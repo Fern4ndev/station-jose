@@ -1,0 +1,10 @@
+# =============================================================================
+# Dependencias de desarrollo y pruebas
+# =============================================================================
+# Instalación:
+#   python -m pip install -r requirements-dev.txt
+#
+# requirements.txt ya fija todas las dependencias de ejecución, pruebas y lint.
+# =============================================================================
+
+-r requirements.txt
