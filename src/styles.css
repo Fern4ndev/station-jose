@@ -1,3 +1,79 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+@theme {
+  /* Azul Marino Principal extraído del isotipo "SJ" y texto */
+  --color-primary-50: #f0f4fa;
+  --color-primary-100: #dce6f4;
+  --color-primary-200: #c0d3ec;
+  --color-primary-300: #93b5de;
+  --color-primary-400: #6292cc;
+  --color-primary-500: #3f73b5;
+  --color-primary-600: #2c5999;
+  --color-primary-700: #1b3866; /* Color exacto o muy cercano al logo corporativo */
+  --color-primary-800: #162a4d;
+  --color-primary-900: #13213a;
+
+  /* Colores secundarios y de superficie complementarios */
+  --color-secondary: #4b5563;
+  --color-surface: #ffffff;
+  --color-canvas: #f0f4fa;
+
+  /* Degradado dinámico usando la identidad del logo */
+  --background-image-admin-pill: radial-gradient(circle at 20% 20%, #3f73b5 0%, #1b3866 60%, #13213a 100%);
+}
+
+:root {
+  --fareas-primary: var(--color-primary-700);
+  --fareas-primary-light: var(--color-primary-500);
+  --fareas-primary-dark: var(--color-primary-800);
+  --fareas-primary-deep: var(--color-primary-900);
+  --fareas-canvas: var(--color-primary-50);
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  background: var(--fareas-canvas);
+}
+
+button {
+  cursor: pointer;
+}
+
+.bg-admin-pill {
+  background-image: var(--background-image-admin-pill);
+}
+
+/* Personalización de la barra de desplazamiento (Scrollbar) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 10px;
+  border: 2px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Animación de entrada para componentes de la interfaz */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

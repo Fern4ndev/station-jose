@@ -56,7 +56,7 @@
 - **Sin SSR:** Angular se compila como aplicación de navegador; no hay renderizado en servidor ni hidratación.
 - **Sin PWA:** no hay service worker ni manifiesto; el servidor controla la caché con cabeceras HTTP.
 - **Sin state manager externo:** el estado de la interfaz usa las señales (`signal`) de Angular y la URL; la fuente de verdad es la API.
-- **Sin librerías nuevas más allá de lo instalado:** en Angular solo los paquetes que ya trae un proyecto nuevo de Angular 21 (núcleo, router, formularios, `HttpClient`, RxJS y herramientas de compilación y pruebas); no se agregan Angular Material, CDK, NgRx ni librerías de gráficos, tablas o fechas. En el backend, la lista de dependencias es **cerrada** (ver abajo).
+- **Sin librerías nuevas no autorizadas:** en Angular, además de los paquetes de un proyecto nuevo (núcleo, router, formularios, `HttpClient`, RxJS, compilación y pruebas), solo se autorizan PrimeNG 21 con `@primeuix/themes` y `primeicons`, `iconify-icon`, `chart.js` y Tailwind 4; no se agregan Angular Material, NgRx ni librerías de PDF. En el backend, la lista de dependencias es **cerrada** (ver abajo).
 - **Sin Docker:** instalación nativa de Python, PostgreSQL, pgAdmin 4, RapidOCR y Node. Los procesos se lanzan con comandos de la propia herramienta.
 - **Sin Redis:** refresh tokens revocables, límites de intentos, secuencias y notificaciones entre instancias (`LISTEN/NOTIFY`) viven en PostgreSQL.
 - **Sin Celery ni workers externos:** no hay colas ni procesos auxiliares. La lectura OCR se ejecuta dentro de la petición (en el pool de hilos de FastAPI), con límite de concurrencia y de tiempo. Las tareas periódicas son comandos (`python -m app.cli ...`) que también se pueden ejecutar desde un endpoint a demanda; programarlas con `APScheduler` en la aplicación; se evita iniciar más de una instancia del scheduler por despliegue.
@@ -158,11 +158,12 @@ Avance global: **0 de 15 fases cerradas**
 ### 3.1 Raíz del repositorio
 
 ```
-sistema-vales-san-jose/
+station-jose/                        # raíz del repositorio
 ├── README.md
 ├── .gitignore
-├── backend/                          # FastAPI, PostgreSQL y OCR
-└── frontend/                         # Angular 21 (plan aparte)
+├── angular.json  package.json  tsconfig*.json   # proyecto Angular en la raíz
+├── src/  public/                                # Angular 21 (detalle en el plan de frontend)
+└── backend/                         # FastAPI, PostgreSQL y OCR
 ```
 
 ### 3.2 Backend (FastAPI) dentro de `backend/`
@@ -442,7 +443,7 @@ Todas las rutas van bajo `/api/v1`. Formato de cada línea: **método y ruta** �
 
 Tareas:
 - [ ] Instalar Python 3.11 o superior, PostgreSQL 16 o superior, pgAdmin 4, RapidOCR (`rapidocr==3.10.0`), Git y la versión de Node.js que exige Angular 21 (comprobar con `ng version` cuando se cree el frontend). En Windows, asegurarse de que `psql`, `pg_dump` y `pg_restore` queden en el `PATH` (o anotar su ruta en `C:\Program Files\PostgreSQL\<versión>\bin`).
-- [ ] Crear el repositorio con `backend/` y `frontend/`, y el `.gitignore` (`.venv/`, `.env`, `almacenamiento/`, `datos/documentos/`, `node_modules/`).
+- [ ] Crear el repositorio con `backend/` y el proyecto Angular en la raíz, y el `.gitignore` (`.venv/`, `.env`, `almacenamiento/`, `datos/documentos/`, `node_modules/`, `dist/`, `.angular/`).
 - [ ] Crear el entorno virtual en `backend/` y el `pyproject.toml` con la lista cerrada de dependencias, el entrypoint (`[tool.fastapi] entrypoint = "app.main:app"`) y la configuración de `pytest` y `ruff`. Instalar con `pip install -e ".[dev]"`.
 - [ ] Crear en PostgreSQL las bases `vales_san_jose` y `vales_san_jose_test` con codificación `UTF8` (por ejemplo `CREATE DATABASE vales_san_jose WITH ENCODING 'UTF8' TEMPLATE template0;`) y los dos roles con `LOGIN`: `vales_migrador` (dueño de la estructura y los disparadores) y `vales_app` (sin privilegios por defecto; cada migración concede lo mínimo). Otorgar `CONNECT` sobre ambas bases, `CREATE` sobre el esquema `public` a `vales_migrador` y `USAGE` sobre `public` a `vales_app`; PostgreSQL 15 o superior ya no da `CREATE` en `public` a todos los usuarios. Se pueden crear desde pgAdmin (clic derecho en *Databases* → *Create* y en *Login/Group Roles* → *Create*), anotando la configuración en `.env.example`.
 
@@ -479,7 +480,7 @@ Tareas:
 - `pip list` muestra únicamente las dependencias de la lista cerrada y sus dependencias transitivas.
 - pgAdmin 4 conecta al servidor local y muestra `vales_san_jose` y `vales_san_jose_test`; `vales_app` puede conectarse pero no crear tablas ni borrar filas de las tablas que solo permiten `SELECT` e `INSERT`.
 
-**Habilita en Angular:** crear el proyecto `frontend/` con Angular 21 (sin SSR), con la configuración de proxy `/api` hacia `http://127.0.0.1:8000`.
+**Habilita en Angular:** crear el proyecto Angular 21 (sin SSR) en la raíz del repositorio, con la configuración de proxy `/api` hacia `http://127.0.0.1:8000`.
 
 ---
 
@@ -901,7 +902,7 @@ Tareas:
 - Descargar `GET /reportes/exportar/consumo-periodo.xlsx` y abrirlo en Excel o LibreOffice: los datos coinciden con `GET /reportes/consumo/periodo` con los mismos filtros.
 - `pytest tests/test_consultas.py tests/test_reportes.py` en verde; `python scripts/smoke.py --hasta 12`.
 
-**Habilita en Angular:** consultas de saldo y consumo, panel de inicio, gráficos (barras y líneas dibujados con SVG propio, sin librería), exportación a Excel y vistas de impresión para PDF.
+**Habilita en Angular:** consultas de saldo y consumo, panel de inicio, gráficos de barras y líneas con `p-chart` sobre `chart.js` (siempre con tabla equivalente accesible), exportación a Excel y vistas de impresión para PDF.
 
 ---
 
@@ -951,7 +952,7 @@ def registrar_frontend(app: FastAPI) -> None:
 **Entregable navegable:** la aplicación Angular completa en `http://127.0.0.1:8000`, con la API en el mismo origen.
 
 **Verificación:**
-- `ng build` en `frontend/`, luego `fastapi run` en `backend/`: abrir `http://127.0.0.1:8000`, iniciar sesión, recargar una ruta interna (por ejemplo `/ordenes`) y comprobar que carga la aplicación; `GET /api/v1/ruta-inexistente` devuelve JSON `404`, no la aplicación.
+- `ng build` en la raíz del repositorio, luego `fastapi run` en `backend/`: abrir `http://127.0.0.1:8000`, iniciar sesión, recargar una ruta interna (por ejemplo `/ordenes`) y comprobar que carga la aplicación; `GET /api/v1/ruta-inexistente` devuelve JSON `404`, no la aplicación.
 - `pytest -q` completo y `ruff check .` en verde.
 - La prueba de carga termina sin errores y con `verificar-saldos` en 0 diferencias.
 

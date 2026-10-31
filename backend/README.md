@@ -91,7 +91,7 @@ Variables de la plantilla:
 | `DATABASE_URL` | Conexión asíncrona de la aplicación (`postgresql+asyncpg://`) |
 | `MIGRADOR_URL` | Conexión con permisos para aplicar el esquema |
 | `ALMACENAMIENTO_DIR` | Directorio de archivos privados |
-| `FRONTEND_DIST` | Carpeta compilada del frontend para producción |
+| `FRONTEND_DIST` | Carpeta compilada del frontend para producción (`../dist/frontend/browser`, relativa a `backend/`) |
 | `JWT_SECRET_KEY` | Clave de firma JWT, larga y aleatoria |
 | `RECAPTCHA_SECRET_KEY` | Clave secreta de reCAPTCHA |
 | `RECAPTCHA_SITE_KEY` | Clave pública de reCAPTCHA asociada al frontend |
