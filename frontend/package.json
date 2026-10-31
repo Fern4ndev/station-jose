@@ -1,5 +1,5 @@
 {
-  "name": "station-manage",
+  "name": "frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,6 +7,18 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
   },
   "private": true,
   "packageManager": "npm@11.12.1",
@@ -17,6 +29,11 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "@primeuix/themes": "^3.1.0",
+    "chart.js": "^4.6.1",
+    "iconify-icon": "^3.0.4",
+    "primeicons": "^8.0.2",
+    "primeng": "^21.1.10",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -27,7 +44,6 @@
     "@tailwindcss/postcss": "^4.1.12",
     "jsdom": "^28.0.0",
     "postcss": "^8.5.3",
-    "prettier": "^3.8.1",
     "tailwindcss": "^4.1.12",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"

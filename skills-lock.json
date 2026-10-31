@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "angular-best-practices": {
+      "source": "alfredoperez/angular-best-practices",
+      "sourceType": "github",
+      "skillPath": "skills/angular-best-practices/SKILL.md",
+      "computedHash": "bd5a37f3523908e9f3fdb94b12f597cb757e946b4d63621b6982a9abfbaf234d"
+    },
+    "fastapi": {
+      "source": "fastapi/fastapi",
+      "sourceType": "github",
+      "skillPath": "fastapi/.agents/skills/fastapi/SKILL.md",
+      "computedHash": "ff680b56037089d5f4cb399af70b0f9efd3d332887be464db11864b14eb3ad93"
+    },
+    "tdd": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/tdd/SKILL.md",
+      "computedHash": "535d1a6f3bd5bded8971e7e4ea76538907cbff6b6d32c39cf97b669869dcd383"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "7ac62d931e52dbc7c309ed8ee067101969db2454709339b02daa583e80e98d5f"
+    }
+  }
+}
