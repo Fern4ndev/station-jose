@@ -9,6 +9,7 @@ station-jose/
 ├── angular.json  package.json  tsconfig*.json   # proyecto Angular (raíz)
 ├── src/  public/                                # código y estáticos del frontend
 ├── backend/                                     # FastAPI, PostgreSQL y OCR
+├── docs/                                        # Lista blanca de dependencias
 ├── requerimientos-funcionales-sistema.md
 ├── plan-implementacion-backend-fastapi.md
 └── plan-implementacion-frontend-angular.md
@@ -18,7 +19,7 @@ station-jose/
 | --- | --- | --- |
 | Frontend | Angular 21 (SPA, standalone, zoneless), PrimeNG 21, Tailwind 4, `iconify-icon` | `src/main.ts` |
 | Backend | FastAPI, SQLAlchemy/SQLModel async, PostgreSQL 16, RapidOCR | `backend/app/main.py` |
-| Base de datos | SQL versionado a mano en `backend/db/` | `backend/db/schema.sql` |
+| Base de datos | PostgreSQL 16+; esquema y datos iniciales en `backend/db/` | `backend/db/schema.sql` |
 
 ## Estado
 
@@ -46,9 +47,10 @@ Requisitos y preparación detallada en [`backend/README.md`](backend/README.md).
 
 ```powershell
 cd backend
-py -3.11 -m venv .venv
+py -3.13 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements-dev.txt
+python -m pip install -e ".[dev]"
+python scripts/verificar_entorno.py
 ```
 
 La API aún no tiene entrypoint (`backend/app/main.py` no existe). Cuando se implemente:
@@ -69,3 +71,4 @@ Un solo origen: el backend sirve los archivos estáticos de Angular desde `../di
 - [`plan-implementacion-backend-fastapi.md`](plan-implementacion-backend-fastapi.md) — 15 fases, catálogo de 93 endpoints.
 - [`plan-implementacion-frontend-angular.md`](plan-implementacion-frontend-angular.md) — 15 bloques, rutas y contrato de la API.
 - [`AGENTS.md`](AGENTS.md) — convenciones de código Angular del proyecto.
+- [`docs/dependencias-base.json`](docs/dependencias-base.json) — lista blanca de dependencias del frontend.

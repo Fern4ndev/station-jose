@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vales-san-jose"
+version = "0.1.0"
+description = "API de gestión de vales de combustible de la estación de servicio San José"
+requires-python = ">=3.11"
+dependencies = [
+    # API y validación
+    "fastapi[standard]==0.141.1",
+    "uvicorn[standard]==0.54.0",
+    "pydantic==2.13.5",
+    "pydantic-settings==2.15.0",
+    "python-multipart==0.0.20",
+    "websockets==17.1",
+    "httpx==0.28.1",
+    # Persistencia
+    "sqlmodel==0.0.24",
+    "sqlalchemy[asyncio]==2.0.36",
+    "asyncpg==0.30.0",
+    # Autenticación y correo
+    "pwdlib[argon2]==0.2.1",
+    "pyjwt==2.10.1",
+    "email-validator==2.3.0",
+    "aiosmtplib==4.0.1",
+    # Procesamiento y tareas
+    "rapidocr==3.10.0",
+    "onnxruntime==1.20.1",
+    "numpy==2.1.3",
+    "opencv-python-headless==4.10.0.84",
+    "pdfplumber==0.11.4",
+    "pypdfium2==5.13.0",
+    "apscheduler==3.10.4",
+    "sse-starlette==3.4.11",
+    # Archivos y reportes
+    "openpyxl==3.1.5",
+    "reportlab==4.2.5",
+    "boto3==1.43.118",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.4",
+    "pytest-asyncio==0.25.2",
+    "ruff==0.8.4",
+]
+
+[tool.fastapi]
+entrypoint = "app.main:app"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "almacenamiento", "datos", "informes"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC", "C4", "SIM", "RUF", "S"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S311"]
+"scripts/**" = ["S603", "S607"]

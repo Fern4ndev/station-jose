@@ -6,6 +6,19 @@
 
 BEGIN;
 
+-- Tipos cerrados del dominio. Los valores configurables (combustibles,
+-- parámetros y acciones de auditoría) permanecen como texto.
+DO $$ BEGIN CREATE TYPE user_role AS ENUM ('administrador', 'oficina', 'despachador'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE institution_type AS ENUM ('publica', 'privada', 'ong', 'otra'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE institution_numbering AS ENUM ('general', 'por_orden', 'no_aplica'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE institution_status AS ENUM ('activa', 'inactiva'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE purchase_order_status AS ENUM ('borrador', 'vigente', 'cerrada', 'anulada'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE ocr_status AS ENUM ('pendiente', 'procesando', 'lista', 'fallida', 'confirmada', 'descartada'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE ocr_method AS ENUM ('texto_digital', 'ocr'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE voucher_issuer AS ENUM ('estacion', 'entidad'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE voucher_status AS ENUM ('activo', 'agotado', 'vencido', 'anulado'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE voucher_movement_type AS ENUM ('emision', 'consumo', 'anulacion', 'ajuste', 'reversion'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 CREATE TABLE IF NOT EXISTS schema_migrations (
     version         text PRIMARY KEY,
     nombre          text NOT NULL,
@@ -28,28 +41,35 @@ CREATE TABLE IF NOT EXISTS estaciones (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_estaciones_nombre_lower ON estaciones (lower(nombre));
 
-CREATE TABLE IF NOT EXISTS usuarios (
+CREATE TABLE IF NOT EXISTS app_users (
     id                      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nombre                  text NOT NULL,
-    correo                  text NOT NULL,
+    full_name               text NOT NULL,
+    email                   text NOT NULL,
+    dni                     varchar(8),
+    code                    text,
+    whatsapp                text,
     password_hash           text NOT NULL,
-    rol                     text NOT NULL,
-    estacion_id             bigint REFERENCES estaciones(id) ON DELETE RESTRICT,
-    activo                  boolean NOT NULL DEFAULT true,
-    debe_cambiar_password   boolean NOT NULL DEFAULT true,
+    role                    user_role NOT NULL,
+    station_id              bigint REFERENCES estaciones(id) ON DELETE RESTRICT,
+    active                  boolean NOT NULL DEFAULT true,
+    must_change_password    boolean NOT NULL DEFAULT true,
     password_cambiado_en    timestamptz,
     ultimo_acceso_en        timestamptz,
     creado_en               timestamptz NOT NULL DEFAULT now(),
     actualizado_en          timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT usuarios_rol_valido CHECK (rol IN ('administrador', 'oficina', 'despachador')),
-    CONSTRAINT usuarios_correo_no_vacio CHECK (length(trim(correo)) > 3)
+    CONSTRAINT app_users_nombre_no_vacio CHECK (length(trim(full_name)) > 0),
+    CONSTRAINT app_users_email_no_vacio CHECK (length(trim(email)) > 3),
+    CONSTRAINT app_users_password_argon2id CHECK (password_hash LIKE '$argon2id$%'),
+    CONSTRAINT app_users_dni_valido CHECK (dni IS NULL OR dni ~ '^[0-9]{8}$')
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_usuarios_correo_lower ON usuarios (lower(correo));
-CREATE INDEX IF NOT EXISTS ix_usuarios_rol_activo ON usuarios (rol, activo);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_app_users_email_lower ON app_users (lower(email));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_app_users_dni ON app_users (dni) WHERE dni IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_app_users_code ON app_users (code) WHERE code IS NOT NULL;
+CREATE INDEX IF NOT EXISTS ix_app_users_role_active ON app_users (role, active);
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
     id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    usuario_id          bigint NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+    app_user_id          bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
     familia_id          uuid NOT NULL,
     token_hash          varchar(64) NOT NULL,
     emitido_en          timestamptz NOT NULL DEFAULT now(),
@@ -62,7 +82,7 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     CONSTRAINT refresh_tokens_expira_despues CHECK (expira_en > emitido_en)
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_refresh_tokens_hash ON refresh_tokens (token_hash);
-CREATE INDEX IF NOT EXISTS ix_refresh_tokens_usuario ON refresh_tokens (usuario_id, expira_en DESC);
+CREATE INDEX IF NOT EXISTS ix_refresh_tokens_usuario ON refresh_tokens (app_user_id, expira_en DESC);
 CREATE INDEX IF NOT EXISTS ix_refresh_tokens_familia ON refresh_tokens (familia_id);
 
 CREATE TABLE IF NOT EXISTS intentos_login (
@@ -78,7 +98,7 @@ CREATE INDEX IF NOT EXISTS ix_intentos_login_ip_fecha ON intentos_login (ip, cre
 
 CREATE TABLE IF NOT EXISTS tokens_recuperacion (
     id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    usuario_id      bigint NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+    app_user_id      bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
     token_hash      varchar(64) NOT NULL,
     creado_en       timestamptz NOT NULL DEFAULT now(),
     expira_en       timestamptz NOT NULL,
@@ -87,13 +107,13 @@ CREATE TABLE IF NOT EXISTS tokens_recuperacion (
     CONSTRAINT tokens_recuperacion_expira_despues CHECK (expira_en > creado_en)
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_tokens_recuperacion_hash ON tokens_recuperacion (token_hash);
-CREATE INDEX IF NOT EXISTS ix_tokens_recuperacion_usuario ON tokens_recuperacion (usuario_id, expira_en DESC);
+CREATE INDEX IF NOT EXISTS ix_tokens_recuperacion_usuario ON tokens_recuperacion (app_user_id, expira_en DESC);
 
 CREATE TABLE IF NOT EXISTS parametros (
     clave           text PRIMARY KEY,
     valor           text NOT NULL,
     actualizado_en  timestamptz NOT NULL DEFAULT now(),
-    actualizado_por bigint REFERENCES usuarios(id) ON DELETE RESTRICT
+    actualizado_por bigint REFERENCES app_users(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS combustibles (
@@ -111,7 +131,7 @@ CREATE TABLE IF NOT EXISTS precios_combustible (
     combustible_id  bigint NOT NULL REFERENCES combustibles(id) ON DELETE RESTRICT,
     precio_galon    numeric(12,2) NOT NULL CHECK (precio_galon > 0),
     vigente_desde   date NOT NULL,
-    usuario_id      bigint NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+    app_user_id      bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
     creado_en       timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT precios_combustible_fecha_unica UNIQUE (combustible_id, vigente_desde)
 );
@@ -121,19 +141,17 @@ CREATE TABLE IF NOT EXISTS instituciones (
     id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre              text NOT NULL,
     ruc                 varchar(11) NOT NULL,
-    tipo                text NOT NULL,
+    tipo                institution_type NOT NULL,
     telefono            text,
     correo              text,
     direccion           text,
     representante       text,
-    modalidad_numeracion text NOT NULL DEFAULT 'no_aplica',
-    estado              text NOT NULL DEFAULT 'activa',
+    modalidad_numeracion institution_numbering NOT NULL DEFAULT 'no_aplica',
+    estado              institution_status NOT NULL DEFAULT 'activa',
     creado_en           timestamptz NOT NULL DEFAULT now(),
     actualizado_en      timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT instituciones_ruc_formato CHECK (ruc ~ '^[0-9]{11}$'),
-    CONSTRAINT instituciones_tipo_valido CHECK (tipo IN ('publica', 'privada', 'ong', 'otra')),
-    CONSTRAINT instituciones_numeracion_valida CHECK (modalidad_numeracion IN ('general', 'por_orden', 'no_aplica')),
-    CONSTRAINT instituciones_estado_valido CHECK (estado IN ('activa', 'inactiva'))
+    CONSTRAINT instituciones_nombre_no_vacio CHECK (length(trim(nombre)) > 0)
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_instituciones_ruc ON instituciones (ruc);
 CREATE INDEX IF NOT EXISTS ix_instituciones_nombre_lower ON instituciones (lower(nombre));
@@ -146,14 +164,14 @@ CREATE TABLE IF NOT EXISTS ordenes_compra (
     fecha_emision       date NOT NULL,
     presupuesto_soles   numeric(14,2) NOT NULL CHECK (presupuesto_soles > 0),
     combustible_id      bigint REFERENCES combustibles(id) ON DELETE RESTRICT,
-    estado              text NOT NULL DEFAULT 'borrador',
+    estado              purchase_order_status NOT NULL DEFAULT 'borrador',
     serie_desde         integer,
     serie_hasta         integer,
     creada_con_ocr      boolean NOT NULL DEFAULT false,
     archivo_path        text,
     observaciones       text,
     motivo_anulacion    text,
-    creado_por          bigint NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+    creado_por          bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
     creado_en           timestamptz NOT NULL DEFAULT now(),
     actualizado_en      timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT ordenes_numero_unico_por_institucion_anio UNIQUE (institucion_id, anio, numero),
@@ -170,12 +188,12 @@ CREATE INDEX IF NOT EXISTS ix_ordenes_estado_fecha ON ordenes_compra (estado, fe
 
 CREATE TABLE IF NOT EXISTS ocr_extracciones (
     id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    usuario_id          bigint NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+    app_user_id          bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
     archivo_path        text NOT NULL,
     archivo_nombre      text NOT NULL,
     archivo_mime        text NOT NULL,
-    estado              text NOT NULL DEFAULT 'pendiente',
-    metodo              text,
+    estado              ocr_status NOT NULL DEFAULT 'pendiente',
+    metodo              ocr_method,
     resultado           jsonb NOT NULL DEFAULT '{}'::jsonb,
     campos_finales      jsonb NOT NULL DEFAULT '{}'::jsonb,
     correcciones        jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -192,7 +210,7 @@ CREATE TABLE IF NOT EXISTS ocr_extracciones (
     CONSTRAINT ocr_confianza_valida CHECK (confianza_promedio IS NULL OR confianza_promedio BETWEEN 0 AND 1),
     CONSTRAINT ocr_tiempo_valido CHECK (tiempo_ms IS NULL OR tiempo_ms >= 0)
 );
-CREATE INDEX IF NOT EXISTS ix_ocr_usuario_fecha ON ocr_extracciones (usuario_id, creado_en DESC);
+CREATE INDEX IF NOT EXISTS ix_ocr_usuario_fecha ON ocr_extracciones (app_user_id, creado_en DESC);
 CREATE INDEX IF NOT EXISTS ix_ocr_estado_fecha ON ocr_extracciones (estado, creado_en DESC);
 
 CREATE TABLE IF NOT EXISTS secuencias (
@@ -204,31 +222,37 @@ CREATE TABLE IF NOT EXISTS secuencias (
 
 CREATE TABLE IF NOT EXISTS vales (
     id                      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    codigo_interno          text NOT NULL,
+    numero_estacion         text,
     numero_entidad          text,
     clave_numeracion        text,
     orden_compra_id         bigint NOT NULL REFERENCES ordenes_compra(id) ON DELETE RESTRICT,
-    emisor                  text NOT NULL,
+    emisor                  voucher_issuer NOT NULL,
     combustible_id          bigint NOT NULL REFERENCES combustibles(id) ON DELETE RESTRICT,
     cantidad_inicial        numeric(12,2) NOT NULL CHECK (cantidad_inicial > 0),
     precio_galon_aplicado   numeric(12,2) NOT NULL CHECK (precio_galon_aplicado > 0),
     valor_soles             numeric(14,2) NOT NULL CHECK (valor_soles > 0),
     valor_comprometido_soles numeric(14,2) NOT NULL CHECK (valor_comprometido_soles >= 0),
     saldo                   numeric(12,2) NOT NULL CHECK (saldo >= 0 AND saldo <= cantidad_inicial),
-    estado                  text NOT NULL DEFAULT 'activo',
+    estado                  voucher_status NOT NULL DEFAULT 'activo',
     fecha_emision           date NOT NULL DEFAULT ((now() AT TIME ZONE 'America/Lima')::date),
     fecha_vencimiento       date,
     veces_impreso           integer NOT NULL DEFAULT 0 CHECK (veces_impreso >= 0),
-    creado_por              bigint NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+    creado_por              bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
     creado_en               timestamptz NOT NULL DEFAULT now(),
     actualizado_en          timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT vales_codigo_interno_unico UNIQUE (codigo_interno),
-    CONSTRAINT vales_emisor_valido CHECK (emisor IN ('estacion', 'entidad')),
-    CONSTRAINT vales_estado_valido CHECK (estado IN ('activo', 'agotado', 'vencido', 'anulado')),
+    CONSTRAINT vales_numero_estacion_no_vacio CHECK (numero_estacion IS NULL OR length(trim(numero_estacion)) > 0),
+    CONSTRAINT vales_numero_entidad_no_vacio CHECK (numero_entidad IS NULL OR length(trim(numero_entidad)) > 0),
     CONSTRAINT vales_vencimiento_valido CHECK (fecha_vencimiento IS NULL OR fecha_vencimiento >= fecha_emision),
     CONSTRAINT vales_saldo_estado CHECK ((saldo = 0 AND estado IN ('agotado', 'anulado')) OR (saldo > 0 AND estado IN ('activo', 'vencido'))),
-    CONSTRAINT vales_numero_entidad_requerido CHECK (emisor <> 'entidad' OR nullif(trim(numero_entidad), '') IS NOT NULL)
+    CONSTRAINT vales_numeracion_segun_emisor CHECK (
+        (emisor = 'estacion' AND numero_estacion IS NOT NULL AND numero_entidad IS NULL AND clave_numeracion IS NULL)
+        OR (emisor = 'entidad' AND numero_estacion IS NULL AND numero_entidad IS NOT NULL AND clave_numeracion IS NOT NULL)
+    )
 );
+-- numero_estacion: numeración propia de la estación.
+-- clave_numeracion para entidad: "institucion:<id>:<numero>" si es general,
+-- o "orden:<id>:<numero>" si reinicia en cada orden de compra.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_vales_numero_estacion ON vales (numero_estacion) WHERE numero_estacion IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS ux_vales_clave_numeracion ON vales (clave_numeracion) WHERE clave_numeracion IS NOT NULL;
 CREATE INDEX IF NOT EXISTS ix_vales_orden ON vales (orden_compra_id);
 CREATE INDEX IF NOT EXISTS ix_vales_combustible_estado ON vales (combustible_id, estado);
@@ -238,13 +262,13 @@ CREATE INDEX IF NOT EXISTS ix_vales_numero_entidad ON vales (numero_entidad) WHE
 CREATE TABLE IF NOT EXISTS movimientos_vale (
     id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     vale_id             bigint NOT NULL REFERENCES vales(id) ON DELETE RESTRICT,
-    tipo                text NOT NULL,
+    tipo                voucher_movement_type NOT NULL,
     variacion           numeric(12,2) NOT NULL,
     saldo_posterior     numeric(12,2) NOT NULL CHECK (saldo_posterior >= 0),
     cantidad_galones    numeric(12,2),
     precio_galon        numeric(12,2),
     importe_soles       numeric(14,2),
-    usuario_id          bigint NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+    app_user_id          bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
     estacion_id         bigint NOT NULL REFERENCES estaciones(id) ON DELETE RESTRICT,
     motivo              text,
     placa               text,
@@ -253,7 +277,6 @@ CREATE TABLE IF NOT EXISTS movimientos_vale (
     movimiento_origen_id bigint REFERENCES movimientos_vale(id) ON DELETE RESTRICT,
     fecha_local         date NOT NULL DEFAULT (now() AT TIME ZONE 'America/Lima')::date,
     creado_en           timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT movimientos_tipo_valido CHECK (tipo IN ('emision', 'consumo', 'anulacion', 'ajuste', 'reversion')),
     CONSTRAINT movimientos_consumo_datos CHECK (
         tipo <> 'consumo' OR (cantidad_galones > 0 AND precio_galon > 0 AND importe_soles > 0)
     ),
@@ -272,7 +295,7 @@ CREATE INDEX IF NOT EXISTS ix_movimientos_estacion_fecha ON movimientos_vale (es
 
 CREATE TABLE IF NOT EXISTS auditoria (
     id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    usuario_id      bigint REFERENCES usuarios(id) ON DELETE RESTRICT,
+    app_user_id      bigint REFERENCES app_users(id) ON DELETE RESTRICT,
     accion          text NOT NULL,
     entidad         text NOT NULL,
     entidad_id      text,
@@ -282,13 +305,13 @@ CREATE TABLE IF NOT EXISTS auditoria (
     user_agent      text,
     creado_en       timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS ix_auditoria_usuario_fecha ON auditoria (usuario_id, creado_en DESC);
+CREATE INDEX IF NOT EXISTS ix_auditoria_usuario_fecha ON auditoria (app_user_id, creado_en DESC);
 CREATE INDEX IF NOT EXISTS ix_auditoria_entidad_fecha ON auditoria (entidad, entidad_id, creado_en DESC);
 CREATE INDEX IF NOT EXISTS ix_auditoria_fecha ON auditoria (creado_en DESC);
 
 CREATE TABLE IF NOT EXISTS verificaciones_integridad (
     id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    ejecutada_por       bigint REFERENCES usuarios(id) ON DELETE RESTRICT,
+    ejecutada_por       bigint REFERENCES app_users(id) ON DELETE RESTRICT,
     vales_revisados     integer NOT NULL DEFAULT 0 CHECK (vales_revisados >= 0),
     diferencias        integer NOT NULL DEFAULT 0 CHECK (diferencias >= 0),
     creado_en           timestamptz NOT NULL DEFAULT now()
@@ -301,7 +324,7 @@ CREATE TABLE IF NOT EXISTS diferencias_integridad (
     saldo_almacenado    numeric(12,2) NOT NULL,
     saldo_recalculado   numeric(12,2) NOT NULL,
     revisada            boolean NOT NULL DEFAULT false,
-    revisada_por        bigint REFERENCES usuarios(id) ON DELETE RESTRICT,
+    revisada_por        bigint REFERENCES app_users(id) ON DELETE RESTRICT,
     revisada_en         timestamptz,
     comentario          text,
     creado_en           timestamptz NOT NULL DEFAULT now(),
@@ -313,7 +336,7 @@ CREATE INDEX IF NOT EXISTS ix_diferencias_vale ON diferencias_integridad (vale_i
 CREATE TABLE IF NOT EXISTS impresiones_vale (
     id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     vale_id         bigint NOT NULL REFERENCES vales(id) ON DELETE RESTRICT,
-    usuario_id      bigint NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
+    app_user_id      bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
     es_duplicado    boolean NOT NULL DEFAULT false,
     creado_en       timestamptz NOT NULL DEFAULT now()
 );
@@ -352,7 +375,7 @@ $$;
 DO $$
 DECLARE tabla text;
 BEGIN
-    FOREACH tabla IN ARRAY ARRAY['estaciones', 'usuarios', 'combustibles', 'instituciones', 'ordenes_compra', 'ocr_extracciones', 'vales'] LOOP
+    FOREACH tabla IN ARRAY ARRAY['estaciones', 'app_users', 'combustibles', 'instituciones', 'ordenes_compra', 'ocr_extracciones', 'vales'] LOOP
         EXECUTE format('DROP TRIGGER IF EXISTS %I_actualizado_en ON %I', tabla, tabla);
         EXECUTE format('CREATE TRIGGER %I_actualizado_en BEFORE UPDATE ON %I FOR EACH ROW EXECUTE FUNCTION actualizar_timestamp()', tabla, tabla);
     END LOOP;
@@ -363,7 +386,7 @@ $$;
 -- El usuario propietario/migrador conserva el control del esquema y DDL.
 GRANT USAGE ON SCHEMA public TO vales_app;
 GRANT SELECT, INSERT, UPDATE ON
-    estaciones, usuarios, refresh_tokens, intentos_login, tokens_recuperacion,
+    estaciones, app_users, refresh_tokens, intentos_login, tokens_recuperacion,
     parametros, combustibles, precios_combustible, instituciones,
     ordenes_compra, ocr_extracciones, secuencias, vales,
     verificaciones_integridad, diferencias_integridad, impresiones_vale

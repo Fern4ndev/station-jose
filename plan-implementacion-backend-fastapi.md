@@ -41,7 +41,7 @@
 
 ## 1. Decisiones técnicas y restricciones
 
-**Autenticación requerida:** reCAPTCHA v3 validado desde el backend (token, acción, hostname y umbral configurable); JWT de acceso de vida corta; refresh tokens aleatorios, almacenados como hash, rotatorios y revocables. La configuración, secretos y endpoints quedan fuera del control del cliente. Se agregan dependencias explícitas en `requirements.txt` para JWT, hashing compatible, configuración y RapidOCR; versiones fijadas por rangos y revisadas al implementar.
+**Autenticación requerida:** reCAPTCHA v3 validado desde el backend (token, acción, hostname y umbral configurable); JWT de acceso de vida corta; refresh tokens aleatorios, almacenados como hash, rotatorios y revocables. La configuración, secretos y endpoints quedan fuera del control del cliente. JWT, hashing compatible, configuración y RapidOCR figuran como dependencias explícitas en `backend/pyproject.toml`, con versiones fijadas.
 
 **Roles:** Administrador (todos los permisos), Oficina (operación, OCR, vales y reportes) y Despachador (consulta operativa mínima y registro de consumos). Toda ruta protegida declara permiso; ocultar módulos en Angular nunca sustituye autorización en API.
 
@@ -70,7 +70,7 @@
 - **Procesamiento y tareas:** `rapidocr==3.10.0` con `onnxruntime`, `numpy`, `opencv-python-headless`, `pdfplumber` y `pypdfium2`; `apscheduler` para tareas programadas; `sse-starlette` para avisos SSE entre sedes.
 - **Archivos y reportes:** `openpyxl` para Excel, `reportlab` para PDF y `boto3` para almacenamiento compatible con S3.
 - **Desarrollo y verificación:** `pytest`, `pytest-asyncio` y `ruff`.
-- Las versiones exactas instalables están declaradas en `backend/requirements.txt`. Se usa la compilación headless de OpenCV en servidor; no se instala también `opencv-python`, pues ambos distribuyen el mismo módulo `cv2`.
+- Las versiones exactas instalables están declaradas en `backend/pyproject.toml` (`[project] dependencies` y el extra `dev`) y se instalan con `pip install -e ".[dev]"`. Se usa la compilación headless de OpenCV en servidor; no se instala también `opencv-python`, pues ambos distribuyen el mismo módulo `cv2`.
 
 **Lo que se resuelve sin librería (y por qué):**
 - **Contraseñas:** `pwdlib[argon2]`.
@@ -112,17 +112,17 @@ Documentación y diseño:
 - [ ] Puntos por confirmar con la estación (sección 7)
 - [ ] Órdenes de compra reales de ejemplo (30 a 50, anonimizadas) para el OCR
 
-Implementación (según lo conversado, aún no se inicia; marca lo que ya tengas):
-- [ ] Repositorio creado
-- [ ] Base de datos PostgreSQL creada y visible en pgAdmin 4
-- [ ] Servicio FastAPI levantado
-- [ ] RapidOCR instalado
+Implementación:
+- [x] Repositorio creado
+- [x] Base de datos PostgreSQL creada y visible en pgAdmin 4
+- [ ] Servicio FastAPI levantado (Fase 1)
+- [x] RapidOCR instalado
 
 ### 2.2 Tablero de fases
 
-Avance global: **0 de 15 fases cerradas**
+Avance global: **1 de 15 fases cerradas**
 
-- [ ] **Fase 0** Entorno y repositorio (inicio: ____ / fin: ____)
+- [x] **Fase 0** Entorno y repositorio (inicio: 31/10/2026 / fin: 31/10/2026)
 - [ ] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: ____ / fin: ____)
 - [ ] **Fase 2** Autenticación, sesiones y auditoría base (inicio: ____ / fin: ____)
 - [ ] **Fase 3** Usuarios, roles y permisos (inicio: ____ / fin: ____)
@@ -222,6 +222,9 @@ backend/
 │   ├── documentos/
 │   ├── verdad_terreno/
 │   └── division.json
+├── db/                               # esquema y datos iniciales, previos a las migraciones
+│   ├── schema.sql                    # esquema completo en un solo archivo (idempotente)
+│   └── seed.sql                      # catálogos de demostración (no producción)
 ├── informes/                         # resultados de evaluación del OCR
 ├── scripts/
 │   ├── verificar_entorno.py
@@ -442,10 +445,10 @@ Todas las rutas van bajo `/api/v1`. Formato de cada línea: **método y ruta** �
 **Requerimientos:** ninguno directo (base).
 
 Tareas:
-- [ ] Instalar Python 3.11 o superior, PostgreSQL 16 o superior, pgAdmin 4, RapidOCR (`rapidocr==3.10.0`), Git y la versión de Node.js que exige Angular 21 (comprobar con `ng version` cuando se cree el frontend). En Windows, asegurarse de que `psql`, `pg_dump` y `pg_restore` queden en el `PATH` (o anotar su ruta en `C:\Program Files\PostgreSQL\<versión>\bin`).
-- [ ] Crear el repositorio con `backend/` y el proyecto Angular en la raíz, y el `.gitignore` (`.venv/`, `.env`, `almacenamiento/`, `datos/documentos/`, `node_modules/`, `dist/`, `.angular/`).
-- [ ] Crear el entorno virtual en `backend/` y el `pyproject.toml` con la lista cerrada de dependencias, el entrypoint (`[tool.fastapi] entrypoint = "app.main:app"`) y la configuración de `pytest` y `ruff`. Instalar con `pip install -e ".[dev]"`.
-- [ ] Crear en PostgreSQL las bases `vales_san_jose` y `vales_san_jose_test` con codificación `UTF8` (por ejemplo `CREATE DATABASE vales_san_jose WITH ENCODING 'UTF8' TEMPLATE template0;`) y los dos roles con `LOGIN`: `vales_migrador` (dueño de la estructura y los disparadores) y `vales_app` (sin privilegios por defecto; cada migración concede lo mínimo). Otorgar `CONNECT` sobre ambas bases, `CREATE` sobre el esquema `public` a `vales_migrador` y `USAGE` sobre `public` a `vales_app`; PostgreSQL 15 o superior ya no da `CREATE` en `public` a todos los usuarios. Se pueden crear desde pgAdmin (clic derecho en *Databases* → *Create* y en *Login/Group Roles* → *Create*), anotando la configuración en `.env.example`.
+- [x] Instalar Python 3.11 o superior, PostgreSQL 16 o superior, pgAdmin 4, RapidOCR (`rapidocr==3.10.0`), Git y la versión de Node.js que exige Angular 21 (comprobar con `ng version` cuando se cree el frontend). En Windows, asegurarse de que `psql`, `pg_dump` y `pg_restore` queden en el `PATH` (o anotar su ruta en `C:\Program Files\PostgreSQL\<versión>\bin`).
+- [x] Crear el repositorio con `backend/` y el proyecto Angular en la raíz, y el `.gitignore` (`.venv/`, `.env`, `almacenamiento/`, `datos/documentos/`, `node_modules/`, `dist/`, `.angular/`).
+- [x] Crear el entorno virtual en `backend/` y el `pyproject.toml` con la lista cerrada de dependencias, el entrypoint (`[tool.fastapi] entrypoint = "app.main:app"`) y la configuración de `pytest` y `ruff`. Instalar con `pip install -e ".[dev]"`.
+- [x] Crear en PostgreSQL las bases `vales_san_jose` y `vales_san_jose_test` con codificación `UTF8` (por ejemplo `CREATE DATABASE vales_san_jose WITH ENCODING 'UTF8' TEMPLATE template0;`) y los dos roles con `LOGIN`: `vales_migrador` (dueño de la estructura y los disparadores) y `vales_app` (sin privilegios por defecto; cada migración concede lo mínimo). Otorgar `CONNECT` sobre ambas bases, `CREATE` sobre el esquema `public` a `vales_migrador` y `USAGE` sobre `public` a `vales_app`; PostgreSQL 15 o superior ya no da `CREATE` en `public` a todos los usuarios. Se pueden crear desde pgAdmin (clic derecho en *Databases* → *Create* y en *Login/Group Roles* → *Create*), anotando la configuración en `.env.example`.
 
   Con `psql` como superusuario (en pgAdmin, ejecutar cada bloque conectado a la base que corresponda):
 
@@ -470,8 +473,8 @@ Tareas:
 
   La contraseña real no se escribe en el repositorio: va en `.env` (fuera de git) y en `.env.example` solo como marcador.
 
-- [ ] Comprobar la conexión desde pgAdmin 4: registrar el servidor con host `127.0.0.1`, puerto `5432` y el rol `postgres`, y ver las dos bases en el árbol. pgAdmin es solo la herramienta de administración; las migraciones se aplican con `python -m app.cli migrar aplicar`.
-- [ ] Escribir `scripts/verificar_entorno.py`: comprueba las versiones de Python, PostgreSQL (`SELECT version()`), RapidOCR mediante import y carga del modelo, Git, Node y `pg_dump`, y la conexión a las dos bases con los dos roles.
+- [x] Comprobar la conexión desde pgAdmin 4: registrar el servidor con host `127.0.0.1`, puerto `5432` y el rol `postgres`, y ver las dos bases en el árbol. pgAdmin es solo la herramienta de administración; las migraciones se aplican con `python -m app.cli migrar aplicar`.
+- [x] Escribir `scripts/verificar_entorno.py`: comprueba las versiones de Python, PostgreSQL (`SELECT version()`), RapidOCR mediante import y carga del modelo, Git, Node y `pg_dump`, y la conexión a las dos bases con los dos roles.
 
 **Entregable navegable:** resultado del script en consola, con una línea por comprobación.
 
