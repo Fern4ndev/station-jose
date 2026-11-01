@@ -122,23 +122,27 @@ Implementación:
 
 ### 2.2 Tablero de fases
 
-Avance global: **7 de 15 fases cerradas**. La Fase 1 cerró el 31/10/2026: ejecutor de migraciones con checksum y línea base, migración `0001_base.sql`, manejo de errores estándar, `core/dinero.py`, `core/tiempo.py`, `GET /catalogos/enums`, `cli.py`, `tests/conftest.py`, pruebas de sistema/dinero/tiempo y `scripts/smoke.py --hasta 1` en verde.
+Avance global: **8 de 15 fases cerradas**. La Fase 1 cerró el 31/10/2026: ejecutor de migraciones con checksum y línea base, migración `0001_base.sql`, manejo de errores estándar, `core/dinero.py`, `core/tiempo.py`, `GET /catalogos/enums`, `cli.py`, `tests/conftest.py`, pruebas de sistema/dinero/tiempo y `scripts/smoke.py --hasta 1` en verde.
 
 La Fase 3 (01/11/2026) agregó `core/permisos.py` (matriz rol → permisos), `requiere_permiso`, el módulo completo `GET/POST/PATCH /usuarios`, `POST /usuarios/{id}/restablecer-password`, la protección del último administrador y la prueba global de autorización que recorre `app.routes`; 53 pruebas en verde (14 nuevas en `tests/test_usuarios.py`) y Ruff limpio.
 
 La Fase 4 cerró el 01/11/2026: catálogo de combustibles con precios inmutables (CMB-01..04), parámetros por rango, ficha de la estación y logo validado por contenido; verificada con `pytest tests/test_combustibles.py tests/test_configuracion.py` y el smoke `--hasta 4` en verde sobre la base de desarrollo.
 
-La Fase 5 (01/11/2026) dejó instituciones con RUC validado por módulo 11, órdenes con numeración por institución y año, advertencia de duplicado con confirmación, transiciones de estado, adjuntos por firma y `tests/test_instituciones.py` + `tests/test_ordenes.py` en verde; el smoke `--hasta 5` queda pendiente (sin comprobaciones propias, el recorrido 6 cubreاپdirecto solo 1-4 y 6).
+La Fase 5 (01/11/2026) dejó instituciones con RUC validado por módulo 11, órdenes con numeración por institución y año, advertencia de duplicado con confirmación, transiciones de estado, adjuntos por firma y `tests/test_instituciones.py` + `tests/test_ordenes.py` en verde. La fase no tiene comprobaciones propias en `scripts/smoke.py`: el recorrido (`--hasta 5`) avisa que cubre 1-4, 6 y 7.
 
 La Fase 6 cerró el 01/11/2026: migraciones `0006_vales` y `0007_disparadores` (inmutabilidad de movimientos y auditoría con disparadores), numeración de estación con formato configurable y contador bloqueado, emisión atómica de vales con vista previa, techo de presupuesto con máximo de galones, vales de entidad con clave de numeración y serie, buscador global, alertas e impresión; 130 pruebas en verde (20 nuevas en `tests/test_vales.py`), smoke `--hasta 6` completo (001-034) en verde sobre la base de desarrollo y Ruff limpio.
 
+La Fase 7 cerró el 01/11/2026 con `routers/consumos.py`, `services/consumos.py` y `schemas/consumos.py`: consumo exacto en galones o por importe con el precio congelado del vale, bloqueo `FOR UPDATE` sobre la fila del vale, reenvío idempotente por `token_operacion`, reversión enlazada con `movimiento_origen_id`, anulación y ajuste de saldo en `services/vales.py`, `procesar_vencimientos` con su comando y endpoint, y comprobante de consumo. 154 pruebas en verde (24 nuevas en `tests/test_consumos.py`), `smoke.py --hasta 7` completo (001-042) y `scripts/probar_concurrencia.py` con 6 aceptados, 4 rechazados y saldo final 10.00 sobre un vale de 100 galones. Ruff limpio.
+
+En la misma sesión se corrigieron tres defectos que bloqueaban el recorrido manual: `schema.sql` no reproducía cuatro columnas, dos CHECK y los dos disparadores `BEFORE TRUNCATE` de las migraciones; el hash del seed era inválido y los correos de demostración usaban el dominio reservado `.local`; y `RECAPTCHA_SECRET_KEY` traía un valor de relleno que forzaba la verificación real y rechazaba cualquier login local.
+
 - [x] **Fase 0** Entorno y repositorio (inicio: 31/10/2026 / fin: 31/10/2026)
 - [x] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: 31/10/2026 / fin: 31/10/2026) - [x] **Fase 2** Autenticación, sesiones y auditoría base (inicio: ____ / fin: 31/10/2026)
-- [x] **Fase 3** Usuarios, roles y permisos (inicio: 31/10/2026 / fin: 01/11/2026; smoke `--hasta 3` pendiente solo del ajuste de permisos de la base de desarrollo, ver `backend/db/permisos-dev-fix.sql`)
+- [x] **Fase 3** Usuarios, roles y permisos (inicio: 31/10/2026 / fin: 01/11/2026; smoke `--hasta 3` verificado el 01/11/2026 sobre una base creada con `schema.sql`)
 - [x] **Fase 4** Configuración, combustibles y precios (inicio: 31/10/2026 / fin: 01/11/2026)
 - [x] **Fase 5** Instituciones y órdenes de compra (inicio: 01/11/2026 / fin: 01/11/2026)
 - [x] **Fase 6** Vales: emisión y vales de entidad (inicio: 01/11/2026 / fin: 01/11/2026)
-- [ ] **Fase 7** Consumos y correcciones (inicio: ____ / fin: ____)
+- [x] **Fase 7** Consumos y correcciones (inicio: 01/11/2026 / fin: 01/11/2026)
 - [ ] **Fase 8** Auditoría e integridad de saldos (inicio: ____ / fin: ____)
 - [ ] **Fase 9** Motor OCR con RapidOCR (inicio: ____ / fin: ____)
 - [ ] **Fase 10** Dataset y evaluación del OCR (inicio: ____ / fin: ____)
@@ -250,7 +254,7 @@ backend/
     └── fixtures/                     # documentos mínimos sin datos reales
 ```
 
-**Implementado hasta ahora (cierre de Fase 1):** `pyproject.toml`, `.env.example`, `app/config.py`, `app/errors.py`, `app/cli.py`, `app/main.py`, `app/core/dinero.py`, `app/core/tiempo.py`, `app/core/permisos.py`, `app/core/dominio.py`, `app/db/sesion.py`, `app/db/migrar.py`, `app/db/migraciones/0001_base.sql`, `app/routers/sistema.py`, `app/routers/catalogos.py`, `app/schemas/sistema.py`, `db/schema.sql`, `db/seed.sql`, `scripts/crear_admin.py`, `scripts/verificar_entorno.py`, `scripts/smoke.py`, `tests/conftest.py`, `tests/test_sistema.py`, `tests/test_dinero.py` y `tests/test_tiempo.py`. Los demás módulos del árbol representan trabajo pendiente, no funcionalidades terminadas.
+**Implementado hasta ahora (cierre de Fase 7):** `pyproject.toml`, `.env.example`, `app/config.py`, `app/errors.py`, `app/cli.py`, `app/main.py`, `app/dependencies.py`, `app/core/*` (dinero, tiempo, permisos, dominio, seguridad, archivos, ruc), `app/db/sesion.py`, `app/db/migrar.py`, `app/db/migraciones/0001`-`0007`, los routers `sistema`, `catalogos`, `auth`, `usuarios`, `configuracion`, `combustibles`, `instituciones`, `ordenes`, `vales` y `consumos` con sus servicios y esquemas, `db/schema.sql`, `db/seed.sql`, `scripts/verificar_entorno.py`, `scripts/smoke.py`, `scripts/probar_concurrencia.py`, `tests/conftest.py` y las pruebas de sistema, dinero, tiempo, auth, usuarios, configuración, combustibles, instituciones, órdenes, vales y consumos. Los módulos de integridad, OCR, consultas y reportes siguen pendientes (Fases 8-12).
 
 Nota sobre bases con esquema legacy (`usuarios`, `usuario_id`, `vales.codigo_interno`): el plan no convierte esquemas heredados automáticamente. Para esas bases, respaldar los datos necesarios, eliminar los objetos payload y aplicar las migraciones desde una base vacía; la base de pruebas se reconstruyó así al cerrar la Fase 1.
 
@@ -258,7 +262,7 @@ Nota sobre bases con esquema legacy (`usuarios`, `usuario_id`, `vales.codigo_int
 
 Los vales se identifican solo por números, sin código de barras ni QR: `numero_estacion` guarda la numeración propia de la estación; `numero_entidad` guarda la numeración asignada por una institución. `clave_numeracion` garantiza unicidad general por institución o reinicio de numeración por orden de compra. El `id` de PostgreSQL se usa como identificador relacional interno y no se imprime como numeración del vale.
 
-`schema.sql` y `seed.sql` son scripts SQL directos, ejecutables desde pgAdmin o `psql`. `schema.sql` también ajusta una instalación previa de `app_users` quitando `active` y haciendo nullable `must_change_password`; no convierte otros esquemas heredados automáticamente. El seed incluye tres cuentas de demostración, una por rol, y datos vinculados a la cuenta de administrador. Antes de ejecutar, se deben reemplazar sus hashes Argon2id de ejemplo por hashes correspondientes a contraseñas conocidas.
+`schema.sql` y `seed.sql` son scripts SQL directos, ejecutables desde pgAdmin o `psql`. `schema.sql` también ajusta una instalación previa de `app_users` quitando `active` y haciendo nullable `must_change_password`; no convierte otros esquemas heredados automáticamente. El seed crea por sí solo las tres cuentas de demostración, una por rol (`admin@grsanjose.pe`, `oficina@grsanjose.pe`, `despachador@grsanjose.pe`), con contraseña `Admin12345` cifrada con Argon2id: no hace falta crear un administrador antes ni editar el archivo. Son credenciales de desarrollo y se cambian desde la API en producción.
 
 ---
 
@@ -767,21 +771,26 @@ async def registrar_consumo(db: AsyncSession, vale_id: int, datos: ConsumoIn, us
 
 En PostgreSQL, `SELECT ... FOR UPDATE` dentro de `READ COMMITTED` espera al bloqueo y vuelve a evaluar la fila con el valor ya confirmado, así que el saldo que se resta es siempre el último. El índice único de `token_operacion` cierra la ventana del doble envío; no hace falta subir a `SERIALIZABLE`.
 
-- [ ] `Vale.asegurar_consumible`: rechaza vale agotado, anulado o vencido (se reconoce por fecha aunque no esté marcado), orden anulada y combustible distinto del del vale (P-03), con el código de error específico.
-- [ ] Validación de la cantidad (mayor que cero, hasta 2 decimales), datos complementarios opcionales (P-06) y fecha local siempre del servidor; el registro retroactivo solo para el administrador y con motivo (P-09).
-- [ ] Reversión: movimiento inverso enlazado con `movimiento_origen_id` (único: no se revierte dos veces); no se revierte un consumo de un vale anulado.
-- [ ] Anulación de vale: movimiento de anulación por el saldo restante, saldo en cero y `valor_comprometido_soles` igual al valor ya consumido (P-13). Ajuste de saldo con signo y motivo, sin dejar saldo negativo.
-- [ ] Vencimiento: reconocimiento por fecha en cada consulta y consumo, más `procesar_vencimientos` (comando `python -m app.cli vencimientos` y endpoint a demanda).
-- [ ] Completar `tiene_consumos` de la Fase 5 y actualizar su prueba; el comprobante de consumo devuelve los datos para imprimir.
-- [ ] `scripts/probar_concurrencia.py`: inicia sesión con varios clientes y lanza consumos simultáneos sobre un mismo vale con hilos.
-- [ ] Pruebas: consumo parcial (100 menos 30 es 70), saldo insuficiente, vale agotado, anulado, vencido, combustible distinto, token repetido (devuelve el original), reversión y doble reversión, ajuste que dejaría saldo negativo, historial ordenado, anulación de orden con y sin consumos, y concurrencia.
+- [x] `Vale.asegurar_consumible`: rechaza vale agotado, anulado o vencido (se reconoce por fecha aunque no esté marcado), orden anulada y combustible distinto del del vale (P-03), con el código de error específico. (`services/consumos.py::_asegurar_consumible`)
+- [x] Validación de la cantidad (mayor que cero, hasta 2 decimales), datos complementarios opcionales (P-06) y fecha local siempre del servidor; el registro retroactivo solo para el administrador y con motivo (P-09). (`schemas/consumos.py::ConsumoEntrada`, `services/consumos.py::registrar_consumo`)
+- [x] Reversión: movimiento inverso enlazado con `movimiento_origen_id` (único: no se revierte dos veces); no se revierte un consumo de un vale anulado. (`services/consumos.py::revertir_consumo`)
+- [x] Anulación de vale: movimiento de anulación por el saldo restante, saldo en cero y `valor_comprometido_soles` igual al valor ya consumido (P-13). Ajuste de saldo con signo y motivo, sin dejar saldo negativo. (`services/vales.py::anular_vale`, `::ajustar_vale`)
+- [x] Vencimiento: reconocimiento por fecha en cada consulta y consumo, más `procesar_vencimientos` (comando `python -m app.cli vencimientos` y endpoint a demanda). (`services/vales.py::procesar_vencimientos`, `POST /vales/vencimientos/procesar`)
+- [x] Completar `tiene_consumos` de la Fase 5 y actualizar su prueba; el comprobante de consumo devuelve los datos para imprimir. (`services/ordenes.py::tiene_consumos`, `GET /consumos/{id}/comprobante`)
+- [x] `scripts/probar_concurrencia.py`: inicia sesión con varios clientes y lanza consumos simultáneos sobre un mismo vale con hilos.
+- [x] Pruebas: consumo parcial (100 menos 30 es 70), saldo insuficiente, vale agotado, anulado, vencido, combustible distinto, token repetido (devuelve el original), reversión y doble reversión, ajuste que dejaría saldo negativo, historial ordenado, anulación de orden con y sin consumos, y concurrencia. (`tests/test_consumos.py`, 24 pruebas)
 
 **Entregable navegable:** despacho completo desde `/docs`.
 
 **Verificación:**
-- `pytest tests/test_consumos.py` en verde.
-- `python scripts/probar_concurrencia.py --numero-estacion 2027-000001 --procesos 10 --cantidad 15` sobre un vale de 100 galones imprime: aceptados 6, rechazados 4, saldo final 10.00.
-- Con `smoke.py --hasta 7`: consumir 30 de 100 (saldo 70), consumir 80 (`409`), reenviar el mismo `token_operacion` (un solo movimiento), revertir como administrador y anular un vale.
+- `pytest tests/test_consumos.py` en verde (24 pruebas) y la batería completa en 154 pruebas.
+- `python scripts/probar_concurrencia.py --numero-estacion 2026-000008 --procesos 10 --cantidad 15` sobre un vale de 100 galones imprimió: aceptados 6, rechazados 4, saldo final 10.00.
+- Con `smoke.py --hasta 7` (001-042): consumir 30 de 100 (saldo 70), consumir 80 (`409`), reenviar el mismo `token_operacion` (un solo movimiento), revertir como administrador y anular un vale.
+
+**Cerrada el 01/11/2026.** En la misma sesión se alinearon los artefactos de base de datos que el recorrido manual usa:
+- `db/schema.sql` recuperó lo que solo existía en las migraciones (`refresh_tokens.ultimo_uso_en` con su índice, `ordenes_compra.archivo_tipo|archivo_tamano|archivo_hash` con su CHECK, `movimientos_motivo_obligatorio` y los disparadores `BEFORE TRUNCATE` de `movimientos_vale` y `auditoria`), de modo que una base creada con `schema.sql` es idéntica a una creada con `0001`-`0007`.
+- `db/seed.sql` inserta las tres cuentas de demostración con un hash Argon2id válido y documenta la contraseña `Admin12345`; antes el hash de ejemplo era inválido y los correos `@san-jose.local` los rechazaba `EmailStr`, así que ninguna cuenta podía iniciar sesión.
+- `tests/conftest.py` repone el catálogo `parametros` después de cada limpieza: la clave foránea a `app_users` hacía que el `TRUNCATE ... CASCADE` lo vaciara, y las pruebas de alertas y de tamaño de adjunto dependían de esos valores.
 
 **Habilita en Angular:** pantalla de despacho (con el `token_operacion` generado por pantalla), historial de movimientos y acciones del administrador (anular, ajustar, revertir).
 

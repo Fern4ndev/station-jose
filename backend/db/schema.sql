@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     expira_en           timestamptz NOT NULL,
     revocado_en         timestamptz,
     reemplazado_por_id  bigint REFERENCES refresh_tokens(id) ON DELETE RESTRICT,
+    ultimo_uso_en       timestamptz,
     ip                  inet,
     user_agent          text,
     CONSTRAINT refresh_tokens_hash_hex CHECK (token_hash ~ '^[0-9a-f]{64}$'),
@@ -88,6 +89,7 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 CREATE UNIQUE INDEX IF NOT EXISTS ux_refresh_tokens_hash ON refresh_tokens (token_hash);
 CREATE INDEX IF NOT EXISTS ix_refresh_tokens_usuario ON refresh_tokens (app_user_id, expira_en DESC);
 CREATE INDEX IF NOT EXISTS ix_refresh_tokens_familia ON refresh_tokens (familia_id);
+CREATE INDEX IF NOT EXISTS ix_refresh_tokens_ultimo_uso ON refresh_tokens (app_user_id, ultimo_uso_en DESC);
 
 CREATE TABLE IF NOT EXISTS intentos_login (
     id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -173,6 +175,9 @@ CREATE TABLE IF NOT EXISTS ordenes_compra (
     serie_hasta         integer,
     creada_con_ocr      boolean NOT NULL DEFAULT false,
     archivo_path        text,
+    archivo_tipo        text,
+    archivo_tamano      bigint,
+    archivo_hash        text,
     observaciones       text,
     motivo_anulacion    text,
     creado_por          bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
@@ -185,7 +190,12 @@ CREATE TABLE IF NOT EXISTS ordenes_compra (
         (serie_desde IS NULL AND serie_hasta IS NULL)
         OR (serie_desde IS NOT NULL AND serie_hasta IS NOT NULL AND serie_desde > 0 AND serie_hasta >= serie_desde)
     ),
-    CONSTRAINT ordenes_anulacion_con_motivo CHECK (estado <> 'anulada' OR nullif(trim(motivo_anulacion), '') IS NOT NULL)
+    CONSTRAINT ordenes_anulacion_con_motivo CHECK (estado <> 'anulada' OR nullif(trim(motivo_anulacion), '') IS NOT NULL),
+    -- Metadatos completos o ninguno: no queda un archivo con ruta pero sin hash.
+    CONSTRAINT ordenes_archivo_completo CHECK (
+        archivo_path IS NULL
+        OR (archivo_tipo IS NOT NULL AND archivo_tamano IS NOT NULL AND archivo_hash IS NOT NULL)
+    )
 );
 CREATE INDEX IF NOT EXISTS ix_ordenes_institucion_fecha ON ordenes_compra (institucion_id, fecha_emision DESC);
 CREATE INDEX IF NOT EXISTS ix_ordenes_estado_fecha ON ordenes_compra (estado, fecha_emision DESC);
@@ -289,6 +299,10 @@ CREATE TABLE IF NOT EXISTS movimientos_vale (
         OR (tipo = 'consumo' AND variacion < 0)
         OR (tipo = 'anulacion' AND variacion < 0)
         OR (tipo IN ('ajuste', 'reversion'))
+    ),
+    -- Ajustes (VAL-11) y anulaciones (VAL-10) llevan motivo en el movimiento.
+    CONSTRAINT movimientos_motivo_obligatorio CHECK (
+        tipo NOT IN ('ajuste', 'anulacion') OR nullif(trim(motivo), '') IS NOT NULL
     )
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_movimientos_token_operacion ON movimientos_vale (token_operacion) WHERE token_operacion IS NOT NULL;
@@ -365,6 +379,18 @@ DROP TRIGGER IF EXISTS auditoria_inmutable ON auditoria;
 CREATE TRIGGER auditoria_inmutable
 BEFORE UPDATE OR DELETE ON auditoria
 FOR EACH ROW EXECUTE FUNCTION rechazar_mutacion_inmutable();
+
+-- El TRUNCATE no dispara los eventos de fila: hacen falta disparadores de
+-- sentencia propios (AUD-05). Se activan al aplicar la migración 0007.
+DROP TRIGGER IF EXISTS movimientos_vale_sin_truncate ON movimientos_vale;
+CREATE TRIGGER movimientos_vale_sin_truncate
+BEFORE TRUNCATE ON movimientos_vale
+FOR EACH STATEMENT EXECUTE FUNCTION rechazar_mutacion_inmutable();
+
+DROP TRIGGER IF EXISTS auditoria_sin_truncate ON auditoria;
+CREATE TRIGGER auditoria_sin_truncate
+BEFORE TRUNCATE ON auditoria
+FOR EACH STATEMENT EXECUTE FUNCTION rechazar_mutacion_inmutable();
 
 CREATE OR REPLACE FUNCTION actualizar_timestamp()
 RETURNS trigger

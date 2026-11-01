@@ -1,7 +1,13 @@
 -- Datos iniciales de demostración. No ejecutar en producción.
--- Antes de ejecutar, reemplaza el hash Argon2id compartido por el mismo hash
--- para los tres usuarios de demostración, o asigna un hash distinto a cada uno.
--- No guardes contraseñas en texto plano en este archivo.
+--
+-- Crea las tres cuentas de demostración (una por rol) sin depender de un paso
+-- previo: la contraseña `Admin12345` viaja cifrada con Argon2id, el mismo
+-- algoritmo que usa la aplicación (`app/core/seguridad.py`). El hash es fijo
+-- para que el seed sea reproducible; en producción se cambia desde la API.
+--
+--   admin@grsanjose.pe        administrador
+--   oficina@grsanjose.pe      oficina
+--   despachador@grsanjose.pe  despachador
 --
 -- Se puede ejecutar desde pgAdmin o con psql.
 -- Es idempotente: no duplica estaciones, catálogos, órdenes, vales ni movimientos.
@@ -25,29 +31,31 @@ INSERT INTO estaciones (nombre, ruc, direccion, telefono, correo)
 SELECT v.nombre, v.ruc, v.direccion, v.telefono, v.correo
 FROM (VALUES
     ('San José - Abancay', '20555555556', 'Av. Núñez del Prado 123, Abancay', '083-321001', 'abancay@grsanjose.pe'),
-    ('San José - Tamburco', '20555555556', 'Av. Tamburco s/n, Abancay', '083-321002', 'tamburco@gr sanjose.pe')
+    ('San José - Tamburco', '20555555556', 'Av. Tamburco s/n, Abancay', '083-321002', 'tamburco@grsanjose.pe')
 ) AS v(nombre, ruc, direccion, telefono, correo)
 WHERE NOT EXISTS (SELECT 1 FROM estaciones e WHERE lower(e.nombre) = lower(v.nombre));
 
 -- Cuentas de demostración: una por cada rol de la aplicación.
--- Reemplaza el hash de ejemplo por uno que corresponda a una contraseña conocida.
+-- Contraseña común `Admin12345`, ya cifrada con Argon2id (formato de id 19,
+-- m=65536, t=3, p=4: los parámetros por defecto de `pwdlib`).
 INSERT INTO app_users (role, dni, code, email, full_name,
                        password_hash, must_change_password, station_id)
 SELECT v.role, v.dni, v.code, v.email, v.full_name, v.password_hash,
        NULL, e.id
 FROM (VALUES
-    ('administrador'::user_role, '99900001', 'ADM-001', 'admin@san-jose.local', 'Administrador', '$argon2id$v=19$m=65536,t=3,p=4$Y83Nb/c+S4sUpDNl7+HSiQ$XPBBd5UN7GK+59zLDtUTjOMhy009pp3JDf/g5xazJ4k'),
-    ('oficina'::user_role,       '99900002', 'OFI-001', 'oficina@san-jose.local', 'Oficina', '$argon2id$v=19$m=65536,t=3,p=4$Y83Nb/c+S4sUpDNl7+HSiQ$XPBBd5UN7GK+59zLDtUTjOMhy009pp3JDf/g5xazJ4k'),
-    ('despachador'::user_role,   '99900003', 'DES-001', 'despachador@san-jose.local', 'Despachador', '$argon2id$v=19$m=65536,t=3,p=4$Y83Nb/c+S4sUpDNl7+HSiQ$XPBBd5UN7GK+59zLDtUTjOMhy009pp3JDf/g5xazJ4k')
+    ('administrador'::user_role, '99900001', 'ADM-001', 'admin@grsanjose.pe', 'Administrador', '$argon2id$v=19$m=65536,t=3,p=4$1J0keKXxPytQqEZb1rYejA$uUOyHmBzqGuncu36yAmJ+Rh6AoWDjcQpkcUiyHlydzk'),
+    ('oficina'::user_role,       '99900002', 'OFI-001', 'oficina@grsanjose.pe', 'Oficina', '$argon2id$v=19$m=65536,t=3,p=4$1J0keKXxPytQqEZb1rYejA$uUOyHmBzqGuncu36yAmJ+Rh6AoWDjcQpkcUiyHlydzk'),
+    ('despachador'::user_role,   '99900003', 'DES-001', 'despachador@grsanjose.pe', 'Despachador', '$argon2id$v=19$m=65536,t=3,p=4$1J0keKXxPytQqEZb1rYejA$uUOyHmBzqGuncu36yAmJ+Rh6AoWDjcQpkcUiyHlydzk')
 ) AS v(role, dni, code, email, full_name, password_hash)
 CROSS JOIN estaciones e
 WHERE e.nombre = 'San José - Abancay'
 ON CONFLICT DO NOTHING;
 
--- Repetir el seed deja estas cuentas en su estado de demostración inicial.
+-- Repetir el seed deja estas cuentas sin cambio de contraseña obligatorio.
 UPDATE app_users
 SET must_change_password = NULL
-WHERE email IN ('admin@san-jose.local', 'oficina@san-jose.local', 'despachador@san-jose.local');
+WHERE email IN ('admin@grsanjose.pe', 'oficina@grsanjose.pe', 'despachador@grsanjose.pe')
+  AND must_change_password IS NOT NULL;
 
 DO $$
 BEGIN

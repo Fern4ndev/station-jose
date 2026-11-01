@@ -13,6 +13,7 @@ from app.routers import (
     catalogos,
     combustibles,
     configuracion,
+    consumos,
     instituciones,
     ordenes,
     sistema,
@@ -47,4 +48,5 @@ app.include_router(instituciones.router, prefix=ajustes.api_v1_prefix)
 app.include_router(ordenes.router, prefix=ajustes.api_v1_prefix)
 app.include_router(vales.router_emision, prefix=ajustes.api_v1_prefix)
 app.include_router(vales.router_vales, prefix=ajustes.api_v1_prefix)
+app.include_router(consumos.router, prefix=ajustes.api_v1_prefix)
 registrar_manejadores(app)

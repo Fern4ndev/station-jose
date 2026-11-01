@@ -20,6 +20,7 @@ from app.dependencies import (
     requiere_permiso,
     user_agent_de_peticion,
 )
+from app.schemas.consumos import ValeAjuste, ValeAnular, VencimientosSalida
 from app.schemas.vales import (
     AlertasSalida,
     ImpresionSalida,
@@ -44,6 +45,18 @@ def _ver() -> object:
 
 def _emitir() -> object:
     return requiere_permiso("vales.emitir")
+
+
+def _anular() -> object:
+    return requiere_permiso("vales.anular")
+
+
+def _ajustar() -> object:
+    return requiere_permiso("vales.ajustar")
+
+
+def _gestionar_config() -> object:
+    return requiere_permiso("config.gestionar")
 
 
 def _fecha_o_nada(valor: str | None) -> date | None:
@@ -199,6 +212,19 @@ async def alertas(
     return AlertasSalida(**datos)
 
 
+@router_vales.post(
+    "/vencimientos/procesar", response_model=VencimientosSalida
+)
+async def procesar_vencimientos(
+    sesion: SesionBd,
+    _: UsuarioAutenticado = Depends(_gestionar_config()),  # noqa: B008
+) -> VencimientosSalida:
+    """VAL-09: marca vencidos los vales cuya fecha ya pasó, a demanda."""
+    datos = await servicio.procesar_vencimientos(sesion)
+    await sesion.commit()
+    return VencimientosSalida(**datos)
+
+
 @router_vales.get("/{id_vale}", response_model=ValeDetalle)
 async def detalle(
     id_vale: int,
@@ -221,6 +247,55 @@ async def movimientos(
     historia = await servicio.movimientos(sesion, id_vale)
     await sesion.commit()
     return historia
+
+
+@router_vales.post(
+    "/{id_vale}/anular", response_model=ValeDetalle
+)
+async def anular(
+    id_vale: int,
+    peticion: ValeAnular,
+    request: Request,
+    sesion: SesionBd,
+    editor: UsuarioAutenticado = Depends(_anular()),  # noqa: B008
+) -> ValeDetalle:
+    """VAL-10/P-13: anulación con motivo; el compromiso queda en lo consumido."""
+    await servicio.anular_vale(
+        sesion,
+        id_vale,
+        motivo=peticion.motivo,
+        actor_id=editor.id,
+        ip=ip_de_peticion(request),
+        user_agent=user_agent_de_peticion(request),
+    )
+    await sesion.commit()
+    ficha = await servicio.detalle(sesion, id_vale)
+    await sesion.commit()
+    return ValeDetalle(**ficha)
+
+
+@router_vales.post("/{id_vale}/ajustes", response_model=ValeDetalle)
+async def ajustes(
+    id_vale: int,
+    peticion: ValeAjuste,
+    request: Request,
+    sesion: SesionBd,
+    editor: UsuarioAutenticado = Depends(_ajustar()),  # noqa: B008
+) -> ValeDetalle:
+    """VAL-11/RN-09: variación con signo y motivo obligatorio."""
+    await servicio.ajustar_vale(
+        sesion,
+        id_vale,
+        variacion=peticion.variacion,
+        motivo=peticion.motivo,
+        actor_id=editor.id,
+        ip=ip_de_peticion(request),
+        user_agent=user_agent_de_peticion(request),
+    )
+    await sesion.commit()
+    ficha = await servicio.detalle(sesion, id_vale)
+    await sesion.commit()
+    return ValeDetalle(**ficha)
 
 
 @router_vales.post("/{id_vale}/impresion", response_model=ImpresionSalida)

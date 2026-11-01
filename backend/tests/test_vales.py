@@ -13,6 +13,7 @@ emisión simultánea de dos usuarios que nunca excede el presupuesto (RN-03).
 
 import asyncio
 from contextlib import asynccontextmanager
+from datetime import date
 
 import asyncpg
 from httpx import AsyncClient
@@ -174,15 +175,20 @@ async def _registrar_entidad(
     )
 
 
-def _parchear_vale(vale_id: int, cambios: dict) -> None:
+def _valor_para_bd(columna: str, valor: object) -> object:
+    """asyncpg exige `date` en las columnas de fecha, no cadenas ISO."""
+    if columna.startswith("fecha_") and isinstance(valor, str):
+        return date.fromisoformat(valor)
+    return valor
+
+
+async def _parchear_vale(vale_id: int, cambios: dict) -> None:
     """Actualiza una fila de `vales` directamente en la base de pruebas.
 
     Los disparadores de inalterabilidad solo cubren movimientos y auditoría,
     no `vales`, de modo que la prueba puede arrancar estados que todavía no
     salen de la API (saldo parcial, vencimientos pasados).
     """
-    import asyncio
-
     from app.config import obtener_settings as ajustes
 
     async def ejecutar() -> None:
@@ -192,12 +198,12 @@ def _parchear_vale(vale_id: int, cambios: dict) -> None:
             await conexion.execute(
                 f"UPDATE vales SET {columnas} WHERE id = $1",  # noqa: S608
                 vale_id,
-                *cambios.values(),
+                *(_valor_para_bd(k, v) for k, v in cambios.items()),
             )
         finally:
             await conexion.close()
 
-    asyncio.run(ejecutar())
+    await ejecutar()
 
 
 # ---------------------------------------------------------------------------

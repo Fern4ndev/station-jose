@@ -87,6 +87,11 @@ def construir_parser() -> argparse.ArgumentParser:
     demo_parser.add_argument(
         "--test", action="store_true", help="siembra en la base de pruebas"
     )
+
+    comandos.add_parser(
+        "vencimientos",
+        help="marca vencidos los vales activos cuya fecha ya pasó (VAL-09)",
+    )
     return parser
 
 
@@ -179,6 +184,22 @@ async def ejecutar_crear_admin(nombre: str, correo: str, usar_pruebas: bool) -> 
     return 0
 
 
+async def ejecutar_vencimientos() -> int:
+    """VAL-09: corre `procesar_vencimientos` sobre la base del .env actual.
+
+    Pensado para una tarea programada (cron) una vez al día; cualquier
+    lectura del módulo también deriva el estado por fecha.
+    """
+    from app.db.sesion import FabricaSesiones
+    from app.services import vales
+
+    async with FabricaSesiones() as sesion:
+        datos = await vales.procesar_vencimientos(sesion)
+        await sesion.commit()
+    print(f"✓ Vales marcados vencidos: {datos['vencidos']}.")
+    return 0
+
+
 async def ejecutar_sembrar_demo(usar_pruebas: bool) -> int:
     """Semilla catálogos de ejemplo (Fase 4): combustibles y precios iniciales.
 
@@ -254,6 +275,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return asyncio.run(ejecutar_crear_admin(args.nombre, args.correo, args.test))
     if args.comando == "sembrar-demo":
         return asyncio.run(ejecutar_sembrar_demo(args.test))
+    if args.comando == "vencimientos":
+        return asyncio.run(ejecutar_vencimientos())
     return 2
 
 

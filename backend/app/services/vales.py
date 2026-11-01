@@ -842,3 +842,273 @@ async def registrar_impresion(
         user_agent=user_agent,
     )
     return {**ficha, "es_duplicado": es_duplicado, "veces_impreso": conteo + 1}
+
+
+# ---------------------------------------------------------------------------
+# Correcciones de la Fase 7: anulación, ajustes y vencimientos
+# ---------------------------------------------------------------------------
+
+
+async def _vale_bajo_bloqueo(sesion: AsyncSession, id_vale: int) -> dict:
+    """El vale con FOR UPDATE y el estado real de su orden (RN-13)."""
+    fila = (
+        await sesion.execute(
+            text(
+                """
+                SELECT v.*, o.estado AS orden_estado
+                  FROM vales v
+                  JOIN ordenes_compra o ON o.id = v.orden_compra_id
+                 WHERE v.id = :id
+                FOR UPDATE OF v
+                """
+            ),
+            {"id": id_vale},
+        )
+    ).mappings().one_or_none()
+    if fila is None:
+        raise ErrorDominio(404, "VALE_NO_ENCONTRADO", "El vale no existe.")
+    return dict(fila)
+
+
+async def _consumo_neto_soles(sesion: AsyncSession, vale: dict) -> Decimal:
+    """P-13: galones consumidos netos (consumos menos reversiones) valorados
+    con el precio del vale, para reducir su compromiso al anularlo."""
+    filas = await sesion.execute(
+        text(
+            """
+            SELECT coalesce(sum(variacion), 0) AS variacion_neta
+              FROM movimientos_vale
+             WHERE vale_id = :id AND tipo IN ('consumo', 'reversion')
+            """
+        ),
+        {"id": vale["id"]},
+    )
+    variacion_neta = dinero.a_decimal(filas.scalar_one())
+    if variacion_neta > 0:
+        variacion_neta = Decimal("0.00")
+    galones = -variacion_neta
+    precio = dinero.a_decimal(vale["precio_galon_aplicado"])
+    return dinero.monto(galones * precio)
+
+
+async def anular_vale(
+    sesion: AsyncSession,
+    id_vale: int,
+    *,
+    motivo: str,
+    actor_id: int,
+    ip: str | None = None,
+    user_agent: str | None = None,
+) -> dict:
+    """VAL-10/P-13: invalida el vale y deja su compromiso en lo consumido."""
+    if not str(motivo).strip():
+        raise ErrorDominio(
+            422,
+            "MOTIVO_OBLIGATORIO",
+            "El motivo es obligatorio para anular un vale.",
+            {"motivo": ["Indica por qué se anula el vale."]},
+        )
+    vale = await _vale_bajo_bloqueo(sesion, id_vale)
+    if vale["estado"] == "anulado":
+        raise ErrorDominio(
+            409, "VALE_ANULADO", "El vale ya está anulado."
+        )
+    if vale["orden_estado"] not in ("vigente", "cerrada"):
+        raise ErrorDominio(
+            409,
+            "ORDEN_NO_EMITIBLE",
+            "El vale pertenece a una orden anulada; gestiona la orden primero.",
+        )
+    saldo = dinero.a_decimal(vale["saldo"])
+    consumido_neto = await _consumo_neto_soles(sesion, vale)
+    if dinero.es_positivo(saldo):
+        id_estacion = await _id_estacion(sesion)
+        await sesion.execute(
+            text(
+                """
+                INSERT INTO movimientos_vale (
+                    vale_id, tipo, variacion, saldo_posterior, cantidad_galones,
+                    precio_galon, importe_soles, app_user_id, estacion_id,
+                    motivo, fecha_local
+                ) VALUES (
+                    :vale, 'anulacion', :variacion, 0, 0,
+                    :precio, 0, :usuario, :estacion, :motivo, :fecha_local
+                )
+                """
+            ),
+            {
+                "vale": id_vale,
+                "variacion": -saldo,
+                "precio": dinero.a_decimal(vale["precio_galon_aplicado"]),
+                "usuario": actor_id,
+                "estacion": id_estacion,
+                "motivo": motivo.strip(),
+                "fecha_local": tiempo.hoy(),
+            },
+        )
+    await sesion.execute(
+        text(
+            "UPDATE vales SET saldo = 0, estado = 'anulado',"
+            " valor_comprometido_soles = :consumido, actualizado_en = now()"
+            " WHERE id = :id"
+        ),
+        {
+            "consumido": dinero.monto(consumido_neto),
+            "id": id_vale,
+        },
+    )
+    await auditoria.registrar(
+        sesion,
+        usuario_id=actor_id,
+        accion="vale_anulado",
+        entidad="vales",
+        entidad_id=id_vale,
+        antes={"saldo": dinero.como_texto(saldo), "estado": vale["estado"]},
+        despues={"motivo": motivo.strip()},
+        ip=ip,
+        user_agent=user_agent,
+    )
+    return {
+        "id": id_vale,
+        "estado": "anulado",
+        "saldo": "0.00",
+        "valor_comprometido_soles": dinero.como_texto(consumido_neto),
+    }
+
+
+async def ajustar_vale(
+    sesion: AsyncSession,
+    id_vale: int,
+    *,
+    variacion: str,
+    motivo: str,
+    actor_id: int,
+    ip: str | None = None,
+    user_agent: str | None = None,
+) -> dict:
+    """VAL-11: variación con signo sobre el saldo, con motivo obligatorio."""
+    if not str(motivo).strip():
+        raise ErrorDominio(
+            422,
+            "MOTIVO_OBLIGATORIO",
+            "El motivo es obligatorio para ajustar un vale.",
+            {"motivo": ["Indica la razón del ajuste."]},
+        )
+    try:
+        delta = dinero.cantidad(variacion)
+    except dinero.ErrorNumero as exc:
+        raise ErrorDominio(
+            422,
+            "VALIDACION_INVALIDA",
+            "Revise los campos marcados.",
+            {"variacion": ["La variación debe ser un número con hasta 2 decimales."]},
+        ) from exc
+    if delta == 0:
+        raise ErrorDominio(
+            422,
+            "VALIDACION_INVALIDA",
+            "Revise los campos marcados.",
+            {"variacion": ["La variación no puede ser cero."]},
+        )
+    vale = await _vale_bajo_bloqueo(sesion, id_vale)
+    if vale["estado"] in ("anulado", "vencido"):
+        raise ErrorDominio(
+            409,
+            "VALE_NO_AJUSTABLE",
+            f"No se ajusta un vale {vale['estado']}: mira su orden o anúlalo.",
+        )
+    saldo = dinero.a_decimal(vale["saldo"])
+    inicial = dinero.a_decimal(vale["cantidad_inicial"])
+    nuevo = saldo + delta
+    if nuevo < 0:
+        raise ErrorDominio(
+            409,
+            "AJUSTE_NEGATIVO",
+            "El ajuste dejaría el saldo negativo.",
+            detalles={"saldo": dinero.como_texto(saldo)},
+        )
+    if nuevo > inicial:
+        raise ErrorDominio(
+            409,
+            "AJUSTE_EXCEDIDO",
+            "El ajuste dejaría el saldo sobre la cantidad inicial del vale.",
+            detalles={
+                "saldo": dinero.como_texto(saldo),
+                "cantidad_inicial": dinero.como_texto(inicial),
+            },
+        )
+    nuevo = dinero.monto(nuevo)
+    id_estacion = await _id_estacion(sesion)
+    await sesion.execute(
+        text(
+            """
+            INSERT INTO movimientos_vale (
+                vale_id, tipo, variacion, saldo_posterior, cantidad_galones,
+                precio_galon, importe_soles, app_user_id, estacion_id,
+                motivo, fecha_local
+            ) VALUES (
+                :vale, 'ajuste', :variacion, :saldo_posterior, 0,
+                :precio, 0, :usuario, :estacion, :motivo, :fecha_local
+            )
+            """
+        ),
+        {
+            "vale": id_vale,
+            "variacion": delta,
+            "saldo_posterior": nuevo,
+            "precio": dinero.a_decimal(vale["precio_galon_aplicado"]),
+            "usuario": actor_id,
+            "estacion": id_estacion,
+            "motivo": motivo.strip(),
+            "fecha_local": tiempo.hoy(),
+        },
+    )
+    await sesion.execute(
+        text(
+            "UPDATE vales SET saldo = :saldo, estado = :estado,"
+            " actualizado_en = now() WHERE id = :id"
+        ),
+        {
+            "saldo": nuevo,
+            "estado": "agotado" if nuevo == 0 else "activo",
+            "id": id_vale,
+        },
+    )
+    await auditoria.registrar(
+        sesion,
+        usuario_id=actor_id,
+        accion="vale_ajustado",
+        entidad="vales",
+        entidad_id=id_vale,
+        despues={
+            "variacion": dinero.como_texto(delta),
+            "saldo": dinero.como_texto(nuevo),
+            "motivo": motivo.strip(),
+        },
+        ip=ip,
+        user_agent=user_agent,
+    )
+    return {
+        "id": id_vale,
+        "saldo": dinero.como_texto(nuevo),
+        "estado": "agotado" if nuevo == 0 else "activo",
+    }
+
+
+async def procesar_vencimientos(sesion: AsyncSession) -> dict:
+    """VAL-09: marca vencidos los vales activos cuya fecha ya pasó.
+
+    Lo llama el comando `python -m app.cli vencimientos` y el endpoint a
+    demanda; además, cualquier lectura deriva el estado por fecha (VAL-08),
+    así que el proceso es de orden y no condiciona el despacho.
+    """
+    resultado = await sesion.execute(
+        text(
+            "UPDATE vales SET estado = 'vencido', actualizado_en = now()"
+            " WHERE estado = 'activo'"
+            "   AND fecha_vencimiento IS NOT NULL"
+            "   AND fecha_vencimiento < "
+            "       (now() AT TIME ZONE 'America/Lima')::date"
+        )
+    )
+    return {"vencidos": int(resultado.rowcount or 0)}

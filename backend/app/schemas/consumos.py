@@ -8,9 +8,9 @@ cantidades viajan como cadena exacta (plan sección 1).
 """
 
 import uuid
-from datetime import date, datetime
+from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.core import dinero
 

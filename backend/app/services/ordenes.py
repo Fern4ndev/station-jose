@@ -13,8 +13,8 @@ cliente reenvía la petición con `confirmar_duplicado = TRUE` si es real.
 
 La validación de estados sigue la sección 3.4: borrador→vigente|anulada,
 vigente→cerrada|anulada; cerrada y anulada son terminales. La anulación
-requiere motivo (ORD-09) y no admite consumos (RN-17): el marcador
-`tiene_consumos` queda para la Fase 7, y mientras tanto devuelve False.
+requiere motivo (ORD-09) y no admite consumos (RN-17): `tiene_consumos`
+consulta `movimientos_vale` por los vales de la orden.
 """
 
 from decimal import Decimal
@@ -39,12 +39,23 @@ TRANSICIONES_VALIDAS: dict[str, set[str]] = {
 }
 
 
-def tiene_consumos(_id_orden: int) -> bool:
-    """ORD-09/RN-17: marcador de Fase 5. La Fase 7 lo convierte en la consulta
-    real contra `movimientos_vale`; mientras tanto ninguna orden tiene consumos,
-    así que la anulación solo depende del estado.
-    """
-    return False
+async def tiene_consumos(sesion: AsyncSession, id_orden: int) -> bool:
+    """ORD-09/RN-17: la orden tiene consumos si algún vale suyo registra
+    consumos (o reversión de consumo, que solo existe tras un consumo)."""
+    filas = await sesion.execute(
+        text(
+            """
+            SELECT 1
+              FROM movimientos_vale m
+              JOIN vales v ON v.id = m.vale_id
+             WHERE v.orden_compra_id = :id
+               AND m.tipo IN ('consumo', 'reversion')
+             LIMIT 1
+            """
+        ),
+        {"id": id_orden},
+    )
+    return filas.first() is not None
 
 
 async def _obtener_orden(sesion: AsyncSession, id_orden: int) -> dict:
@@ -675,7 +686,7 @@ async def anular(
             "El motivo es obligatorio para anular una orden.",
             detalles={"campo": "motivo"},
         )
-    if tiene_consumos(id_orden):
+    if await tiene_consumos(sesion, id_orden):
         raise ErrorDominio(
             409,
             "ORDEN_CON_CONSUMOS",

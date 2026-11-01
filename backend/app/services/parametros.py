@@ -16,6 +16,8 @@ DEFECTO_NUMERO: dict[str, int] = {
     "login_bloqueo_min": 15,
     "refresh_token_dias": 30,
     "archivo_max_mb": 10,  # tope de documentos adjuntos a las órdenes (ORD-03)
+    "vale_umbral_saldo_bajo_pct": 10,  # alerta de saldo bajo (VAL-13)
+    "vale_dias_aviso_vencimiento": 7,  # aviso previo al vencimiento (VAL-13)
 }
 
 

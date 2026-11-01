@@ -19,7 +19,8 @@ RAIZ_BACKEND = Path(__file__).resolve().parents[1]
 
 # Gama de tablas que se vacía entre pruebas. Se dejan fuera `schema_migrations`
 # (control del ejecutor) y `parametros` (catálogo con los valores por defecto
-# que instala la migración 0001).
+# que instala la migración 0001, reinsertado tras la limpieza porque la clave
+# foránea a `app_users` lo arrastra en el TRUNCATE en cascada).
 TABLAS = (
     "impresiones_vale",
     "diferencias_integridad",
@@ -40,6 +41,23 @@ TABLAS = (
     "estaciones",
 )
 TABLAS_INMUTABLES = ("movimientos_vale", "auditoria")
+
+# `parametros` referencia `app_users`, así que el TRUNCATE en cascada lo vacía
+# aunque no esté en `TABLAS`. Se reinserta el catálogo después de cada limpieza
+# con los mismos valores que instala la migración 0001, de modo que ninguna
+# prueba dependa del orden ni de lo que dejó la anterior.
+PARAMETROS_POR_DEFECTO = (
+    ("ocr_umbral_confianza", "0.80"),
+    ("archivo_max_mb", "10"),
+    ("vale_formato_numeracion_estacion", "{anio}-{secuencia:06d}"),
+    ("vale_vigencia_dias", ""),
+    ("vale_umbral_saldo_bajo_pct", "10"),
+    ("vale_dias_aviso_vencimiento", "7"),
+    ("sesion_inactividad_min", "60"),
+    ("login_intentos_max", "5"),
+    ("login_bloqueo_min", "15"),
+    ("refresh_token_dias", "30"),
+)
 
 
 def _leer_env(ruta: Path) -> dict[str, str]:
@@ -121,6 +139,11 @@ async def base_limpia() -> AsyncIterator[None]:
             await connection.execute(f"ALTER TABLE {tabla} DISABLE TRIGGER USER")
         await connection.execute(
             "TRUNCATE " + ", ".join(TABLAS) + " RESTART IDENTITY CASCADE"
+        )
+        await connection.executemany(
+            "INSERT INTO parametros (clave, valor) VALUES ($1, $2)"
+            " ON CONFLICT (clave) DO NOTHING",
+            PARAMETROS_POR_DEFECTO,
         )
         for tabla in TABLAS_INMUTABLES:
             await connection.execute(f"ALTER TABLE {tabla} ENABLE TRIGGER USER")

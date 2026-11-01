@@ -17,7 +17,9 @@ import argparse
 import asyncio
 import datetime as _dt
 import os
+import secrets
 import sys
+import uuid
 from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from typing import TypedDict
@@ -729,6 +731,249 @@ async def _vale_entidad_y_duplicado(cliente: httpx.AsyncClient) -> str | None:
     return None
 
 
+# --- Fase 7: consumos y correcciones ---------------------------------------
+
+ESTADO_FASE_7: dict[str, object] = {}
+
+
+def _token_fase_7() -> str:
+    return str(uuid.uuid4())
+
+
+def _ruc_aleatorio() -> str:
+    """RUC de 11 dígitos con dígito verificador válido y único por corrida."""
+    base = f"20{secrets.randbelow(100_000_000):08d}"
+    pesos = (5, 4, 3, 2, 7, 6, 5, 4, 3, 2)
+    verificador = 11 - (sum(int(d) * p for d, p in zip(base, pesos, strict=True)) % 11)
+    return base + str({10: 0, 11: 1}.get(verificador, verificador))
+
+
+async def _login_admin_para_fase7(cliente: httpx.AsyncClient) -> str | None:
+    if not CLAVE_SMOKE:
+        return "Define SMOKE_PASSWORD con la contraseña vigente del administrador."
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={"correo": CORREO_SMOKE, "password": CLAVE_SMOKE, "recaptcha_token": "smoke"},
+    )
+    if respuesta.status_code != 200:
+        return f"Login devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    cliente.headers["Authorization"] = f"Bearer {respuesta.json()['access_token']}"
+    return None
+
+
+async def _escenario_para_fase7(cliente: httpx.AsyncClient) -> str | None:
+    """Prepara combustible, institución, orden vigente y un vale de 100."""
+    marca = _ms_actuales()  # el nombre debe ser único por corrida (UNIQUE)
+    respuesta = await cliente.post(
+        "/api/v1/combustibles", json={"nombre": f"Consumos Smoke {marca}"}
+    )
+    if respuesta.status_code != 201:
+        return f"POST combustibles devolvió {respuesta.status_code}: {respuesta.text}"
+    combustible = respuesta.json()
+    precio = await cliente.post(
+        f"/api/v1/combustibles/{combustible['id']}/precios",
+        json={"precio_galon": "15.50", "vigente_desde": "2026-01-01"},
+    )
+    if precio.status_code != 201:
+        return f"POST precios devolvió {precio.status_code}: {precio.text}"
+
+    ficha = await cliente.put(
+        "/api/v1/configuracion/estacion",
+        json={"nombre": "Estación San José", "ruc": "20100047218"},
+    )
+    if ficha.status_code not in (200, 201):
+        return f"PUT estación devolvió {ficha.status_code}: {ficha.text}"
+
+    ruc_valido = _ruc_aleatorio()
+
+    institucion = await cliente.post(
+        "/api/v1/instituciones",
+        json={
+            "nombre": "Municipalidad Fase 7",
+            "ruc": ruc_valido,
+            "tipo": "publica",
+            "modalidad_numeracion": "por_orden",
+        },
+    )
+    if institucion.status_code != 201:
+        return f"POST instituciones devolvió {institucion.status_code}: {institucion.text}"
+
+    orden = await cliente.post(
+        "/api/v1/ordenes",
+        json={
+            "institucion_id": institucion.json()["id"],
+            "fecha_emision": _dt.date.today().isoformat(),
+            "presupuesto_soles": "5000.00",
+            "estado": "vigente",
+            "confirmar_duplicado": True,
+        },
+    )
+    if orden.status_code != 201:
+        return f"POST ordenes devolvió {orden.status_code}: {orden.text}"
+    orden = orden.json()
+
+    emision = await cliente.post(
+        f"/api/v1/ordenes/{orden['id']}/vales",
+        json={"combustible_id": combustible["id"],"cantidades": ["100.00"]},
+    )
+    if emision.status_code != 201:
+        return f"POST vales devolvió {emision.status_code}: {emision.text}"
+    vale = emision.json()[0]
+    ESTADO_FASE_7.update({"orden": orden["id"], "vale": vale["id"]})
+    return None
+
+
+def _falta_escenario_fase7(*claves: str) -> str | None:
+    """Un paso previo fallido no debe arrastrar KeyError a los siguientes."""
+    faltan = [clave for clave in claves if clave not in ESTADO_FASE_7]
+    if not faltan:
+        return None
+    return (
+        "Falta el escenario de la fase 7 ("
+        + ", ".join(faltan)
+        + "): el paso anterior no lo preparó."
+    )
+
+
+async def _consume_parcial(cliente: httpx.AsyncClient) -> str | None:
+    """CON-01: consumir 30 de 100 deja saldo 70."""
+    if (falta := _falta_escenario_fase7("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    respuesta = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": _token_fase_7(), "cantidad_galones": "30.00"},
+    )
+    if respuesta.status_code != 201:
+        return f"POST consumos devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    datos = respuesta.json()
+    if datos["saldo_posterior"] != "70.00" or datos["importe_soles"] != "465.00":
+        return f"Movimiento inesperado: {datos}"
+    ESTADO_FASE_7["token"] = datos["token_operacion"]
+    ESTADO_FASE_7["movimiento"] = datos["id"]
+    detalle = (await cliente.get(f"/api/v1/vales/{vale}")).json()
+    if detalle["saldo"] != "70.00":
+        return f"El saldo del vale no es 70.00: {detalle['saldo']}"
+    return None
+
+
+async def _consume_excesivo_rechazado(cliente: httpx.AsyncClient) -> str | None:
+    """CON-03: consumir 80 sobre un saldo de 70 devuelve 409."""
+    if (falta := _falta_escenario_fase7("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    respuesta = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": _token_fase_7(), "cantidad_galones": "80.00"},
+    )
+    if respuesta.status_code != 409:
+        return f"POST consumos devolvió {respuesta.status_code}; se esperaba 409."
+    if respuesta.json().get("codigo") != "SALDO_INSUFICIENTE":
+        return f"codigo inesperado: {respuesta.json().get('codigo')}"
+    if respuesta.json().get("detalles", {}).get("saldo") != "70.00":
+        return "El 409 no declara el saldo disponible."
+    return None
+
+
+async def _reenvio_token_no_duplica(cliente: httpx.AsyncClient) -> str | None:
+    """CON-08: el reenvío con el mismo token devuelve el movimiento original."""
+    if (falta := _falta_escenario_fase7("vale", "token", "movimiento")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    respuesta = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={
+            "token_operacion": ESTADO_FASE_7["token"],
+            "cantidad_galones": "95.00",
+        },
+    )
+    if respuesta.status_code != 201:
+        return f"Reenvío devolvió {respuesta.status_code}; se esperaba 201."
+    if respuesta.json()["id"] != ESTADO_FASE_7["movimiento"]:
+        return "El reenvío devolvió otro movimiento; el token no matchea."
+    if respuesta.json()["saldo_posterior"] != "70.00":
+        return "El reenvío alteró el saldo."
+    historia = (await cliente.get(f"/api/v1/vales/{vale}/movimientos")).json()
+    # La línea de tiempo incluye la emisión (CON-12): emisión + consumo.
+    if len(historia) != 2:
+        return f"Hay {len(historia)} movimientos; el token aprobado duplicó."
+    return None
+
+
+async def _revertir_como_admin(cliente: httpx.AsyncClient) -> str | None:
+    """CON-11: la reversión devuelve los 30 galones; la doble es 409."""
+    if (falta := _falta_escenario_fase7("movimiento")) is not None:
+        return falta
+    movimiento = int(ESTADO_FASE_7["movimiento"])
+    respuesta = await cliente.post(
+        f"/api/v1/consumos/{movimiento}/revertir",
+        json={"motivo": "Despacho grabado dos veces por el smoke"},
+    )
+    if respuesta.status_code != 200:
+        return f"POST revertir devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    if respuesta.json()["saldo_posterior"] != "100.00":
+        return f"La reversión no restituyó el saldo: {respuesta.json()}"
+    doble = await cliente.post(
+        f"/api/v1/consumos/{movimiento}/revertir",
+        json={"motivo": "Repetir la reversión debe fallar"},
+    )
+    if doble.status_code != 409 or doble.json().get("codigo") != "CONSUMO_YA_REVERTIDO":
+        return f"La doble reversión devolvió {doble.status_code}: {doble.json().get('codigo')}"
+    return None
+
+
+async def _anula_vale(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-10/P-13: el vale anulado queda sin saldo y compromete lo consumido."""
+    if (falta := _falta_escenario_fase7("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    # Consumo de 10 galones antes de anular: compromiso = 10 x 15.50 = S/ 155.00.
+    consumo = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": _token_fase_7(), "importe_soles": "155.00"},
+    )
+    if consumo.status_code != 201:
+        return f"POST consumos devolvió {consumo.status_code}: {consumo.json().get('mensaje')}"
+    anulacion = await cliente.post(
+        f"/api/v1/vales/{vale}/anular", json={"motivo": "Orden corregida por smoke"}
+    )
+    if anulacion.status_code != 200:
+        return f"POST anular devolvió {anulacion.status_code}: {anulacion.json().get('mensaje')}"
+    detalle = anulacion.json()
+    if detalle["estado"] != "anulado" or detalle["saldo"] != "0.00":
+        return f"El vale anulado no quedó en cero: {detalle}"
+    if detalle["valor_comprometido_soles"] != "155.00":
+        return (
+            "El compromiso no quedó en lo ya consumido: "
+            f"{detalle['valor_comprometido_soles']}"
+        )
+    despacho = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": _token_fase_7(), "cantidad_galones": "1.00"},
+    )
+    if despacho.status_code != 409 or despacho.json().get("codigo") != "VALE_ANULADO":
+        return "Después de anular, el despacho no devolvió VALE_ANULADO."
+    return None
+
+
+async def _orden_con_consumos_no_se_anula(cliente: httpx.AsyncClient) -> str | None:
+    """ORD-09/RN-17: la orden con consumo no se anula (ni sin consumos)."""
+    if (falta := _falta_escenario_fase7("orden")) is not None:
+        return falta
+    orden = int(ESTADO_FASE_7["orden"])
+    respuesta = await cliente.post(
+        f"/api/v1/ordenes/{orden}/anular", json={"motivo": "Orden revisada"}
+    )
+    if respuesta.status_code != 409:
+        return f"POST anular orden devolvió {respuesta.status_code}; se esperaba 409."
+    if respuesta.json().get("codigo") != "ORDEN_CON_CONSUMOS":
+        return f"codigo inesperado: {respuesta.json().get('codigo')}"
+
+    cliente.headers.pop("Authorization", None)
+    ESTADO_FASE_7.clear()
+    return None
+
+
 async def _busca_por_numero_entidad(cliente: httpx.AsyncClient) -> str | None:
     """QRY-01: el buscador halla el vale de entidad por su número."""
     respuesta = await cliente.get("/api/v1/vales/buscar", params={"q": ESTADO_FASE_6["numero"]})
@@ -816,6 +1061,20 @@ FASES: tuple[Fase, ...] = (
              _vale_entidad_y_duplicado),
             ("034 búsqueda global halla el vale por número de entidad",
              _busca_por_numero_entidad),
+        ),
+    },
+    {
+        "numero": 7,
+        "titulo": "Consumos y correcciones",
+        "comprobaciones": (
+            ("035 login del administrador del smoke", _login_admin_para_fase7),
+            ("036 escenario: vale de 100 galones listo para despachar", _escenario_para_fase7),
+            ("037 consumir 30 de 100 deja saldo 70", _consume_parcial),
+            ("038 consumir 80 sobre saldo 70 devuelve 409", _consume_excesivo_rechazado),
+            ("039 reenvío con el mismo token no duplica", _reenvio_token_no_duplica),
+            ("040 reversión del consumo y doble reversión 409", _revertir_como_admin),
+            ("041 anulación del vale con compromiso en lo consumido", _anula_vale),
+            ("042 orden con consumos no se anula", _orden_con_consumos_no_se_anula),
         ),
     },
 )
