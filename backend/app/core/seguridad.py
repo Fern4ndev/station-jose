@@ -110,6 +110,11 @@ def decodificar_token(token: str) -> dict[str, Any]:
         raise ErrorToken("El token expiró.") from exc
     except jwt.InvalidTokenError as exc:
         raise ErrorToken("El token no es válido.") from exc
-    if not isinstance(claims["ses"], int) or not isinstance(claims["rol"], str):
+    if (
+        not isinstance(claims["ses"], int)
+        or not isinstance(claims["rol"], str)
+        or not isinstance(claims["sub"], str)
+        or not claims["sub"].isdigit()
+    ):
         raise ErrorToken("Los claims del token están incompletos.")
     return claims

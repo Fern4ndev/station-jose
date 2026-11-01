@@ -35,6 +35,14 @@ class Settings(BaseSettings):
     jwt_secret_key: str = ""
     recaptcha_secret_key: str = ""
     recaptcha_site_key: str = ""
+    recaptcha_umbral_minimo: float = 0.5
+    recaptcha_hostname: str = ""
+
+    # Sesión (plan, secciones 4 y 5.2).
+    access_token_minutos: int = 10
+    recuperacion_token_minutos: int = 15
+    # URL del frontend para el enlace del correo de recuperación (P-08).
+    frontend_url: str = ""
 
     smtp_host: str = ""
     smtp_port: int = 587

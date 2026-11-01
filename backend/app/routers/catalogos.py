@@ -1,20 +1,22 @@
 """Catálogos cerrados para el frontend (plan, sección 5.1).
 
-En la Fase 2 llegará la autenticación; entonces este endpoint declarará el
-permiso `sesion`. Mientras tanto responde porque el frontend necesita las
-listas para construir formularios desde la primera pantalla.
+Requieren una sesión válida (AUT-09): cualquier usuario autenticado puede
+leerlos porque alimentan formularios y menús. Con `must_change_password`
+en TRUE la dependencia común los bloquea hasta el cambio (AUT-06); para el
+resto de permisos entra `requiere_permiso` en la Fase 3.
 """
 
 from fastapi import APIRouter
 
 from app.core import dominio
+from app.dependencies import UsuarioActual
 from app.schemas.sistema import EnumsRespuesta
 
 router = APIRouter(prefix="/catalogos", tags=["catalogos"])
 
 
 @router.get("/enums")
-async def enums() -> EnumsRespuesta:
+async def enums(_: UsuarioActual) -> EnumsRespuesta:
     """Listas cerradas de estados, tipos, emisores, roles y permisos."""
     return EnumsRespuesta(
         roles=list(dominio.ROLES),

@@ -2,7 +2,9 @@
 
 API con **FastAPI**, **PostgreSQL 16+** y OCR con RapidOCR para la gestión de combustible de la estación San José, Abancay. Se desarrolla en Python 3.11 o superior.
 
-> **Estado:** Fase 1 del plan cerrada (31/10/2026). Existe la API con `GET /api/v1/salud` y `GET /api/v1/catalogos/enums`, el ejecutor de migraciones SQL numeradas (`0001_base.sql`), errores estandarizados, CLI, pruebas automatizadas y `scripts/smoke.py --hasta 1`. Autenticación y usuarios llegan en la Fase 2.
+> **Estado:** Fase 1 del plan cerrada (31/10/2026). Existe la API con `GET /api/v1/salud` y `GET /api/v1/catalogos/enums` (protegido), el ejecutor de migraciones SQL numeradas (`0001_base.sql`, `0002_sesiones.sql`), errores estandarizados, CLI, pruebas automatizadas y `scripts/smoke.py --hasta 2`.
+**Fase 2 cerrada (31/10/2026):** autenticación y sesiones — `POST /auth/login`, `/auth/refresh` (rotación con CSRF), `/auth/logout`, `/auth/yo`, `/auth/recuperar`, `/auth/restablecer` y `/auth/cambiar-password`; contraseñas Argon2id, limpieza crítica de límite de intentos, reCAPTCHA v3, cierre de sesión y auditoría. No existe ruta de registro: las cuentas se crean con `python -m app.cli crear-admin`.
+**Fase 3 cerrada (01/11/2026):** usuarios, roles y permisos — `GET/POST/PATCH /usuarios` y `POST /usuarios/{id}/restablecer-password` con permiso `usuarios.gestionar` (solo administrador), matriz rol → permisos en `app/core/permisos.py`, dependencia `requiere_permiso(...)` en `app/dependencies.py` y la protección del último administrador (`UL´TIMO_ADMINISTRADOR`). La prueba global de autorización recorre `app.routes` y hace fallar la suite si un endpoint nuevo sale sin sesión ni permiso. 14 pruebas nuevas en `tests/test_usuarios.py` (53 en total) y `scripts/smoke.py --hasta 3` listo; su ejecución sobre la base de desarrollo queda pendiente del ajuste de permisos de [db/permisos-dev-fix.sql](db/permisos-dev-fix.sql) (pgAdmin).
 
 ## Estructura
 
@@ -69,15 +71,20 @@ Copia `.env.example` a `.env` y ajusta los valores. No uses las credenciales de 
 | `ENTORNO` | Entorno de ejecución (`desarrollo`, `pruebas`, `produccion`) |
 | `DATABASE_URL` | Conexión de la aplicación como `vales_app` (`postgresql+asyncpg://`) |
 | `DATABASE_URL_TEST` | La misma conexión sobre `vales_san_jose_test` |
-| `MIGRADOR_URL` | Conexión como `vales_migrador`, para aplicar migraciones |
+| `MIGRADOR_URL` | Conexión como `vales_migrador`, para aplicar migraciones y `crear-admin` |
 | `MIGRADOR_URL_TEST` | La misma conexión sobre `vales_san_jose_test` |
 | `OCR_DEVICE` | Dispositivo de `onnxruntime` (`cpu` en desarrollo) |
 | `ALMACENAMIENTO_DIR` | Directorio de archivos privados |
 | `FRONTEND_DIST` | Carpeta compilada del frontend (`../dist/frontend/browser`, relativa a `backend/`) |
-| `JWT_SECRET_KEY` | Clave de firma JWT, larga y aleatoria |
-| `RECAPTCHA_SECRET_KEY` | Clave secreta de reCAPTCHA v3 |
+| `JWT_SECRET_KEY` | Clave de firma JWT, larga y aleatoria (obligatoria fuera de desarrollo) |
+| `ACCESS_TOKEN_MINUTOS` | Vida del access JWT (10) |
+| `RECUPERACION_TOKEN_MINUTOS` | Vida del token de un solo uso del correo (15) |
+| `FRONTEND_URL` | Base del frontend para el enlace de recuperación (vacío: solo se imprime el enlace) |
+| `RECAPTCHA_SECRET_KEY` | Clave secreta de reCAPTCHA v3 (vacío: verificación local en desarrollo) |
 | `RECAPTCHA_SITE_KEY` | Clave pública de reCAPTCHA que usa el frontend |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | Correo saliente |
+| `RECAPTCHA_UMBRAL_MINIMO` | Score mínimo aceptado (0.5) |
+| `RECAPTCHA_HOSTNAME` | `hostname` esperado si difiere del host de la petición |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | Correo saliente (sin `SMTP_HOST` el enlace se imprime en consola) |
 
 ## Base de datos
 
@@ -146,6 +153,17 @@ El SQL de `schema.sql` define el esquema inicial y actualiza una instalación pr
 
 Además, la Fase 1 del plan agrega el ejecutor de migraciones numeradas (`app/db/migraciones/`), que se usa con `python -m app.cli migrar aplicar` y `python -m app.cli migrar estado`.
 
+## Crear el administrador (Fase 2)
+
+No existe ruta de registro: las cuentas nacen por CLI. `crear-admin` genera una contraseña temporal aleatoria, la imprime **una sola vez** y marca `must_change_password = TRUE`, de modo que en el primer inicio el sistema exige el cambio y restringe la API hasta completarlo (AUT-06):
+
+```powershell
+python -m app.cli crear-admin --nombre Admin --correo admin@ejemplo.pe
+python -m app.cli crear-admin --nombre Admin --correo admin@ejemplo.pe --test   # base de pruebas
+```
+
+El flujo restante se hace desde `/docs`: `POST /auth/login` con la contraseña temporal → `POST /auth/cambiar-password`. Los *refresh tokens* viajan en una cookie HttpOnly bajo `/api/v1/auth` y `refresh`/`logout` validan el token CSRF de la cookie pública `csrf_token` (doble envío).
+
 ## Verificar el entorno
 
 ```powershell
@@ -169,13 +187,16 @@ python -m pytest
 ruff check .
 ```
 
-La suite cubre el módulo de sistema (`/salud`, `/catalogos/enums`, formato de errores), `core/dinero.py` y `core/tiempo.py`. `tests/conftest.py` apunta la aplicación a la base de pruebas, aplica las migraciones con `MIGRADOR_URL_TEST` y vacía las tablas entre pruebas (desactiva los disparadores inmutables, `TRUNCATE ... RESTART IDENTITY CASCADE` y los reactiva).
+La suite cubre el módulo de sistema (`/salud`, formato de errores y el bloqueo de `/catalogos/enums` sin sesión), `core/dinero.py`, `core/tiempo.py` y toda la Fase 2 de autenticación (`tests/test_auth.py`: límite de intentos, cambio obligatorio, rotación y reutilización de refresh, CSRF, recuperación de un solo uso, inactividad y auditoría). En la batería, reCAPTCHA queda en modo local y el correo se imprime en consola, para no depender de servicios externos. `tests/conftest.py` apunta la aplicación a la base de pruebas, aplica las migraciones con `MIGRADOR_URL_TEST` y vacía las tablas entre pruebas (desactiva los disparadores inmutables, `TRUNCATE ... RESTART IDENTITY CASCADE` y los reactiva).
 
 El recorrido acumulado por fase, con la API corriendo:
 
 ```powershell
 python scripts/smoke.py --hasta 1
+python scripts/smoke.py --hasta 2      # requiere SMOKE_CORREO y SMOKE_PASSWORD de un admin ya cambiado
 ```
+
+La Fase 2 del smoke verifica el bloqueo sin sesión, login correcto y erróneo, `/auth/yo` con permisos, `/catalogos/enums` con sesión, rotación del refresh con CSRF y el cierre que revoca la familia.
 
 ## Notas de diseño
 

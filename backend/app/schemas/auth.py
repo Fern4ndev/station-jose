@@ -21,7 +21,7 @@ class SesionRespuesta(BaseModel):
     """Respuesta de login y de cambio de contraseña exitosos."""
 
     access_token: str
-    token_type: str = "Bearer"
+    token_type: str = "Bearer"  # noqa: S105 - el tipo de token se declara aquí
     expira_en: int
     must_change_password: bool
     usuario: UsuarioMinimo

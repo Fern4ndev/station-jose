@@ -8,8 +8,9 @@ tiene cambio obligatorio en TRUE, solo deja pasar `/auth/yo`,
 """
 
 import ipaddress
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 from urllib.parse import urlparse
 
@@ -18,6 +19,7 @@ from sqlalchemy import text
 
 from app.config import obtener_settings
 from app.core import seguridad, tiempo
+from app.core.permisos import PERMISOS_POR_ROL
 from app.db.sesion import SesionBd
 from app.errors import ErrorDominio
 from app.services import parametros
@@ -86,7 +88,7 @@ async def _usuario_de_peticion(request: Request, sesion: SesionBd) -> UsuarioAut
             WHERE u.id = CAST(:sub AS bigint)
             """
         ),
-        {"sub": claims["sub"], "ses": claims["ses"]},
+        {"sub": int(claims["sub"]), "ses": int(claims["ses"])},
     )
     fila = filas.mappings().first()
     if fila is None or fila["revocado_en"] is not None:
@@ -104,7 +106,9 @@ async def _usuario_de_peticion(request: Request, sesion: SesionBd) -> UsuarioAut
 
     # Un solo realce del seguimiento por access token emitido: si el token
     # es más nuevo que el último uso, la sesión avanza. En el resto de
-    # peticiones la comparación descarta la escritura.
+    # peticiones la comparación descarta la escritura. PyJWT entrega `iat`
+    # como epoch en segundos; la base compara timestamptz.
+    instante_del_token = datetime.fromtimestamp(int(claims["iat"]), tz=UTC)
     await sesion.execute(
         text(
             """
@@ -114,7 +118,7 @@ async def _usuario_de_peticion(request: Request, sesion: SesionBd) -> UsuarioAut
               AND (ultimo_uso_en IS NULL OR ultimo_uso_en < :iat)
             """
         ),
-        {"ses": claims["ses"], "iat": claims["iat"], "ahora": tiempo.ahora()},
+        {"ses": claims["ses"], "iat": instante_del_token, "ahora": tiempo.ahora()},
     )
     return UsuarioAutenticado(
         id=int(fila["id"]),
@@ -146,6 +150,29 @@ async def usuario_actual_autorizado(
                 "Debe cambiar su contraseña antes de continuar.",
             )
     return usuario
+
+
+def requiere_permiso(permiso: str) -> Callable:
+    """Fase 3: exige que el rol del usuario registrado tenga el permiso.
+
+    Se declara con `Depends(requiere_permiso("usuarios.gestionar"))`: además
+    del permiso aplica todo `UsuarioActual` (cambio obligatorio incluido).
+    """
+
+    async def comprobado(
+        # B008 intencional: es el patrón de dependencia anidada de FastAPI.
+        usuario: UsuarioAutenticado = Depends(usuario_actual_autorizado),  # noqa: B008
+    ) -> UsuarioAutenticado:
+        if permiso not in PERMISOS_POR_ROL.get(usuario.rol, frozenset()):
+            raise ErrorDominio(
+                403,
+                "SIN_PERMISO",
+                "No tiene permiso para esta acción.",
+                {"permiso": permiso},
+            )
+        return usuario
+
+    return comprobado
 
 
 async def proteccion_csrf(request: Request) -> None:

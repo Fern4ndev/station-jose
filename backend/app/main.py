@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from app.config import obtener_settings
 from app.db.sesion import motor
 from app.errors import registrar_manejadores
-from app.routers import catalogos, sistema
+from app.routers import auth, catalogos, sistema, usuarios
 
 ajustes = obtener_settings()
 
@@ -28,5 +28,7 @@ app = FastAPI(
 )
 
 app.include_router(sistema.router, prefix=ajustes.api_v1_prefix)
+app.include_router(auth.router, prefix=ajustes.api_v1_prefix)
 app.include_router(catalogos.router, prefix=ajustes.api_v1_prefix)
+app.include_router(usuarios.router, prefix=ajustes.api_v1_prefix)
 registrar_manejadores(app)

@@ -69,9 +69,34 @@ MIGRADOR_PRUEBAS = _config_env("MIGRADOR_URL_TEST")
 os.environ["DATABASE_URL"] = BASE_PRUEBAS
 os.environ["MIGRADOR_URL"] = MIGRADOR_PRUEBAS
 
+# La batería debe ser determinista y sin servicios externos: el verificador
+# de reCAPTCHA queda en modo local (rechaza solo los tokens de prueba
+# declarados) y el correo de recuperación se imprime en consola (P-08).
+os.environ["RECAPTCHA_SECRET_KEY"] = ""
+os.environ["SMTP_HOST"] = ""
+
 # Imports de la aplicación, después de fijar el entorno (pytest fixture setup).
 # El noqa es intencional: ruff excluye E402 para conftest vía per-file-ignores.
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
+
 from app.db import migrar as migraciones
+
+# pytest-asyncio 0.25 entrega un bucle por prueba; el pool del motor retiene
+# conexiones atadas al bucle que las usó por primera vez y la siguiente
+# prueba choca con 'Event loop is closed'. En pruebas, el motor usa NullPool
+# (conexión nueva por uso) y la fábrica se rehace para que los endpoints la
+# tomen del módulo reasignado.
+from app.db import sesion as sesion_bd
+
+motor_pruebas = create_async_engine(
+    BASE_PRUEBAS,
+    isolation_level="READ COMMITTED",
+    poolclass=NullPool,
+)
+sesion_bd.motor = motor_pruebas
+sesion_bd.FabricaSesiones = async_sessionmaker(motor_pruebas, expire_on_commit=False)
+
 from app.main import app as aplicacion
 
 

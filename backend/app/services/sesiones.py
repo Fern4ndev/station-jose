@@ -65,17 +65,18 @@ async def verificar_recaptcha(token: str, hostname_peticion: str | None) -> bool
     if not ajustes.recaptcha_secret_key:
         # Desarrollo/pruebas sin cuenta: falla solo si el uso envía un token
         # de fallo; cualquier otro token pasa como `texto_digital`.
-        if not token or token in TOKENS_REGISTRADOS_FALLO:
-            return False
-        return True
+        return bool(token) and token not in TOKENS_REGISTRADOS_FALLO
     cuerpo_verify = {
         "secret": ajustes.recaptcha_secret_key,
         "response": token,
     }
     try:
-        respuesta = await httpx.post(
-            "https://www.google.com/recaptcha/api/siteverify", data=cuerpo_verify
-        )
+        # Cliente propio para no bloquear el hilo de eventos (ASYNC210).
+        async with httpx.AsyncClient(timeout=10.0) as cliente:
+            respuesta = await cliente.post(
+                "https://www.google.com/recaptcha/api/siteverify",
+                data=cuerpo_verify,
+            )
     except httpx.HTTPError:
         return False
     if respuesta.status_code != 200:
@@ -173,8 +174,13 @@ async def emitir_sesion(
     debe_cambiar_password: bool,
     ip: str | None,
     user_agent: str | None,
+    familia_id: str | None = None,
 ) -> SesionEmitida:
-    """Crea una familia de refresh (login o cambio de contraseña)."""
+    """Crea una familia de refresh (login, rotación o cambio de contraseña).
+
+    En la rotación (`rotar_refresh`) se conserva la familia del token usado:
+    así, revocar la familia por reutilización alcanza a la sesión nueva.
+    """
     ajustes = obtener_settings()
     dias = max(
         1,
@@ -182,7 +188,7 @@ async def emitir_sesion(
     )
     ahora = tiempo.ahora()
     mismo_token = seguridad.generar_token_opaco()
-    familia = str(uuid.uuid4())
+    familia = familia_id or str(uuid.uuid4())
     filas = await sesion.execute(
         text(
             """
@@ -258,6 +264,7 @@ async def rotar_refresh(
         debe_cambiar_password=bool(fila["must_change_password"]),
         ip=ip,
         user_agent=user_agent,
+        familia_id=str(fila["familia_id"]),
     )
     await sesion.execute(
         text(

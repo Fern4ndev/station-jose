@@ -10,25 +10,13 @@ async def test_salud_responde_ok(cliente):
     assert datos["version"].startswith("PostgreSQL")
 
 
-async def test_catalogos_enums_devuelve_las_listas(cliente):
+async def test_catalogos_enums_protege_sin_sesion_y_exige_sesion(cliente):
+    """CAT-01/Fase 2: los catálogos requieren sesión (AUT-09); el formato es estándar."""
     respuesta = await cliente.get("/api/v1/catalogos/enums")
-    assert respuesta.status_code == 200
+    assert respuesta.status_code == 401
     datos = respuesta.json()
-
-    assert datos["roles"] == ["administrador", "oficina", "despachador"]
-    assert datos["modalidades_numeracion"] == ["general", "por_orden", "no_aplica"]
-    assert datos["estados_orden"] == ["borrador", "vigente", "cerrada", "anulada"]
-    assert datos["emisores_vale"] == ["estacion", "entidad"]
-    assert datos["estados_vale"] == ["activo", "agotado", "vencido", "anulado"]
-    assert datos["tipos_movimiento"] == [
-        "emision",
-        "consumo",
-        "anulacion",
-        "ajuste",
-        "reversion",
-    ]
-    assert "sesion" in datos["permisos"]
-    assert "usuarios.gestionar" in datos["permisos"]
+    assert datos["codigo"] == "TOKEN_INVALIDO"
+    # Las listas completas se cubren con sesión activa en tests/test_auth.py.
 
 
 async def test_ruta_inexistente_usa_el_formato_de_error_del_plan(cliente):

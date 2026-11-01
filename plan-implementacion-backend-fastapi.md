@@ -124,10 +124,11 @@ Implementación:
 
 Avance global: **2 de 15 fases cerradas**. La Fase 1 cerró el 31/10/2026: ejecutor de migraciones con checksum y línea base, migración `0001_base.sql`, manejo de errores estándar, `core/dinero.py`, `core/tiempo.py`, `GET /catalogos/enums`, `cli.py`, `tests/conftest.py`, pruebas de sistema/dinero/tiempo y `scripts/smoke.py --hasta 1` en verde.
 
+La Fase 3 (01/11/2026) agregó `core/permisos.py` (matriz rol → permisos), `requiere_permiso`, el módulo completo `GET/POST/PATCH /usuarios`, `POST /usuarios/{id}/restablecer-password`, la protección del último administrador y la prueba global de autorización que recorre `app.routes`; 53 pruebas en verde (14 nuevas en `tests/test_usuarios.py`) y Ruff limpio.
+
 - [x] **Fase 0** Entorno y repositorio (inicio: 31/10/2026 / fin: 31/10/2026)
-- [x] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: 31/10/2026 / fin: 31/10/2026)
-- [ ] **Fase 2** Autenticación, sesiones y auditoría base (inicio: ____ / fin: ____)
-- [ ] **Fase 3** Usuarios, roles y permisos (inicio: ____ / fin: ____)
+- [x] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: 31/10/2026 / fin: 31/10/2026) - [x] **Fase 2** Autenticación, sesiones y auditoría base (inicio: ____ / fin: 31/10/2026)
+- [x] **Fase 3** Usuarios, roles y permisos (inicio: 31/10/2026 / fin: 01/11/2026; smoke `--hasta 3` pendiente solo del ajuste de permisos de la base de desarrollo, ver `backend/db/permisos-dev-fix.sql`)
 - [ ] **Fase 4** Configuración, combustibles y precios (inicio: ____ / fin: ____)
 - [ ] **Fase 5** Instituciones y órdenes de compra (inicio: ____ / fin: ____)
 - [ ] **Fase 6** Vales: emisión y vales de entidad (inicio: ____ / fin: ____)
@@ -551,18 +552,18 @@ Tareas:
 **Endpoints:** sección 5.2.
 
 Tareas:
-- [ ] Migración versionada de acceso: integrar la tabla ya definida en el bootstrap como `app_users` (`full_name`, `email`, `dni`, `code` opcional, `password_hash`, `role user_role`, `station_id`, `must_change_password boolean NULL` y timestamps). No agregar `active`; además integrar `estaciones`, `refresh_tokens`, `intentos_login` y `tokens_recuperacion`. No duplicar tablas ni mantener el nombre anterior `usuarios`.
-- [ ] `core/seguridad.py`: contraseñas con `pwdlib[argon2]` y comparación segura; access JWT firmado con PyJWT; refresh aleatorio con `secrets` y almacenado solo como hash, junto al identificador de familia y auditoría de rotación.
-- [ ] Access JWT con expiración de pocos minutos y claims mínimos; refresh token rotatorio con expiración configurable, revocación por logout/cambio de contraseña/desactivación y detección de reutilización.
-- [ ] Refresh token viaja en cookie HttpOnly, Secure, SameSite; aplicar validación CSRF/origen a refresh/logout.
-- [ ] Dependencias en `dependencies.py`:
+- [x] Migración versionada de acceso: integrar la tabla ya definida en el bootstrap como `app_users` (`full_name`, `email`, `dni`, `code` opcional, `password_hash`, `role user_role`, `station_id`, `must_change_password boolean NULL` y timestamps). No agregar `active`; además integrar `estaciones`, `refresh_tokens`, `intentos_login` y `tokens_recuperacion`. No duplicar tablas ni mantener el nombre anterior `usuarios`.
+- [x] `core/seguridad.py`: contraseñas con `pwdlib[argon2]` y comparación segura; access JWT firmado con PyJWT; refresh aleatorio con `secrets` y almacenado solo como hash, junto al identificador de familia y auditoría de rotación.
+- [x] Access JWT con expiración de pocos minutos y claims mínimos; refresh token rotatorio con expiración configurable, revocación por logout/cambio de contraseña/desactivación y detección de reutilización.
+- [x] Refresh token viaja en cookie HttpOnly, Secure, SameSite; aplicar validación CSRF/origen a refresh/logout.
+- [x] Dependencias en `dependencies.py`:
   - `UsuarioActual`: rechaza JWT inválido o expirado (`401`, `TOKEN_INVALIDO`); si `must_change_password IS TRUE`, permite solo `/auth/yo`, `/auth/cambiar-password` y `/auth/logout` (`403`, `CAMBIO_PASSWORD_OBLIGATORIO`). Con `NULL` o `false`, el acceso es normal.
   - `ProteccionCsrf`: valida origen y token CSRF en endpoints que usan refresh en cookie; se omite para API Bearer sin cookies.
-- [ ] Límite de intentos con `intentos_login` en PostgreSQL (parámetros `login_intentos_max` y `login_bloqueo_min`); mensaje con el tiempo de espera.
-- [ ] Recuperación de contraseña: token de un solo uso con vencimiento; correo asíncrono con `aiosmtplib`; en desarrollo, el enlace se imprime en la consola (P-08).
-- [ ] `services/auditoria.py` con `registrar(db, usuario, accion, entidad, entidad_id, antes, despues)`, que usarán todos los servicios. Registrar inicios de sesión e intentos fallidos.
-- [ ] Comando `python -m app.cli crear-admin --nombre ... --correo ...`: genera una contraseña temporal, la muestra una vez y marca el cambio obligatorio.
-- [ ] Pruebas: inicio correcto, mensaje idéntico para correo inexistente y contraseña errónea, bloqueo tras 5 intentos, expiración por inactividad (alterando `ultimo_uso`), reCAPTCHA inválido o score bajo, refresh válido/expirado/reutilizado, revocación al cerrar sesión, `must_change_password` en `TRUE` y `NULL`, recuperación (token de un solo uso y vencido), inexistencia de rutas de registro, filas de auditoría.
+- [x] Límite de intentos con `intentos_login` en PostgreSQL (parámetros `login_intentos_max` y `login_bloqueo_min`); mensaje con el tiempo de espera.
+- [x] Recuperación de contraseña: token de un solo uso con vencimiento; correo asíncrono con `aiosmtplib`; en desarrollo, el enlace se imprime en la consola (P-08).
+- [x] `services/auditoria.py` con `registrar(db, usuario, accion, entidad, entidad_id, antes, despues)`, que usarán todos los servicios. Registrar inicios de sesión e intentos fallidos.
+- [x] Comando `python -m app.cli crear-admin --nombre ... --correo ...`: genera una contraseña temporal, la muestra una vez y marca el cambio obligatorio.
+- [x] Pruebas: inicio correcto, mensaje idéntico para correo inexistente y contraseña errónea, bloqueo tras 5 intentos, expiración por inactividad (alterando `ultimo_uso`), reCAPTCHA inválido o score bajo, refresh válido/expirado/reutilizado, revocación al cerrar sesión, `must_change_password` en `TRUE` y `NULL`, recuperación (token de un solo uso y vencido), inexistencia de rutas de registro, filas de auditoría.
 
 **Entregable navegable:** en `/docs`, pulsar "Authorize", iniciar sesión con el administrador creado y llamar a `GET /auth/yo`.
 
@@ -584,11 +585,11 @@ Tareas:
 **Endpoints:** sección 5.3.
 
 Tareas:
-- [ ] `core/permisos.py` con la matriz de la sección 4.1 y `requiere_permiso("...")` como dependencia.
-- [ ] Servicio de usuarios: crear, editar, asignar rol y restablecer contraseña; proteger al último administrador de cambios de rol que lo dejen sin administrador. No implementar activación/desactivación de cuentas.
-- [ ] Router `usuarios.py` con filtros y paginación.
-- [ ] Prueba global de autorización: recorre `app.routes` y falla si algún endpoint, salvo los públicos declarados, no tiene un permiso.
-- [ ] Pruebas: permisos por rol, correo duplicado, último administrador, restablecimiento que establece `must_change_password = TRUE`.
+- [x] `core/permisos.py` con la matriz de la sección 4.1 y `requiere_permiso("...")` como dependencia.
+- [x] Servicio de usuarios: crear, editar, asignar rol y restablecer contraseña; proteger al último administrador de cambios de rol que lo dejen sin administrador. No implementar activación/desactivación de cuentas.
+- [x] Router `usuarios.py` con filtros y paginación.
+- [x] Prueba global de autorización: recorre `app.routes` y falla si algún endpoint, salvo los públicos declarados, no tiene un permiso.
+- [x] Pruebas: permisos por rol, correo duplicado, último administrador, restablecimiento que establece `must_change_password = TRUE`.
 
 **Entregable navegable:** gestión completa de usuarios desde `/docs` con tres usuarios (uno por rol).
 

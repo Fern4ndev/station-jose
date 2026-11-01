@@ -5,7 +5,6 @@ Access JWT Bearer de vida corta + refresh rotatorio en cookie HttpOnly
 cookie para refresh y logout. No existe ninguna ruta de registro (AUT-03).
 """
 
-import uuid
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, Request
@@ -369,15 +368,16 @@ async def cambiar_password(
             WHERE id = :id
             """
         ),
-        {"hash": seguridad.hashear_password(peticion.password_nueva), "id": usuario.id, "ahora": ahora},
+        {
+            "hash": seguridad.hashear_password(peticion.password_nueva),
+            "id": usuario.id,
+            "ahora": ahora,
+        },
     )
     if usuario.familia_id:
-        # El cambio de contraseña invalida las familias activas (plan, sección 1).
+        # El cambio de contraseña invalida la familia actual (plan, sección 1).
         await sesiones.revocar_familia(sesion, familia_id=usuario.familia_id)
-    ajustes = obtener_settings()
-    dias_refresh = max(
-        1, await parametros.numero(sesion, "refresh_token_dias")
-    )
+    dias_refresh = max(1, await parametros.numero(sesion, "refresh_token_dias"))
     nueva = await sesiones.emitir_sesion(
         sesion,
         usuario_id=usuario.id,
