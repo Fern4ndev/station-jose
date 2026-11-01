@@ -79,7 +79,7 @@
 - **Correo de recuperación (P-08):** `aiosmtplib`.
 - **Excel (.xlsx):** `openpyxl` (RF-REP-07).
 - **PDF (vales, comprobantes y reportes):** `reportlab` para generar PDF en el backend.
-- **Código de barras del vale (RF-VAL-12):** el backend entrega el valor a codificar y Angular dibuja un código de barras Code 128 propio en SVG.
+- **Numeración de vales:** no se usa código de barras ni QR. Los vales de la estación conservan la numeración propia de San José; los vales de entidad conservan la numeración que les asigna cada institución. Para entidades con reinicio por orden, el número puede repetirse en órdenes distintas; para numeración general, es único por institución.
 - **Migraciones, CLI y configuración:** ejecutor propio, `argparse` y variables de entorno.
 
 **Decisiones de diseño con impacto en la exactitud de saldos:**
@@ -115,12 +115,14 @@ Documentación y diseño:
 Implementación:
 - [x] Repositorio creado
 - [x] Base de datos PostgreSQL creada y visible en pgAdmin 4
-- [ ] Servicio FastAPI levantado (Fase 1)
+- [x] Esquema inicial `backend/db/schema.sql` y seed de desarrollo `backend/db/seed.sql` con tablas, tipos enum y numeración de vales diferenciada
+- [x] Entry point FastAPI, configuración, sesión asíncrona y endpoint básico de salud (`/api/v1/salud`)
+- [ ] Servicio FastAPI levantado y verificado (Fase 1)
 - [x] RapidOCR instalado
 
 ### 2.2 Tablero de fases
 
-Avance global: **1 de 15 fases cerradas**
+Avance global: **1 de 15 fases cerradas**. La Fase 1 está en curso: ya existe el esqueleto mínimo de API y el SQL inicial; faltan ejecutor de migraciones, manejo de errores, CLI y verificaciones de fase.
 
 - [x] **Fase 0** Entorno y repositorio (inicio: 31/10/2026 / fin: 31/10/2026)
 - [ ] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: ____ / fin: ____)
@@ -241,6 +243,14 @@ backend/
     └── fixtures/                     # documentos mínimos sin datos reales
 ```
 
+**Implementado hasta ahora:** `pyproject.toml`, `.env.example`, `app/config.py`, `app/main.py`, `app/db/sesion.py`, `app/routers/sistema.py`, `db/schema.sql`, `db/seed.sql`, `scripts/crear_admin.py` y `scripts/verificar_entorno.py`. Los demás módulos del árbol representan trabajo pendiente, no funcionalidades terminadas.
+
+**Esquema inicial vigente:** las cuentas viven en `app_users` con los roles `administrador`, `oficina` y `despachador` (`user_role`). No hay columna `active` ni flujo para activar/desactivar cuentas. `must_change_password` admite `NULL`: solo `TRUE` obliga a cambiar la contraseña antes de usar los demás módulos; `FALSE` y `NULL` permiten el acceso normal. El seed asigna `NULL` a las tres cuentas de demo. `code` es un identificador opcional de la cuenta, por ejemplo un código interno de personal; no reemplaza el DNI ni el correo. No se almacena WhatsApp.
+
+Los vales se identifican solo por números, sin código de barras ni QR: `numero_estacion` guarda la numeración propia de la estación; `numero_entidad` guarda la numeración asignada por una institución. `clave_numeracion` garantiza unicidad general por institución o reinicio de numeración por orden de compra. El `id` de PostgreSQL se usa como identificador relacional interno y no se imprime como numeración del vale.
+
+`schema.sql` y `seed.sql` son scripts SQL directos, ejecutables desde pgAdmin o `psql`. `schema.sql` también ajusta una instalación previa de `app_users` quitando `active` y haciendo nullable `must_change_password`; no convierte otros esquemas heredados automáticamente. El seed incluye tres cuentas de demostración, una por rol, y datos vinculados a la cuenta de administrador. Antes de ejecutar, se deben reemplazar sus hashes Argon2id de ejemplo por hashes correspondientes a contraseñas conocidas.
+
 ---
 
 <a id="s4"></a>
@@ -291,7 +301,7 @@ Todas las rutas van bajo `/api/v1`. Formato de cada línea: **método y ruta** �
 - `POST /auth/login` · público · AUT-01, AUT-04 · recibe correo, contraseña y token reCAPTCHA v3; el backend verifica el token con Google, comprueba acción, hostname y score. Emite access JWT corto y refresh token opaco rotatorio.
 - `POST /auth/refresh` · refresh válido · AUT-10 · invalida el token usado y devuelve access JWT y refresh nuevo; reutilización revoca la familia.
 - `POST /auth/logout` · sesión autenticada · AUT-02 · revoca la familia de refresh tokens.
-- `GET /auth/yo` · access JWT válido · AUT-07, AUT-08, AUT-09 · devuelve usuario, rol, permisos e indicador de cambio obligatorio.
+- `GET /auth/yo` · access JWT válido · AUT-07, AUT-08, AUT-09 · devuelve usuario, rol, permisos e indicador de cambio obligatorio (normaliza `must_change_password IS TRUE` como `true`; `NULL` y `false` como `false`).
 - `POST /auth/recuperar` · público · AUT-05 · recibe `correo`; siempre responde con el mismo mensaje, exista o no el correo.
 - `POST /auth/restablecer` · público · AUT-05, AUT-06 · recibe `token` y `password_nueva`; el token es de un solo uso y vence.
 - `POST /auth/cambiar-password` · `sesion` (permitido aun con cambio obligatorio) · AUT-06, AUT-07 · recibe `password_actual` y `password_nueva` (mínimo 8 caracteres, distinta de la actual).
@@ -299,13 +309,11 @@ Todas las rutas van bajo `/api/v1`. Formato de cada línea: **método y ruta** �
 
 ### 5.3 Usuarios (M02)
 
-- `GET /usuarios` · `usuarios.gestionar` · USR-02 · filtros `q`, `rol`, `estado`, paginación.
+- `GET /usuarios` · `usuarios.gestionar` · USR-02 · filtros `q`, `rol`, paginación.
 - `POST /usuarios` · `usuarios.gestionar` · USR-01 · recibe `nombre`, `correo`, `rol`; devuelve la contraseña temporal una sola vez.
 - `GET /usuarios/{id}` · `usuarios.gestionar` · USR-02 · detalle.
 - `PATCH /usuarios/{id}` · `usuarios.gestionar` · USR-03, USR-04 · cambia `nombre`, `correo` o `rol`; protege al último administrador.
-- `POST /usuarios/{id}/desactivar` · `usuarios.gestionar` · USR-05, USR-07 · cierra sus sesiones.
-- `POST /usuarios/{id}/activar` · `usuarios.gestionar` · USR-05.
-- `POST /usuarios/{id}/restablecer-password` · `usuarios.gestionar` · USR-06 · devuelve una contraseña temporal una sola vez y marca el cambio obligatorio.
+- `POST /usuarios/{id}/restablecer-password` · `usuarios.gestionar` · USR-06 · devuelve una contraseña temporal una sola vez y establece `must_change_password = TRUE`.
 
 ### 5.4 Configuración (M12)
 
@@ -365,12 +373,12 @@ Todas las rutas van bajo `/api/v1`. Formato de cada línea: **método y ruta** �
 - `POST /ordenes/{orden_id}/vales/simulacion` · `vales.emitir` · VAL-01, VAL-03, CMB-04 · recibe `combustible_id` y las cantidades; devuelve el precio vigente, el valor en soles, el presupuesto restante y el máximo de galones emisibles. No guarda nada.
 - `POST /ordenes/{orden_id}/vales` · `vales.emitir` · VAL-01, VAL-02, VAL-03, VAL-04 · recibe `combustible_id`, `fecha_vencimiento` opcional y la lista de vales (cantidad de cada uno); emite todos o ninguno.
 - `POST /ordenes/{orden_id}/vales-entidad` · `vales.emitir` · VAL-05, VAL-15 · recibe `numero_entidad`, `combustible_id`, `cantidad` y `fecha_vencimiento` opcional; valida la unicidad según la modalidad de la institución y el rango de la serie.
-- `GET /vales` · `vales.ver` · VAL-06 · filtros `q` (código interno o número de la entidad), `institucion_id`, `orden_id`, `estado`, `combustible_id`, `emisor`, paginación.
+- `GET /vales` · `vales.ver` · VAL-06 · filtros `q` (número de estación o número de entidad), `institucion_id`, `orden_id`, `estado`, `combustible_id`, `emisor`, paginación.
 - `GET /vales/buscar` · `vales.ver` · QRY-01, CON-01, VAL-06 · parámetro `q`; devuelve hasta 8 candidatos con institución, orden, combustible, saldo y estado. Si el número coincide con varios vales, devuelve todos.
 - `GET /vales/alertas` · `vales.ver` · VAL-13 · vales con saldo bajo y próximos a vencer, según los parámetros.
-- `GET /vales/{id}` · `vales.ver` · VAL-07, VAL-08 · código interno, número de la entidad, orden, cantidad inicial, consumido, saldo, precio aplicado, valor en soles y estado (un vale vencido se reconoce como tal aunque el proceso diario no lo haya marcado).
+- `GET /vales/{id}` · `vales.ver` · VAL-07, VAL-08 · numeración de estación o de entidad, orden, cantidad inicial, consumido, saldo, precio aplicado, valor en soles y estado (un vale vencido se reconoce como tal aunque el proceso diario no lo haya marcado).
 - `GET /vales/{id}/movimientos` · `vales.ver` · CON-12 · línea de tiempo con cantidad, saldo posterior, usuario, fecha y motivo.
-- `POST /vales/{id}/impresion` · `vales.emitir` · VAL-12 · registra la impresión y devuelve los datos del vale y el valor para el código de barras; desde la segunda vez marca el vale como duplicado.
+- `POST /vales/{id}/impresion` · `vales.emitir` · VAL-12 · registra la impresión y devuelve los datos y números del vale; desde la segunda vez marca el vale como duplicado.
 - `POST /vales/{id}/anular` · `vales.anular` · VAL-10 · recibe `motivo`.
 - `POST /vales/{id}/ajustes` · `vales.ajustar` · VAL-11 · recibe `variacion` (con signo) y `motivo`; `409` con `AJUSTE_NEGATIVO` si el saldo quedaría negativo.
 - `POST /vales/vencimientos/procesar` · `config.gestionar` · VAL-09 · marca como vencidos los vales cuya fecha ya pasó, a demanda.
@@ -495,9 +503,9 @@ Tareas:
 **Requerimientos:** ninguno directo (base de todos).
 
 Tareas:
-- [ ] Crear la estructura de carpetas de la sección 3.2.
-- [ ] `config.py`: lectura de variables de entorno (`DATABASE_URL`, `MIGRADOR_URL`, `ENTORNO`, `OCR_DEVICE`, `ALMACENAMIENTO_DIR`, `FRONTEND_DIST`, `SMTP_*`, `JWT_SECRET_KEY`, `RECAPTCHA_SECRET_KEY`) con valores por defecto para desarrollo y sin secretos en el repositorio. Las URL usan el dialecto `postgresql+asyncpg://` (por ejemplo `postgresql+asyncpg://vales_app:clave@127.0.0.1:5432/vales_san_jose`).
-- [ ] `db/sesion.py`: motor de SQLAlchemy con `isolation_level="READ COMMITTED"` (el valor por defecto de PostgreSQL, declarado de forma explícita), `pool_pre_ping` y la dependencia `SesionBd` con `Annotated`.
+- [x] Crear la estructura base de carpetas de la sección 3.2; los módulos de dominio se completan en sus respectivas fases.
+- [x] `config.py`: configuración de entorno con Pydantic Settings, archivo `.env` local y secretos fuera del repositorio. Las URL usan `postgresql+asyncpg://`.
+- [x] `db/sesion.py`: motor de SQLAlchemy con `isolation_level="READ COMMITTED"`, `pool_pre_ping` y dependencia `SesionBd` con `Annotated`.
 - [ ] Ejecutor de migraciones (`db/migrar.py`):
   - tabla `schema_migrations` (versión, nombre, checksum, fecha);
   - archivos `NNNN_descripcion.sql` en orden; sentencias separadas por una línea `-- ---` (así los cuerpos de funciones y disparadores en PL/pgSQL, delimitados con `$$ ... $$`, pueden contener `;` sin romper el archivo);
@@ -505,10 +513,13 @@ Tareas:
   - se rechaza aplicar si un archivo ya aplicado cambió (checksum distinto);
   - usa `MIGRADOR_URL`; solo hacia adelante (la reversión se hace con respaldo);
   - comandos `python -m app.cli migrar estado`, `aplicar` y `nueva <nombre>`.
-- [ ] Migración `0001_base.sql`: `parametros` (clave, valor, actualizado_en) y `secuencias` (nombre, anio, ultimo), con claves primarias `bigint GENERATED ALWAYS AS IDENTITY` y marcas de tiempo `timestamptz`.
+- [x] Crear el bootstrap inicial `db/schema.sql` ejecutable desde pgAdmin/psql: tipos enum (`user_role`, tipos de institución, estados de orden/OCR/vale y movimientos), tablas y restricciones. `db/seed.sql` carga datos de demostración; todavía no sustituye al futuro ejecutor de migraciones numeradas.
+- [ ] Implementar el ejecutor propio de migraciones SQL numeradas y establecer cómo convertir el esquema inicial en la primera migración versionada sin duplicar el estado de una base.
+- [ ] Completar `parametros` y `secuencias` en el flujo versionado, con claves y marcas de tiempo definidas en este plan.
 - [ ] `errors.py`: `ErrorDominio(status, codigo, mensaje, detalles)`, manejador de errores de validación (422 con detalle por campo) y manejador general que nunca expone trazas.
 - [ ] `core/dinero.py` (Decimal, redondeo a 2 decimales con mitad hacia arriba) y `core/tiempo.py` (ahora en Lima con UTC-5 fijo, fecha local, rangos de hoy, semana, mes y mes anterior), con pruebas.
-- [ ] Enums del dominio y router `sistema.py` con `GET /salud` (consulta `SELECT 1` y la versión del servidor) y `GET /catalogos/enums`.
+- [x] Crear enums PostgreSQL del dominio y router `sistema.py` con `GET /salud` (consulta `SELECT 1` y versión del servidor).
+- [ ] Agregar `GET /catalogos/enums` y pruebas para el endpoint de salud.
 - [ ] `tests/conftest.py`: aplica las migraciones sobre `vales_san_jose_test` con `MIGRADOR_URL`; para limpiar entre pruebas, desactiva temporalmente los disparadores de inalterabilidad con `ALTER TABLE ... DISABLE TRIGGER USER`, ejecuta `TRUNCATE ... RESTART IDENTITY CASCADE` y los vuelve a habilitar; ofrece el cliente de pruebas conectado como `vales_app` cuando la prueba necesite comprobar permisos.
 - [ ] `scripts/smoke.py`: cliente HTTP que obtiene access JWT, rota refresh token y ejecuta comprobaciones numeradas hasta la fase indicada (`--hasta N`), con salida `OK` o `FALLA` y código de salida.
 - [ ] `cli.py` con `argparse` y el comando `migrar`.
@@ -536,24 +547,24 @@ Tareas:
 **Endpoints:** sección 5.2.
 
 Tareas:
-- [ ] Migración `0002_acceso.sql`: `usuarios` (nombre, correo con índice único sobre `lower(correo)` —PostgreSQL distingue mayúsculas—, `password_hash`, rol, `estacion_id` opcional, `activo` y `debe_cambiar_password` como `boolean`), `estaciones` (nombre, dirección, estado), `refresh_tokens` (hash, familia, usuario, expiración, rotación y revocación), `intentos_login` y `tokens_recuperacion` (hash, usuario, vencimiento, usado). Migración `0003_auditoria.sql`: `auditoria` (usuario, acción, entidad, entidad_id, antes y después como `jsonb`, fecha, ip como `inet`), con `GRANT SELECT, INSERT` únicamente para `vales_app` y sin `UPDATE`, `DELETE` ni `TRUNCATE`.
+- [ ] Migración versionada de acceso: integrar la tabla ya definida en el bootstrap como `app_users` (`full_name`, `email`, `dni`, `code` opcional, `password_hash`, `role user_role`, `station_id`, `must_change_password boolean NULL` y timestamps). No agregar `active`; además integrar `estaciones`, `refresh_tokens`, `intentos_login` y `tokens_recuperacion`. No duplicar tablas ni mantener el nombre anterior `usuarios`.
 - [ ] `core/seguridad.py`: contraseñas con `pwdlib[argon2]` y comparación segura; access JWT firmado con PyJWT; refresh aleatorio con `secrets` y almacenado solo como hash, junto al identificador de familia y auditoría de rotación.
 - [ ] Access JWT con expiración de pocos minutos y claims mínimos; refresh token rotatorio con expiración configurable, revocación por logout/cambio de contraseña/desactivación y detección de reutilización.
 - [ ] Refresh token viaja en cookie HttpOnly, Secure, SameSite; aplicar validación CSRF/origen a refresh/logout.
 - [ ] Dependencias en `dependencies.py`:
-  - `UsuarioActual`: rechaza JWT inválido o expirado (`401`, `TOKEN_INVALIDO`) y usuario inactivo; si `debe_cambiar_password` está activo, permite solo `/auth/yo`, `/auth/cambiar-password` y `/auth/logout` (`403`, `CAMBIO_PASSWORD_OBLIGATORIO`).
+  - `UsuarioActual`: rechaza JWT inválido o expirado (`401`, `TOKEN_INVALIDO`); si `must_change_password IS TRUE`, permite solo `/auth/yo`, `/auth/cambiar-password` y `/auth/logout` (`403`, `CAMBIO_PASSWORD_OBLIGATORIO`). Con `NULL` o `false`, el acceso es normal.
   - `ProteccionCsrf`: valida origen y token CSRF en endpoints que usan refresh en cookie; se omite para API Bearer sin cookies.
 - [ ] Límite de intentos con `intentos_login` en PostgreSQL (parámetros `login_intentos_max` y `login_bloqueo_min`); mensaje con el tiempo de espera.
 - [ ] Recuperación de contraseña: token de un solo uso con vencimiento; correo asíncrono con `aiosmtplib`; en desarrollo, el enlace se imprime en la consola (P-08).
 - [ ] `services/auditoria.py` con `registrar(db, usuario, accion, entidad, entidad_id, antes, despues)`, que usarán todos los servicios. Registrar inicios de sesión e intentos fallidos.
 - [ ] Comando `python -m app.cli crear-admin --nombre ... --correo ...`: genera una contraseña temporal, la muestra una vez y marca el cambio obligatorio.
-- [ ] Pruebas: inicio correcto, mensaje idéntico para correo inexistente y contraseña errónea, usuario inactivo, bloqueo tras 5 intentos, expiración por inactividad (alterando `ultimo_uso`), reCAPTCHA inválido o score bajo, refresh válido/expirado/reutilizado, revocación al cerrar sesión, cambio obligatorio, recuperación (token de un solo uso y vencido), inexistencia de rutas de registro, filas de auditoría.
+- [ ] Pruebas: inicio correcto, mensaje idéntico para correo inexistente y contraseña errónea, bloqueo tras 5 intentos, expiración por inactividad (alterando `ultimo_uso`), reCAPTCHA inválido o score bajo, refresh válido/expirado/reutilizado, revocación al cerrar sesión, `must_change_password` en `TRUE` y `NULL`, recuperación (token de un solo uso y vencido), inexistencia de rutas de registro, filas de auditoría.
 
 **Entregable navegable:** en `/docs`, pulsar "Authorize", iniciar sesión con el administrador creado y llamar a `GET /auth/yo`.
 
 **Verificación:**
 - `python -m app.cli crear-admin --nombre Admin --correo admin@ejemplo.pe` muestra la contraseña temporal.
-- En `/docs`: `POST /auth/login` con esa contraseña, luego `GET /auth/yo` devuelve `debe_cambiar_password: true`; cualquier otro endpoint responde `403`; tras `POST /auth/cambiar-password` el acceso se normaliza.
+- En `/docs`: probar una cuenta con `must_change_password = TRUE` (los endpoints quedan restringidos hasta el cambio) y otra con `NULL` (acceso normal).
 - `pytest tests/test_auth.py` en verde; `python scripts/smoke.py --hasta 2`.
 
 **Habilita en Angular:** pantallas de inicio de sesión, recuperación y cambio de contraseña; guarda de rutas; interceptor que lleva a la pantalla de ingreso ante un `401`; un interceptor de Authorization y renovación del access token mediante refresh.
@@ -570,15 +581,15 @@ Tareas:
 
 Tareas:
 - [ ] `core/permisos.py` con la matriz de la sección 4.1 y `requiere_permiso("...")` como dependencia.
-- [ ] Servicio de usuarios: crear (contraseña temporal mostrada una vez), editar, asignar rol, activar, desactivar (borra sus sesiones), restablecer contraseña y protección del último administrador activo.
+- [ ] Servicio de usuarios: crear, editar, asignar rol y restablecer contraseña; proteger al último administrador de cambios de rol que lo dejen sin administrador. No implementar activación/desactivación de cuentas.
 - [ ] Router `usuarios.py` con filtros y paginación.
 - [ ] Prueba global de autorización: recorre `app.routes` y falla si algún endpoint, salvo los públicos declarados, no tiene un permiso.
-- [ ] Pruebas: permisos por rol, correo duplicado, desactivación que cierra sesiones, último administrador, contraseña temporal que fuerza el cambio.
+- [ ] Pruebas: permisos por rol, correo duplicado, último administrador, restablecimiento que establece `must_change_password = TRUE`.
 
 **Entregable navegable:** gestión completa de usuarios desde `/docs` con tres usuarios (uno por rol).
 
 **Verificación:**
-- Con `smoke.py --hasta 3`: crea un operador, inicia sesión con él, obtiene `403` en `/usuarios`, lo desactiva como administrador y comprueba que su sesión deja de funcionar (`401`).
+- Con `smoke.py --hasta 3`: crea un operador, inicia sesión con él y obtiene `403` en `/usuarios`; valida permisos y protección del último administrador al cambiar roles.
 - `pytest tests/test_usuarios.py` en verde, incluida la prueba global de autorización.
 
 **Habilita en Angular:** menú según permisos, pantalla de gestión de usuarios y pantalla de acceso denegado.
@@ -595,7 +606,7 @@ Tareas:
 
 Tareas:
 - [ ] Migración `0004_catalogos.sql`: `estacion` (una fila), `combustibles`, `precios_combustible` (combustible, `precio_galon numeric(8,2)`, `vigente_desde`, usuario). `vales_app` sin `UPDATE`, `DELETE` ni `TRUNCATE` sobre `precios_combustible`.
-- [ ] `services/parametros.py`: definición en código de cada parámetro (tipo, valor por defecto, mínimo, máximo, descripción) y lectura directa de PostgreSQL en cada uso, para que el cambio rija sin reiniciar. Parámetros: `ocr_umbral_confianza` (0.80), `archivo_max_mb` (10), `vale_formato_codigo` (`VAL-{anio}-{secuencia:06d}`), `vale_vigencia_dias` (vacío), `vale_umbral_saldo_bajo_pct` (10), `vale_dias_aviso_vencimiento` (7), `sesion_inactividad_min` (60), `login_intentos_max` (5), `login_bloqueo_min` (15).
+- [ ] `services/parametros.py`: definición en código de cada parámetro (tipo, valor por defecto, mínimo, máximo, descripción) y lectura directa de PostgreSQL en cada uso, para que el cambio rija sin reiniciar. Parámetros: `ocr_umbral_confianza` (0.80), `archivo_max_mb` (10), `vale_formato_numeracion_estacion` (formato configurable para numeración propia de San José), `vale_vigencia_dias` (vacío), `vale_umbral_saldo_bajo_pct` (10), `vale_dias_aviso_vencimiento` (7), `sesion_inactividad_min` (60), `login_intentos_max` (5), `login_bloqueo_min` (15).
 - [ ] Servicio de precios: registrar (la fecha no puede ser anterior a la del último precio del combustible), precio vigente a una fecha (el último con vigencia menor o igual) y la función `calcular_valor(cantidad, precio)` de CMB-04.
 - [ ] Logo de la estación: validación por contenido (PNG o JPG), máximo 1 MB, almacenado en `almacenamiento/estacion/`.
 - [ ] Combustibles: crear, editar nombre, activar o desactivar; uno en uso no se elimina.
@@ -651,7 +662,7 @@ Tareas:
 
 Tareas:
 - [ ] Migración `0006_vales.sql`:
-  - `vales`: `codigo_interno` único, `numero_entidad`, `clave_numeracion` única, `orden_compra_id`, `emisor`, `combustible_id`, `cantidad_inicial`, `precio_galon_aplicado`, `valor_soles`, `valor_comprometido_soles`, `saldo` como `numeric(12,2)` con `CHECK (saldo >= 0)`, `estado`, `fecha_emision`, `fecha_vencimiento`, `veces_impreso`;
+  - `vales`: `numero_estacion` único para vales de San José, `numero_entidad` para vales emitidos por instituciones, `clave_numeracion` única según la modalidad institucional, `orden_compra_id`, `emisor`, `combustible_id`, `cantidad_inicial`, `precio_galon_aplicado`, `valor_soles`, `valor_comprometido_soles`, `saldo` como `numeric(12,2)` con `CHECK (saldo >= 0)`, `estado`, `fecha_emision`, `fecha_vencimiento`, `veces_impreso`; no existe un código interno impreso ni código de barras/QR.
   - `movimientos_vale`: vale, tipo, `variacion numeric(12,2)` con signo, `saldo_posterior numeric(12,2)`, usuario, motivo, placa, conductor, `token_operacion uuid` único, `movimiento_origen_id` único (para reversiones), `fecha_local date`, instante de creación `timestamptz`; `vales_app` con `GRANT SELECT, INSERT` únicamente.
 - [ ] Migración `0007_disparadores.sql` (ejecutada con `vales_migrador`): función en PL/pgSQL y disparadores `BEFORE UPDATE OR DELETE` (por fila) y `BEFORE TRUNCATE` (por sentencia) sobre `movimientos_vale` y `auditoria`, que rechazan el cambio incluso para el rol dueño. Modelo:
 
@@ -674,10 +685,10 @@ CREATE TRIGGER movimientos_vale_sin_truncate
 
 En PostgreSQL los disparadores se ejecutan también para el rol dueño, así que el control no depende del registro binario. El dueño de la tabla puede desactivarlos con `ALTER TABLE ... DISABLE TRIGGER` (por eso las pruebas de limpieza lo hacen de forma explícita) y un superusuario puede hacerlo con `session_replication_role`; ninguno de esos privilegios los tiene `vales_app`, que sigue limitado por los `GRANT`.
 
-- [ ] `services/numeracion.py`: código interno con el formato del parámetro, incrementando la fila de `secuencias` bajo `SELECT ... FOR UPDATE`.
+- [ ] `services/numeracion.py`: genera/asigna la numeración propia de la estación con el formato configurable, incrementando `secuencias` bajo `SELECT ... FOR UPDATE`. La numeración de entidad se conserva como la entrega cada institución.
 - [ ] Emisión: bajo bloqueo de la orden, toma el precio vigente, calcula `valor_soles`, comprueba que la suma de `valor_comprometido_soles` más lo nuevo no exceda el presupuesto y crea todos los vales y sus movimientos de emisión, o ninguno. Errores con el presupuesto restante y el máximo de galones. Simulación sin guardar.
-- [ ] Vales de entidad: arma `clave_numeracion` (`G-{institucion_id}-{numero}` o `O-{orden_id}-{numero}` según la modalidad), valida el rango de la serie de la orden, aplica las mismas reglas de saldo y presupuesto y recibe su código interno. El tratamiento del presupuesto sigue el supuesto de P-11.
-- [ ] Búsqueda (`GET /vales/buscar`) por código interno o número de la entidad, con todos los candidatos cuando hay coincidencias múltiples, y listado con filtros.
+- [ ] Vales de entidad: arma `clave_numeracion` (`institucion:{institucion_id}:{numero}` o `orden:{orden_id}:{numero}` según la modalidad), valida el rango de la serie de la orden, aplica las mismas reglas de saldo y presupuesto y conserva el número de entidad. El tratamiento del presupuesto sigue el supuesto de P-11.
+- [ ] Búsqueda (`GET /vales/buscar`) por número de estación o número de entidad, con todos los candidatos cuando hay coincidencias múltiples, y listado con filtros.
 - [ ] Alertas de saldo bajo y por vencer; datos de impresión con registro de la impresión y marca de duplicado.
 - [ ] Pruebas: presupuesto excedido, cambio de precio entre dos emisiones (cada vale conserva su precio), atomicidad (tres vales y el tercero falla: no queda ninguno), orden en borrador, cerrada o anulada, combustible sin precio, número de entidad repetido en la misma serie (rechazado) y en otra orden con numeración por orden (aceptado), número fuera de rango, serie agotada, búsqueda con varias coincidencias, y emisión simultánea de dos usuarios sobre la misma orden (el total nunca excede el presupuesto).
 
@@ -687,7 +698,7 @@ En PostgreSQL los disparadores se ejecutan también para el rol dueño, así que
 - Con `smoke.py --hasta 6`: simular una emisión, emitir 2 vales, intentar uno que excede el presupuesto (`409` con el máximo de galones), registrar un vale de entidad repetido en una institución con numeración general (`409`) y buscar por número de entidad.
 - `pytest tests/test_vales.py` en verde, incluida la prueba de emisión simultánea.
 
-**Habilita en Angular:** emisión con vista previa, registro de vales de entidad, listado, detalle, vista de impresión con código de barras, buscador global y alertas.
+**Habilita en Angular:** emisión con vista previa, registro de vales de entidad, listado, detalle, vista de impresión numerada, buscador global y alertas.
 
 ---
 
@@ -758,7 +769,7 @@ En PostgreSQL, `SELECT ... FOR UPDATE` dentro de `READ COMMITTED` espera al bloq
 
 **Verificación:**
 - `pytest tests/test_consumos.py` en verde.
-- `python scripts/probar_concurrencia.py --codigo VAL-2027-000001 --procesos 10 --cantidad 15` sobre un vale de 100 galones imprime: aceptados 6, rechazados 4, saldo final 10.00.
+- `python scripts/probar_concurrencia.py --numero-estacion 2027-000001 --procesos 10 --cantidad 15` sobre un vale de 100 galones imprime: aceptados 6, rechazados 4, saldo final 10.00.
 - Con `smoke.py --hasta 7`: consumir 30 de 100 (saldo 70), consumir 80 (`409`), reenviar el mismo `token_operacion` (un solo movimiento), revertir como administrador y anular un vale.
 
 **Habilita en Angular:** pantalla de despacho (con el `token_operacion` generado por pantalla), historial de movimientos y acciones del administrador (anular, ajustar, revertir).
@@ -973,7 +984,7 @@ Tareas:
 - [ ] Servidor Linux (por ejemplo Ubuntu) o Windows, con Python 3.11 o superior, PostgreSQL 16 o superior y RapidOCR (`rapidocr==3.10.0`). PostgreSQL se instala como servicio y arranca con el sistema; pgAdmin no es necesario en producción.
 - [ ] Copiar el backend, crear el entorno virtual, instalar las dependencias y colocar la compilación de Angular en `FRONTEND_DIST`.
 - [ ] `.env` de producción con permisos restringidos (`ENTORNO=produccion`, contraseñas de PostgreSQL, SMTP, claves privadas JWT, secretos reCAPTCHA y flags Secure/SameSite).
-- [ ] Aplicar las migraciones con `vales_migrador` y crear el administrador con `crear-admin`.
+- [ ] Aplicar las migraciones con `vales_migrador`; crear la cuenta inicial segura y no reutilizar usuarios ni hashes del seed de demostración.
 - [ ] Ejecutar `fastapi run --host 127.0.0.1 --port 8000` como servicio del sistema (systemd, o un servicio de Windows) con reinicio automático y un solo proceso (el límite de concurrencia del OCR es por proceso).
 - [ ] Proxy inverso (Nginx o IIS) con HTTPS (Let's Encrypt) hacia el puerto local; el tiempo de espera del proxy mayor que el máximo de lectura OCR.
 - [ ] Respaldos diarios: `pg_dump --format=custom --no-owner --file=...` (más `pg_dumpall --globals-only` para los roles) y copia de `almacenamiento/` (cifrando datos en tránsito y protegiendo el almacenamiento de documentos con permisos restringidos), con retención definida y script documentado. El mismo respaldo se puede lanzar desde pgAdmin (*Backup*), pero el script de `pg_dump` es el que queda versionado y programado.
@@ -1005,9 +1016,11 @@ Tareas:
 
 Para no frenar el desarrollo, cada punto abierto tiene un supuesto por defecto. Los de negocio conservan la numeración de la especificación de requerimientos (sección 8.2).
 
+Las decisiones confirmadas en este plan prevalecen sobre supuestos anteriores de los documentos de requerimientos: los vales se buscan e imprimen por numeración, sin código interno visible, código de barras ni QR.
+
 ### 7.1 De negocio
 
-- [ ] **P-01. Impresión de vales.** Supuesto: se imprimen con código de barras. *Afecta:* Fase 6.
+- [x] **P-01. Identificación impresa de vales.** Decisión confirmada: no llevan código de barras ni QR; se imprimen con su numeración (propia de San José o asignada por la entidad). *Afecta:* Fase 6.
 - [ ] **P-02. Vencimiento de vales.** Supuesto: la fecha de vencimiento es opcional. *Afecta:* Fases 6 y 7.
 - [ ] **P-03. Combustible del consumo.** Supuesto: debe coincidir con el del vale. *Afecta:* Fase 7.
 - [ ] **P-04. Anulación de órdenes con consumos.** Supuesto: no se permite; solo se cierran. *Afecta:* Fases 5 y 7.
@@ -1024,7 +1037,7 @@ Para no frenar el desarrollo, cada punto abierto tiene un supuesto por defecto. 
 
 - [ ] **T-01. Excel.** Supuesto: escritor propio de `.xlsx` con la biblioteca estándar. Si se permite `openpyxl`, se reemplaza detrás de la misma interfaz. *Afecta:* Fase 12.
 - [ ] **T-02. PDF.** Supuesto: el navegador imprime o guarda como PDF las vistas de Angular. Si se exige generarlo en el servidor, hay que sumar una librería. *Afecta:* Fases 6, 7 y 12.
-- [ ] **T-03. Código de barras.** Supuesto: Code 128 dibujado en SVG por Angular, sin librería (el requerimiento admite QR o barras). *Afecta:* Fase 6.
+- [x] **T-03. Código de barras/QR.** No se implementan; la búsqueda e impresión usan numeración de vales.
 - [ ] **T-04. Disparadores de PostgreSQL.** Se crean con PL/pgSQL y se ejecutan también para el rol dueño de la tabla; no dependen del registro binario. Si por alguna razón no se pudieran crear, el control de inalterabilidad se mantiene con los permisos de `vales_app` (sin `UPDATE`, `DELETE` ni `TRUNCATE`). *Afecta:* Fases 6 y 8.
 - [ ] **T-05. Versión de Node.js.** Se confirma con la que exija Angular 21 en el momento de crear el proyecto. *Afecta:* Fase 0.
 

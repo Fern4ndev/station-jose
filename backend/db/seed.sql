@@ -1,7 +1,7 @@
 -- Datos iniciales de demostración. No ejecutar en producción.
--- Antes de ejecutar, reemplaza el hash de ejemplo del INSERT del administrador
--- por un hash Argon2id generado para la contraseña que usarás. No guardes una
--- contraseña en texto plano en este archivo.
+-- Antes de ejecutar, reemplaza el hash Argon2id compartido por el mismo hash
+-- para los tres usuarios de demostración, o asigna un hash distinto a cada uno.
+-- No guardes contraseñas en texto plano en este archivo.
 --
 -- Se puede ejecutar desde pgAdmin o con psql.
 -- Es idempotente: no duplica estaciones, catálogos, órdenes, vales ni movimientos.
@@ -29,20 +29,31 @@ FROM (VALUES
 ) AS v(nombre, ruc, direccion, telefono, correo)
 WHERE NOT EXISTS (SELECT 1 FROM estaciones e WHERE lower(e.nombre) = lower(v.nombre));
 
--- Usuario inicial de desarrollo. La contraseña se entrega solo como hash por
--- variable de psql; los siguientes datos del seed quedan asociados a este admin.
-INSERT INTO app_users (role, dni, code, email, full_name, whatsapp,
-                       password_hash, must_change_password, station_id, active)
-SELECT 'administrador', NULL, NULL, 'admin@san-jose.local', 'Administrador de demostración', NULL,
-       '$argon2id$v=19$m=65536,t=3,p=4$Y83Nb/c+S4sUpDNl7+HSiQ$XPBBd5UN7GK+59zLDtUTjOMhy009pp3JDf/g5xazJ4k', TRUE, e.id, TRUE
-FROM estaciones e
+-- Cuentas de demostración: una por cada rol de la aplicación.
+-- Reemplaza el hash de ejemplo por uno que corresponda a una contraseña conocida.
+INSERT INTO app_users (role, dni, code, email, full_name,
+                       password_hash, must_change_password, station_id)
+SELECT v.role, v.dni, v.code, v.email, v.full_name, v.password_hash,
+       NULL, e.id
+FROM (VALUES
+    ('administrador'::user_role, '99900001', 'ADM-001', 'admin@san-jose.local', 'Administrador', '$argon2id$v=19$m=65536,t=3,p=4$Y83Nb/c+S4sUpDNl7+HSiQ$XPBBd5UN7GK+59zLDtUTjOMhy009pp3JDf/g5xazJ4k'),
+    ('oficina'::user_role,       '99900002', 'OFI-001', 'oficina@san-jose.local', 'Oficina', '$argon2id$v=19$m=65536,t=3,p=4$Y83Nb/c+S4sUpDNl7+HSiQ$XPBBd5UN7GK+59zLDtUTjOMhy009pp3JDf/g5xazJ4k'),
+    ('despachador'::user_role,   '99900003', 'DES-001', 'despachador@san-jose.local', 'Despachador', '$argon2id$v=19$m=65536,t=3,p=4$Y83Nb/c+S4sUpDNl7+HSiQ$XPBBd5UN7GK+59zLDtUTjOMhy009pp3JDf/g5xazJ4k')
+) AS v(role, dni, code, email, full_name, password_hash)
+CROSS JOIN estaciones e
 WHERE e.nombre = 'San José - Abancay'
 ON CONFLICT DO NOTHING;
 
+-- Repetir el seed deja estas cuentas en su estado de demostración inicial.
+UPDATE app_users
+SET must_change_password = NULL
+WHERE email IN ('admin@san-jose.local', 'oficina@san-jose.local', 'despachador@san-jose.local');
+
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM app_users WHERE role = 'administrador' AND active) THEN
-        RAISE EXCEPTION 'No se pudo crear ni encontrar un administrador activo. Revisa el hash Argon2id del INSERT inicial.';
+    IF (SELECT count(DISTINCT role) FROM app_users
+        WHERE role IN ('administrador', 'oficina', 'despachador')) < 3 THEN
+        RAISE EXCEPTION 'Falta una cuenta de demostración para uno o más roles. Revisa conflictos de email/DNI/código en app_users.';
     END IF;
 END;
 $$;
@@ -78,7 +89,7 @@ FROM (VALUES
 ) AS v(combustible, precio, vigente_desde)
 JOIN combustibles c ON c.nombre = v.combustible
 CROSS JOIN LATERAL (
-    SELECT id FROM app_users WHERE role = 'administrador' AND active ORDER BY id LIMIT 1
+    SELECT id FROM app_users WHERE role = 'administrador' ORDER BY id LIMIT 1
 ) u
 ON CONFLICT (combustible_id, vigente_desde) DO NOTHING;
 
@@ -112,7 +123,7 @@ FROM (VALUES
 JOIN instituciones i ON i.ruc = v.ruc
 LEFT JOIN combustibles c ON c.nombre = v.combustible
 CROSS JOIN LATERAL (
-    SELECT id FROM app_users WHERE role = 'administrador' AND active ORDER BY id LIMIT 1
+    SELECT id FROM app_users WHERE role = 'administrador' ORDER BY id LIMIT 1
 ) u
 ON CONFLICT (institucion_id, anio, numero) DO NOTHING;
 
@@ -127,7 +138,7 @@ DECLARE
     gasohol_id bigint;
     vale_actual_id bigint;
 BEGIN
-    SELECT id INTO admin_id FROM app_users WHERE role = 'administrador' AND active ORDER BY id LIMIT 1;
+    SELECT id INTO admin_id FROM app_users WHERE role = 'administrador' ORDER BY id LIMIT 1;
     SELECT id INTO estacion_abancay_id FROM estaciones WHERE nombre = 'San José - Abancay';
     SELECT id INTO estacion_tamburco_id FROM estaciones WHERE nombre = 'San José - Tamburco';
     SELECT id INTO diesel_id FROM combustibles WHERE nombre = 'Diésel B5';
@@ -227,7 +238,7 @@ BEGIN
     END IF;
 
     INSERT INTO secuencias (nombre, anio, ultimo)
-    VALUES ('vale', 2026, 3)
+    VALUES ('vale', 2026, 2)
     ON CONFLICT (nombre, anio) DO UPDATE
        SET ultimo = GREATEST(secuencias.ultimo, EXCLUDED.ultimo);
 END;

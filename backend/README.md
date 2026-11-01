@@ -112,7 +112,7 @@ La estructura y los datos iniciales se aplican con `psql` y el rol `vales_migrad
 psql "postgresql://vales_migrador:CLAVE@127.0.0.1:5432/vales_san_jose" -v ON_ERROR_STOP=1 -f backend/db/schema.sql
 ```
 
-`db/schema.sql` crea los enums de dominio y la tabla `app_users`. `db/seed.sql` es solo para desarrollo y no necesita un usuario creado previamente: inserta un administrador inicial con un hash Argon2id. Antes de ejecutarlo, reemplaza el hash de ejemplo por uno generado para la contraseña deseada. Puedes ejecutar el archivo completo en pgAdmin o con `psql`:
+`db/schema.sql` crea los enums de dominio y la tabla `app_users`. `db/seed.sql` es solo para desarrollo y no necesita usuarios creados previamente: inserta un administrador, un usuario de oficina y un despachador. Antes de ejecutarlo, reemplaza los hashes Argon2id de ejemplo por hashes de contraseñas conocidas. Las tres cuentas están marcadas para cambiar la contraseña en el primer inicio de sesión. Puedes ejecutar el archivo completo en pgAdmin o con `psql`:
 
 ```powershell
 psql "postgresql://vales_migrador:CLAVE@127.0.0.1:5432/vales_san_jose" -v ON_ERROR_STOP=1 -f backend/db/seed.sql
@@ -120,7 +120,9 @@ psql "postgresql://vales_migrador:CLAVE@127.0.0.1:5432/vales_san_jose" -v ON_ERR
 
 Los vales se identifican por numeración: `numero_estacion` para los emitidos por San José y `numero_entidad` para los emitidos por una institución. En las entidades, `clave_numeracion` aplica unicidad por institución (numeración general) o por orden de compra (numeración que se reinicia en cada orden).
 
-El SQL de `schema.sql` define el esquema inicial; no convierte automáticamente una base creada con la estructura anterior. Para una base existente hace falta una migración de datos antes de usar esta versión.
+En `app_users`, no hay columna `active`. `must_change_password` admite `NULL`: solo `TRUE` obliga a cambiar una contraseña al ingresar; `FALSE` o `NULL` no fuerzan el cambio. Las cuentas del seed reciben `NULL`. `code` es un identificador opcional de la cuenta (por ejemplo, un código interno de personal), distinto del DNI y del correo; el seed usa códigos de demostración únicos.
+
+El SQL de `schema.sql` define el esquema inicial y actualiza una instalación previa de `app_users` quitando `active` y permitiendo `NULL` en `must_change_password`. No convierte otros esquemas heredados automáticamente; para esos casos hace falta una migración de datos.
 
 Además, la Fase 1 del plan agrega el ejecutor de migraciones numeradas (`app/db/migraciones/`), que se usa con `python -m app.cli migrar aplicar` y `python -m app.cli migrar estado`.
 

@@ -47,12 +47,10 @@ CREATE TABLE IF NOT EXISTS app_users (
     email                   text NOT NULL,
     dni                     varchar(8),
     code                    text,
-    whatsapp                text,
     password_hash           text NOT NULL,
     role                    user_role NOT NULL,
     station_id              bigint REFERENCES estaciones(id) ON DELETE RESTRICT,
-    active                  boolean NOT NULL DEFAULT true,
-    must_change_password    boolean NOT NULL DEFAULT true,
+    must_change_password    boolean,
     password_cambiado_en    timestamptz,
     ultimo_acceso_en        timestamptz,
     creado_en               timestamptz NOT NULL DEFAULT now(),
@@ -62,10 +60,16 @@ CREATE TABLE IF NOT EXISTS app_users (
     CONSTRAINT app_users_password_argon2id CHECK (password_hash LIKE '$argon2id$%'),
     CONSTRAINT app_users_dni_valido CHECK (dni IS NULL OR dni ~ '^[0-9]{8}$')
 );
+-- Ajusta instalaciones de desarrollo creadas con una versión previa de este
+-- bootstrap: el acceso ya no depende de una columna active y el indicador de
+-- cambio de contraseña queda nullable.
+ALTER TABLE app_users DROP COLUMN IF EXISTS active;
+ALTER TABLE app_users ALTER COLUMN must_change_password DROP NOT NULL;
+ALTER TABLE app_users ALTER COLUMN must_change_password DROP DEFAULT;
 CREATE UNIQUE INDEX IF NOT EXISTS ux_app_users_email_lower ON app_users (lower(email));
 CREATE UNIQUE INDEX IF NOT EXISTS ux_app_users_dni ON app_users (dni) WHERE dni IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS ux_app_users_code ON app_users (code) WHERE code IS NOT NULL;
-CREATE INDEX IF NOT EXISTS ix_app_users_role_active ON app_users (role, active);
+CREATE INDEX IF NOT EXISTS ix_app_users_role ON app_users (role);
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
     id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

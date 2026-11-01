@@ -62,7 +62,7 @@
 - **Diálogos con `p-dialog` de PrimeNG**: aporta trampa de foco, cierre con Escape, bloqueo del fondo y API declarativa sin código propio. El diálogo de motivo obligatorio (anular, ajustar, revertir) se construye sobre él.
 - **Gráficos con `p-chart` (PrimeNG sobre `chart.js`)** para barras y líneas, **siempre** acompañados de una tabla equivalente en un `<details>`: un `canvas` por sí solo no es accesible para lectores de pantalla, y el requisito de accesibilidad no se delega a la librería.
 - **PDF por impresión del navegador:** el backend entrega datos en JSON; Angular los muestra en vistas preparadas para imprimir (`@media print`) y el usuario imprime o usa "Guardar como PDF".
-- **Código de barras Code 128 propio en SVG** para el vale (RF-VAL-12), probado con vectores del estándar y con un lector real.
+- La impresión y búsqueda de vales usan su numeración de estación o entidad; no se dibujan códigos de barras ni QR.
 - **Iconografía con `iconify-icon`** (`<iconify-icon icon="...">`) para los iconos propios de la interfaz; `primeicons` queda solo donde PrimeNG lo usa internamente. Para que producción no dependa de la API pública de Iconify, los iconos que se usen se registran desde paquetes locales de `@iconify-json/*` en el arranque de la aplicación.
 - **Estilos con Tailwind 4 para la maquetación** (rejillas, espaciado, utilidades) y el sistema de temas de PrimeNG para los componentes. El orden de capas se declara con `theme.options.cssLayer` en `providePrimeNG` (`{ name: 'primeng', order: 'theme, base, primeng' }`), que es el mecanismo oficial de interoperabilidad con Tailwind 4: así el *preflight* no pisa los estilos de PrimeNG.
 - **Dinero sin `float`:** los montos llegan como cadenas decimales. El cliente nunca suma ni redondea montos; solo los muestra y hace comprobaciones informativas con enteros (`bigint`). La regla definitiva siempre la aplica el backend.
@@ -237,15 +237,15 @@ Los permisos llegan en `GET /auth/yo` (`sesion`, `usuarios.gestionar`, `ordenes.
 
 El catálogo de endpoints del backend define las pantallas; la cobertura se confirmará al actualizar el contrato OpenAPI. Faltan estas piezas de apoyo, que deben existir en la fase indicada para poder verificar los bloques del frontend con datos reales:
 
-- [ ] **G1. Datos de demostración completos** (Fases 4 a 7): `python -m app.cli sembrar-demo` debe crear, además de los catálogos, tres usuarios (administrador, Oficina y Despachador) con la contraseña conocida de demostración y sin cambio obligatorio (solo con `ENTORNO=desarrollo`), instituciones con las dos modalidades de numeración, órdenes en distintos estados, vales de la estación y de entidad, y consumos.
+- [ ] **G1. Datos de demostración completos** (Fases 4 a 7): `backend/db/seed.sql` debe crear, además de los catálogos, tres usuarios (administrador, Oficina y Despachador) con `must_change_password = NULL`, instituciones con las dos modalidades de numeración, órdenes en distintos estados, vales de la estación y de entidad, y consumos. Los hashes Argon2id del seed se reemplazan por hashes de contraseñas conocidas antes de ejecutarlo.
 - [ ] **G2. Exportar el contrato desde la Fase 1:** `python -m app.cli exportar-openapi` escribe `backend/openapi.json`; se copia a `contrato/` (raíz del repositorio) al cerrar cada fase del backend (hoy el plan lo guarda recién en la Fase 13).
 - [ ] **G3. Campos mínimos en las respuestas**, para no encadenar peticiones por cada fila:
   - listado de instituciones y búsquedas: `modalidad_numeracion`;
   - listado y detalle de órdenes: nombre y RUC de la institución;
-  - listados y detalle de vales: código interno, número de la entidad, nombre de la institución, número de la orden, combustible, saldo y estado;
+  - listados y detalle de vales: número de estación o número de entidad, nombre de la institución, número de la orden, combustible, saldo y estado;
   - movimientos de vale: nombre del usuario;
-  - detalle de orden: lista resumida de vales (código, cantidad, saldo, estado);
-  - `POST /vales/{id}/impresion`: `es_duplicado` y el valor para el código de barras.
+  - detalle de orden: lista resumida de vales (numeración, cantidad, saldo, estado);
+- `POST /vales/{id}/impresion`: `es_duplicado` y los datos numerados del vale.
 - [ ] **G4. Errores con `detalles` útiles:** `SALDO_INSUFICIENTE` incluye `saldo`; `PRESUPUESTO_EXCEDIDO` incluye `presupuesto_restante` y `maximo_galones`; `CUENTA_BLOQUEADA` incluye los minutos de espera; `NUMERO_FUERA_DE_SERIE` incluye el rango; `ORDEN_POSIBLE_DUPLICADA` incluye el identificador y el número de la orden coincidente.
 - [ ] **G5. Registro de extracción fallida confirmable:** `POST /ocr/extracciones/{id}/confirmar` debe aceptar una extracción en estado `fallida` (registro manual con el archivo ya subido), según RF-OCR-09.
 
@@ -282,7 +282,7 @@ El catálogo de endpoints del backend define las pantallas; la cobertura se conf
 - Diseño adaptable (360, 768 y 1280 píxeles de ancho como mínimo).
 
 **Pruebas (Vitest, con `ng test`):**
-- Unitarias de funciones puras (dinero, fechas, código de barras, utilidades).
+- Unitarias de funciones puras (dinero, fechas, utilidades).
 - De componentes y servicios con `HttpTestingController`, usando respuestas con la misma forma que el contrato.
 - De contrato: todo endpoint del registro existe en `contrato/openapi.json` con el mismo método.
 
@@ -388,7 +388,7 @@ Tareas:
 
 ### Bloque 2. Acceso y estructura de la aplicación
 
-**Objetivo:** inicio y cierre de sesión, cambio obligatorio de contraseña, expiración por inactividad y la estructura de la aplicación con menú por permisos.
+**Objetivo:** inicio y cierre de sesión, cambio condicional de contraseña, expiración por inactividad y la estructura de la aplicación con menú por permisos.
 **Requiere backend:** Fase 2.
 **Requerimientos:** AUT-01 a AUT-10.
 **Rutas:** `/ingresar`, `/recuperar`, `/restablecer/:token`, `/cambiar-password`, `/acceso-denegado`, `/panel` (provisional).
@@ -396,13 +396,13 @@ Tareas:
 **Endpoints que consume:**
 - `POST /auth/login`: inicio de sesión.
 - `POST /auth/logout`: cierre de sesión.
-- `GET /auth/yo`: usuario actual, rol, permisos e indicador de cambio obligatorio.
+- `GET /auth/yo`: usuario actual, rol, permisos e indicador booleano de cambio obligatorio (`true` solo cuando `must_change_password` es `TRUE`).
 - `POST /auth/recuperar`: solicitud de enlace de recuperación.
 - `POST /auth/restablecer`: contraseña nueva con el token.
 - `POST /auth/cambiar-password`: cambio de contraseña.
 
 Tareas:
-- [ ] `AuthStore` con señales (`usuario`, `permisos`, `autenticado`, `debeCambiarPassword`) y `puede(permiso)`; carga inicial con `provideAppInitializer` que llama a `GET /auth/yo` (un `401` significa "sin sesión", no un error).
+- [ ] `AuthStore` con señales (`usuario`, `permisos`, `autenticado`, `debeCambiarPassword`) y `puede(permiso)`; interpreta `must_change_password = TRUE` como obligatorio y `NULL`/`FALSE` como no obligatorio. Carga inicial con `provideAppInitializer` que llama a `GET /auth/yo` (un `401` significa "sin sesión", no un error).
 - [ ] Guardas funcionales: `autenticadoGuard` (lleva a `/ingresar?retorno=...`), `permisoGuard(permiso)` (lleva a `/acceso-denegado`) y `cambioPasswordGuard` (lleva a `/cambiar-password` mientras sea obligatorio).
 - [ ] Interceptor de sesión: ante un `401` con `SESION_EXPIRADA`, guarda la ruta actual, limpia el estado y lleva a `/ingresar` con el aviso "Su sesión expiró"; tras volver a ingresar, regresa a la pantalla en la que estaba. Ante un `403` con `CAMBIO_PASSWORD_OBLIGATORIO`, lleva a `/cambiar-password`.
 - [ ] Pantalla de ingreso: correo y contraseña con los atributos `autocomplete` para gestores de contraseñas; mensaje genérico ante credenciales inválidas; mensaje con el tiempo de espera ante `CUENTA_BLOQUEADA`.
@@ -439,24 +439,22 @@ Tareas:
 - `POST /usuarios`: alta; devuelve la contraseña temporal una sola vez.
 - `GET /usuarios/{id}`: detalle para edición.
 - `PATCH /usuarios/{id}`: cambio de nombre, correo o rol.
-- `POST /usuarios/{id}/desactivar`: bloqueo del acceso.
-- `POST /usuarios/{id}/activar`: reactivación.
 - `POST /usuarios/{id}/restablecer-password`: contraseña temporal nueva.
 
 Tareas:
-- [ ] Listado con búsqueda por nombre o correo, filtros por rol y estado (en la URL) y paginación.
+- [ ] Listado con búsqueda por nombre o correo, filtro por rol (en la URL) y paginación.
 - [ ] Diálogo de alta y edición (nombre, correo, rol desde `CatalogosStore`) con errores `422` junto al campo.
 - [ ] Diálogo que muestra la contraseña temporal **una sola vez**, con botón de copiar y advertencia de que no se podrá ver de nuevo.
-- [ ] Acciones de activar, desactivar y restablecer contraseña, con confirmación.
-- [ ] Mensaje explicativo ante `ULTIMO_ADMINISTRADOR`; el usuario actual no puede desactivarse a sí mismo desde la interfaz.
-- [ ] Pruebas de componentes: alta, correo duplicado, cambio de rol, desactivación, contraseña temporal visible una sola vez.
+- [ ] Acción de restablecer contraseña, con confirmación.
+- [ ] Mensaje explicativo ante `ULTIMO_ADMINISTRADOR` al intentar cambiar el rol del último administrador.
+- [ ] Pruebas de componentes: alta, correo duplicado, cambio de rol, restablecimiento de contraseña temporal visible una sola vez.
 
 **Entregable navegable:** `/usuarios` con usuarios reales.
 
 **Verificación:**
 - Crear un usuario Despachador y copiar su contraseña temporal; iniciar sesión con él en una ventana privada: el menú no muestra opciones de administración y `/usuarios` lleva a acceso denegado.
-- Desactivar a ese usuario Despachador desde el administrador: su siguiente acción lo lleva a `/ingresar`.
-- Intentar desactivar al único administrador: se ve el mensaje del backend.
+- Restablecer la contraseña de una cuenta: el siguiente ingreso obliga a cambiarla.
+- Intentar cambiar el rol del único administrador: se ve el mensaje del backend.
 - `ng test` en verde.
 
 ---
@@ -607,20 +605,19 @@ Tareas:
 - [ ] Vista previa en vivo con `POST .../vales/simulacion` (con retardo y cancelando la petición anterior): precio vigente, valor en soles, presupuesto restante y máximo de galones emisibles. Mensaje para `SIN_PRECIO_VIGENTE` (con enlace al catálogo de precios si el usuario es administrador) y para `PRESUPUESTO_EXCEDIDO` (con los valores de `detalles`).
 - [ ] Resumen antes de confirmar ("3 vales de 100 galones") y emisión con `POST .../vales`; la operación es atómica, de modo que ante un error no se muestra ningún vale como emitido.
 - [ ] Pantalla de vale de entidad: número de la entidad, combustible, cantidad y vencimiento; panel de serie (`GET /ordenes/{id}/serie` del Bloque 6) con números usados y disponibles; mensajes para `NUMERO_ENTIDAD_DUPLICADO`, `NUMERO_FUERA_DE_SERIE` y `SERIE_AGOTADA`.
-- [ ] Listado de vales: búsqueda por código interno o número de la entidad, filtros por institución, orden, estado, combustible y emisor (en la URL), paginación, y una franja de alertas (`GET /vales/alertas`) con enlace al listado filtrado.
-- [ ] Detalle del vale: código interno, número de la entidad, orden, cantidad inicial, consumido, saldo, precio aplicado, valor en soles y estado; línea de tiempo de movimientos (`GET /vales/{id}/movimientos`) con cantidad, saldo posterior, usuario, fecha y motivo.
-- [ ] Componente `CodigoBarras128`: codificación Code 128 (conjunto B) y dibujo en SVG, con su suma de verificación; pruebas con vectores del estándar.
-- [ ] Vista de impresión `/imprimir/vale/:id` con el encabezado de la estación (datos y logo), los datos del vale y el código de barras; el botón "Imprimir" llama a `POST /vales/{id}/impresion` (registra la impresión) y luego a `window.print()`; si el vale ya se imprimió, se muestra la marca de duplicado.
+- [ ] Listado de vales: búsqueda por número de estación o número de entidad, filtros por institución, orden, estado, combustible y emisor (en la URL), paginación, y una franja de alertas (`GET /vales/alertas`) con enlace al listado filtrado.
+- [ ] Detalle del vale: número de estación o número de entidad, orden, cantidad inicial, consumido, saldo, precio aplicado, valor en soles y estado; línea de tiempo de movimientos (`GET /vales/{id}/movimientos`) con cantidad, saldo posterior, usuario, fecha y motivo.
+- [ ] Vista de impresión `/imprimir/vale/:id` con el encabezado de la estación (datos y logo) y la numeración del vale; el botón "Imprimir" llama a `POST /vales/{id}/impresion` (registra la impresión) y luego a `window.print()`; si el vale ya se imprimió, se muestra la marca de duplicado.
 - [ ] Reglas de impresión (`@media print`): sin menú ni botones, tamaño de página y márgenes definidos.
-- [ ] Pruebas: simulación y errores, emisión múltiple, número repetido, serie agotada, codificación Code 128, marca de duplicado.
+- [ ] Pruebas: simulación y errores, emisión múltiple, número repetido, serie agotada, numeración impresa y marca de duplicado.
 
 **Entregable navegable:** emitir vales de una orden, registrar vales de entidad, listarlos, ver su historial e imprimirlos.
 
 **Verificación:**
 - Con una orden vigente: simular una emisión y ver precio, valor y presupuesto restante; emitir 2 vales; intentar uno que exceda el presupuesto y ver el máximo de galones del backend.
 - Registrar un vale de entidad con un número repetido en una institución con numeración general: aparece el rechazo; el mismo número en otra orden con numeración por orden se acepta.
-- Abrir un vale, ver su línea de tiempo con la emisión, e imprimirlo: el código de barras se lee con un lector o con la cámara de un teléfono y devuelve el código interno; la segunda impresión muestra la marca de duplicado.
-- `ng test` en verde (incluida la codificación del código de barras).
+- Abrir un vale, ver su línea de tiempo con la emisión e imprimirlo con su numeración; la segunda impresión muestra la marca de duplicado.
+- `ng test` en verde, incluidas las vistas de numeración e impresión.
 
 ---
 
@@ -643,7 +640,7 @@ Tareas:
 - `POST /vales/vencimientos/procesar`: marcar vales vencidos a demanda.
 
 Tareas:
-- [ ] Pantalla `/despacho`: campo de código con foco automático, compatible con un lector de código de barras que escribe como teclado (Enter lanza la búsqueda con `GET /vales/buscar`). Si hay un solo resultado, se elige solo; si hay varios, lista de candidatos (institución, orden y combustible) navegable con el teclado.
+- [ ] Pantalla `/despacho`: campo de número de vale con foco automático; Enter lanza la búsqueda con `GET /vales/buscar`. Si hay un solo resultado, se elige solo; si hay varios, lista de candidatos (institución, orden y combustible) navegable con el teclado.
 - [ ] Tarjeta del vale elegido con institución, orden, combustible y **saldo actual** en grande; si el vale no es consumible (agotado, anulado o vencido) se muestra el motivo y el formulario queda deshabilitado.
 - [ ] Formulario de consumo: selector de unidad (soles o galones), importe/cantidad (`CampoCantidad`), muestra la conversión y precio del vale, placa, conductor y observación (opcionales; obligatoriedad según P-06). Comprobación informativa contra el saldo con aritmética de enteros (`bigint`), sin sustituir la validación del backend.
 - [ ] **Token de operación:** se genera un UUID al elegir el vale y se reutiliza en cualquier reintento tras una falla de red o un tiempo agotado (el backend devuelve el movimiento original si ya se registró). Solo se renueva después de un registro exitoso o al cambiar de vale.
@@ -664,7 +661,7 @@ Tareas:
 - En las herramientas del navegador, simular falta de conexión durante el envío, volver a conectar y reintentar: queda un solo movimiento (mismo `token_operacion`).
 - Mientras corre `python scripts/probar_concurrencia.py` del backend sobre otro vale, recargar la pantalla de ese vale: el saldo es coherente y nunca negativo.
 - Como administrador: revertir un consumo y anular un vale con motivo; ejecutar `python -m app.cli verificar-saldos` y ver 0 diferencias.
-- Leer el código de barras impreso del Bloque 7 en `/despacho` con un lector o a mano: el vale se abre directo.
+- Buscar el número impreso del vale del Bloque 7 en `/despacho`: si coincide con un solo vale, se abre directo.
 - `ng test` en verde.
 
 ---
@@ -887,7 +884,7 @@ Tareas:
 **Pendientes:**
 - [ ] **Versión de Node.js** que exija Angular 21.2.0 al crear el proyecto (se confirma con `ng version`). *Afecta:* Bloque 0.
 - [ ] **PDF por impresión del navegador** (supuesto, igual que T-02 del backend): si se exige un PDF generado en el servidor, hay que sumar una librería. *Afecta:* Bloques 7, 8, 11 y 12.
-- [ ] **Código de barras Code 128 propio** (supuesto, igual que T-03 del backend): si se prefiere QR, hay que sumar una librería o escribir un generador. *Afecta:* Bloque 7.
+- [x] **Identificación de vales:** no se implementan códigos de barras ni QR; las vistas de consulta e impresión usan la numeración de estación o entidad.
 - [ ] **Pruebas de navegador automatizadas:** el plan no las incluye porque exigen herramientas nuevas (Playwright o similares). Si se permiten, se agregan en el Bloque 13. *Afecta:* Bloque 13.
 - [ ] **Medición de cobertura de pruebas y análisis de estilo:** requieren paquetes que `ng new` no trae (proveedor de cobertura de Vitest, ESLint, Prettier). Si se permiten, se agregan al Bloque 1. *Afecta:* Bloques 1 y 13.
 - [ ] **Brechas del backend G1 a G5** (sección 4.4): hay que aceptarlas o ajustarlas antes de iniciar los bloques que las usan.
