@@ -117,15 +117,15 @@ Implementación:
 - [x] Base de datos PostgreSQL creada y visible en pgAdmin 4
 - [x] Esquema inicial `backend/db/schema.sql` y seed de desarrollo `backend/db/seed.sql` con tablas, tipos enum y numeración de vales diferenciada
 - [x] Entry point FastAPI, configuración, sesión asíncrona y endpoint básico de salud (`/api/v1/salud`)
-- [ ] Servicio FastAPI levantado y verificado (Fase 1)
+- [x] Servicio FastAPI levantado y verificado (Fase 1)
 - [x] RapidOCR instalado
 
 ### 2.2 Tablero de fases
 
-Avance global: **1 de 15 fases cerradas**. La Fase 1 está en curso: ya existe el esqueleto mínimo de API y el SQL inicial; faltan ejecutor de migraciones, manejo de errores, CLI y verificaciones de fase.
+Avance global: **2 de 15 fases cerradas**. La Fase 1 cerró el 31/10/2026: ejecutor de migraciones con checksum y línea base, migración `0001_base.sql`, manejo de errores estándar, `core/dinero.py`, `core/tiempo.py`, `GET /catalogos/enums`, `cli.py`, `tests/conftest.py`, pruebas de sistema/dinero/tiempo y `scripts/smoke.py --hasta 1` en verde.
 
 - [x] **Fase 0** Entorno y repositorio (inicio: 31/10/2026 / fin: 31/10/2026)
-- [ ] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: ____ / fin: ____)
+- [x] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: 31/10/2026 / fin: 31/10/2026)
 - [ ] **Fase 2** Autenticación, sesiones y auditoría base (inicio: ____ / fin: ____)
 - [ ] **Fase 3** Usuarios, roles y permisos (inicio: ____ / fin: ____)
 - [ ] **Fase 4** Configuración, combustibles y precios (inicio: ____ / fin: ____)
@@ -243,7 +243,9 @@ backend/
     └── fixtures/                     # documentos mínimos sin datos reales
 ```
 
-**Implementado hasta ahora:** `pyproject.toml`, `.env.example`, `app/config.py`, `app/main.py`, `app/db/sesion.py`, `app/routers/sistema.py`, `db/schema.sql`, `db/seed.sql`, `scripts/crear_admin.py` y `scripts/verificar_entorno.py`. Los demás módulos del árbol representan trabajo pendiente, no funcionalidades terminadas.
+**Implementado hasta ahora (cierre de Fase 1):** `pyproject.toml`, `.env.example`, `app/config.py`, `app/errors.py`, `app/cli.py`, `app/main.py`, `app/core/dinero.py`, `app/core/tiempo.py`, `app/core/permisos.py`, `app/core/dominio.py`, `app/db/sesion.py`, `app/db/migrar.py`, `app/db/migraciones/0001_base.sql`, `app/routers/sistema.py`, `app/routers/catalogos.py`, `app/schemas/sistema.py`, `db/schema.sql`, `db/seed.sql`, `scripts/crear_admin.py`, `scripts/verificar_entorno.py`, `scripts/smoke.py`, `tests/conftest.py`, `tests/test_sistema.py`, `tests/test_dinero.py` y `tests/test_tiempo.py`. Los demás módulos del árbol representan trabajo pendiente, no funcionalidades terminadas.
+
+Nota sobre bases con esquema legacy (`usuarios`, `usuario_id`, `vales.codigo_interno`): el plan no convierte esquemas heredados automáticamente. Para esas bases, respaldar los datos necesarios, eliminar los objetos payload y aplicar las migraciones desde una base vacía; la base de pruebas se reconstruyó así al cerrar la Fase 1.
 
 **Esquema inicial vigente:** las cuentas viven en `app_users` con los roles `administrador`, `oficina` y `despachador` (`user_role`). No hay columna `active` ni flujo para activar/desactivar cuentas. `must_change_password` admite `NULL`: solo `TRUE` obliga a cambiar la contraseña antes de usar los demás módulos; `FALSE` y `NULL` permiten el acceso normal. El seed asigna `NULL` a las tres cuentas de demo. `code` es un identificador opcional de la cuenta, por ejemplo un código interno de personal; no reemplaza el DNI ni el correo. No se almacena WhatsApp.
 
@@ -506,7 +508,7 @@ Tareas:
 - [x] Crear la estructura base de carpetas de la sección 3.2; los módulos de dominio se completan en sus respectivas fases.
 - [x] `config.py`: configuración de entorno con Pydantic Settings, archivo `.env` local y secretos fuera del repositorio. Las URL usan `postgresql+asyncpg://`.
 - [x] `db/sesion.py`: motor de SQLAlchemy con `isolation_level="READ COMMITTED"`, `pool_pre_ping` y dependencia `SesionBd` con `Annotated`.
-- [ ] Ejecutor de migraciones (`db/migrar.py`):
+- [x] Ejecutor de migraciones (`db/migrar.py`):
   - tabla `schema_migrations` (versión, nombre, checksum, fecha);
   - archivos `NNNN_descripcion.sql` en orden; sentencias separadas por una línea `-- ---` (así los cuerpos de funciones y disparadores en PL/pgSQL, delimitados con `$$ ... $$`, pueden contener `;` sin romper el archivo);
   - cada archivo se aplica dentro de una transacción: PostgreSQL permite DDL transaccional, de modo que una migración fallida no deja cambios a medias (si alguna necesita `CREATE INDEX CONCURRENTLY`, se marca como no transaccional);
@@ -514,15 +516,17 @@ Tareas:
   - usa `MIGRADOR_URL`; solo hacia adelante (la reversión se hace con respaldo);
   - comandos `python -m app.cli migrar estado`, `aplicar` y `nueva <nombre>`.
 - [x] Crear el bootstrap inicial `db/schema.sql` ejecutable desde pgAdmin/psql: tipos enum (`user_role`, tipos de institución, estados de orden/OCR/vale y movimientos), tablas y restricciones. `db/seed.sql` carga datos de demostración; todavía no sustituye al futuro ejecutor de migraciones numeradas.
-- [ ] Implementar el ejecutor propio de migraciones SQL numeradas y establecer cómo convertir el esquema inicial en la primera migración versionada sin duplicar el estado de una base.
-- [ ] Completar `parametros` y `secuencias` en el flujo versionado, con claves y marcas de tiempo definidas en este plan.
-- [ ] `errors.py`: `ErrorDominio(status, codigo, mensaje, detalles)`, manejador de errores de validación (422 con detalle por campo) y manejador general que nunca expone trazas.
-- [ ] `core/dinero.py` (Decimal, redondeo a 2 decimales con mitad hacia arriba) y `core/tiempo.py` (ahora en Lima con UTC-5 fijo, fecha local, rangos de hoy, semana, mes y mes anterior), con pruebas.
+- [x] Implementar el ejecutor propio de migraciones SQL numeradas y establecer cómo convertir el esquema inicial en la primera migración versionada sin duplicar el estado de una base.
+
+  Resolución acordada: el ejecutor detecta una base ya poblada con `schema.sql` (existe `estaciones` y no hay filas en `schema_migrations`), registra `0001` como aplicada con su checksum real y no vuelve a ejecutarla. Sobre una base vacía ejecuta el archivo completo dentro de una transacción. La tabla de control `schema_migrations` la maneja el ejecutor y no forma parte de los archivos numerados.
+- [x] Completar `parametros` y `secuencias` en el flujo versionado, con claves y marcas de tiempo definidas en este plan. La migración `0001_base.sql` inserta los diez parámetros por defecto (`ocr_umbral_confianza`, `archivo_max_mb`, `vale_formato_numeracion_estacion`, `vale_vigencia_dias`, `vale_umbral_saldo_bajo_pct`, `vale_dias_aviso_vencimiento`, `sesion_inactividad_min`, `login_intentos_max`, `login_bloqueo_min`, `refresh_token_dias`) con `ON CONFLICT DO NOTHING`.
+- [x] `errors.py`: `ErrorDominio(status, codigo, mensaje, detalles)`, manejador de errores de validación (422 con detalle por campo), manejador de 404/405 con el formato estándar y manejador general que nunca expone trazas.
+- [x] `core/dinero.py` (Decimal, redondeo a 2 decimales con mitad hacia arriba) y `core/tiempo.py` (ahora en Lima con UTC-5 fijo, fecha local, rangos de hoy, semana, mes y mes anterior), con pruebas (`tests/test_dinero.py`, `tests/test_tiempo.py`).
 - [x] Crear enums PostgreSQL del dominio y router `sistema.py` con `GET /salud` (consulta `SELECT 1` y versión del servidor).
-- [ ] Agregar `GET /catalogos/enums` y pruebas para el endpoint de salud.
-- [ ] `tests/conftest.py`: aplica las migraciones sobre `vales_san_jose_test` con `MIGRADOR_URL`; para limpiar entre pruebas, desactiva temporalmente los disparadores de inalterabilidad con `ALTER TABLE ... DISABLE TRIGGER USER`, ejecuta `TRUNCATE ... RESTART IDENTITY CASCADE` y los vuelve a habilitar; ofrece el cliente de pruebas conectado como `vales_app` cuando la prueba necesite comprobar permisos.
-- [ ] `scripts/smoke.py`: cliente HTTP que obtiene access JWT, rota refresh token y ejecuta comprobaciones numeradas hasta la fase indicada (`--hasta N`), con salida `OK` o `FALLA` y código de salida.
-- [ ] `cli.py` con `argparse` y el comando `migrar`.
+- [x] Agregar `GET /catalogos/enums` y pruebas para el endpoint de salud.
+- [x] `tests/conftest.py`: aplica las migraciones sobre `vales_san_jose_test` con `MIGRADOR_URL`; para limpiar entre pruebas, desactiva temporalmente los disparadores de inalterabilidad con `ALTER TABLE ... DISABLE TRIGGER USER`, ejecuta `TRUNCATE ... RESTART IDENTITY CASCADE` y los vuelve a habilitar; ofrece el cliente de pruebas conectado como `vales_app` cuando la prueba necesite comprobar permisos.
+- [x] `scripts/smoke.py`: cliente HTTP que ejecuta comprobaciones numeradas hasta la fase indicada (`--hasta N`), con salida `OK` o `FALLA` y código de salida. La obtención de JWT y la rotación de refresh token se agregan como comprobaciones desde la Fase 2.
+- [x] `cli.py` con `argparse` y el comando `migrar` (`estado`, `aplicar`, `nueva <nombre>`, con `--test` para la base de pruebas).
 
 **Entregable navegable:** `fastapi dev` y la documentación interactiva en `http://127.0.0.1:8000/docs`.
 

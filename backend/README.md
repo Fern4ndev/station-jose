@@ -2,7 +2,7 @@
 
 API con **FastAPI**, **PostgreSQL 16+** y OCR con RapidOCR para la gestión de combustible de la estación San José, Abancay. Se desarrolla en Python 3.11 o superior.
 
-> **Estado:** Fase 0 del plan completada (entorno, repositorio, dependencias y base de datos). Los módulos `app/` todavía no contienen la API: `app.main:app` se crea en la Fase 1, igual que el ejecutor de migraciones.
+> **Estado:** Fase 1 del plan cerrada (31/10/2026). Existe la API con `GET /api/v1/salud` y `GET /api/v1/catalogos/enums`, el ejecutor de migraciones SQL numeradas (`0001_base.sql`), errores estandarizados, CLI, pruebas automatizadas y `scripts/smoke.py --hasta 1`. Autenticación y usuarios llegan en la Fase 2.
 
 ## Estructura
 
@@ -106,6 +106,26 @@ GRANT USAGE         ON SCHEMA public TO vales_app;
 REVOKE CREATE       ON SCHEMA public FROM PUBLIC;
 ```
 
+### Migraciones versionadas (camino canónico)
+
+La estructura vive en archivos SQL numerados en `app/db/migraciones/` y se aplica con el CLI del proyecto, que conecta con `MIGRADOR_URL`:
+
+```powershell
+python -m app.cli migrar aplicar                 # base de desarrollo
+python -m app.cli migrar estado                  # qué está aplicada y qué falta
+python -m app.cli migrar aplicar --test          # sobre la base de pruebas
+python -m app.cli migrar nueva <nombre>          # genera el siguiente NNNN_<nombre>.sql
+```
+
+Reglas del ejecutor (`app/db/migrar.py`):
+
+- Cada archivo se aplica dentro de una transacción (PostgreSQL permite DDL transaccional). Un archivo no transaccional se marca con `-- NO-TRANSACCIONAL` en la primera línea.
+- Un archivo ya aplicado que cambie el checksum hace fallar `aplicar`: los cambios se hacen en una migración nueva.
+- Bases ya pobladas con `backend/db/schema.sql` y sin registro: el ejecutor detecta `estaciones`, registra `0001` como aplicada y no la re-ejecuta.
+- Esquemas legacy más antiguos (`usuarios`, `usuario_id`, `vales.codigo_interno`) no se convierten automáticamente: respalda los datos, borra los objetos y aplica las migraciones desde una base vacía.
+
+`backend/db/schema.sql` y `backend/db/seed.sql` quedan como bootstrap manual desde pgAdmin/psql para desarrollo y para sembrar datos de demostración; la fuente de la estructura, en adelante, son las migraciones versionadas en `app/db/migraciones/`.
+
 La estructura y los datos iniciales se aplican con `psql` y el rol `vales_migrador`, desde la raíz del repositorio:
 
 ```powershell
@@ -136,8 +156,6 @@ Imprime una línea por comprobación (Python, entorno virtual, dependencias, Git
 
 ## Ejecutar la API
 
-El entrypoint `app.main:app` se crea en la Fase 1. Cuando exista:
-
 ```powershell
 fastapi dev app/main.py
 ```
@@ -151,7 +169,13 @@ python -m pytest
 ruff check .
 ```
 
-Ambos comandos están configurados en `pyproject.toml` y todavía no tienen casos: las primeras pruebas llegan con la Fase 1.
+La suite cubre el módulo de sistema (`/salud`, `/catalogos/enums`, formato de errores), `core/dinero.py` y `core/tiempo.py`. `tests/conftest.py` apunta la aplicación a la base de pruebas, aplica las migraciones con `MIGRADOR_URL_TEST` y vacía las tablas entre pruebas (desactiva los disparadores inmutables, `TRUNCATE ... RESTART IDENTITY CASCADE` y los reactiva).
+
+El recorrido acumulado por fase, con la API corriendo:
+
+```powershell
+python scripts/smoke.py --hasta 1
+```
 
 ## Notas de diseño
 

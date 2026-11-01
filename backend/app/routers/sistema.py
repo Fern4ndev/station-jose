@@ -8,11 +8,11 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.db.sesion import SesionBd
+from app.schemas.sistema import SaludRespuesta
 
 router = APIRouter(tags=["sistema"])
 
 ESTADO_OK = "ok"
-ESTADO_DEGRADADO = "degradado"
 ESTADO_ERROR = "error"
 
 
@@ -25,8 +25,8 @@ def _version_ocr() -> str:
         return ESTADO_ERROR
 
 
-@router.get("/salud")
-async def salud(sesion: SesionBd) -> dict[str, str]:
+@router.get("/salud", response_model=SaludRespuesta)
+async def salud(sesion: SesionBd) -> SaludRespuesta:
     """Informa el estado de la API sin exponer datos sensibles."""
     try:
         await sesion.execute(text("SELECT 1"))
@@ -38,11 +38,9 @@ async def salud(sesion: SesionBd) -> dict[str, str]:
 
     ocr = _version_ocr()
     todo_ok = base == ESTADO_OK and ocr != ESTADO_ERROR
-
-    respuesta = {
-        "estado": ESTADO_OK if todo_ok else ESTADO_DEGRADADO,
-        "base": base,
-        "ocr": ocr,
-        "version": f"PostgreSQL {version_base}" if version_base else "",
-    }
-    return {clave: valor for clave, valor in respuesta.items() if valor}
+    return SaludRespuesta(
+        estado=ESTADO_OK if todo_ok else ESTADO_ERROR,
+        base=base,
+        ocr=ocr,
+        version=f"PostgreSQL {version_base}",
+    )
