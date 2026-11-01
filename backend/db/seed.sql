@@ -238,7 +238,7 @@ BEGIN
     END IF;
 
     INSERT INTO secuencias (nombre, anio, ultimo)
-    VALUES ('vale', 2026, 2)
+    VALUES ('vale_estacion', 2026, 2)
     ON CONFLICT (nombre, anio) DO UPDATE
        SET ultimo = GREATEST(secuencias.ultimo, EXCLUDED.ultimo);
 END;

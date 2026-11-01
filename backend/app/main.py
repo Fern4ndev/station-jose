@@ -8,7 +8,17 @@ from fastapi import FastAPI
 from app.config import obtener_settings
 from app.db.sesion import motor
 from app.errors import registrar_manejadores
-from app.routers import auth, catalogos, sistema, usuarios
+from app.routers import (
+    auth,
+    catalogos,
+    combustibles,
+    configuracion,
+    instituciones,
+    ordenes,
+    sistema,
+    usuarios,
+    vales,
+)
 
 ajustes = obtener_settings()
 
@@ -23,7 +33,7 @@ async def ciclo_vida(_: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     title="San José API",
     description="Gestión de vales de combustible de la estación de servicio San José.",
-    version="0.2.0",
+    version="0.5.0",
     lifespan=ciclo_vida,
 )
 
@@ -31,4 +41,10 @@ app.include_router(sistema.router, prefix=ajustes.api_v1_prefix)
 app.include_router(auth.router, prefix=ajustes.api_v1_prefix)
 app.include_router(catalogos.router, prefix=ajustes.api_v1_prefix)
 app.include_router(usuarios.router, prefix=ajustes.api_v1_prefix)
+app.include_router(combustibles.router, prefix=ajustes.api_v1_prefix)
+app.include_router(configuracion.router, prefix=ajustes.api_v1_prefix)
+app.include_router(instituciones.router, prefix=ajustes.api_v1_prefix)
+app.include_router(ordenes.router, prefix=ajustes.api_v1_prefix)
+app.include_router(vales.router_emision, prefix=ajustes.api_v1_prefix)
+app.include_router(vales.router_vales, prefix=ajustes.api_v1_prefix)
 registrar_manejadores(app)

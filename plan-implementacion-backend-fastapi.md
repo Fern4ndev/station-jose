@@ -122,16 +122,22 @@ Implementación:
 
 ### 2.2 Tablero de fases
 
-Avance global: **2 de 15 fases cerradas**. La Fase 1 cerró el 31/10/2026: ejecutor de migraciones con checksum y línea base, migración `0001_base.sql`, manejo de errores estándar, `core/dinero.py`, `core/tiempo.py`, `GET /catalogos/enums`, `cli.py`, `tests/conftest.py`, pruebas de sistema/dinero/tiempo y `scripts/smoke.py --hasta 1` en verde.
+Avance global: **7 de 15 fases cerradas**. La Fase 1 cerró el 31/10/2026: ejecutor de migraciones con checksum y línea base, migración `0001_base.sql`, manejo de errores estándar, `core/dinero.py`, `core/tiempo.py`, `GET /catalogos/enums`, `cli.py`, `tests/conftest.py`, pruebas de sistema/dinero/tiempo y `scripts/smoke.py --hasta 1` en verde.
 
 La Fase 3 (01/11/2026) agregó `core/permisos.py` (matriz rol → permisos), `requiere_permiso`, el módulo completo `GET/POST/PATCH /usuarios`, `POST /usuarios/{id}/restablecer-password`, la protección del último administrador y la prueba global de autorización que recorre `app.routes`; 53 pruebas en verde (14 nuevas en `tests/test_usuarios.py`) y Ruff limpio.
+
+La Fase 4 cerró el 01/11/2026: catálogo de combustibles con precios inmutables (CMB-01..04), parámetros por rango, ficha de la estación y logo validado por contenido; verificada con `pytest tests/test_combustibles.py tests/test_configuracion.py` y el smoke `--hasta 4` en verde sobre la base de desarrollo.
+
+La Fase 5 (01/11/2026) dejó instituciones con RUC validado por módulo 11, órdenes con numeración por institución y año, advertencia de duplicado con confirmación, transiciones de estado, adjuntos por firma y `tests/test_instituciones.py` + `tests/test_ordenes.py` en verde; el smoke `--hasta 5` queda pendiente (sin comprobaciones propias, el recorrido 6 cubreاپdirecto solo 1-4 y 6).
+
+La Fase 6 cerró el 01/11/2026: migraciones `0006_vales` y `0007_disparadores` (inmutabilidad de movimientos y auditoría con disparadores), numeración de estación con formato configurable y contador bloqueado, emisión atómica de vales con vista previa, techo de presupuesto con máximo de galones, vales de entidad con clave de numeración y serie, buscador global, alertas e impresión; 130 pruebas en verde (20 nuevas en `tests/test_vales.py`), smoke `--hasta 6` completo (001-034) en verde sobre la base de desarrollo y Ruff limpio.
 
 - [x] **Fase 0** Entorno y repositorio (inicio: 31/10/2026 / fin: 31/10/2026)
 - [x] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: 31/10/2026 / fin: 31/10/2026) - [x] **Fase 2** Autenticación, sesiones y auditoría base (inicio: ____ / fin: 31/10/2026)
 - [x] **Fase 3** Usuarios, roles y permisos (inicio: 31/10/2026 / fin: 01/11/2026; smoke `--hasta 3` pendiente solo del ajuste de permisos de la base de desarrollo, ver `backend/db/permisos-dev-fix.sql`)
-- [ ] **Fase 4** Configuración, combustibles y precios (inicio: ____ / fin: ____)
-- [ ] **Fase 5** Instituciones y órdenes de compra (inicio: ____ / fin: ____)
-- [ ] **Fase 6** Vales: emisión y vales de entidad (inicio: ____ / fin: ____)
+- [x] **Fase 4** Configuración, combustibles y precios (inicio: 31/10/2026 / fin: 01/11/2026)
+- [x] **Fase 5** Instituciones y órdenes de compra (inicio: 01/11/2026 / fin: 01/11/2026)
+- [x] **Fase 6** Vales: emisión y vales de entidad (inicio: 01/11/2026 / fin: 01/11/2026)
 - [ ] **Fase 7** Consumos y correcciones (inicio: ____ / fin: ____)
 - [ ] **Fase 8** Auditoría e integridad de saldos (inicio: ____ / fin: ____)
 - [ ] **Fase 9** Motor OCR con RapidOCR (inicio: ____ / fin: ____)
@@ -610,13 +616,13 @@ Tareas:
 **Endpoints:** secciones 5.4 y 5.5.
 
 Tareas:
-- [ ] Migración `0004_catalogos.sql`: `estacion` (una fila), `combustibles`, `precios_combustible` (combustible, `precio_galon numeric(8,2)`, `vigente_desde`, usuario). `vales_app` sin `UPDATE`, `DELETE` ni `TRUNCATE` sobre `precios_combustible`.
-- [ ] `services/parametros.py`: definición en código de cada parámetro (tipo, valor por defecto, mínimo, máximo, descripción) y lectura directa de PostgreSQL en cada uso, para que el cambio rija sin reiniciar. Parámetros: `ocr_umbral_confianza` (0.80), `archivo_max_mb` (10), `vale_formato_numeracion_estacion` (formato configurable para numeración propia de San José), `vale_vigencia_dias` (vacío), `vale_umbral_saldo_bajo_pct` (10), `vale_dias_aviso_vencimiento` (7), `sesion_inactividad_min` (60), `login_intentos_max` (5), `login_bloqueo_min` (15).
-- [ ] Servicio de precios: registrar (la fecha no puede ser anterior a la del último precio del combustible), precio vigente a una fecha (el último con vigencia menor o igual) y la función `calcular_valor(cantidad, precio)` de CMB-04.
-- [ ] Logo de la estación: validación por contenido (PNG o JPG), máximo 1 MB, almacenado en `almacenamiento/estacion/`.
-- [ ] Combustibles: crear, editar nombre, activar o desactivar; uno en uso no se elimina.
-- [ ] Comando `python -m app.cli sembrar-demo --catalogos`: combustibles (Diésel B5, Gasohol 90, Gasohol 95, GLP) y precios de ejemplo.
-- [ ] Pruebas: precio vigente con dos cambios, fecha anterior a la primera, ausencia de edición y borrado de precios, validación de rango de parámetros, cambio de parámetro sin reinicio, subida de logo inválida.
+- [x] Migración `0004_catalogos.sql`: las tablas `estaciones`, `combustibles`, `precios_combustible` y `parametros` ya existen desde `0001_base.sql` con sus índices; la migración deja `vales_app` sin `UPDATE`, `DELETE` ni `TRUNCATE` sobre `precios_combustible` (la edición es imposible por base además de por API).
+- [x] `services/parametros.py` y `services/configuracion.py`: definición en código de cada parámetro (`DefinicionParametro`: tipo, valor por defecto, mínimo, máximo, descripción en `DEFINICIONES`) y lectura directa de PostgreSQL en cada uso, para que el cambio rija sin reiniciar. Parámetros: `ocr_umbral_confianza` (0.80), `archivo_max_mb` (10), `vale_formato_numeracion_estacion` (formato configurable para numeración propia de San José), `vale_vigencia_dias` (vacío), `vale_umbral_saldo_bajo_pct` (10), `vale_dias_aviso_vencimiento` (7), `sesion_inactividad_min` (60), `login_intentos_max` (5), `login_bloqueo_min` (15) y `refresh_token_dias` (30).
+- [x] Servicio de precios: registrar (la fecha no puede ser anterior a la del último precio del combustible; fechas duplicadas→`FECHA_PRECIO_DUPLICADA`), precio vigente a una fecha (el último con vigencia menor o igual) y la función `calcular_valor(cantidad, precio)` de CMB-04.
+- [x] Logo de la estación: validación por contenido (PNG o JPG, sin confiar en la extensión), máximo 1 MB, almacenado en `almacenamiento/estacion/` y servido con `Content-Disposition: inline` y `X-Content-Type-Options: nosniff`.
+- [x] Combustibles: crear, editar nombre, activar o desactivar; uno en uso no se elimina (no existe DELETE en API ni en servicio).
+- [x] Comando `python -m app.cli sembrar-demo --catalogos`: combustibles (Diésel B5, Gasohol 90, Gasohol 95, GLP) y precios de ejemplo; idempotente, verificado en verde.
+- [x] Pruebas: precio vigente con dos cambios, fecha anterior a la primera, ausencia de edición y borrado de precios (no existen rutas y la base rechaza UPDATE/DELETE con `vales_app`), validación de rango de parámetros, cambio de parámetro sin reinicio (`login_intentos_max` a 3 y de vuelta a 5), subida de logo inválida. 21 pruebas nuevas en `tests/test_combustibles.py` y `tests/test_configuracion.py`.
 
 **Entregable navegable:** catálogo, precios y parámetros gestionables desde `/docs`.
 
@@ -639,13 +645,13 @@ Tareas:
 **Endpoints:** secciones 5.6 y 5.7.
 
 Tareas:
-- [ ] Migración `0005_ordenes.sql`: `instituciones` (RUC único con `CHECK (ruc ~ '^[0-9]{11}$')`, `modalidad_numeracion`, estado, etc.) y `ordenes_compra` (`institucion_id`, `numero`, `anio`, `fecha_emision`, `presupuesto_soles numeric(12,2)`, `combustible_id`, `estado`, `serie_desde`, `serie_hasta`, `creada_con_ocr`, `observaciones`, `motivo_anulacion`, metadatos del archivo: ruta relativa, tipo, tamaño y hash). Índice único `(institucion_id, anio, numero)`.
-- [ ] Validación de RUC: 11 dígitos y dígito verificador (pesos 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 sobre los 10 primeros dígitos; resto de la suma entre 11; dígito igual a 11 menos el resto, con 10 como 0 y 11 como 1). Endpoint `GET /instituciones/ruc/{ruc}`.
-- [ ] Servicio de instituciones: alta, edición con la restricción del RUC, desactivación y reactivación, y ficha con resumen (los saldos y consumos se completan en las Fases 6 y 7).
-- [ ] Servicio de órdenes: registro con `borrador` o `vigente`, número único por institución y año, advertencia de posible duplicado (`409` con `ORDEN_POSIBLE_DUPLICADA` y confirmación explícita), edición controlada, transiciones válidas en un diccionario de estados, cierre y anulación con motivo.
-- [ ] `core/archivos.py`: validación por contenido (firmas de PDF, JPG y PNG), tamaño máximo desde el parámetro, almacenamiento en `almacenamiento/ordenes/{año}/{uuid}.{ext}`, lectura en bloques con tope; respuesta con `Content-Disposition: inline` y `X-Content-Type-Options: nosniff`.
-- [ ] Función `tiene_consumos(orden_id)` que por ahora devuelve falso; la Fase 7 la completa y actualiza su prueba.
-- [ ] Pruebas: RUC válido e inválido, RUC duplicado, número duplicado por año, advertencia de duplicado, edición restringida, transiciones inválidas, archivo con extensión falsa, descarga solo autorizada.
+- [x] Migración `0005_ordenes.sql`: `instituciones` (RUC único con `CHECK (ruc ~ '^[0-9]{11}$')`, `modalidad_numeracion`, estado, etc.) y `ordenes_compra` (`institucion_id`, `numero`, `anio`, `fecha_emision`, `presupuesto_soles numeric(12,2)`, `combustible_id`, `estado`, `serie_desde`, `serie_hasta`, `creada_con_ocr`, `observaciones`, `motivo_anulacion`, metadatos del archivo: ruta relativa, tipo, tamaño y hash). Índice único `(institucion_id, anio, numero)`.
+- [x] Validación de RUC: 11 dígitos y dígito verificador (pesos 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 sobre los 10 primeros dígitos; resto de la suma entre 11; dígito igual a 11 menos el resto, con 10 como 0 y 11 como 1). Endpoint `GET /instituciones/ruc/{ruc}`.
+- [x] Servicio de instituciones: alta, edición con la restricción del RUC, desactivación y reactivación, y ficha con resumen (los saldos y consumos se completan en las Fases 6 y 7).
+- [x] Servicio de órdenes: registro con `borrador` o `vigente`, número único por institución y año, advertencia de posible duplicado (`409` con `ORDEN_POSIBLE_DUPLICADA` y confirmación explícita), edición controlada, transiciones válidas en un diccionario de estados, cierre y anulación con motivo.
+- [x] `core/archivos.py`: validación por contenido (firmas de PDF, JPG y PNG), tamaño máximo desde el parámetro, almacenamiento en `almacenamiento/ordenes/{año}/{uuid}.{ext}`, lectura en bloques con tope; respuesta con `Content-Disposition: inline` y `X-Content-Type-Options: nosniff`.
+- [x] Función `tiene_consumos(orden_id)` que por ahora devuelve falso; la Fase 7 la completa y actualiza su prueba.
+- [x] Pruebas: RUC válido e inválido, RUC duplicado, número duplicado por año, advertencia de duplicado, edición restringida, transiciones inválidas, archivo con extensión falsa, descarga solo autorizada.
 
 **Entregable navegable:** registro de instituciones y órdenes con documento adjunto, desde `/docs`.
 
@@ -666,10 +672,10 @@ Tareas:
 **Endpoints:** sección 5.9 (excepto anulación, ajuste y vencimientos, que son de la Fase 7).
 
 Tareas:
-- [ ] Migración `0006_vales.sql`:
+- [x] Migración `0006_vales.sql`:
   - `vales`: `numero_estacion` único para vales de San José, `numero_entidad` para vales emitidos por instituciones, `clave_numeracion` única según la modalidad institucional, `orden_compra_id`, `emisor`, `combustible_id`, `cantidad_inicial`, `precio_galon_aplicado`, `valor_soles`, `valor_comprometido_soles`, `saldo` como `numeric(12,2)` con `CHECK (saldo >= 0)`, `estado`, `fecha_emision`, `fecha_vencimiento`, `veces_impreso`; no existe un código interno impreso ni código de barras/QR.
   - `movimientos_vale`: vale, tipo, `variacion numeric(12,2)` con signo, `saldo_posterior numeric(12,2)`, usuario, motivo, placa, conductor, `token_operacion uuid` único, `movimiento_origen_id` único (para reversiones), `fecha_local date`, instante de creación `timestamptz`; `vales_app` con `GRANT SELECT, INSERT` únicamente.
-- [ ] Migración `0007_disparadores.sql` (ejecutada con `vales_migrador`): función en PL/pgSQL y disparadores `BEFORE UPDATE OR DELETE` (por fila) y `BEFORE TRUNCATE` (por sentencia) sobre `movimientos_vale` y `auditoria`, que rechazan el cambio incluso para el rol dueño. Modelo:
+- [x] Migración `0007_disparadores.sql` (ejecutada con `vales_migrador`): función en PL/pgSQL y disparadores `BEFORE UPDATE OR DELETE` (por fila) y `BEFORE TRUNCATE` (por sentencia) sobre `movimientos_vale` y `auditoria`, que rechazan el cambio incluso para el rol dueño. Modelo:
 
 ```sql
 CREATE OR REPLACE FUNCTION rechazar_cambio() RETURNS trigger AS $$
@@ -690,12 +696,12 @@ CREATE TRIGGER movimientos_vale_sin_truncate
 
 En PostgreSQL los disparadores se ejecutan también para el rol dueño, así que el control no depende del registro binario. El dueño de la tabla puede desactivarlos con `ALTER TABLE ... DISABLE TRIGGER` (por eso las pruebas de limpieza lo hacen de forma explícita) y un superusuario puede hacerlo con `session_replication_role`; ninguno de esos privilegios los tiene `vales_app`, que sigue limitado por los `GRANT`.
 
-- [ ] `services/numeracion.py`: genera/asigna la numeración propia de la estación con el formato configurable, incrementando `secuencias` bajo `SELECT ... FOR UPDATE`. La numeración de entidad se conserva como la entrega cada institución.
-- [ ] Emisión: bajo bloqueo de la orden, toma el precio vigente, calcula `valor_soles`, comprueba que la suma de `valor_comprometido_soles` más lo nuevo no exceda el presupuesto y crea todos los vales y sus movimientos de emisión, o ninguno. Errores con el presupuesto restante y el máximo de galones. Simulación sin guardar.
-- [ ] Vales de entidad: arma `clave_numeracion` (`institucion:{institucion_id}:{numero}` o `orden:{orden_id}:{numero}` según la modalidad), valida el rango de la serie de la orden, aplica las mismas reglas de saldo y presupuesto y conserva el número de entidad. El tratamiento del presupuesto sigue el supuesto de P-11.
-- [ ] Búsqueda (`GET /vales/buscar`) por número de estación o número de entidad, con todos los candidatos cuando hay coincidencias múltiples, y listado con filtros.
-- [ ] Alertas de saldo bajo y por vencer; datos de impresión con registro de la impresión y marca de duplicado.
-- [ ] Pruebas: presupuesto excedido, cambio de precio entre dos emisiones (cada vale conserva su precio), atomicidad (tres vales y el tercero falla: no queda ninguno), orden en borrador, cerrada o anulada, combustible sin precio, número de entidad repetido en la misma serie (rechazado) y en otra orden con numeración por orden (aceptado), número fuera de rango, serie agotada, búsqueda con varias coincidencias, y emisión simultánea de dos usuarios sobre la misma orden (el total nunca excede el presupuesto).
+- [x] `services/numeracion.py`: genera/asigna la numeración propia de la estación con el formato configurable, incrementando `secuencias` bajo `SELECT ... FOR UPDATE`. La numeración de entidad se conserva como la entrega cada institución.
+- [x] Emisión: bajo bloqueo de la orden, toma el precio vigente, calcula `valor_soles`, comprueba que la suma de `valor_comprometido_soles` más lo nuevo no exceda el presupuesto y crea todos los vales y sus movimientos de emisión, o ninguno. Errores con el presupuesto restante y el máximo de galones. Simulación sin guardar.
+- [x] Vales de entidad: arma `clave_numeracion` (`institucion:{institucion_id}:{numero}` o `orden:{orden_id}:{numero}` según la modalidad), valida el rango de la serie de la orden, aplica las mismas reglas de saldo y presupuesto y conserva el número de entidad. El tratamiento del presupuesto sigue el supuesto de P-11.
+- [x] Búsqueda (`GET /vales/buscar`) por número de estación o número de entidad, con todos los candidatos cuando hay coincidencias múltiples, y listado con filtros.
+- [x] Alertas de saldo bajo y por vencer; datos de impresión con registro de la impresión y marca de duplicado.
+- [x] Pruebas: presupuesto excedido, cambio de precio entre dos emisiones (cada vale conserva su precio), atomicidad (tres vales y el tercero falla: no queda ninguno), orden en borrador, cerrada o anulada, combustible sin precio, número de entidad repetido en la misma serie (rechazado) y en otra orden con numeración por orden (aceptado), número fuera de rango, serie agotada, búsqueda con varias coincidencias, y emisión simultánea de dos usuarios sobre la misma orden (el total nunca excede el presupuesto).
 
 **Entregable navegable:** emisión de vales y registro de vales de entidad desde `/docs`.
 

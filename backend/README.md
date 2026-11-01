@@ -5,6 +5,7 @@ API con **FastAPI**, **PostgreSQL 16+** y OCR con RapidOCR para la gestión de c
 > **Estado:** Fase 1 del plan cerrada (31/10/2026). Existe la API con `GET /api/v1/salud` y `GET /api/v1/catalogos/enums` (protegido), el ejecutor de migraciones SQL numeradas (`0001_base.sql`, `0002_sesiones.sql`), errores estandarizados, CLI, pruebas automatizadas y `scripts/smoke.py --hasta 2`.
 **Fase 2 cerrada (31/10/2026):** autenticación y sesiones — `POST /auth/login`, `/auth/refresh` (rotación con CSRF), `/auth/logout`, `/auth/yo`, `/auth/recuperar`, `/auth/restablecer` y `/auth/cambiar-password`; contraseñas Argon2id, limpieza crítica de límite de intentos, reCAPTCHA v3, cierre de sesión y auditoría. No existe ruta de registro: las cuentas se crean con `python -m app.cli crear-admin`.
 **Fase 3 cerrada (01/11/2026):** usuarios, roles y permisos — `GET/POST/PATCH /usuarios` y `POST /usuarios/{id}/restablecer-password` con permiso `usuarios.gestionar` (solo administrador), matriz rol → permisos en `app/core/permisos.py`, dependencia `requiere_permiso(...)` en `app/dependencies.py` y la protección del último administrador (`UL´TIMO_ADMINISTRADOR`). La prueba global de autorización recorre `app.routes` y hace fallar la suite si un endpoint nuevo sale sin sesión ni permiso. 14 pruebas nuevas en `tests/test_usuarios.py` (53 en total) y `scripts/smoke.py --hasta 3` listo; su ejecución sobre la base de desarrollo queda pendiente del ajuste de permisos de [db/permisos-dev-fix.sql](db/permisos-dev-fix.sql) (pgAdmin).
+**Fase 4 cerrada (01/11/2026):** configuración, combustibles y precios — `GET/PUT /configuracion/parametros` con cada parámetro definido en código (`app/services/configuracion.py`: tipo, defecto, rango y descripción) y vigencia inmediata sin reiniciar; `GET/PUT /configuracion/estacion` con logo PNG/JPG validado por firma binaria (hasta 1 MB, `almacenamiento/estacion/`, servido con `nosniff`); catálogo `GET/POST/PATCH /combustibles` con `catalogo.ver/gestionar` y precios históricos inmutables en `GET/POST /combustibles/{id}/precios` (fecha retroactiva y repetida rechazadas; la migración `0004_catalogos.sql` revoca `UPDATE`/`DELETE`/`TRUNCATE` a `vales_app`). `calcular_valor()` aplica CMB-04 para las fases de vales y presupuesto. `python -m app.cli sembrar-demo --catalogos` siembra Diésel B5, Gasohol 90, Gasohol 95 y GLP con precio del día, de forma idempotente. 21 pruebas nuevas en `tests/test_combustibles.py` y `tests/test_configuracion.py` (74 en total); `scripts/smoke.py --hasta 4` listo, su ejecución sobre la base de desarrollo pendiente de `SMOKE_PASSWORD`.
 
 ## Estructura
 
@@ -160,6 +161,8 @@ No existe ruta de registro: las cuentas nacen por CLI. `crear-admin` genera una 
 ```powershell
 python -m app.cli crear-admin --nombre Admin --correo admin@ejemplo.pe
 python -m app.cli crear-admin --nombre Admin --correo admin@ejemplo.pe --test   # base de pruebas
+
+python -m app.cli sembrar-demo --catalogos     # combustibles y precios de ejemplo (idempotente)
 ```
 
 El flujo restante se hace desde `/docs`: `POST /auth/login` con la contraseña temporal → `POST /auth/cambiar-password`. Los *refresh tokens* viajan en una cookie HttpOnly bajo `/api/v1/auth` y `refresh`/`logout` validan el token CSRF de la cookie pública `csrf_token` (doble envío).
@@ -187,13 +190,13 @@ python -m pytest
 ruff check .
 ```
 
-La suite cubre el módulo de sistema (`/salud`, formato de errores y el bloqueo de `/catalogos/enums` sin sesión), `core/dinero.py`, `core/tiempo.py` y toda la Fase 2 de autenticación (`tests/test_auth.py`: límite de intentos, cambio obligatorio, rotación y reutilización de refresh, CSRF, recuperación de un solo uso, inactividad y auditoría). En la batería, reCAPTCHA queda en modo local y el correo se imprime en consola, para no depender de servicios externos. `tests/conftest.py` apunta la aplicación a la base de pruebas, aplica las migraciones con `MIGRADOR_URL_TEST` y vacía las tablas entre pruebas (desactiva los disparadores inmutables, `TRUNCATE ... RESTART IDENTITY CASCADE` y los reactiva).
+La suite cubre el módulo de sistema (`/salud`, formato de errores y el bloqueo de `/catalogos/enums` sin sesión), `core/dinero.py`, `core/tiempo.py` y toda la Fase 2 de autenticación (`tests/test_auth.py`: límite de intentos, cambio obligatorio, rotación y reutilización de refresh, CSRF, recuperación de un solo uso, inactividad y auditoría). Añade la autorización global de la Fase 3 (`tests/test_usuarios.py`) y la Fase 4 (`tests/test_combustibles.py`, `tests/test_configuracion.py`: precios e inmutabilidad, parámetros con rango, ficha y logo de la estación). En la batería, reCAPTCHA queda en modo local y el correo se imprime en consola, para no depender de servicios externos. `tests/conftest.py` apunta la aplicación a la base de pruebas, aplica las migraciones con `MIGRADOR_URL_TEST` y vacía las tablas entre pruebas (desactiva los disparadores inmutables, `TRUNCATE ... RESTART IDENTITY CASCADE` y los reactiva).
 
 El recorrido acumulado por fase, con la API corriendo:
 
 ```powershell
 python scripts/smoke.py --hasta 1
-python scripts/smoke.py --hasta 2      # requiere SMOKE_CORREO y SMOKE_PASSWORD de un admin ya cambiado
+python scripts/smoke.py --hasta 4      # también requiere SMOKE_CORREO y SMOKE_PASSWORD de un admin ya cambiado
 ```
 
 La Fase 2 del smoke verifica el bloqueo sin sesión, login correcto y erróneo, `/auth/yo` con permisos, `/catalogos/enums` con sesión, rotación del refresh con CSRF y el cierre que revoca la familia.

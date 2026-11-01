@@ -8,10 +8,14 @@ La Fase 2 necesita un administrador (creado con `python -m app.cli
 crear-admin --nombre ... --correo ...`) y, después de su primer inicio,
 la contraseña ya cambiada en las variables `SMOKE_CORREO` y `SMOKE_PASSWORD`
 (por omisión actúa como el admin que se ejemplifica en el README).
+El recorrido usa tokens de prueba (`recaptcha_token: smoke`), así que contra
+una base de desarrollo con reCAPTCHA real se levanta el servidor sin
+`RECAPTCHA_SECRET_KEY` para correr el smoke.
 """
 
 import argparse
 import asyncio
+import datetime as _dt
 import os
 import sys
 from collections.abc import Awaitable, Callable
@@ -393,6 +397,356 @@ async def _restablece_operador(cliente: httpx.AsyncClient) -> str | None:
     return None
 
 
+# --- Fase 4: configuración, combustibles y precios ------------------------------
+
+ESTADO_FASE_4: dict[str, str] = {}
+
+
+async def _login_admin_para_fase4(cliente: httpx.AsyncClient) -> str | None:
+    """Sesión del administrador del smoke para el módulo de configuración."""
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={"correo": CORREO_SMOKE, "password": CLAVE_SMOKE, "recaptcha_token": "smoke"},
+    )
+    if respuesta.status_code != 200:
+        return f"Login devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    ESTADO_FASE_4["access"] = respuesta.json()["access_token"]
+    ESTADO_FASE_4["ms"] = _ms_actuales()
+    cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_4['access']}"
+    return None
+
+
+async def _combustible_creado_y_listado(cliente: httpx.AsyncClient) -> str | None:
+    """CMB-01: alta del tipo y catálogo con `precio_vigente` inicial nulo."""
+    nombre = f"Gasohol Smoke {ESTADO_FASE_4['ms']}"
+    alta = await cliente.post("/api/v1/combustibles", json={"nombre": nombre})
+    if alta.status_code != 201:
+        return f"POST /combustibles devolvió {alta.status_code}: {alta.json().get('mensaje')}"
+    ESTADO_FASE_4["combustible_id"] = str(alta.json()["id"])
+    listado = await cliente.get("/api/v1/combustibles", params={"activo": "true"})
+    items = listado.json()["items"]
+    hallado = next((c for c in items if str(c["id"]) == ESTADO_FASE_4["combustible_id"]), None)
+    if hallado is None:
+        return "El combustible creado no aparece en el listado."
+    if hallado["precio_vigente"] is not None:
+        return "El catálogo debería arrancar sin precio vigente."
+    return None
+
+
+async def _precio_registrado_vigente_primero(cliente: httpx.AsyncClient) -> str | None:
+    """CMB-02/03: registra el precio del día y el histórico lo muestra primero."""
+    combustible = ESTADO_FASE_4["combustible_id"]
+    hoy = _dt.date.today().isoformat()
+    precio = await cliente.post(
+        f"/api/v1/combustibles/{combustible}/precios",
+        json={"precio_galon": "15.75", "vigente_desde": hoy},
+    )
+    if precio.status_code == 409:  # precio del día ya sembrado: idempotente
+        pass
+    elif precio.status_code != 201:
+        return f"POST precios devolvió {precio.status_code}: {precio.json().get('mensaje')}"
+
+    listado = await cliente.get("/api/v1/combustibles", params={"activo": "true"})
+    hallado = next(
+        c
+        for c in listado.json()["items"]
+        if str(c["id"]) == combustible
+    )
+    vigente = hallado["precio_vigente"]
+    if not vigente or vigente["vigente_desde"] != hoy:
+        return f"El precio vigente no es el de hoy: {vigente}"
+
+    historico = await cliente.get(f"/api/v1/combustibles/{combustible}/precios")
+    if historico.json()[0]["vigente_desde"] != hoy:
+        return "El histórico no muestra el precio más reciente primero."
+    return None
+
+
+async def _precio_historico_inmutable(cliente: httpx.AsyncClient) -> str | None:
+    """CMB-02/RN-16: fecha anterior al último precio se rechaza (409)."""
+    combustible = ESTADO_FASE_4["combustible_id"]
+    atrasado = await cliente.post(
+        f"/api/v1/combustibles/{combustible}/precios",
+        json={"precio_galon": "16.10", "vigente_desde": "2020-01-01"},
+    )
+    if atrasado.status_code != 409:
+        return f"La fecha retroactiva devolvió {atrasado.status_code}; se esperaba 409."
+    if atrasado.json().get("codigo") != "FECHA_PRECIO_ATRASADA":
+        return f"codigo inesperado: {atrasado.json().get('codigo')}"
+    return None
+
+
+async def _parametros_leen_rango_y_guardan(cliente: httpx.AsyncClient) -> str | None:
+    """CFG-01: catálogo con contrato y guardado de un valor dentro del rango."""
+    lista = await cliente.get("/api/v1/configuracion/parametros")
+    if lista.status_code != 200:
+        return f"GET /configuracion/parametros devolvió {lista.status_code}."
+    contrato = {p["clave"]: p for p in lista.json()["items"]}
+    if "login_intentos_max" not in contrato or "vale_vigencia_dias" not in contrato:
+        return "Faltan parámetros declarados del plan."
+
+    fuera = await cliente.put(
+        "/api/v1/configuracion/parametros",
+        json={"valores": {"login_intentos_max": "0"}},
+    )
+    if fuera.status_code != 422:
+        return f"Un valor fuera de rango devolvió {fuera.status_code}; se esperaba 422."
+
+    ajustado = await cliente.put(
+        "/api/v1/configuracion/parametros",
+        json={"valores": {"ocr_umbral_confianza": "0.85"}},
+    )
+    if ajustado.status_code != 200:
+        return f"PUT de un valor válido devolvió {ajustado.status_code}."
+    confirmado = await cliente.get("/api/v1/configuracion/parametros")
+    valor = next(
+        p for p in confirmado.json()["items"] if p["clave"] == "ocr_umbral_confianza"
+    )
+    if valor["valor"] != "0.85":
+        return f"El valor no rige de inmediato: {valor['valor']}"
+    return None
+
+
+async def _estacion_gestionada_y_protegida(cliente: httpx.AsyncClient) -> str | None:
+    """CFG-02: ficha de la estación se guarda y se lee con `estacion.ver`."""
+    ficha = await cliente.put(
+        "/api/v1/configuracion/estacion",
+        json={
+            "nombre": "Estación San José (smoke)",
+            "ruc": "20100047218",
+            "direccion": "Av. del Smoke 123",
+        },
+    )
+    if ficha.status_code != 200:
+        return (
+            "PUT /configuracion/estacion devolvió "
+            f"{ficha.status_code}: {ficha.json().get('mensaje')}"
+        )
+    lectura = await cliente.get("/api/v1/configuracion/estacion")
+    if lectura.status_code != 200 or "San José" not in lectura.json()["nombre"]:
+        return f"GET /configuracion/estacion: {lectura.status_code} {lectura.text[:120]}"
+    return None
+
+
+async def _logo_rechazado_por_contenido(cliente: httpx.AsyncClient) -> str | None:
+    """CFG-02: la subida se valida por firma binaria, nunca por extensión."""
+    impostor = await cliente.post(
+        "/api/v1/configuracion/estacion/logo",
+        files={"archivo": ("logo.png", b"texto plano no es un png", "image/png")},
+    )
+    if impostor.status_code != 422:
+        return f"Un archivo impostor devolvió {impostor.status_code}; se esperaba 422."
+    if impostor.json().get("codigo") != "FORMATO_INVALIDO":
+        return f"codigo inesperado: {impostor.json().get('codigo')}"
+    # Cierre de fase: se cierra la sesión del smoke.
+    cliente.headers.pop("Authorization", None)
+    ESTADO_FASE_4.clear()
+    return None
+
+
+# --- Fase 6: vales, emisión y vales de entidad ---------------------------------
+
+ESTADO_FASE_6: dict[str, str] = {}
+RUC_SMOKE = "20100104157"
+
+
+async def _login_admin_para_fase6(cliente: httpx.AsyncClient) -> str | None:
+    """Sesión del administrador del smoke para el módulo de vales."""
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={"correo": CORREO_SMOKE, "password": CLAVE_SMOKE, "recaptcha_token": "smoke"},
+    )
+    if respuesta.status_code != 200:
+        return f"Login devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    cliente.headers["Authorization"] = f"Bearer {respuesta.json()['access_token']}"
+    return None
+
+
+async def _escenario_para_fase6(cliente: httpx.AsyncClient) -> str | None:
+    """Combustible con precio, institución con numeración general y la orden.
+
+    La orden se queda corta a propósito: con el precio de S/ 15.75 el
+    galón, un presupuesto de S/ 1000.00 deja techo de 63.49 galones.
+    """
+    marca = ESTADO_FASE_6["ms"] = _ms_actuales()
+    combustible = await cliente.post(
+        "/api/v1/combustibles", json={"nombre": f"Vales Smoke {marca}"}
+    )
+    if combustible.status_code != 201:
+        return f"POST /combustibles devolvió {combustible.status_code}."
+    id_combustible = combustible.json()["id"]
+    ESTADO_FASE_6["combustible"] = str(id_combustible)
+    precio = await cliente.post(
+        f"/api/v1/combustibles/{id_combustible}/precios",
+        json={"precio_galon": "15.75", "vigente_desde": _dt.date.today().isoformat()},
+    )
+    if precio.status_code != 201:
+        return f"POST precios devolvió {precio.status_code}: {precio.json().get('mensaje')}"
+
+    institucion = await cliente.post(
+        "/api/v1/instituciones",
+        json={
+            "nombre": f"Institución Smoke {marca}",
+            "ruc": RUC_SMOKE,
+            "tipo": "publica",
+            "modalidad_numeracion": "general",
+        },
+    )
+    if institucion.status_code == 409:
+        # RUC único: una corrida previa ya lo sembró; se reutiliza.
+        fallback = await cliente.get(f"/api/v1/instituciones/ruc/{RUC_SMOKE}")
+        existente = (fallback.json() or {}).get("institucion")
+        if fallback.status_code != 200 or not existente:
+            return "No se pudo crear ni hallar la institución del smoke (RUC único)."
+        institucion = None
+        institucion_fila = existente
+    elif institucion.status_code != 201:
+        return (
+            "POST /instituciones devolvió "
+            f"{institucion.status_code}: {institucion.json().get('mensaje')}"
+        )
+    else:
+        institucion_fila = institucion.json()
+    ESTADO_FASE_6["institucion"] = str(institucion_fila["id"])
+
+    orden = await cliente.post(
+        "/api/v1/ordenes",
+        json={
+            "institucion_id": institucion_fila["id"],
+            "fecha_emision": _dt.date.today().isoformat(),
+            "presupuesto_soles": "1000.00",
+            "estado": "vigente",
+            "confirmar_duplicado": True,
+        },
+    )
+    if orden.status_code != 201:
+        return f"POST /ordenes devolvió {orden.status_code}: {orden.json().get('mensaje')}"
+    ESTADO_FASE_6["orden"] = str(orden.json()["id"])
+    return None
+
+
+async def _simulacion_no_guarda(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-03/CMB-04: la vista previa devuelve techo y total sin escribir nada."""
+    orden = ESTADO_FASE_6["orden"]
+    combustible = ESTADO_FASE_6["combustible"]
+    respuesta = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales/simulacion",
+        json={"combustible_id": int(combustible), "cantidades": ["20.00", "20.00"]},
+    )
+    if respuesta.status_code != 200:
+        return (
+            f"POST simulacion devolvió {respuesta.status_code}: "
+            f"{respuesta.json().get('mensaje')}"
+        )
+    datos = respuesta.json()
+    if datos["precio_galon"] != "15.75":
+        return f"El precio vigente no es 15.75: {datos['precio_galon']}"
+    if datos["total_soles"] != "630.00":
+        return f"El total de la simulación no es 630.00: {datos['total_soles']}"
+    if datos["presupuesto_restante_soles"] != "1000.00":
+        return "La simulación modificó el presupuesto restante."
+    maximo = float(datos["maximo_galones"])
+    if not 63.48 <= maximo <= 63.50:
+        return f"El máximo de galones no es el techo de 1000/15.75: {maximo}"
+
+    listado = await cliente.get("/api/v1/vales", params={"orden_id": int(orden)})
+    if listado.status_code != 200:
+        return f"GET /vales devolvió {listado.status_code}."
+    if listado.json()["total"] != 0:
+        return "La simulación dejó vales en la base."
+    return None
+
+
+async def _emite_dos_vales(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-01/VAL-02: emisión con numeración de estación y precio retenido."""
+    orden = ESTADO_FASE_6["orden"]
+    combustible = ESTADO_FASE_6["combustible"]
+    emitidos = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales",
+        json={"combustible_id": int(combustible), "cantidades": ["20.00", "20.00"]},
+    )
+    if emitidos.status_code != 201:
+        return f"POST vales devolvió {emitidos.status_code}: {emitidos.json().get('mensaje')}"
+    vales = emitidos.json()
+    if len(vales) != 2:
+        return f"Se esperaban 2 vales, llegaron {len(vales)}"
+    for vale in vales:
+        if vale["valor_soles"] != "315.00":
+            return f"El vale acumuló un valor inesperado: {vale['valor_soles']}"
+        if not vale["numero_estacion"]:
+            return "El vale de estación llegó sin número."
+    return None
+
+
+async def _exceso_rechazado_con_maximo(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-03: 409 PRESUPUESTO_EXCEDIDO con el restante y el máximo de galones."""
+    orden = ESTADO_FASE_6["orden"]
+    combustible = ESTADO_FASE_6["combustible"]
+    exceso = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales",
+        json={"combustible_id": int(combustible), "cantidades": ["30.00"]},
+    )
+    if exceso.status_code != 409:
+        return f"Una emisión que excede devolvió {exceso.status_code}; se esperaba 409."
+    datos = exceso.json()
+    if datos.get("codigo") != "PRESUPUESTO_EXCEDIDO":
+        return f"codigo inesperado: {datos.get('codigo')}"
+    detalles = datos.get("detalles", {})
+    if detalles.get("presupuesto_restante_soles") != "370.00":
+        return "El restante no refleja los dos vales de 315.00."
+    maximo = float(detalles.get("maximo_galones", "0"))
+    if not 23.48 <= maximo <= 23.50:
+        return f"El máximo de galones no cuadra con 370/15.75: {maximo}"
+    return None
+
+
+async def _vale_entidad_y_duplicado(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-05/D-02: el número lo da la institución; repetido en la serie, 409."""
+    orden = ESTADO_FASE_6["orden"]
+    combustible = ESTADO_FASE_6["combustible"]
+    numero = f"VA-ENT-{ESTADO_FASE_6['ms']}-001"
+    ESTADO_FASE_6["numero"] = numero
+    primero = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales-entidad",
+        json={"numero_entidad": numero, "combustible_id": int(combustible), "cantidad": "5.00"},
+    )
+    if primero.status_code != 201:
+        return (
+            "POST vales-entidad devolvió "
+            f"{primero.status_code}: {primero.json().get('mensaje')}"
+        )
+    if primero.json()["numero_entidad"] != numero:
+        return "El número de entidad no se conservó tal como lo envió la institución."
+
+    repetido = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales-entidad",
+        json={"numero_entidad": numero, "combustible_id": int(combustible), "cantidad": "5.00"},
+    )
+    if repetido.status_code != 409:
+        return f"Un número repetido devolvió {repetido.status_code}; se esperaba 409."
+    if repetido.json().get("codigo") != "NUMERO_ENTIDAD_DUPLICADO":
+        return f"codigo inesperado: {repetido.json().get('codigo')}"
+    return None
+
+
+async def _busca_por_numero_entidad(cliente: httpx.AsyncClient) -> str | None:
+    """QRY-01: el buscador halla el vale de entidad por su número."""
+    respuesta = await cliente.get("/api/v1/vales/buscar", params={"q": ESTADO_FASE_6["numero"]})
+    if respuesta.status_code != 200:
+        return f"GET /vales/buscar devolvió {respuesta.status_code}."
+    candidatos = respuesta.json()
+    hallado = [c for c in candidatos if c["numero_entidad"] == ESTADO_FASE_6["numero"]]
+    if not hallado:
+        return "El buscador no encontró el vale de entidad recién registrado."
+    if not hallado[0].get("saldo") or float(hallado[0]["saldo"]) != 5.0:
+        return f"El saldo del candidato no es 5.00: {hallado[0]}"
+
+    # Cierre de fase: se cierra la sesión del smoke.
+    cliente.headers.pop("Authorization", None)
+    ESTADO_FASE_6.clear()
+    return None
+
+
 FASES: tuple[Fase, ...] = (
     {
         "numero": 1,
@@ -430,6 +784,38 @@ FASES: tuple[Fase, ...] = (
             ("018 sin el permiso, /usuarios responde 403 SIN_PERMISO", _operador_sin_permiso),
             ("019 el único administrador no puede cambiar su rol", _ultimo_admin_protegido),
             ("020 restablecer-password entrega una temporal nueva", _restablece_operador),
+        ),
+    },
+    {
+        "numero": 4,
+        "titulo": "Configuración, combustibles y precios",
+        "comprobaciones": (
+            ("021 login del administrador del smoke", _login_admin_para_fase4),
+            ("022 combustible creado y listado con precio nulo", _combustible_creado_y_listado),
+            ("023 precio del día registrado y vigente en el catálogo",
+             _precio_registrado_vigente_primero),
+            ("024 fecha retroactiva de precio rechazada (409)", _precio_historico_inmutable),
+            ("025 parámetros con rango y guardado inmediato", _parametros_leen_rango_y_guardan),
+            ("026 ficha de la estación se guarda y se lee", _estacion_gestionada_y_protegida),
+            ("027 logo impostor rechazado por contenido", _logo_rechazado_por_contenido),
+        ),
+    },
+    {
+        "numero": 6,
+        "titulo": "Vales: emisión y vales de entidad",
+        "comprobaciones": (
+            ("028 login del administrador del smoke", _login_admin_para_fase6),
+            ("029 escenario: combustible con precio, institución y orden vigente",
+             _escenario_para_fase6),
+            ("030 simulación entrega techo y total sin guardar nada", _simulacion_no_guarda),
+            ("031 emisión de 2 vales con precio retenido y numeración",
+             _emite_dos_vales),
+            ("032 emisión excedida rechazada con máximo de galones",
+             _exceso_rechazado_con_maximo),
+            ("033 vale de entidad registra y su duplicado da 409",
+             _vale_entidad_y_duplicado),
+            ("034 búsqueda global halla el vale por número de entidad",
+             _busca_por_numero_entidad),
         ),
     },
 )

@@ -15,6 +15,7 @@ DEFECTO_NUMERO: dict[str, int] = {
     "login_intentos_max": 5,
     "login_bloqueo_min": 15,
     "refresh_token_dias": 30,
+    "archivo_max_mb": 10,  # tope de documentos adjuntos a las órdenes (ORD-03)
 }
 
 
