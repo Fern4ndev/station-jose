@@ -122,7 +122,7 @@ Implementación:
 
 ### 2.2 Tablero de fases
 
-Avance global: **8 de 15 fases cerradas**. La Fase 1 cerró el 31/10/2026: ejecutor de migraciones con checksum y línea base, migración `0001_base.sql`, manejo de errores estándar, `core/dinero.py`, `core/tiempo.py`, `GET /catalogos/enums`, `cli.py`, `tests/conftest.py`, pruebas de sistema/dinero/tiempo y `scripts/smoke.py --hasta 1` en verde.
+Avance global: **9 de 15 fases cerradas**. La Fase 1 cerró el 31/10/2026: ejecutor de migraciones con checksum y línea base, migración `0001_base.sql`, manejo de errores estándar, `core/dinero.py`, `core/tiempo.py`, `GET /catalogos/enums`, `cli.py`, `tests/conftest.py`, pruebas de sistema/dinero/tiempo y `scripts/smoke.py --hasta 1` en verde.
 
 La Fase 3 (01/11/2026) agregó `core/permisos.py` (matriz rol → permisos), `requiere_permiso`, el módulo completo `GET/POST/PATCH /usuarios`, `POST /usuarios/{id}/restablecer-password`, la protección del último administrador y la prueba global de autorización que recorre `app.routes`; 53 pruebas en verde (14 nuevas en `tests/test_usuarios.py`) y Ruff limpio.
 
@@ -134,16 +134,19 @@ La Fase 6 cerró el 01/11/2026: migraciones `0006_vales` y `0007_disparadores` (
 
 La Fase 7 cerró el 01/11/2026 con `routers/consumos.py`, `services/consumos.py` y `schemas/consumos.py`: consumo exacto en galones o por importe con el precio congelado del vale, bloqueo `FOR UPDATE` sobre la fila del vale, reenvío idempotente por `token_operacion`, reversión enlazada con `movimiento_origen_id`, anulación y ajuste de saldo en `services/vales.py`, `procesar_vencimientos` con su comando y endpoint, y comprobante de consumo. 154 pruebas en verde (24 nuevas en `tests/test_consumos.py`), `smoke.py --hasta 7` completo (001-042) y `scripts/probar_concurrencia.py` con 6 aceptados, 4 rechazados y saldo final 10.00 sobre un vale de 100 galones. Ruff limpio.
 
-En la misma sesión se corrigieron tres defectos que bloqueaban el recorrido manual: `schema.sql` no reproducía cuatro columnas, dos CHECK y los dos disparadores `BEFORE TRUNCATE` de las migraciones; el hash del seed era inválido y los correos de demostración usaban el dominio reservado `.local`; y `RECAPTCHA_SECRET_KEY` traía un valor de relleno que forzaba la verificación real y rechazaba cualquier login local.
+La Fase 8 cerró el 01/11/2026 con `services/integridad.py`, `routers/auditoria.py`, `routers/panel.py`, `schemas/auditoria.py` y la migración `0008_integridad.sql`: verificación de saldos en una sola consulta, diferencias con refresco en el lugar y cierre con comentario, bitácora con filtros y paginación, historial por orden, vale, institución, usuario y combustible, indicador de diferencias sin revisar para el administrador y el comando `verificar-saldos` con código de salida 1. 176 pruebas en verde (22 nuevas en `tests/test_integridad.py` y `tests/test_auditoria.py`), `smoke.py --hasta 8` completo (001-050) y el comando probado contra un descuadre real en la base de desarrollo, con la fila revisada protegida por disparador. Ruff limpio.
+
+En la misma sesión de la Fase 7 se corrigieron tres defectos que bloqueaban el recorrido manual: `schema.sql` no reproducía cuatro columnas, dos CHECK y los dos disparadores `BEFORE TRUNCATE` de las migraciones; el hash del seed era inválido y los correos de demostración usaban el dominio reservado `.local`; y `RECAPTCHA_SECRET_KEY` traía un valor de relleno que forzaba la verificación real y rechazaba cualquier login local.
 
 - [x] **Fase 0** Entorno y repositorio (inicio: 31/10/2026 / fin: 31/10/2026)
-- [x] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: 31/10/2026 / fin: 31/10/2026) - [x] **Fase 2** Autenticación, sesiones y auditoría base (inicio: ____ / fin: 31/10/2026)
+- [x] **Fase 1** Esqueleto FastAPI, PostgreSQL y migraciones propias (inicio: 31/10/2026 / fin: 31/10/2026)
+- [x] **Fase 2** Autenticación, sesiones y auditoría base (inicio: ____ / fin: 31/10/2026)
 - [x] **Fase 3** Usuarios, roles y permisos (inicio: 31/10/2026 / fin: 01/11/2026; smoke `--hasta 3` verificado el 01/11/2026 sobre una base creada con `schema.sql`)
 - [x] **Fase 4** Configuración, combustibles y precios (inicio: 31/10/2026 / fin: 01/11/2026)
 - [x] **Fase 5** Instituciones y órdenes de compra (inicio: 01/11/2026 / fin: 01/11/2026)
 - [x] **Fase 6** Vales: emisión y vales de entidad (inicio: 01/11/2026 / fin: 01/11/2026)
 - [x] **Fase 7** Consumos y correcciones (inicio: 01/11/2026 / fin: 01/11/2026)
-- [ ] **Fase 8** Auditoría e integridad de saldos (inicio: ____ / fin: ____)
+- [x] **Fase 8** Auditoría e integridad de saldos (inicio: 01/11/2026 / fin: 01/11/2026)
 - [ ] **Fase 9** Motor OCR con RapidOCR (inicio: ____ / fin: ____)
 - [ ] **Fase 10** Dataset y evaluación del OCR (inicio: ____ / fin: ____)
 - [ ] **Fase 11** API de lectura OCR (inicio: ____ / fin: ____)
@@ -212,9 +215,10 @@ backend/
 │   │   ├── vales.py     ocr.py            auditoria.py     configuracion.py
 │   ├── schemas/                      # Pydantic de entrada y salida, por dominio
 │   ├── routers/                      # un archivo por módulo
-│   │   ├── sistema.py  auth.py  usuarios.py  configuracion.py  combustibles.py
-│   │   ├── instituciones.py  ordenes.py  ocr.py  vales.py  consumos.py
-│   │   ├── consultas.py  reportes.py  auditoria.py
+│   │   ├── sistema.py  catalogos.py  auth.py  usuarios.py  configuracion.py
+│   │   ├── combustibles.py  instituciones.py  ordenes.py  ocr.py
+│   │   ├── vales.py  consumos.py  consultas.py  reportes.py
+│   │   ├── auditoria.py  panel.py
 │   ├── services/                     # reglas de negocio (una función por caso de uso)
 │   │   ├── auth.py  usuarios.py  parametros.py  precios.py  instituciones.py
 │   │   ├── ordenes.py  vales.py  consumos.py  numeracion.py  integridad.py
@@ -254,7 +258,7 @@ backend/
     └── fixtures/                     # documentos mínimos sin datos reales
 ```
 
-**Implementado hasta ahora (cierre de Fase 7):** `pyproject.toml`, `.env.example`, `app/config.py`, `app/errors.py`, `app/cli.py`, `app/main.py`, `app/dependencies.py`, `app/core/*` (dinero, tiempo, permisos, dominio, seguridad, archivos, ruc), `app/db/sesion.py`, `app/db/migrar.py`, `app/db/migraciones/0001`-`0007`, los routers `sistema`, `catalogos`, `auth`, `usuarios`, `configuracion`, `combustibles`, `instituciones`, `ordenes`, `vales` y `consumos` con sus servicios y esquemas, `db/schema.sql`, `db/seed.sql`, `scripts/verificar_entorno.py`, `scripts/smoke.py`, `scripts/probar_concurrencia.py`, `tests/conftest.py` y las pruebas de sistema, dinero, tiempo, auth, usuarios, configuración, combustibles, instituciones, órdenes, vales y consumos. Los módulos de integridad, OCR, consultas y reportes siguen pendientes (Fases 8-12).
+**Implementado hasta ahora (cierre de Fase 8):** `pyproject.toml`, `.env.example`, `app/config.py`, `app/errors.py`, `app/cli.py` (incluido `verificar-saldos`), `app/main.py`, `app/dependencies.py`, `app/core/*` (dinero, tiempo, permisos, dominio, seguridad, archivos, ruc), `app/db/sesion.py`, `app/db/migrar.py`, `app/db/migraciones/0001`-`0008`, los routers `sistema`, `catalogos`, `auth`, `usuarios`, `configuracion`, `combustibles`, `instituciones`, `ordenes`, `vales`, `consumos`, `auditoria` y `panel` con sus servicios y esquemas, `db/schema.sql`, `db/seed.sql`, `scripts/verificar_entorno.py`, `scripts/smoke.py`, `scripts/probar_concurrencia.py`, `tests/conftest.py` y las pruebas de sistema, dinero, tiempo, auth, usuarios, configuración, combustibles, instituciones, órdenes, vales, consumos, integridad y auditoría. Los módulos de OCR, consultas y reportes siguen pendientes (Fases 9-12).
 
 Nota sobre bases con esquema legacy (`usuarios`, `usuario_id`, `vales.codigo_interno`): el plan no convierte esquemas heredados automáticamente. Para esas bases, respaldar los datos necesarios, eliminar los objetos payload y aplicar las migraciones desde una base vacía; la base de pruebas se reconstruyó así al cerrar la Fase 1.
 
@@ -805,22 +809,23 @@ En PostgreSQL, `SELECT ... FOR UPDATE` dentro de `READ COMMITTED` espera al bloq
 **Endpoints:** sección 5.13.
 
 Tareas:
-- [ ] Migración `0008_integridad.sql`: `verificaciones_integridad` (fecha, vales revisados, diferencias) y `diferencias_saldo` (verificación, vale, saldo almacenado, saldo recalculado, `revisada`, comentario).
-- [ ] `services/integridad.py`: una sola consulta que compara `vales.saldo` con la suma de `variacion` por vale, guarda el resultado y las diferencias nuevas; no repite avisos de diferencias ya revisadas salvo que reaparezcan.
-- [ ] Comando `python -m app.cli verificar-saldos` (código de salida 1 si hay diferencias) y endpoint a demanda.
-- [ ] Bitácora con filtros y paginación; historial por registro (`orden`, `vale`, `institucion`, `usuario`, `combustible`).
-- [ ] Indicador de diferencias sin revisar en `GET /panel/indicadores` (se completa en la Fase 12).
-- [ ] Pruebas: sin diferencias con datos coherentes; diferencia provocada y detectada; marcar como revisada; la aplicación (con `vales_app`) no puede modificar ni borrar `movimientos_vale` ni `auditoria` (error de permisos), y los disparadores lo impiden también para `vales_migrador`; `TRUNCATE` sobre esas tablas también se rechaza.
+- [x] Migración `0008_integridad.sql`: las tablas `verificaciones_integridad` (fecha, vales revisados, diferencias) y `diferencias_integridad` (verificación, vale, saldo almacenado, saldo recalculado, `revisada`, comentario) ya vienen de `0001_base.sql`, así que la migración las endurece: índice único parcial `ux_diferencias_pendientes_vale` (una sola diferencia pendiente por vale), índices `ix_verificaciones_fecha` e `ix_auditoria_accion_fecha`, y el disparador `diferencias_integridad_protegidas`, que en una fila pendiente solo permite refrescar los saldos comparados, congela las revisadas y rechaza todo `DELETE`. `db/schema.sql` queda sincronizado.
+- [x] `services/integridad.py`: una sola consulta con CTE que compara `vales.saldo` con la suma de `variacion` por vale (la emisión incluida), guarda la verificación y registra las diferencias; una pendiente se refresca en el lugar, una revisada con los mismos saldos no vuelve a avisar y un descuadre distinto o reincidente crea una fila nueva.
+- [x] Comando `python -m app.cli verificar-saldos` (código de salida 1 si hay diferencias) y `POST /auditoria/integridad/verificar` a demanda.
+- [x] Bitácora con filtros (usuario, acción, entidad y rango de fechas) y paginación; historial por registro para `orden`, `vale`, `institucion`, `usuario` y `combustible`. La emisión deja `vale_emitido` por cada vale, así el historial arranca en la emisión (AUD-04).
+- [x] Indicador de diferencias sin revisar en `GET /panel/indicadores`: solo el administrador lo recibe y el resto de indicadores llega en la Fase 12.
+- [x] Pruebas: `tests/test_integridad.py` (13) y `tests/test_auditoria.py` (9) cubren datos coherentes, descuadre provocado y detectado, refresco y cierre de la diferencia, la aplicación (`vales_app`) sin permiso para modificar o borrar `movimientos_vale` ni `auditoria`, los disparadores de `vales_migrador` y el `TRUNCATE` rechazado.
 
 **Entregable navegable:** bitácora, historial e integridad desde `/docs`.
 
 **Verificación:**
-- `python -m app.cli verificar-saldos` imprime "0 diferencias" con código 0.
-- Con `vales_migrador`: `UPDATE vales SET saldo = saldo + 1 WHERE id = 1`; el comando informa 1 diferencia y termina con código 1; `GET /auditoria/integridad/diferencias` la lista y `POST .../revisar` la marca con un comentario.
-- `UPDATE movimientos_vale SET variacion = 0` con `vales_app` falla por permisos.
-- `TRUNCATE movimientos_vale` con `vales_migrador` falla por el disparador `BEFORE TRUNCATE`.
-- En pgAdmin, la tabla `vales` del vale alterado muestra el saldo inflado y `diferencias_saldo` la fila pendiente de revisión.
-- `pytest tests/test_integridad.py tests/test_auditoria.py` en verde; `python scripts/smoke.py --hasta 8`.
+- `python -m app.cli verificar-saldos` imprime "Vales revisados: 12; 0 diferencias." con código 0.
+- Con `vales_migrador`: `UPDATE vales SET saldo = saldo - 1 WHERE id = 17` (el CHECK de `vales` impide superar `cantidad_inicial`, así que el descuadre se provoca hacia abajo); el comando informa 1 diferencia y termina con código 1; `GET /auditoria/integridad/diferencias?revisada=false` la lista con ambos saldos y `POST .../revisar` la marca con el comentario y el usuario. Repetir la revisión devuelve 409 `DIFERENCIA_YA_REVISADA`, y el disparador rechaza `UPDATE` y `DELETE` sobre la fila revisada (SQLSTATE 55000).
+- Restaurado el saldo original, el comando vuelve a "0 diferencias" con código 0; la diferencia revisada queda como evidencia histórica.
+- `UPDATE`/`DELETE` de `movimientos_vale` o `auditoria` con `vales_app` falla por permisos (42501).
+- `TRUNCATE movimientos_vale` con `vales_migrador` falla por el disparador `BEFORE TRUNCATE` (55000).
+- En pgAdmin, la tabla `vales` del vale alterado muestra el saldo descuadrado y `diferencias_integridad` la fila pendiente de revisión.
+- `pytest tests/test_integridad.py tests/test_auditoria.py` en verde; `pytest` completo con 176 pruebas; `python scripts/smoke.py --hasta 8` completo (001-050).
 
 **Habilita en Angular:** pantallas de bitácora, historial dentro de los detalles de orden y vale, e integridad de saldos.
 

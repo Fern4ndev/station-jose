@@ -992,6 +992,147 @@ async def _busca_por_numero_entidad(cliente: httpx.AsyncClient) -> str | None:
     return None
 
 
+# --- Fase 8: auditoría e integridad de saldos ------------------------------
+
+ESTADO_FASE_8: dict[str, object] = {}
+
+
+async def _login_admin_para_fase8(cliente: httpx.AsyncClient) -> str | None:
+    """Sesión del administrador del smoke para auditoría e integridad."""
+    return await _login_admin_para_fase7(cliente)
+
+
+async def _escenario_para_fase8(cliente: httpx.AsyncClient) -> str | None:
+    """Vale de 100 galones con un consumo de 30: saldo 70 y sus movimientos."""
+    falta = await _escenario_para_fase7(cliente)
+    if falta is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    consumo = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": str(uuid.uuid4()), "cantidad_galones": "30.00"},
+    )
+    if consumo.status_code != 201:
+        return f"POST consumos devolvió {consumo.status_code}: {consumo.text}"
+    ESTADO_FASE_8.update({"vale": vale, "movimiento": consumo.json()["id"]})
+    ESTADO_FASE_7.clear()
+    return None
+
+
+def _falta_escenario_fase8(*claves: str) -> str | None:
+    faltan = [clave for clave in claves if clave not in ESTADO_FASE_8]
+    if not faltan:
+        return None
+    return (
+        "Falta el escenario de la fase 8 ("
+        + ", ".join(faltan)
+        + "): el paso anterior no lo preparó."
+    )
+
+
+async def _verifica_saldos_sin_diferencias(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-05: con datos coherentes la verificación no encuentra descuadres."""
+    respuesta = await cliente.post("/api/v1/auditoria/integridad/verificar")
+    if respuesta.status_code != 200:
+        return f"POST verificar devolvió {respuesta.status_code}: {respuesta.text}"
+    datos = respuesta.json()
+    if datos["diferencias"] != 0:
+        return f"La verificación reportó {datos['diferencias']} diferencias."
+    if datos["vales_revisados"] < 1:
+        return "La verificación no revisó ningún vale."
+    ESTADO_FASE_8["verificacion"] = datos["id"]
+    return None
+
+
+async def _ultima_verificacion_coincide(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-05: la última corrida es la que se acaba de ejecutar."""
+    if (falta := _falta_escenario_fase8("verificacion")) is not None:
+        return falta
+    respuesta = await cliente.get("/api/v1/auditoria/integridad/ultima")
+    if respuesta.status_code != 200:
+        return f"GET integridad/ultima devolvió {respuesta.status_code}."
+    datos = respuesta.json()
+    if datos["verificacion"] is None:
+        return "La última verificación no quedó registrada."
+    if datos["verificacion"]["id"] != ESTADO_FASE_8["verificacion"]:
+        return "La última verificación no es la recién ejecutada."
+    if datos["diferencias_pendientes"] != 0:
+        return f"Hay {datos['diferencias_pendientes']} diferencias sin revisar."
+    return None
+
+
+async def _bitacora_registra_la_verificacion(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-03: la corrida deja su huella con usuario y resultado."""
+    respuesta = await cliente.get(
+        "/api/v1/auditoria/bitacora", params={"accion": "verificacion_integridad"}
+    )
+    if respuesta.status_code != 200:
+        return f"GET bitacora devolvió {respuesta.status_code}: {respuesta.text}"
+    datos = respuesta.json()
+    if datos["total"] < 1:
+        return "La verificación no dejó entrada en la bitácora."
+    fila = datos["items"][0]
+    if fila["entidad"] != "integridad" or not fila["usuario"]:
+        return f"Entrada de bitácora incompleta: {fila}"
+    return None
+
+
+async def _historial_del_vale(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-04: el historial del vale arranca en la emisión y trae el consumo."""
+    if (falta := _falta_escenario_fase8("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_8["vale"])
+    respuesta = await cliente.get(f"/api/v1/auditoria/historial/vale/{vale}")
+    if respuesta.status_code != 200:
+        return f"GET historial devolvió {respuesta.status_code}: {respuesta.text}"
+    acciones = [item["accion"] for item in respuesta.json()["items"]]
+    for esperada in ("vale_emitido", "consumo_registrado"):
+        if esperada not in acciones:
+            return f"El historial del vale no registra {esperada}: {acciones}"
+    return None
+
+
+async def _saldo_cuadra_con_sus_movimientos(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-05: la suma de variaciones del historial es el saldo del vale."""
+    if (falta := _falta_escenario_fase8("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_8["vale"])
+    detalle = await cliente.get(f"/api/v1/vales/{vale}")
+    movimientos = await cliente.get(f"/api/v1/vales/{vale}/movimientos")
+    if detalle.status_code != 200 or movimientos.status_code != 200:
+        return "No se pudo leer el vale o su historial de movimientos."
+    saldo = detalle.json()["saldo"]
+    if saldo != "70.00":
+        return f"El saldo del vale no es 70.00: {saldo}"
+    suma = sum(float(m["variacion"]) for m in movimientos.json())
+    if round(suma, 2) != float(saldo):
+        return f"La suma de variaciones ({suma}) no cuadra con el saldo ({saldo})."
+    return None
+
+
+async def _sin_diferencias_pendientes(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-06: la base de desarrollo queda sin alertas abiertas."""
+    respuesta = await cliente.get(
+        "/api/v1/auditoria/integridad/diferencias", params={"revisada": False}
+    )
+    if respuesta.status_code != 200:
+        return f"GET diferencias devolvió {respuesta.status_code}: {respuesta.text}"
+    total = respuesta.json()["total"]
+    if total != 0:
+        return (
+            f"Quedan {total} diferencias sin revisar; ciérrelas con el endpoint "
+            "de revisión antes de dar la fase por cerrada."
+        )
+    panel = await cliente.get("/api/v1/panel/indicadores")
+    if panel.status_code != 200:
+        return f"GET panel/indicadores devolvió {panel.status_code}."
+    if panel.json()["diferencias_sin_revisar"] != 0:
+        return f"El panel informa {panel.json()['diferencias_sin_revisar']} pendientes."
+    cliente.headers.pop("Authorization", None)
+    ESTADO_FASE_8.clear()
+    return None
+
+
 FASES: tuple[Fase, ...] = (
     {
         "numero": 1,
@@ -1075,6 +1216,20 @@ FASES: tuple[Fase, ...] = (
             ("040 reversión del consumo y doble reversión 409", _revertir_como_admin),
             ("041 anulación del vale con compromiso en lo consumido", _anula_vale),
             ("042 orden con consumos no se anula", _orden_con_consumos_no_se_anula),
+        ),
+    },
+    {
+        "numero": 8,
+        "titulo": "Auditoría e integridad de saldos",
+        "comprobaciones": (
+            ("043 login del administrador del smoke", _login_admin_para_fase8),
+            ("044 escenario: vale de 100 con un consumo de 30", _escenario_para_fase8),
+            ("045 la verificación no halla diferencias", _verifica_saldos_sin_diferencias),
+            ("046 la última verificación es la recién ejecutada", _ultima_verificacion_coincide),
+            ("047 la verificación queda en la bitácora", _bitacora_registra_la_verificacion),
+            ("048 el historial del vale arranca en la emisión", _historial_del_vale),
+            ("049 el saldo cuadra con sus movimientos", _saldo_cuadra_con_sus_movimientos),
+            ("050 sin diferencias pendientes y el panel en cero", _sin_diferencias_pendientes),
         ),
     },
 )

@@ -325,6 +325,7 @@ CREATE TABLE IF NOT EXISTS auditoria (
 );
 CREATE INDEX IF NOT EXISTS ix_auditoria_usuario_fecha ON auditoria (app_user_id, creado_en DESC);
 CREATE INDEX IF NOT EXISTS ix_auditoria_entidad_fecha ON auditoria (entidad, entidad_id, creado_en DESC);
+CREATE INDEX IF NOT EXISTS ix_auditoria_accion_fecha ON auditoria (accion, creado_en DESC);
 CREATE INDEX IF NOT EXISTS ix_auditoria_fecha ON auditoria (creado_en DESC);
 
 CREATE TABLE IF NOT EXISTS verificaciones_integridad (
@@ -334,6 +335,7 @@ CREATE TABLE IF NOT EXISTS verificaciones_integridad (
     diferencias        integer NOT NULL DEFAULT 0 CHECK (diferencias >= 0),
     creado_en           timestamptz NOT NULL DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS ix_verificaciones_fecha ON verificaciones_integridad (creado_en DESC);
 
 CREATE TABLE IF NOT EXISTS diferencias_integridad (
     id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -350,6 +352,9 @@ CREATE TABLE IF NOT EXISTS diferencias_integridad (
 );
 CREATE INDEX IF NOT EXISTS ix_diferencias_pendientes ON diferencias_integridad (revisada, creado_en DESC) WHERE NOT revisada;
 CREATE INDEX IF NOT EXISTS ix_diferencias_vale ON diferencias_integridad (vale_id, creado_en DESC);
+-- Una sola alerta pendiente por vale: la verificación refresca la abierta
+-- en lugar de duplicarla (0008_integridad).
+CREATE UNIQUE INDEX IF NOT EXISTS ux_diferencias_pendientes_vale ON diferencias_integridad (vale_id) WHERE NOT revisada;
 
 CREATE TABLE IF NOT EXISTS impresiones_vale (
     id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -391,6 +396,40 @@ DROP TRIGGER IF EXISTS auditoria_sin_truncate ON auditoria;
 CREATE TRIGGER auditoria_sin_truncate
 BEFORE TRUNCATE ON auditoria
 FOR EACH STATEMENT EXECUTE FUNCTION rechazar_mutacion_inmutable();
+
+-- La diferencia detectada es evidencia (0008_integridad): pendiente solo
+-- admite refresco de los saldos comparados; revisada queda congelada y nunca
+-- se elimina.
+CREATE OR REPLACE FUNCTION proteger_diferencia_integridad()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF TG_OP = 'DELETE' THEN
+        RAISE EXCEPTION 'La diferencia % es evidencia de auditoría y no se elimina', OLD.id
+            USING ERRCODE = '55000';
+    END IF;
+    IF OLD.revisada THEN
+        RAISE EXCEPTION 'La diferencia % ya fue revisada y no se modifica', OLD.id
+            USING ERRCODE = '55000';
+    END IF;
+    IF NEW.id <> OLD.id
+       OR NEW.vale_id <> OLD.vale_id
+       OR NEW.creado_en IS DISTINCT FROM OLD.creado_en THEN
+        RAISE EXCEPTION 'El origen de la diferencia % es inmutable', OLD.id
+            USING ERRCODE = '55000';
+    END IF;
+    IF NEW.revisada AND NEW.revisada_en IS NULL THEN
+        NEW.revisada_en := now();
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS diferencias_integridad_protegidas ON diferencias_integridad;
+CREATE TRIGGER diferencias_integridad_protegidas
+BEFORE UPDATE OR DELETE ON diferencias_integridad
+FOR EACH ROW EXECUTE FUNCTION proteger_diferencia_integridad();
 
 CREATE OR REPLACE FUNCTION actualizar_timestamp()
 RETURNS trigger

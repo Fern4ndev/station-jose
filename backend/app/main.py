@@ -9,6 +9,7 @@ from app.config import obtener_settings
 from app.db.sesion import motor
 from app.errors import registrar_manejadores
 from app.routers import (
+    auditoria,
     auth,
     catalogos,
     combustibles,
@@ -16,6 +17,7 @@ from app.routers import (
     consumos,
     instituciones,
     ordenes,
+    panel,
     sistema,
     usuarios,
     vales,
@@ -49,4 +51,6 @@ app.include_router(ordenes.router, prefix=ajustes.api_v1_prefix)
 app.include_router(vales.router_emision, prefix=ajustes.api_v1_prefix)
 app.include_router(vales.router_vales, prefix=ajustes.api_v1_prefix)
 app.include_router(consumos.router, prefix=ajustes.api_v1_prefix)
+app.include_router(auditoria.router, prefix=ajustes.api_v1_prefix)
+app.include_router(panel.router, prefix=ajustes.api_v1_prefix)
 registrar_manejadores(app)

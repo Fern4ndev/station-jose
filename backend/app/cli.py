@@ -11,6 +11,9 @@ Comandos disponibles en la Fase 2:
 - `sembrar-demo --catalogos [--test]`
                              siembra combustibles de ejemplo (Diésel B5,
                              Gasohol 90, Gasohol 95, GLP) y su precio del día.
+- `vencimientos`             marca vencidos los vales activos por fecha (VAL-09).
+- `verificar-saldos`         compara cada saldo con sus movimientos y sale con
+                             código 1 si encuentra diferencias (AUD-05).
 
 Las conexiones de migración salen de `backend/.env` (`MIGRADOR_URL`); con
 `--test` se usa `MIGRADOR_URL_TEST` para la base de pruebas.
@@ -91,6 +94,10 @@ def construir_parser() -> argparse.ArgumentParser:
     comandos.add_parser(
         "vencimientos",
         help="marca vencidos los vales activos cuya fecha ya pasó (VAL-09)",
+    )
+    comandos.add_parser(
+        "verificar-saldos",
+        help="compara cada saldo con sus movimientos; código 1 si hay diferencias (AUD-05)",
     )
     return parser
 
@@ -200,6 +207,34 @@ async def ejecutar_vencimientos() -> int:
     return 0
 
 
+async def ejecutar_verificar_saldos() -> int:
+    """AUD-05: verifica los saldos y devuelve 1 si encontró diferencias.
+
+    Pensado para una tarea programada: cada corrida queda registrada en
+    `verificaciones_integridad` (y sus descuadres en `diferencias_integridad`),
+    así que el código de salida solo tiene que avisar al operador.
+    """
+    from app.db.sesion import FabricaSesiones
+    from app.services import integridad
+
+    async with FabricaSesiones() as sesion:
+        resultado = await integridad.verificar(sesion)
+        await sesion.commit()
+
+    print(
+        f"Vales revisados: {resultado['vales_revisados']}; "
+        f"{resultado['diferencias']} diferencias."
+    )
+    if resultado["diferencias"]:
+        print(
+            "Revise GET /api/v1/auditoria/integridad/diferencias y cierre cada "
+            "una con su comentario.",
+            file=sys.stderr,
+        )
+        return 1
+    return 0
+
+
 async def ejecutar_sembrar_demo(usar_pruebas: bool) -> int:
     """Semilla catálogos de ejemplo (Fase 4): combustibles y precios iniciales.
 
@@ -277,6 +312,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return asyncio.run(ejecutar_sembrar_demo(args.test))
     if args.comando == "vencimientos":
         return asyncio.run(ejecutar_vencimientos())
+    if args.comando == "verificar-saldos":
+        return asyncio.run(ejecutar_verificar_saldos())
     return 2
 
 

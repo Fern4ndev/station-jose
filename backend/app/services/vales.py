@@ -303,6 +303,25 @@ async def emitir_estacion(
         ip=ip,
         user_agent=user_agent,
     )
+    # AUD-04: cada vale nace con su propia entrada, además del lote de la
+    # orden, para que su historial arranque en la emisión.
+    for emitido in emitidos:
+        await auditoria.registrar(
+            sesion,
+            usuario_id=actor_id,
+            accion="vale_emitido",
+            entidad="vales",
+            entidad_id=int(emitido["id"]),
+            despues={
+                "numero_estacion": emitido["numero_estacion"],
+                "cantidad_inicial": emitido["cantidad_inicial"],
+                "valor_soles": emitido["valor_soles"],
+                "combustible_id": combustible_id,
+                "orden_compra_id": orden_id,
+            },
+            ip=ip,
+            user_agent=user_agent,
+        )
     return emitidos
 
 
@@ -536,6 +555,23 @@ async def registrar_entidad(
         despues={
             "numero_entidad": numero_limpio,
             "valor_soles": dinero.como_texto(valor),
+        },
+        ip=ip,
+        user_agent=user_agent,
+    )
+    # AUD-04: el vale de entidad también arranca su propio historial.
+    await auditoria.registrar(
+        sesion,
+        usuario_id=actor_id,
+        accion="vale_entidad_registrado",
+        entidad="vales",
+        entidad_id=id_vale,
+        despues={
+            "numero_entidad": numero_limpio,
+            "cantidad_inicial": dinero.como_texto(cantidad_dec),
+            "valor_soles": dinero.como_texto(valor),
+            "combustible_id": combustible_id,
+            "orden_compra_id": orden["id"],
         },
         ip=ip,
         user_agent=user_agent,
