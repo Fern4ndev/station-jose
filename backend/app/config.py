@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     migrador_url_test: str = ""
 
     ocr_device: str = "cpu"
+    ocr_concurrencia: int = 2  # lecturas simultáneas del motor (semáforo)
+    ocr_tiempo_segundos: float = 120.0  # tope por documento
+    ocr_turno_segundos: float = 5.0  # espera máxima por un turno
+    ocr_dpi: int = 300  # densidad al renderizar un PDF escaneado
     almacenamiento_dir: Path = RAIZ / "almacenamiento"
     frontend_dist: Path = RAIZ.parent / "dist" / "frontend" / "browser"
 

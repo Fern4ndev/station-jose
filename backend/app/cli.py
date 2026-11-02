@@ -14,6 +14,9 @@ Comandos disponibles en la Fase 2:
 - `vencimientos`             marca vencidos los vales activos por fecha (VAL-09).
 - `verificar-saldos`         compara cada saldo con sus movimientos y sale con
                              código 1 si encuentra diferencias (AUD-05).
+- `ocr-probar <archivo>`    lee un PDF/JPG/PNG con el motor OCR (Fase 9) e
+                             imprime la extracción en JSON con la
+                             confianza por campo.
 
 Las conexiones de migración salen de `backend/.env` (`MIGRADOR_URL`); con
 `--test` se usa `MIGRADOR_URL_TEST` para la base de pruebas.
@@ -21,15 +24,18 @@ Las conexiones de migración salen de `backend/.env` (`MIGRADOR_URL`); con
 
 import argparse
 import asyncio
+import json
 import sys
 from collections.abc import Sequence
 from contextlib import suppress
+from pathlib import Path as RutaSistema
 
 import asyncpg
 
 from app.config import obtener_settings
 from app.core import seguridad
 from app.db import migrar
+from app.errors import ErrorDominio
 
 # CMB-01: catálogo de ejemplo del plan (Fase 4, `sembrar-demo --catalogos`).
 # Precio y vigencia inicial a título ilustrativo para desarrollo.
@@ -90,6 +96,12 @@ def construir_parser() -> argparse.ArgumentParser:
     demo_parser.add_argument(
         "--test", action="store_true", help="siembra en la base de pruebas"
     )
+
+    ocr_parser = comandos.add_parser(
+        "ocr-probar",
+        help="lee un PDF/JPG/PNG con el motor OCR e imprime el JSON (Fase 9)",
+    )
+    ocr_parser.add_argument("archivo", help="ruta del PDF, JPG o PNG a procesar")
 
     comandos.add_parser(
         "vencimientos",
@@ -207,6 +219,57 @@ async def ejecutar_vencimientos() -> int:
     return 0
 
 
+def ejecutar_ocr_probar(ruta: str) -> int:
+    """Fase 9: corre el pipeline de OCR sobre un archivo e imprime el JSON.
+
+    Es el entregable navegable de la fase: la salida muestra los campos, la
+    confianza por campo, el método de lectura, las advertencias y el motivo
+    de falla, igual que los consumirá la revisión en pantalla de la Fase 11.
+    """
+    from app.services.ocr.pipeline import AjustesOcr, procesar
+
+    archivo = RutaSistema(ruta)
+    if not archivo.is_file():
+        print(f"FALLA: no existe el archivo {ruta}.", file=sys.stderr)
+        return 2
+
+    ajustes_app = obtener_settings()
+    ajustes = AjustesOcr(
+        dpi=ajustes_app.ocr_dpi,
+        paginas_max=5,
+        megapixeles_max=25.0,
+        tiempo_segundos=ajustes_app.ocr_tiempo_segundos,
+        turno_segundos=ajustes_app.ocr_turno_segundos,
+        umbral_confianza=0.8,
+        concurrencia=ajustes_app.ocr_concurrencia,
+    )
+    try:
+        extraccion = procesar(archivo.read_bytes(), ajustes=ajustes)
+    except ErrorDominio as exc:
+        print(f"FALLA: {exc.codigo}: {exc.mensaje}", file=sys.stderr)
+        return 1
+
+    datos = {
+        "estado": extraccion.estado,
+        "metodo": extraccion.metodo,
+        "paginas": extraccion.paginas,
+        "tiempo_ms": extraccion.tiempo_ms,
+        "motivo": extraccion.motivo,
+        "campos": [
+            {
+                "clave": campo.clave,
+                "valor": campo.valor,
+                "confianza": round(campo.confianza, 4),
+                "requiere_revision": campo.requiere_revision,
+            }
+            for campo in extraccion.campos
+        ],
+        "advertencias": list(extraccion.advertencias),
+    }
+    print(json.dumps(datos, ensure_ascii=False, indent=2))
+    return 0 if extraccion.estado == "lista" else 1
+
+
 async def ejecutar_verificar_saldos() -> int:
     """AUD-05: verifica los saldos y devuelve 1 si encontró diferencias.
 
@@ -314,6 +377,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return asyncio.run(ejecutar_vencimientos())
     if args.comando == "verificar-saldos":
         return asyncio.run(ejecutar_verificar_saldos())
+    if args.comando == "ocr-probar":
+        return ejecutar_ocr_probar(args.archivo)
     return 2
 
 
