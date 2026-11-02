@@ -2,7 +2,7 @@
 
 **Proyecto:** Sistema web con OCR para la gestión de combustible institucional, estación de servicio San José, Abancay
 **Documento complementario de:** `plan-implementacion-backend-fastapi.md` y `requerimientos-funcionales-sistema.md` (v3.0)
-**Versión del plan:** 3.1 (reemplaza a `plan-implementacion-frontend.md`, basado en Livewire; la 3.1 acompaña el cambio del backend a PostgreSQL 16 o superior con pgAdmin 4)
+**Versión del plan:** 3.2 (reemplaza a `plan-implementacion-frontend.md`, basado en Livewire; la 3.1 acompañó el cambio del backend a PostgreSQL 16 con pgAdmin 4; la 3.2 fija el proyecto Angular en la **raíz del repositorio**, sin carpeta `frontend/`, y autoriza PrimeNG, `iconify-icon`, Tailwind y `chart.js`)
 **Fecha de corte del estado:** 30 de octubre de 2026
 
 **Cómo usar este archivo:** cada tarea es una casilla. Al terminarla, cambia `- [ ]` por `- [x]`. Un bloque se cierra solo cuando pasa su **Verificación**. Cada bloque está conectado a datos reales del backend desde el primer día y termina en algo **navegable** (pantallas que se abren en el navegador) y **verificable** (pruebas automáticas y un recorrido guiado con datos reales).
@@ -47,22 +47,24 @@
 
 **OCR:** el flujo de Oficina acepta PDF e imágenes y presenta el original junto a campos extraídos por RapidOCR, confianza/advertencias y controles para corregir antes de confirmar.
 
-**Arquitectura.** Aplicación de una sola página (SPA) en Angular 21.2.0, dentro de `frontend/`. En producción se compila a archivos estáticos y los sirve el backend FastAPI desde el mismo origen que la API (`/api/v1`); en desarrollo, `ng serve` hace de proxy hacia el backend. Un solo origen evita CORS; la política de tokens se configura según el transporte seguro acordado con el backend.
+**Arquitectura.** Aplicación de una sola página (SPA) en Angular 21.2.0 que vive en la **raíz del repositorio**, junto a `backend/`: `angular.json`, `package.json`, `tsconfig*.json`, `src/` y `public/` cuelgan directamente de la raíz. En producción se compila a archivos estáticos y los sirve el backend FastAPI desde el mismo origen que la API (`/api/v1`); en desarrollo, `ng serve` hace de proxy hacia el backend. Un solo origen evita CORS; la política de tokens se configura según el transporte seguro acordado con el backend.
 
 **Restricciones acordadas y cómo se cumplen:**
 - **Sin SSR:** se crea el proyecto con la opción de renderizado en servidor desactivada; la compilación es solo de navegador.
 - **Sin PWA:** sin `service worker`, sin manifiesto y sin modo sin conexión. La caché la controla el servidor con cabeceras HTTP.
 - **Sin state manager externo:** el estado vive en servicios propios con `signal` de Angular (sesión, catálogos, avisos), en el estado local de cada pantalla y en la URL (filtros y paginación). La fuente de verdad es la API.
-- **Sin librerías nuevas más allá de lo instalado:** solo lo que genera `ng new` en Angular 21.2.0. No se agregan Angular Material, CDK, NgRx, librerías de gráficos, tablas, fechas, iconos, PDF ni de pruebas de navegador. Un script (`scripts/verificar-dependencias.mjs`) compara `package.json` con la instantánea tomada al crear el proyecto y falla si aparece algo más.
+- **Lista cerrada de dependencias de interfaz.** Además de lo que genera `ng new` (núcleo, router, formularios, `HttpClient`, RxJS), se autorizan explícitamente **solo** estos paquetes: **PrimeNG 21** (tabla, paginador, diálogo, avisos, combos, calendario y gráficos), **`@primeuix/themes`** (preset de tema de PrimeNG), **`primeicons`** (iconos internos que PrimeNG exige), **`iconify-icon`** (iconografía propia de la aplicación), **`chart.js`** (motor de `p-chart`) y **Tailwind 4** con **`@tailwindcss/postcss`** (maquetación). `@angular/cdk` llega como dependencia de PrimeNG y se acepta por esa vía. No se agregan Angular Material, NgRx, librerías de PDF ni de pruebas de navegador. `scripts/verificar-dependencias.mjs` compara `package.json` con la lista blanca de `docs/dependencias-base.json` y falla ante cualquier paquete fuera de ella.
 
 **Lo que trae Angular 21.2.0 y se aprovecha:** cambio de detección sin `zone.js` por defecto (zoneless), `HttpClient` disponible desde el inicio, Vitest como ejecutor de pruebas por defecto (`ng test`), señales, control de flujo en plantillas (`@if`, `@for`, `@switch`, `@defer`) y componentes independientes (standalone). Se comprueba al crear el proyecto.
 
 **Decisiones del frontend:**
 - **Formularios reactivos tipados**, no Signal Forms: en Angular 21.2.0 Signal Forms es experimental.
-- **Diálogos con el elemento nativo `<dialog>`** (`showModal()`): trampa de foco y tecla Escape incluidas, sin CDK.
-- **Gráficos de barras y líneas en SVG propio**, con una tabla equivalente para accesibilidad.
+- **Diálogos con `p-dialog` de PrimeNG**: aporta trampa de foco, cierre con Escape, bloqueo del fondo y API declarativa sin código propio. El diálogo de motivo obligatorio (anular, ajustar, revertir) se construye sobre él.
+- **Gráficos con `p-chart` (PrimeNG sobre `chart.js`)** para barras y líneas, **siempre** acompañados de una tabla equivalente en un `<details>`: un `canvas` por sí solo no es accesible para lectores de pantalla, y el requisito de accesibilidad no se delega a la librería.
 - **PDF por impresión del navegador:** el backend entrega datos en JSON; Angular los muestra en vistas preparadas para imprimir (`@media print`) y el usuario imprime o usa "Guardar como PDF".
-- **Código de barras Code 128 propio en SVG** para el vale (RF-VAL-12), probado con vectores del estándar y con un lector real.
+- La impresión y búsqueda de vales usan su numeración de estación o entidad; no se dibujan códigos de barras ni QR.
+- **Iconografía con `iconify-icon`** (`<iconify-icon icon="...">`) para los iconos propios de la interfaz; `primeicons` queda solo donde PrimeNG lo usa internamente. Para que producción no dependa de la API pública de Iconify, los iconos que se usen se registran desde paquetes locales de `@iconify-json/*` en el arranque de la aplicación.
+- **Estilos con Tailwind 4 para la maquetación** (rejillas, espaciado, utilidades) y el sistema de temas de PrimeNG para los componentes. El orden de capas se declara con `theme.options.cssLayer` en `providePrimeNG` (`{ name: 'primeng', order: 'theme, base, primeng' }`), que es el mecanismo oficial de interoperabilidad con Tailwind 4: así el *preflight* no pisa los estilos de PrimeNG.
 - **Dinero sin `float`:** los montos llegan como cadenas decimales. El cliente nunca suma ni redondea montos; solo los muestra y hace comprobaciones informativas con enteros (`bigint`). La regla definitiva siempre la aplica el backend.
 - **Fechas sin conversiones accidentales:** las fechas sin hora (`2027-03-15`) se manejan como cadenas; los instantes se muestran con el desfase fijo de Lima (`-0500`), sin depender de la zona horaria del navegador.
 - **Autenticación con JWT:** access token de vida corta en memoria y refresh token rotatorio en cookie HttpOnly/Secure/SameSite si el despliegue permite cookie; nunca guardar tokens en `localStorage`. Validar reCAPTCHA v3 en el inicio de sesión; Angular no decide si el score es válido.
@@ -83,8 +85,8 @@
 Documentación y diseño:
 - [x] Especificación de requerimientos funcionales v3.0 (roles Oficina/Despachador y autenticación con reCAPTCHA/JWT)
 - [x] Plan de backend v4.0 en FastAPI (15 fases; catálogo de endpoints por validar)
-- [x] Stack definido: Angular 21.2.0, FastAPI, PostgreSQL y OCR con RapidOCR
-- [x] Restricciones definidas (sin SSR, PWA, state manager ni librerías nuevas)
+- [x] Stack definido: Angular 21.2.0 + PrimeNG 21 + Tailwind 4 + `iconify-icon`, FastAPI, PostgreSQL y OCR con RapidOCR
+- [x] Restricciones definidas (sin SSR, PWA ni state manager; lista cerrada de dependencias de interfaz)
 - [x] Plan anterior de frontend en Livewire (reemplazado por este plan)
 - [ ] Bocetos de baja fidelidad validados con 2 o 3 usuarios (despacho, revisión OCR y consulta de saldo)
 - [ ] Brechas del backend resueltas (sección 4.4)
@@ -124,7 +126,7 @@ Cada bloque indica la fase del backend de la que depende.
 3. El bloque 10 (OCR) depende de la Fase 11 del backend; el motor y la evaluación del OCR (Fases 9 y 10) no afectan al frontend.
 4. Los bloques 13 y 14 cierran.
 
-**Cómo conviven los dos procesos en desarrollo:** `fastapi dev` en `backend/` (puerto 8000) y `ng serve` en `frontend/` (puerto 4200). Siempre se trabaja abriendo `http://localhost:4200`.
+**Cómo conviven los dos procesos en desarrollo:** `fastapi dev` en `backend/` (puerto 8000) y `ng serve` en la raíz del repositorio (puerto 4200). Siempre se trabaja abriendo `http://localhost:4200`.
 
 ---
 
@@ -133,45 +135,62 @@ Cada bloque indica la fase del backend de la que depende.
 ## 3. Estructura de carpetas
 
 ```
-frontend/
-├── angular.json  package.json  tsconfig*.json     # los genera el CLI
+station-jose/                        # raíz del repositorio = proyecto Angular
+├── angular.json  package.json  tsconfig*.json   # los genera el CLI
 ├── proxy.conf.json                  # /api, /docs y /openapi.json hacia el backend (solo desarrollo)
 ├── contrato/
 │   └── openapi.json                 # copia del contrato del backend, actualizada en cada fase
 ├── scripts/
-│   └── verificar-dependencias.mjs   # compara package.json con la instantánea inicial
+│   └── verificar-dependencias.mjs   # compara package.json con la lista blanca
 ├── docs/
-│   ├── dependencias-base.json       # instantánea de dependencias tras `ng new`
+│   ├── dependencias-base.json       # lista blanca de dependencias autorizadas
 │   └── guiones/                     # guion de verificación manual de cada bloque
-├── public/                          # favicon
+├── public/                          # favicon y estáticos
+├── backend/                         # FastAPI (plan aparte)
 └── src/
-    ├── index.html  main.ts  styles.css
+    ├── index.html  main.ts  styles.css   # styles.css: capas de Tailwind + tema PrimeNG
+    ├── assets/
+    ├── environments/
+    │   └── environment.ts           # apiUrl relativo: '/api/v1'
     └── app/
-        ├── app.config.ts            # providers: router, HttpClient, locale, inicializador de sesión
+        ├── app.config.ts            # providers: router, HttpClient, PrimeNG, locale, inicializador
         ├── app.routes.ts            # rutas con carga diferida por módulo
-        ├── layout/                  # estructura principal: cabecera, menú, buscador global, avisos
-        ├── nucleo/                  # servicios únicos de toda la aplicación
+        ├── core/                    # servicios únicos de toda la aplicación
         │   ├── api/                 # cliente.ts, endpoints.ts, errores.ts, paginacion.ts, descargas.ts
-        │   ├── auth/                # auth.store.ts, auth.api.ts, guardas.ts, interceptores.ts
-        │   ├── catalogos/           # catalogos.store.ts (GET /catalogos/enums)
-        │   ├── formato/             # dinero.ts, fechas.ts, locale-es-pe.ts, pipes
-        │   └── utilidades/          # uuid.ts, carga.ts, filtros-url.ts, formularios.ts
-        ├── compartido/              # componentes y directivas sin lógica de negocio
-        │   ├── ui/                  # tabla, paginador, badge-estado, aviso, dialogo, campo,
-        │   │                        # campo-cantidad, combobox, vacio, cargando, encabezado-pagina,
-        │   │                        # confirmar-motivo, temporizador-espera
-        │   ├── graficos/            # grafico-barras, grafico-lineas
-        │   ├── impresion/           # hoja-impresion, codigo-barras-128
-        │   ├── documentos/          # visor-documento
-        │   └── directivas/          # puede (según permisos)
-        └── funcionalidades/         # un directorio por módulo, cada uno con su archivo de rutas
-            ├── acceso/  usuarios/  configuracion/  combustibles/  instituciones/  ordenes/
-            ├── vales/   despacho/  auditoria/      ocr/           consultas/      reportes/
-            ├── panel/   impresion/
-            └── (en cada una) *.routes.ts · *.api.ts · modelos.ts · paginas/ · componentes/
+        │   ├── constants/           # tokens de inyección, claves, regex, enums fijos
+        │   ├── guards/              # autenticadoGuard, permisoGuard, cambioPasswordGuard
+        │   ├── interceptors/        # auth, errores, sesión
+        │   ├── models/              # tipos globales: Usuario, Sesion, Pagina<T>, ErrorApi
+        │   └── services/            # auth, catálogos, avisos, formato, utilidades
+        ├── layouts/                 # cascarones visuales, sin lógica de negocio
+        │   ├── admin/               # header + sidebar + <router-outlet>
+        │   │   └── components/
+        │   │       ├── header/
+        │   │       └── sidebar/
+        │   └── auth/                # ingreso, recuperación, restablecimiento
+        ├── shared/                  # reutilizable y sin lógica de negocio
+        │   ├── components/          # envoltorios de PrimeNG, badge-estado, vacio, encabezado-pagina
+        │   ├── directives/          # puede (según permisos)
+        │   ├── pipes/               # moneda, galones, fecha, instante
+        │   ├── utils/               # uuid.ts, carga.ts, filtros-url.ts, formularios.ts
+        │   └── validators/          # validadores reactivos propios
+        └── features/                # un directorio por módulo, con sus propias rutas
+            ├── auth/  usuarios/  configuracion/  combustibles/  instituciones/  ordenes/
+            ├── vales/ despacho/  auditoria/      ocr/           consultas/      reportes/
+            ├── panel/ impresion/
+            └── (en cada una) *.routes.ts · *.api.ts · *.model.ts · pages/ · components/
 ```
 
-**Convención de nombres.** Archivos en minúsculas con guiones. Sufijos propios: `.pagina.ts` (componente con ruta), `.api.ts` (llamadas HTTP de un módulo), `.store.ts` (estado con señales), `.spec.ts` (pruebas, junto al archivo que prueban). Nombres de clases, funciones y variables en español, igual que el backend.
+**Qué va en cada carpeta.**
+
+| Carpeta | Contenido | Regla de dependencia |
+|---|---|---|
+| `core/` | Servicios singleton (`providedIn: 'root'`), guardas, interceptores, modelos globales, `environment` | No importa nada de `features/` ni de `shared/` |
+| `shared/` | Piezas presentacionales puras, pipes, directivas, utilidades y validadores | No importa de `features/`; no inyecta servicios de negocio |
+| `features/` | Un módulo de negocio autocontenido con sus rutas, páginas, API y servicios | No importa de otro `features/`; si comparte algo, sube a `shared/` o `core/` |
+| `layouts/` | Cabecera, menú y `<router-outlet>`; solo estructura visual | No conoce `features/`; usa `shared/` y `core/` |
+
+**Convención de nombres.** Carpetas y estructura en inglés (`core/`, `shared/`, `features/`, `layouts/`), que es la convención universal de Angular y no choca con el CLI. Sufijos de archivo: `.routes.ts` (rutas del módulo), `.api.ts` (llamadas HTTP), `.model.ts` (tipos del dominio), `.store.ts` (estado con señales), `.page.ts` (componente asociado a una ruta), `.service.ts`, `.guard.ts`, `.interceptor.ts`, `.pipe.ts`, `.spec.ts`. **El dominio se nombra en español**, igual que la API y la base de datos: `vales.service.ts`, `orden-compra.model.ts`, `precio_galon`. Los controles de formulario llevan exactamente el nombre del campo de la API para que los `422` se asignen solos (sección 4.1).
 
 ---
 
@@ -218,15 +237,15 @@ Los permisos llegan en `GET /auth/yo` (`sesion`, `usuarios.gestionar`, `ordenes.
 
 El catálogo de endpoints del backend define las pantallas; la cobertura se confirmará al actualizar el contrato OpenAPI. Faltan estas piezas de apoyo, que deben existir en la fase indicada para poder verificar los bloques del frontend con datos reales:
 
-- [ ] **G1. Datos de demostración completos** (Fases 4 a 7): `python -m app.cli sembrar-demo` debe crear, además de los catálogos, tres usuarios (administrador, Oficina y Despachador) con la contraseña conocida de demostración y sin cambio obligatorio (solo con `ENTORNO=desarrollo`), instituciones con las dos modalidades de numeración, órdenes en distintos estados, vales de la estación y de entidad, y consumos.
-- [ ] **G2. Exportar el contrato desde la Fase 1:** `python -m app.cli exportar-openapi` escribe `backend/openapi.json`; se copia a `frontend/contrato/` al cerrar cada fase del backend (hoy el plan lo guarda recién en la Fase 13).
+- [ ] **G1. Datos de demostración completos** (Fases 4 a 7): `backend/db/seed.sql` debe crear, además de los catálogos, tres usuarios (administrador, Oficina y Despachador) con `must_change_password = NULL`, instituciones con las dos modalidades de numeración, órdenes en distintos estados, vales de la estación y de entidad, y consumos. Los hashes Argon2id del seed se reemplazan por hashes de contraseñas conocidas antes de ejecutarlo.
+- [ ] **G2. Exportar el contrato desde la Fase 1:** `python -m app.cli exportar-openapi` escribe `backend/openapi.json`; se copia a `contrato/` (raíz del repositorio) al cerrar cada fase del backend (hoy el plan lo guarda recién en la Fase 13).
 - [ ] **G3. Campos mínimos en las respuestas**, para no encadenar peticiones por cada fila:
   - listado de instituciones y búsquedas: `modalidad_numeracion`;
   - listado y detalle de órdenes: nombre y RUC de la institución;
-  - listados y detalle de vales: código interno, número de la entidad, nombre de la institución, número de la orden, combustible, saldo y estado;
+  - listados y detalle de vales: número de estación o número de entidad, nombre de la institución, número de la orden, combustible, saldo y estado;
   - movimientos de vale: nombre del usuario;
-  - detalle de orden: lista resumida de vales (código, cantidad, saldo, estado);
-  - `POST /vales/{id}/impresion`: `es_duplicado` y el valor para el código de barras.
+  - detalle de orden: lista resumida de vales (numeración, cantidad, saldo, estado);
+- `POST /vales/{id}/impresion`: `es_duplicado` y los datos numerados del vale.
 - [ ] **G4. Errores con `detalles` útiles:** `SALDO_INSUFICIENTE` incluye `saldo`; `PRESUPUESTO_EXCEDIDO` incluye `presupuesto_restante` y `maximo_galones`; `CUENTA_BLOQUEADA` incluye los minutos de espera; `NUMERO_FUERA_DE_SERIE` incluye el rango; `ORDEN_POSIBLE_DUPLICADA` incluye el identificador y el número de la orden coincidente.
 - [ ] **G5. Registro de extracción fallida confirmable:** `POST /ocr/extracciones/{id}/confirmar` debe aceptar una extracción en estado `fallida` (registro manual con el archivo ya subido), según RF-OCR-09.
 
@@ -247,7 +266,7 @@ El catálogo de endpoints del backend define las pantallas; la cobertura se conf
 - Cada ruta de listado guarda sus filtros, orden y página en los parámetros de la URL (recargar o compartir la dirección reproduce la vista).
 
 **Datos y estado:**
-- Un archivo `*.api.ts` por módulo con una función por endpoint, que devuelve `Observable` tipado. Las rutas salen de `nucleo/api/endpoints.ts` (un registro único), que la prueba de contrato compara con `contrato/openapi.json`.
+- Un archivo `*.api.ts` por módulo con una función por endpoint, que devuelve `Observable` tipado. Las rutas salen de `core/api/endpoints.ts` (un registro único), que la prueba de contrato compara con `contrato/openapi.json`.
 - `crearCarga(fuente$)`: utilidad propia que devuelve señales `datos`, `cargando` y `error`, y cancela la petición anterior al cambiar la fuente (`switchMap`).
 - Servicios con señales solo para lo transversal: `AuthStore`, `CatalogosStore` y `AvisosStore`. Todo lo demás vive en la pantalla que lo usa.
 - Ninguna pantalla consulta dos veces lo mismo: lo que viene en la respuesta de un listado no se vuelve a pedir por fila.
@@ -263,7 +282,7 @@ El catálogo de endpoints del backend define las pantallas; la cobertura se conf
 - Diseño adaptable (360, 768 y 1280 píxeles de ancho como mínimo).
 
 **Pruebas (Vitest, con `ng test`):**
-- Unitarias de funciones puras (dinero, fechas, código de barras, utilidades).
+- Unitarias de funciones puras (dinero, fechas, utilidades).
 - De componentes y servicios con `HttpTestingController`, usando respuestas con la misma forma que el contrato.
 - De contrato: todo endpoint del registro existe en `contrato/openapi.json` con el mismo método.
 
@@ -291,7 +310,7 @@ El catálogo de endpoints del backend define las pantallas; la cobertura se conf
 - Ninguna pantalla usa datos fijos: todo viene del backend (con `sembrar-demo` para desarrollo).
 - Los componentes de pantalla no contienen reglas de negocio: recogen datos, llaman al backend y muestran el resultado o el error.
 - Cada formulario nombra sus controles igual que los campos de la API y muestra los errores `422` junto al campo.
-- Ninguna dependencia fuera de la instantánea inicial.
+- Ninguna dependencia fuera de la lista blanca de `docs/dependencias-base.json`.
 
 ---
 
@@ -309,8 +328,10 @@ El catálogo de endpoints del backend define las pantallas; la cobertura se conf
 
 Tareas:
 - [ ] Instalar la versión de Node.js que exija Angular 21.2.0 y la CLI de Angular (`ng version` muestra las versiones).
-- [ ] Crear el proyecto en `frontend/` con `ng new`, con enrutamiento, hojas de estilo CSS, **sin SSR ni prerenderizado** y con las opciones por defecto de Angular 21.2.0 (sin `zone.js`, Vitest).
-- [ ] Guardar la instantánea de dependencias en `docs/dependencias-base.json` y escribir `scripts/verificar-dependencias.mjs`: lee `package.json` y `docs/dependencias-base.json` y falla si hay dependencias nuevas.
+- [ ] Proyecto Angular **en la raíz del repositorio** (junto a `backend/`), creado con `ng new`, con enrutamiento, hojas de estilo CSS, **sin SSR ni prerenderizado** y con las opciones por defecto de Angular 21.2.0 (sin `zone.js`, Vitest).
+- [ ] Instalar y configurar la capa de interfaz: `primeng`, `@primeuix/themes`, `primeicons`, `iconify-icon`, `chart.js` y `tailwindcss` + `@tailwindcss/postcss`. `app.config.ts` registra `providePrimeNG` con el preset de tema y `theme.options.cssLayer = { name: 'primeng', order: 'theme, base, primeng' }`.
+- [ ] Registrar los iconos de `iconify-icon` que use la aplicación desde paquetes locales de `@iconify-json/*`, para no depender de la API pública de Iconify en producción.
+- [ ] Guardar la lista blanca de dependencias en `docs/dependencias-base.json` y escribir `scripts/verificar-dependencias.mjs`: lee `package.json` y `docs/dependencias-base.json` y falla si aparece un paquete fuera de la lista autorizada (sección 1).
 - [ ] Revisar `tsconfig.json`: `strict` activo y `strictTemplates` activo.
 - [ ] `proxy.conf.json` con `/api`, `/docs` y `/openapi.json` hacia `http://127.0.0.1:8000`, y `proxyConfig` en `angular.json`. Con `/docs` por el proxy, se puede iniciar sesión desde la documentación del backend y compartir la sesión con la aplicación en `localhost:4200`.
 - [ ] `index.html` con `lang="es"` y título; registrar los datos de idioma `es-PE` (`registerLocaleData`) y `LOCALE_ID`.
@@ -342,15 +363,15 @@ Tareas:
 
 Tareas:
 - [ ] `app.config.ts`: `provideRouter` con enlace de parámetros a entradas de componentes, restauración de la posición de desplazamiento y títulos por ruta; `provideHttpClient` con interceptor para Bearer access JWT y renovación controlada ante 401; `LOCALE_ID` `es-PE`.
-- [ ] `nucleo/api/errores.ts`: clase `ErrorApi` (`estado`, `codigo`, `mensaje`, `detalles`) y `erroresInterceptor` que convierte cualquier `HttpErrorResponse` (incluida una respuesta `blob` con JSON y la falta de red, con código `ERROR_RED`) en un `ErrorApi`.
-- [ ] `nucleo/api/endpoints.ts`: registro único de endpoints (método y ruta) y `ClienteApi` con `get`, `post`, `put`, `patch`, y el tipo `Pagina<T>`.
-- [ ] `nucleo/api/descargas.ts`: descarga de archivos desde un `blob` (`.xlsx`).
-- [ ] `nucleo/formato/dinero.ts`: convierte cadenas decimales a `bigint` (centésimas), compara y valida formato (hasta 2 decimales). Sin `Number` para montos.
-- [ ] `nucleo/formato/fechas.ts`: `hoyLima()` con desfase fijo, formatos `dd/mm/aaaa` y `dd/mm/aaaa hh:mm` desde cadenas, sin pasar por `Date` las fechas sin hora. Pipes `moneda`, `galones`, `fecha` e `instante`.
-- [ ] `nucleo/utilidades/`: `uuid.ts` (con alternativa fuera de contexto seguro), `carga.ts` (`crearCarga`), `filtros-url.ts` (filtros enlazados a la URL) y `formularios.ts` (`aplicarErroresServidor(form, error)`, que asigna los `detalles` de un `422` a los controles).
-- [ ] `nucleo/catalogos/catalogos.store.ts`: señales con las listas de `GET /catalogos/enums` y funciones para obtener la etiqueta de cada valor.
-- [ ] Componentes de `compartido/ui/`: `AvisosStore` y su región `aria-live`, `Dialogo` (sobre `<dialog>`), `Campo` (etiqueta, ayuda y errores), `CampoCantidad`, `Combobox` (con roles ARIA y teclado), `Tabla`, `Paginador`, `BadgeEstado`, `Cargando`, `Vacio`, `EncabezadoPagina`, `ConfirmarMotivo`, `TemporizadorEspera`.
-- [ ] `styles.css`: variables de diseño (colores, espaciado, tipografía), estilos de foco, tablas, formularios, adaptación a pantallas pequeñas y reglas base de `@media print`.
+- [ ] `core/api/errores.ts`: clase `ErrorApi` (`estado`, `codigo`, `mensaje`, `detalles`) y `erroresInterceptor` que convierte cualquier `HttpErrorResponse` (incluida una respuesta `blob` con JSON y la falta de red, con código `ERROR_RED`) en un `ErrorApi`.
+- [ ] `core/api/endpoints.ts`: registro único de endpoints (método y ruta) y `ClienteApi` con `get`, `post`, `put`, `patch`, y el tipo `Pagina<T>`.
+- [ ] `core/api/descargas.ts`: descarga de archivos desde un `blob` (`.xlsx`).
+- [ ] `shared/utils/dinero.ts`: convierte cadenas decimales a `bigint` (centésimas), compara y valida formato (hasta 2 decimales). Sin `Number` para montos.
+- [ ] `shared/utils/fechas.ts`: `hoyLima()` con desfase fijo, formatos `dd/mm/aaaa` y `dd/mm/aaaa hh:mm` desde cadenas, sin pasar por `Date` las fechas sin hora. Pipes en `shared/pipes/`: `moneda`, `galones`, `fecha` e `instante`.
+- [ ] `shared/utils/`: `uuid.ts` (con alternativa fuera de contexto seguro), `carga.ts` (`crearCarga`), `filtros-url.ts` (filtros enlazados a la URL) y `formularios.ts` (`aplicarErroresServidor(form, error)`, que asigna los `detalles` de un `422` a los controles).
+- [ ] `core/services/catalogos.store.ts`: señales con las listas de `GET /catalogos/enums` y funciones para obtener la etiqueta de cada valor.
+- [ ] Componentes de `shared/components/`: envoltorios delgados sobre PrimeNG (`Tabla`, `Paginador`, `Dialogo` sobre `p-dialog`, `Combobox` sobre `p-select`, `ConfirmarMotivo`) y propios donde PrimeNG no aplica (`AvisosStore` con su región `aria-live`, `Campo` con etiqueta/ayuda/errores, `CampoCantidad` con `inputmode="decimal"`, `BadgeEstado` que combina color **y** texto, `Cargando`, `Vacio`, `EncabezadoPagina`, `TemporizadorEspera`). Ningún componente de `shared/` inyecta servicios de negocio.
+- [ ] `styles.css`: Tailwind 4 con `@theme` para los tokens de diseño (la paleta corporativa azul ya está definida desde el isotipo), capas de PrimeNG en el orden acordado, estilos de foco, adaptación a pantallas pequeñas y reglas base de `@media print`.
 - [ ] Pantalla `/componentes`: galería con todos los componentes y sus estados. Pantalla `/diagnostico`: estado del backend y las listas de `GET /catalogos/enums`.
 - [ ] Pruebas: dinero (comparaciones, ceros, redondeo no permitido), fechas (`hoyLima`, formatos), `crearCarga` (cancela la petición anterior), `aplicarErroresServidor`, interceptor de errores, y la prueba de contrato contra `contrato/openapi.json`.
 
@@ -367,7 +388,7 @@ Tareas:
 
 ### Bloque 2. Acceso y estructura de la aplicación
 
-**Objetivo:** inicio y cierre de sesión, cambio obligatorio de contraseña, expiración por inactividad y la estructura de la aplicación con menú por permisos.
+**Objetivo:** inicio y cierre de sesión, cambio condicional de contraseña, expiración por inactividad y la estructura de la aplicación con menú por permisos.
 **Requiere backend:** Fase 2.
 **Requerimientos:** AUT-01 a AUT-10.
 **Rutas:** `/ingresar`, `/recuperar`, `/restablecer/:token`, `/cambiar-password`, `/acceso-denegado`, `/panel` (provisional).
@@ -375,19 +396,19 @@ Tareas:
 **Endpoints que consume:**
 - `POST /auth/login`: inicio de sesión.
 - `POST /auth/logout`: cierre de sesión.
-- `GET /auth/yo`: usuario actual, rol, permisos e indicador de cambio obligatorio.
+- `GET /auth/yo`: usuario actual, rol, permisos e indicador booleano de cambio obligatorio (`true` solo cuando `must_change_password` es `TRUE`).
 - `POST /auth/recuperar`: solicitud de enlace de recuperación.
 - `POST /auth/restablecer`: contraseña nueva con el token.
 - `POST /auth/cambiar-password`: cambio de contraseña.
 
 Tareas:
-- [ ] `AuthStore` con señales (`usuario`, `permisos`, `autenticado`, `debeCambiarPassword`) y `puede(permiso)`; carga inicial con `provideAppInitializer` que llama a `GET /auth/yo` (un `401` significa "sin sesión", no un error).
+- [ ] `AuthStore` con señales (`usuario`, `permisos`, `autenticado`, `debeCambiarPassword`) y `puede(permiso)`; interpreta `must_change_password = TRUE` como obligatorio y `NULL`/`FALSE` como no obligatorio. Carga inicial con `provideAppInitializer` que llama a `GET /auth/yo` (un `401` significa "sin sesión", no un error).
 - [ ] Guardas funcionales: `autenticadoGuard` (lleva a `/ingresar?retorno=...`), `permisoGuard(permiso)` (lleva a `/acceso-denegado`) y `cambioPasswordGuard` (lleva a `/cambiar-password` mientras sea obligatorio).
 - [ ] Interceptor de sesión: ante un `401` con `SESION_EXPIRADA`, guarda la ruta actual, limpia el estado y lleva a `/ingresar` con el aviso "Su sesión expiró"; tras volver a ingresar, regresa a la pantalla en la que estaba. Ante un `403` con `CAMBIO_PASSWORD_OBLIGATORIO`, lleva a `/cambiar-password`.
 - [ ] Pantalla de ingreso: correo y contraseña con los atributos `autocomplete` para gestores de contraseñas; mensaje genérico ante credenciales inválidas; mensaje con el tiempo de espera ante `CUENTA_BLOQUEADA`.
 - [ ] Pantallas de recuperación (siempre el mismo mensaje, exista o no el correo), de restablecimiento con el token de la URL y de cambio de contraseña (contraseña actual, nueva de al menos 8 caracteres y distinta de la actual, validación informativa).
 - [ ] Cierre de sesión que limpia el estado y lleva a `/ingresar`.
-- [ ] Estructura principal (`layout/`): cabecera con el nombre de la estación y el usuario, menú lateral definido por una tabla de configuración (ruta, etiqueta, permiso requerido), que se colapsa en pantallas pequeñas; región de avisos; enfoque en el encabezado de la página tras navegar; título del documento por ruta.
+- [ ] Estructura principal (`layouts/admin/`): cabecera con el nombre de la estación y el usuario, menú lateral definido por una tabla de configuración (ruta, etiqueta, permiso requerido), que se colapsa en pantallas pequeñas; región de avisos; enfoque en el encabezado de la página tras navegar; título del documento por ruta.
 - [ ] Directiva `puede` (o `@if (auth.puede(...))`) para ocultar acciones sin permiso.
 - [ ] Cargar `CatalogosStore` justo después de iniciar sesión.
 - [ ] Pantalla de acceso denegado y pantalla provisional de `/panel`.
@@ -418,24 +439,22 @@ Tareas:
 - `POST /usuarios`: alta; devuelve la contraseña temporal una sola vez.
 - `GET /usuarios/{id}`: detalle para edición.
 - `PATCH /usuarios/{id}`: cambio de nombre, correo o rol.
-- `POST /usuarios/{id}/desactivar`: bloqueo del acceso.
-- `POST /usuarios/{id}/activar`: reactivación.
 - `POST /usuarios/{id}/restablecer-password`: contraseña temporal nueva.
 
 Tareas:
-- [ ] Listado con búsqueda por nombre o correo, filtros por rol y estado (en la URL) y paginación.
+- [ ] Listado con búsqueda por nombre o correo, filtro por rol (en la URL) y paginación.
 - [ ] Diálogo de alta y edición (nombre, correo, rol desde `CatalogosStore`) con errores `422` junto al campo.
 - [ ] Diálogo que muestra la contraseña temporal **una sola vez**, con botón de copiar y advertencia de que no se podrá ver de nuevo.
-- [ ] Acciones de activar, desactivar y restablecer contraseña, con confirmación.
-- [ ] Mensaje explicativo ante `ULTIMO_ADMINISTRADOR`; el usuario actual no puede desactivarse a sí mismo desde la interfaz.
-- [ ] Pruebas de componentes: alta, correo duplicado, cambio de rol, desactivación, contraseña temporal visible una sola vez.
+- [ ] Acción de restablecer contraseña, con confirmación.
+- [ ] Mensaje explicativo ante `ULTIMO_ADMINISTRADOR` al intentar cambiar el rol del último administrador.
+- [ ] Pruebas de componentes: alta, correo duplicado, cambio de rol, restablecimiento de contraseña temporal visible una sola vez.
 
 **Entregable navegable:** `/usuarios` con usuarios reales.
 
 **Verificación:**
 - Crear un usuario Despachador y copiar su contraseña temporal; iniciar sesión con él en una ventana privada: el menú no muestra opciones de administración y `/usuarios` lleva a acceso denegado.
-- Desactivar a ese usuario Despachador desde el administrador: su siguiente acción lo lleva a `/ingresar`.
-- Intentar desactivar al único administrador: se ve el mensaje del backend.
+- Restablecer la contraseña de una cuenta: el siguiente ingreso obliga a cambiarla.
+- Intentar cambiar el rol del único administrador: se ve el mensaje del backend.
 - `ng test` en verde.
 
 ---
@@ -586,20 +605,19 @@ Tareas:
 - [ ] Vista previa en vivo con `POST .../vales/simulacion` (con retardo y cancelando la petición anterior): precio vigente, valor en soles, presupuesto restante y máximo de galones emisibles. Mensaje para `SIN_PRECIO_VIGENTE` (con enlace al catálogo de precios si el usuario es administrador) y para `PRESUPUESTO_EXCEDIDO` (con los valores de `detalles`).
 - [ ] Resumen antes de confirmar ("3 vales de 100 galones") y emisión con `POST .../vales`; la operación es atómica, de modo que ante un error no se muestra ningún vale como emitido.
 - [ ] Pantalla de vale de entidad: número de la entidad, combustible, cantidad y vencimiento; panel de serie (`GET /ordenes/{id}/serie` del Bloque 6) con números usados y disponibles; mensajes para `NUMERO_ENTIDAD_DUPLICADO`, `NUMERO_FUERA_DE_SERIE` y `SERIE_AGOTADA`.
-- [ ] Listado de vales: búsqueda por código interno o número de la entidad, filtros por institución, orden, estado, combustible y emisor (en la URL), paginación, y una franja de alertas (`GET /vales/alertas`) con enlace al listado filtrado.
-- [ ] Detalle del vale: código interno, número de la entidad, orden, cantidad inicial, consumido, saldo, precio aplicado, valor en soles y estado; línea de tiempo de movimientos (`GET /vales/{id}/movimientos`) con cantidad, saldo posterior, usuario, fecha y motivo.
-- [ ] Componente `CodigoBarras128`: codificación Code 128 (conjunto B) y dibujo en SVG, con su suma de verificación; pruebas con vectores del estándar.
-- [ ] Vista de impresión `/imprimir/vale/:id` con el encabezado de la estación (datos y logo), los datos del vale y el código de barras; el botón "Imprimir" llama a `POST /vales/{id}/impresion` (registra la impresión) y luego a `window.print()`; si el vale ya se imprimió, se muestra la marca de duplicado.
+- [ ] Listado de vales: búsqueda por número de estación o número de entidad, filtros por institución, orden, estado, combustible y emisor (en la URL), paginación, y una franja de alertas (`GET /vales/alertas`) con enlace al listado filtrado.
+- [ ] Detalle del vale: número de estación o número de entidad, orden, cantidad inicial, consumido, saldo, precio aplicado, valor en soles y estado; línea de tiempo de movimientos (`GET /vales/{id}/movimientos`) con cantidad, saldo posterior, usuario, fecha y motivo.
+- [ ] Vista de impresión `/imprimir/vale/:id` con el encabezado de la estación (datos y logo) y la numeración del vale; el botón "Imprimir" llama a `POST /vales/{id}/impresion` (registra la impresión) y luego a `window.print()`; si el vale ya se imprimió, se muestra la marca de duplicado.
 - [ ] Reglas de impresión (`@media print`): sin menú ni botones, tamaño de página y márgenes definidos.
-- [ ] Pruebas: simulación y errores, emisión múltiple, número repetido, serie agotada, codificación Code 128, marca de duplicado.
+- [ ] Pruebas: simulación y errores, emisión múltiple, número repetido, serie agotada, numeración impresa y marca de duplicado.
 
 **Entregable navegable:** emitir vales de una orden, registrar vales de entidad, listarlos, ver su historial e imprimirlos.
 
 **Verificación:**
 - Con una orden vigente: simular una emisión y ver precio, valor y presupuesto restante; emitir 2 vales; intentar uno que exceda el presupuesto y ver el máximo de galones del backend.
 - Registrar un vale de entidad con un número repetido en una institución con numeración general: aparece el rechazo; el mismo número en otra orden con numeración por orden se acepta.
-- Abrir un vale, ver su línea de tiempo con la emisión, e imprimirlo: el código de barras se lee con un lector o con la cámara de un teléfono y devuelve el código interno; la segunda impresión muestra la marca de duplicado.
-- `ng test` en verde (incluida la codificación del código de barras).
+- Abrir un vale, ver su línea de tiempo con la emisión e imprimirlo con su numeración; la segunda impresión muestra la marca de duplicado.
+- `ng test` en verde, incluidas las vistas de numeración e impresión.
 
 ---
 
@@ -622,7 +640,7 @@ Tareas:
 - `POST /vales/vencimientos/procesar`: marcar vales vencidos a demanda.
 
 Tareas:
-- [ ] Pantalla `/despacho`: campo de código con foco automático, compatible con un lector de código de barras que escribe como teclado (Enter lanza la búsqueda con `GET /vales/buscar`). Si hay un solo resultado, se elige solo; si hay varios, lista de candidatos (institución, orden y combustible) navegable con el teclado.
+- [ ] Pantalla `/despacho`: campo de número de vale con foco automático; Enter lanza la búsqueda con `GET /vales/buscar`. Si hay un solo resultado, se elige solo; si hay varios, lista de candidatos (institución, orden y combustible) navegable con el teclado.
 - [ ] Tarjeta del vale elegido con institución, orden, combustible y **saldo actual** en grande; si el vale no es consumible (agotado, anulado o vencido) se muestra el motivo y el formulario queda deshabilitado.
 - [ ] Formulario de consumo: selector de unidad (soles o galones), importe/cantidad (`CampoCantidad`), muestra la conversión y precio del vale, placa, conductor y observación (opcionales; obligatoriedad según P-06). Comprobación informativa contra el saldo con aritmética de enteros (`bigint`), sin sustituir la validación del backend.
 - [ ] **Token de operación:** se genera un UUID al elegir el vale y se reutiliza en cualquier reintento tras una falla de red o un tiempo agotado (el backend devuelve el movimiento original si ya se registró). Solo se renueva después de un registro exitoso o al cambiar de vale.
@@ -643,7 +661,7 @@ Tareas:
 - En las herramientas del navegador, simular falta de conexión durante el envío, volver a conectar y reintentar: queda un solo movimiento (mismo `token_operacion`).
 - Mientras corre `python scripts/probar_concurrencia.py` del backend sobre otro vale, recargar la pantalla de ese vale: el saldo es coherente y nunca negativo.
 - Como administrador: revertir un consumo y anular un vale con motivo; ejecutar `python -m app.cli verificar-saldos` y ver 0 diferencias.
-- Leer el código de barras impreso del Bloque 7 en `/despacho` con un lector o a mano: el vale se abre directo.
+- Buscar el número impreso del vale del Bloque 7 en `/despacho`: si coincide con un solo vale, se abre directo.
 - `ng test` en verde.
 
 ---
@@ -778,12 +796,12 @@ Tareas:
 
 Tareas:
 - [ ] Panel de inicio: tarjetas con órdenes del mes, vales activos, galones consumidos y vales por agotarse o vencer (cada una enlaza al listado filtrado); franja de alertas; para el administrador, aviso de diferencias de saldo sin revisar con enlace a `/auditoria/integridad`.
-- [ ] Componentes SVG propios `GraficoBarras` y `GraficoLineas`: escala con valores "redondos" en los ejes, etiquetas formateadas con la configuración regional, `viewBox` adaptable, lectura del valor al pasar el cursor o enfocar con el teclado, título y descripción accesibles, y una tabla equivalente en un `<details>`. Distinguen series por color **y** por etiqueta o patrón.
+- [ ] Componentes `GraficoBarras` y `GraficoLineas` en `shared/components/`, construidos sobre `p-chart`: opciones de `chart.js` con escala de valores "redondos" en los ejes, etiquetas formateadas con la configuración regional, `maintainAspectRatio: false` para que sea adaptable, título y descripción accesibles en el contenedor, y una tabla equivalente dentro de un `<details>` que es la representación accesible real del dato. Distinguen series por color **y** por etiqueta o patrón.
 - [ ] `/reportes/consumo`: barra de filtros (rangos del Bloque 11, agrupación) y tres gráficos (por periodo, por institución y por combustible) cargados con `@defer`; todo en la URL.
 - [ ] `/reportes/ordenes`: cantidad de órdenes y presupuesto total del periodo, con detalle por institución.
 - [ ] Exportación a Excel: el botón descarga con `HttpClient` en modo `blob` desde `GET /reportes/exportar/{reporte}.xlsx` con los filtros activos; errores del backend mostrados como aviso.
 - [ ] Vistas de impresión `/imprimir/reporte/:tipo` con el encabezado de la estación, los filtros usados, la fecha de emisión y los mismos datos que la pantalla; sin menú ni controles al imprimir (RF-REP-08).
-- [ ] Pruebas: escalas y etiquetas de los gráficos, datos de la tabla equivalente, filtros en la URL, descarga con filtros.
+- [ ] Pruebas: configuración de los gráficos, datos de la tabla equivalente, filtros en la URL, descarga con filtros.
 
 **Entregable navegable:** panel, reportes con gráficos y exportación a Excel e impresión.
 
@@ -791,7 +809,7 @@ Tareas:
 - Con los datos de volumen: abrir `/reportes/consumo`, cambiar de agrupación diaria a mensual y comprobar que gráficos y tabla cambian sin recargar la página.
 - Exportar a Excel y abrir el archivo en Excel o LibreOffice: los totales coinciden con la tabla en pantalla.
 - Imprimir o guardar como PDF `/imprimir/reporte/consumo-periodo`: se ven el encabezado de la estación, los filtros y los datos, sin menús.
-- Recorrer los gráficos solo con el teclado y leer sus valores con el lector de pantalla del sistema.
+- Recorrer los gráficos y comprobar que la tabla equivalente del `<details>` se lee completa con el teclado y el lector de pantalla (el `canvas` no es accesible por sí solo).
 - `ng test` en verde.
 
 ---
@@ -845,7 +863,7 @@ Tareas:
 **Entregable navegable:** la aplicación completa en `http://127.0.0.1:8000` (o el dominio de producción), con la API en el mismo origen.
 
 **Verificación:**
-- `ng build` en `frontend/` y `fastapi run` en `backend/`: abrir `http://127.0.0.1:8000`, iniciar sesión, recargar `/ordenes` y `/vales/{id}`: cargan la aplicación; `GET /api/v1/ruta-inexistente` devuelve JSON `404`, no la aplicación.
+- `ng build` en la raíz del repositorio y `fastapi run` en `backend/`: abrir `http://127.0.0.1:8000`, iniciar sesión, recargar `/ordenes` y `/vales/{id}`: cargan la aplicación; `GET /api/v1/ruta-inexistente` devuelve JSON `404`, no la aplicación.
 - En las herramientas del navegador (pestaña de red): `index.html` sin caché y los archivos con hash con caché larga; ningún `service worker`.
 - `python scripts/smoke.py --hasta 13` del backend en verde con la aplicación servida.
 - Un usuario nuevo completa los cuatro flujos con el manual y sin ayuda.
@@ -858,9 +876,15 @@ Tareas:
 
 ## 7. Decisiones pendientes
 
+**Cerradas en la versión 3.2:**
+- [x] **Capa de interfaz:** PrimeNG 21 + `@primeuix/themes` + `primeicons` para componentes, `iconify-icon` para la iconografía propia, Tailwind 4 para la maquetación y `chart.js` mediante `p-chart` para los gráficos. Sustituye la decisión anterior de construir tabla, diálogo, combos y gráficos a mano.
+- [x] **Ubicación del código:** el proyecto Angular vive en la **raíz del repositorio**, junto a `backend/`. No existe ni se creará una carpeta `frontend/`.
+- [x] **Convención de nombres:** estructura de carpetas en inglés (`core/`, `shared/`, `features/`, `layouts/`) y nombres de dominio en español, con los controles de formulario idénticos a los campos de la API.
+
+**Pendientes:**
 - [ ] **Versión de Node.js** que exija Angular 21.2.0 al crear el proyecto (se confirma con `ng version`). *Afecta:* Bloque 0.
 - [ ] **PDF por impresión del navegador** (supuesto, igual que T-02 del backend): si se exige un PDF generado en el servidor, hay que sumar una librería. *Afecta:* Bloques 7, 8, 11 y 12.
-- [ ] **Código de barras Code 128 propio** (supuesto, igual que T-03 del backend): si se prefiere QR, hay que sumar una librería o escribir un generador. *Afecta:* Bloque 7.
+- [x] **Identificación de vales:** no se implementan códigos de barras ni QR; las vistas de consulta e impresión usan la numeración de estación o entidad.
 - [ ] **Pruebas de navegador automatizadas:** el plan no las incluye porque exigen herramientas nuevas (Playwright o similares). Si se permiten, se agregan en el Bloque 13. *Afecta:* Bloque 13.
 - [ ] **Medición de cobertura de pruebas y análisis de estilo:** requieren paquetes que `ng new` no trae (proveedor de cobertura de Vitest, ESLint, Prettier). Si se permiten, se agregan al Bloque 1. *Afecta:* Bloques 1 y 13.
 - [ ] **Brechas del backend G1 a G5** (sección 4.4): hay que aceptarlas o ajustarlas antes de iniciar los bloques que las usan.

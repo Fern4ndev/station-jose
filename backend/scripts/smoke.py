@@ -1,0 +1,1291 @@
+"""Recorrido de verificación por fase: `python scripts/smoke.py --hasta N`.
+
+Es acumulativo: cada fase agrega comprobaciones numeradas y al ejecutar con
+`--hasta N` se repiten todas las de las fases anteriores. Salida `OK` o
+`FALLA` por comprobación; el proceso termina con código 1 si alguna falla.
+
+La Fase 2 necesita un administrador (creado con `python -m app.cli
+crear-admin --nombre ... --correo ...`) y, después de su primer inicio,
+la contraseña ya cambiada en las variables `SMOKE_CORREO` y `SMOKE_PASSWORD`
+(por omisión actúa como el admin que se ejemplifica en el README).
+El recorrido usa tokens de prueba (`recaptcha_token: smoke`), así que contra
+una base de desarrollo con reCAPTCHA real se levanta el servidor sin
+`RECAPTCHA_SECRET_KEY` para correr el smoke.
+"""
+
+import argparse
+import asyncio
+import datetime as _dt
+import os
+import secrets
+import sys
+import uuid
+from collections.abc import Awaitable, Callable
+from contextlib import suppress
+from typing import TypedDict
+
+import httpx
+
+COMPROBACION = Callable[[httpx.AsyncClient], Awaitable[str | None]]
+"""Devuelve None si la comprobación pasa; una explicación si falla."""
+
+
+class Fase(TypedDict):
+    numero: int
+    titulo: str
+    comprobaciones: tuple[tuple[str, COMPROBACION], ...]
+
+
+CORREO_SMOKE = os.environ.get("SMOKE_CORREO", "admin@ejemplo.pe")
+CLAVE_SMOKE = os.environ.get("SMOKE_PASSWORD", "")
+
+
+async def _salud_en_ok(cliente: httpx.AsyncClient) -> str | None:
+    respuesta = await cliente.get("/api/v1/salud")
+    if respuesta.status_code != 200:
+        return f"GET /api/v1/salud devolvió {respuesta.status_code}."
+    datos = respuesta.json()
+    if datos.get("estado") != "ok":
+        return f"El estado no es 'ok': {datos}"
+    return None
+
+
+async def _enums_protegido(cliente: httpx.AsyncClient) -> str | None:
+    """CAT-01/Fase 2: los catálogos piden sesión (AUT-09)."""
+    respuesta = await cliente.get("/api/v1/catalogos/enums")
+    if respuesta.status_code != 401:
+        return f"Sin sesión devolvió {respuesta.status_code}; se esperaba 401."
+    return None
+
+
+async def _openapi_generado(cliente: httpx.AsyncClient) -> str | None:
+    respuesta = await cliente.get("/openapi.json")
+    if respuesta.status_code != 200:
+        return "La documentación OpenAPI no está disponible (¿estás en desarrollo?)."
+    return None
+
+
+# --- Fase 2: sesión -----------------------------------------------------------------
+
+ESTADO_FASE_2: dict[str, str] = {}
+
+
+def _cabecera_csrf(cliente: httpx.AsyncClient) -> dict[str, str]:
+    return {
+        "X-CSRF-Token": cliente.cookies.get("csrf_token", ""),
+        "Origin": str(cliente.base_url).rstrip("/"),
+    }
+
+
+async def _login_con_clave_erronea(cliente: httpx.AsyncClient) -> str | None:
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={
+            "correo": CORREO_SMOKE,
+            "password": "esta-clave-no-existe",
+            "recaptcha_token": "smoke",
+        },
+    )
+    if respuesta.status_code != 401:
+        return f"Login erróneo devolvió {respuesta.status_code}; se esperaba 401."
+    if respuesta.json().get("codigo") != "CREDENCIALES_INVALIDAS":
+        return f"codigo inesperado: {respuesta.json().get('codigo')}"
+    return None
+
+
+async def _login_correcto(cliente: httpx.AsyncClient) -> str | None:
+    if not CLAVE_SMOKE:
+        return "Define SMOKE_PASSWORD con la contraseña vigente del administrador."
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={"correo": CORREO_SMOKE, "password": CLAVE_SMOKE, "recaptcha_token": "smoke"},
+    )
+    if respuesta.status_code == 400 and respuesta.json().get("codigo") == "CUENTA_BLOQUEADA":
+        return "La cuenta está bloqueada por intentos previos; espera el plazo."
+    if respuesta.status_code != 200:
+        return f"Login devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    datos = respuesta.json()
+    if datos.get("must_change_password"):
+        return (
+            "must_change_password está en TRUE: inicia /docs y usa "
+            "POST /auth/cambiar-password antes de repetir el smoke."
+        )
+    ESTADO_FASE_2["access"] = datos["access_token"]
+    ESTADO_FASE_2["access_viejo"] = datos["access_token"]
+    ESTADO_FASE_2["refresh"] = cliente.cookies.get("refresh_token", "")
+    return None
+
+
+async def _yo_con_permisos(cliente: httpx.AsyncClient) -> str | None:
+    cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_2['access']}"
+    try:
+        respuesta = await cliente.get("/api/v1/auth/yo")
+    except httpx.HTTPError as exc:
+        return f"GET /auth/yo falló: {exc}"
+    if respuesta.status_code != 200:
+        return f"GET /auth/yo devolvió {respuesta.status_code}."
+    datos = respuesta.json()
+    if "sesion" not in datos.get("permisos", []):
+        return "El rol del usuario no declara el permiso 'sesion'."
+    return None
+
+
+async def _enums_con_sesion(cliente: httpx.AsyncClient) -> str | None:
+    try:
+        respuesta = await cliente.get("/api/v1/catalogos/enums")
+    except httpx.HTTPError as exc:
+        return f"GET /catalogos/enums falló: {exc}"
+    if respuesta.status_code != 200:
+        return f"GET /catalogos/enums devolvió {respuesta.status_code}."
+    datos = respuesta.json()
+    faltan = [
+        clave
+        for clave in (
+            "roles",
+            "estados_orden",
+            "estados_vale",
+            "tipos_movimiento",
+            "permisos",
+        )
+        if clave not in datos
+    ]
+    if faltan:
+        return f"Faltan claves en la respuesta: {', '.join(faltan)}."
+    return None
+
+
+async def _refresh_rota_con_csrf(cliente: httpx.AsyncClient) -> str | None:
+    cliente.headers.pop("Authorization", None)
+    try:
+        respuesta = await cliente.post("/api/v1/auth/refresh", headers=_cabecera_csrf(cliente))
+    except httpx.HTTPError as exc:
+        return f"POST /auth/refresh falló: {exc}"
+    if respuesta.status_code != 200:
+        return (
+            f"POST /auth/refresh devolvió {respuesta.status_code}: "
+            f"{respuesta.json().get('mensaje')}"
+        )
+    token_nuevo = cliente.cookies.get("refresh_token", "")
+    if not token_nuevo or token_nuevo == ESTADO_FASE_2.get("refresh"):
+        return "La cookie de refresh no rotó."
+    ESTADO_FASE_2["access"] = respuesta.json()["access_token"]
+    ESTADO_FASE_2["refresh"] = token_nuevo
+    return None
+
+
+async def _sin_csrf_rechaza(cliente: httpx.AsyncClient) -> str | None:
+    try:
+        respuesta = await cliente.post("/api/v1/auth/refresh")
+    except httpx.HTTPError as exc:
+        return f"POST /auth/refresh sin CSRF falló: {exc}"
+    if respuesta.status_code != 403:
+        return f"Sin token CSRF devolvió {respuesta.status_code}; se esperaba 403."
+    if respuesta.json().get("codigo") != "CSRF_INVALIDO":
+        return f"codigo inesperado: {respuesta.json().get('codigo')}"
+    return None
+
+
+async def _logout_revoca(cliente: httpx.AsyncClient) -> str | None:
+    access = ESTADO_FASE_2.get("access")
+    if not access:
+        return "No hay access token de la fase (falló el login o el refresh)."
+    cliente.headers["Authorization"] = f"Bearer {access}"
+    try:
+        respuesta = await cliente.post("/api/v1/auth/logout", headers=_cabecera_csrf(cliente))
+    except httpx.HTTPError as exc:
+        return f"POST /auth/logout falló: {exc}"
+    if respuesta.status_code != 200:
+        return f"POST /auth/logout devolvió {respuesta.status_code}."
+    ESTADO_FASE_2.clear()
+    return None
+
+
+async def _yo_sin_sesion_rechaza(cliente: httpx.AsyncClient) -> str | None:
+    cliente.headers.pop("Authorization", None)  # no bearer tras el logout.
+    try:
+        respuesta = await cliente.get("/api/v1/auth/yo")
+    except httpx.HTTPError as exc:
+        return f"GET /auth/yo falló: {exc}"
+    if respuesta.status_code != 401:
+        return f"Sin sesión devolvió {respuesta.status_code}; se esperaba 401."
+    return None
+
+
+# --- Fase 3: usuarios, roles y permisos --------------------------------------------
+
+CLAVE_OPERADOR_SMOKE = "OperadorSmoke33"
+
+ESTADO_FASE_3: dict[str, str | int] = {}
+
+
+async def _usuarios_sin_sesion_rechaza(cliente: httpx.AsyncClient) -> str | None:
+    """UX-02/Fase 3: el módulo usuarios exige permiso usuarios.gestionar."""
+    try:
+        respuesta = await cliente.get("/api/v1/usuarios")
+    except httpx.HTTPError as exc:
+        return f"GET /usuarios falló: {exc}"
+    if respuesta.status_code != 401:
+        return f"Sin sesión devolvió {respuesta.status_code}; se esperaba 401."
+    return None
+
+
+def _ms_actuales() -> str:
+    """Marca de tiempo en ms, para un correo único por corrida del smoke."""
+    import time
+
+    return str(int(time.time() * 1000))
+
+
+async def _login_admin_para_usuarios(cliente: httpx.AsyncClient) -> str | None:
+    """Inicia sesión con el administrador y guarda su id para USR-07."""
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={"correo": CORREO_SMOKE, "password": CLAVE_SMOKE, "recaptcha_token": "smoke"},
+    )
+    if respuesta.status_code != 200:
+        cuerpo = respuesta.json()
+        return (
+            "Login del administrador devolvió "
+            f"{respuesta.status_code}: {cuerpo.get('mensaje')}"
+        )
+    ESTADO_FASE_3["access_admin"] = respuesta.json()["access_token"]
+    cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_3['access_admin']}"
+    yo = await cliente.get("/api/v1/auth/yo")
+    if yo.status_code != 200:
+        return f"GET /auth/yo del admin devolvió {yo.status_code}."
+    ESTADO_FASE_3["admin_id"] = yo.json()["usuario"]["id"]
+    return None
+
+
+async def _crea_operador(cliente: httpx.AsyncClient) -> str | None:
+    """USR-01: el admin crea un operador; la contraseña temporal llega una vez."""
+    sufijo = _ms_actuales()  # correo único por corrida, sin rechazos 409
+    correo = f"operador-{sufijo}@ejemplo.pe"
+    ESTADO_FASE_3["correo_operador"] = correo
+    cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_3['access_admin']}"
+    respuesta = await cliente.post(
+        "/api/v1/usuarios",
+        json={
+            "nombre": f"Operador Smoke {sufijo}",
+            "correo": correo,
+            "rol": "despachador",
+        },
+    )
+    if respuesta.status_code != 201:
+        return f"POST /usuarios devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    datos = respuesta.json()
+    ESTADO_FASE_3["id_operador"] = datos["id"]
+    ESTADO_FASE_3["clave_temporal"] = datos["password_temporal"]
+
+    # USR-02: el listado con búsqueda encuentra al recién creado.
+    busqueda = await cliente.get("/api/v1/usuarios", params={"q": correo})
+    if busqueda.status_code != 200:
+        return f"GET /usuarios?q= devolvió {busqueda.status_code}."
+    if int(busqueda.json()["total"]) < 1:
+        return "El listado con búsqueda no encontró al operador recién creado."
+    return None
+
+
+async def _login_operador_con_temporal(cliente: httpx.AsyncClient) -> str | None:
+    """El operador entra con su contraseña temporal (RF-AUT-07 entra en juego)."""
+    cliente.headers.pop("Authorization", None)
+    cliente.cookies.clear()
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={
+            "correo": str(ESTADO_FASE_3["correo_operador"]),
+            "password": str(ESTADO_FASE_3["clave_temporal"]),
+            "recaptcha_token": "smoke",
+        },
+    )
+    if respuesta.status_code != 200:
+        cuerpo = respuesta.json()
+        return (
+            "Login del operador devolvió "
+            f"{respuesta.status_code}: {cuerpo.get('mensaje')}"
+        )
+    datos = respuesta.json()
+    if not datos.get("must_change_password"):
+        return "El operador debería tener must_change_password en TRUE."
+    ESTADO_FASE_3["access_temporal"] = datos["access_token"]
+    return None
+
+
+async def _operador_restringido_al_cambiar(cliente: httpx.AsyncClient) -> str | None:
+    """AUT-06: con cambio obligatorio solo pasan /auth/yo, cambiar-password y logout."""
+    cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_3['access_temporal']}"
+    respuesta = await cliente.get("/api/v1/usuarios")
+    if respuesta.status_code != 403:
+        return (
+            f"GET /usuarios con cambio pendiente devolvió {respuesta.status_code}"
+            "; se esperaba 403."
+        )
+    if respuesta.json().get("codigo") != "CAMBIO_PASSWORD_OBLIGATORIO":
+        return f"codigo inesperado: {respuesta.json().get('codigo')}"
+    return None
+
+
+async def _operador_cambia_password(cliente: httpx.AsyncClient) -> str | None:
+    cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_3['access_temporal']}"
+    respuesta = await cliente.post(
+        "/api/v1/auth/cambiar-password",
+        json={
+            "password_actual": ESTADO_FASE_3["clave_temporal"],
+            "password_nueva": CLAVE_OPERADOR_SMOKE,
+        },
+    )
+    if respuesta.status_code != 200:
+        cuerpo = respuesta.json()
+        return (
+            "POST /auth/cambiar-password del operador devolvió "
+            f"{respuesta.status_code}: {cuerpo.get('mensaje')}"
+        )
+    ESTADO_FASE_3["access_operador"] = respuesta.json()["access_token"]
+    return None
+
+
+async def _operador_sin_permiso(cliente: httpx.AsyncClient) -> str | None:
+    """Sección 4.1: `usuarios.gestionar` solo lo tiene el administrador."""
+    cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_3['access_operador']}"
+    respuesta = await cliente.get("/api/v1/usuarios")
+    if respuesta.status_code != 403:
+        return f"GET /usuarios del operador devolvió {respuesta.status_code}; se esperaba 403."
+    if respuesta.json().get("codigo") != "SIN_PERMISO":
+        return f"codigo inesperado: {respuesta.json().get('codigo')}"
+    return None
+
+
+async def _ultimo_admin_protegido(cliente: httpx.AsyncClient) -> str | None:
+    """USR-07: no se le puede cambiar el rol al único administrador.
+
+    Solo es posible cuando el admin del smoke es el ÚLTIMO. Contra una base
+    con mas administradores (p. ej. desarrollo) el parche es legítimo y el
+    smoke no toca datos: la protección se valida estrictamente en pytest.
+    """
+    cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_3['access_admin']}"
+    respuesta = await cliente.get("/api/v1/usuarios", params={"rol": "administrador"})
+    if respuesta.status_code != 200:
+        return f"GET /usuarios?rol=administrador devolución {respuesta.status_code}."
+    if int(respuesta.json()["total"]) > 1:
+        print("        nota: hay mas de un administrador; USR-07 se omite (verificado en pytest).")
+        return None
+    parche = await cliente.patch(
+        f"/api/v1/usuarios/{ESTADO_FASE_3['admin_id']}",
+        json={"rol": "despachador"},
+    )
+    if parche.status_code != 409:
+        return f"PATCH del rol del único admin devolvió {parche.status_code}; se esperaba 409."
+    if parche.json().get("codigo") != "ULTIMO_ADMINISTRADOR":
+        return f"codigo inesperado: {parche.json().get('codigo')}"
+    return None
+
+
+async def _restablece_operador(cliente: httpx.AsyncClient) -> str | None:
+    """USR-06: nueva contraseña temporal mostrada una sola vez."""
+    respuesta = await cliente.post(
+        f"/api/v1/usuarios/{ESTADO_FASE_3['id_operador']}/restablecer-password"
+    )
+    if respuesta.status_code != 200:
+        cuerpo = respuesta.json()
+        return (
+            "POST restablecer-password devolvió "
+            f"{respuesta.status_code}: {cuerpo.get('mensaje')}"
+        )
+    nueva = respuesta.json()["password_temporal"]
+    if nueva == ESTADO_FASE_3["clave_temporal"]:
+        return "La contraseña temporal restablecida no debería repetirse."
+    ESTADO_FASE_3.clear()
+    cliente.headers.pop("Authorization", None)
+    return None
+
+
+# --- Fase 4: configuración, combustibles y precios ------------------------------
+
+ESTADO_FASE_4: dict[str, str] = {}
+
+
+async def _login_admin_para_fase4(cliente: httpx.AsyncClient) -> str | None:
+    """Sesión del administrador del smoke para el módulo de configuración."""
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={"correo": CORREO_SMOKE, "password": CLAVE_SMOKE, "recaptcha_token": "smoke"},
+    )
+    if respuesta.status_code != 200:
+        return f"Login devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    ESTADO_FASE_4["access"] = respuesta.json()["access_token"]
+    ESTADO_FASE_4["ms"] = _ms_actuales()
+    cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_4['access']}"
+    return None
+
+
+async def _combustible_creado_y_listado(cliente: httpx.AsyncClient) -> str | None:
+    """CMB-01: alta del tipo y catálogo con `precio_vigente` inicial nulo."""
+    nombre = f"Gasohol Smoke {ESTADO_FASE_4['ms']}"
+    alta = await cliente.post("/api/v1/combustibles", json={"nombre": nombre})
+    if alta.status_code != 201:
+        return f"POST /combustibles devolvió {alta.status_code}: {alta.json().get('mensaje')}"
+    ESTADO_FASE_4["combustible_id"] = str(alta.json()["id"])
+    listado = await cliente.get("/api/v1/combustibles", params={"activo": "true"})
+    items = listado.json()["items"]
+    hallado = next((c for c in items if str(c["id"]) == ESTADO_FASE_4["combustible_id"]), None)
+    if hallado is None:
+        return "El combustible creado no aparece en el listado."
+    if hallado["precio_vigente"] is not None:
+        return "El catálogo debería arrancar sin precio vigente."
+    return None
+
+
+async def _precio_registrado_vigente_primero(cliente: httpx.AsyncClient) -> str | None:
+    """CMB-02/03: registra el precio del día y el histórico lo muestra primero."""
+    combustible = ESTADO_FASE_4["combustible_id"]
+    hoy = _dt.date.today().isoformat()
+    precio = await cliente.post(
+        f"/api/v1/combustibles/{combustible}/precios",
+        json={"precio_galon": "15.75", "vigente_desde": hoy},
+    )
+    if precio.status_code == 409:  # precio del día ya sembrado: idempotente
+        pass
+    elif precio.status_code != 201:
+        return f"POST precios devolvió {precio.status_code}: {precio.json().get('mensaje')}"
+
+    listado = await cliente.get("/api/v1/combustibles", params={"activo": "true"})
+    hallado = next(
+        c
+        for c in listado.json()["items"]
+        if str(c["id"]) == combustible
+    )
+    vigente = hallado["precio_vigente"]
+    if not vigente or vigente["vigente_desde"] != hoy:
+        return f"El precio vigente no es el de hoy: {vigente}"
+
+    historico = await cliente.get(f"/api/v1/combustibles/{combustible}/precios")
+    if historico.json()[0]["vigente_desde"] != hoy:
+        return "El histórico no muestra el precio más reciente primero."
+    return None
+
+
+async def _precio_historico_inmutable(cliente: httpx.AsyncClient) -> str | None:
+    """CMB-02/RN-16: fecha anterior al último precio se rechaza (409)."""
+    combustible = ESTADO_FASE_4["combustible_id"]
+    atrasado = await cliente.post(
+        f"/api/v1/combustibles/{combustible}/precios",
+        json={"precio_galon": "16.10", "vigente_desde": "2020-01-01"},
+    )
+    if atrasado.status_code != 409:
+        return f"La fecha retroactiva devolvió {atrasado.status_code}; se esperaba 409."
+    if atrasado.json().get("codigo") != "FECHA_PRECIO_ATRASADA":
+        return f"codigo inesperado: {atrasado.json().get('codigo')}"
+    return None
+
+
+async def _parametros_leen_rango_y_guardan(cliente: httpx.AsyncClient) -> str | None:
+    """CFG-01: catálogo con contrato y guardado de un valor dentro del rango."""
+    lista = await cliente.get("/api/v1/configuracion/parametros")
+    if lista.status_code != 200:
+        return f"GET /configuracion/parametros devolvió {lista.status_code}."
+    contrato = {p["clave"]: p for p in lista.json()["items"]}
+    if "login_intentos_max" not in contrato or "vale_vigencia_dias" not in contrato:
+        return "Faltan parámetros declarados del plan."
+
+    fuera = await cliente.put(
+        "/api/v1/configuracion/parametros",
+        json={"valores": {"login_intentos_max": "0"}},
+    )
+    if fuera.status_code != 422:
+        return f"Un valor fuera de rango devolvió {fuera.status_code}; se esperaba 422."
+
+    ajustado = await cliente.put(
+        "/api/v1/configuracion/parametros",
+        json={"valores": {"ocr_umbral_confianza": "0.85"}},
+    )
+    if ajustado.status_code != 200:
+        return f"PUT de un valor válido devolvió {ajustado.status_code}."
+    confirmado = await cliente.get("/api/v1/configuracion/parametros")
+    valor = next(
+        p for p in confirmado.json()["items"] if p["clave"] == "ocr_umbral_confianza"
+    )
+    if valor["valor"] != "0.85":
+        return f"El valor no rige de inmediato: {valor['valor']}"
+    return None
+
+
+async def _estacion_gestionada_y_protegida(cliente: httpx.AsyncClient) -> str | None:
+    """CFG-02: ficha de la estación se guarda y se lee con `estacion.ver`."""
+    ficha = await cliente.put(
+        "/api/v1/configuracion/estacion",
+        json={
+            "nombre": "Estación San José (smoke)",
+            "ruc": "20100047218",
+            "direccion": "Av. del Smoke 123",
+        },
+    )
+    if ficha.status_code != 200:
+        return (
+            "PUT /configuracion/estacion devolvió "
+            f"{ficha.status_code}: {ficha.json().get('mensaje')}"
+        )
+    lectura = await cliente.get("/api/v1/configuracion/estacion")
+    if lectura.status_code != 200 or "San José" not in lectura.json()["nombre"]:
+        return f"GET /configuracion/estacion: {lectura.status_code} {lectura.text[:120]}"
+    return None
+
+
+async def _logo_rechazado_por_contenido(cliente: httpx.AsyncClient) -> str | None:
+    """CFG-02: la subida se valida por firma binaria, nunca por extensión."""
+    impostor = await cliente.post(
+        "/api/v1/configuracion/estacion/logo",
+        files={"archivo": ("logo.png", b"texto plano no es un png", "image/png")},
+    )
+    if impostor.status_code != 422:
+        return f"Un archivo impostor devolvió {impostor.status_code}; se esperaba 422."
+    if impostor.json().get("codigo") != "FORMATO_INVALIDO":
+        return f"codigo inesperado: {impostor.json().get('codigo')}"
+    # Cierre de fase: se cierra la sesión del smoke.
+    cliente.headers.pop("Authorization", None)
+    ESTADO_FASE_4.clear()
+    return None
+
+
+# --- Fase 6: vales, emisión y vales de entidad ---------------------------------
+
+ESTADO_FASE_6: dict[str, str] = {}
+RUC_SMOKE = "20100104157"
+
+
+async def _login_admin_para_fase6(cliente: httpx.AsyncClient) -> str | None:
+    """Sesión del administrador del smoke para el módulo de vales."""
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={"correo": CORREO_SMOKE, "password": CLAVE_SMOKE, "recaptcha_token": "smoke"},
+    )
+    if respuesta.status_code != 200:
+        return f"Login devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    cliente.headers["Authorization"] = f"Bearer {respuesta.json()['access_token']}"
+    return None
+
+
+async def _escenario_para_fase6(cliente: httpx.AsyncClient) -> str | None:
+    """Combustible con precio, institución con numeración general y la orden.
+
+    La orden se queda corta a propósito: con el precio de S/ 15.75 el
+    galón, un presupuesto de S/ 1000.00 deja techo de 63.49 galones.
+    """
+    marca = ESTADO_FASE_6["ms"] = _ms_actuales()
+    combustible = await cliente.post(
+        "/api/v1/combustibles", json={"nombre": f"Vales Smoke {marca}"}
+    )
+    if combustible.status_code != 201:
+        return f"POST /combustibles devolvió {combustible.status_code}."
+    id_combustible = combustible.json()["id"]
+    ESTADO_FASE_6["combustible"] = str(id_combustible)
+    precio = await cliente.post(
+        f"/api/v1/combustibles/{id_combustible}/precios",
+        json={"precio_galon": "15.75", "vigente_desde": _dt.date.today().isoformat()},
+    )
+    if precio.status_code != 201:
+        return f"POST precios devolvió {precio.status_code}: {precio.json().get('mensaje')}"
+
+    institucion = await cliente.post(
+        "/api/v1/instituciones",
+        json={
+            "nombre": f"Institución Smoke {marca}",
+            "ruc": RUC_SMOKE,
+            "tipo": "publica",
+            "modalidad_numeracion": "general",
+        },
+    )
+    if institucion.status_code == 409:
+        # RUC único: una corrida previa ya lo sembró; se reutiliza.
+        fallback = await cliente.get(f"/api/v1/instituciones/ruc/{RUC_SMOKE}")
+        existente = (fallback.json() or {}).get("institucion")
+        if fallback.status_code != 200 or not existente:
+            return "No se pudo crear ni hallar la institución del smoke (RUC único)."
+        institucion = None
+        institucion_fila = existente
+    elif institucion.status_code != 201:
+        return (
+            "POST /instituciones devolvió "
+            f"{institucion.status_code}: {institucion.json().get('mensaje')}"
+        )
+    else:
+        institucion_fila = institucion.json()
+    ESTADO_FASE_6["institucion"] = str(institucion_fila["id"])
+
+    orden = await cliente.post(
+        "/api/v1/ordenes",
+        json={
+            "institucion_id": institucion_fila["id"],
+            "fecha_emision": _dt.date.today().isoformat(),
+            "presupuesto_soles": "1000.00",
+            "estado": "vigente",
+            "confirmar_duplicado": True,
+        },
+    )
+    if orden.status_code != 201:
+        return f"POST /ordenes devolvió {orden.status_code}: {orden.json().get('mensaje')}"
+    ESTADO_FASE_6["orden"] = str(orden.json()["id"])
+    return None
+
+
+async def _simulacion_no_guarda(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-03/CMB-04: la vista previa devuelve techo y total sin escribir nada."""
+    orden = ESTADO_FASE_6["orden"]
+    combustible = ESTADO_FASE_6["combustible"]
+    respuesta = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales/simulacion",
+        json={"combustible_id": int(combustible), "cantidades": ["20.00", "20.00"]},
+    )
+    if respuesta.status_code != 200:
+        return (
+            f"POST simulacion devolvió {respuesta.status_code}: "
+            f"{respuesta.json().get('mensaje')}"
+        )
+    datos = respuesta.json()
+    if datos["precio_galon"] != "15.75":
+        return f"El precio vigente no es 15.75: {datos['precio_galon']}"
+    if datos["total_soles"] != "630.00":
+        return f"El total de la simulación no es 630.00: {datos['total_soles']}"
+    if datos["presupuesto_restante_soles"] != "1000.00":
+        return "La simulación modificó el presupuesto restante."
+    maximo = float(datos["maximo_galones"])
+    if not 63.48 <= maximo <= 63.50:
+        return f"El máximo de galones no es el techo de 1000/15.75: {maximo}"
+
+    listado = await cliente.get("/api/v1/vales", params={"orden_id": int(orden)})
+    if listado.status_code != 200:
+        return f"GET /vales devolvió {listado.status_code}."
+    if listado.json()["total"] != 0:
+        return "La simulación dejó vales en la base."
+    return None
+
+
+async def _emite_dos_vales(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-01/VAL-02: emisión con numeración de estación y precio retenido."""
+    orden = ESTADO_FASE_6["orden"]
+    combustible = ESTADO_FASE_6["combustible"]
+    emitidos = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales",
+        json={"combustible_id": int(combustible), "cantidades": ["20.00", "20.00"]},
+    )
+    if emitidos.status_code != 201:
+        return f"POST vales devolvió {emitidos.status_code}: {emitidos.json().get('mensaje')}"
+    vales = emitidos.json()
+    if len(vales) != 2:
+        return f"Se esperaban 2 vales, llegaron {len(vales)}"
+    for vale in vales:
+        if vale["valor_soles"] != "315.00":
+            return f"El vale acumuló un valor inesperado: {vale['valor_soles']}"
+        if not vale["numero_estacion"]:
+            return "El vale de estación llegó sin número."
+    return None
+
+
+async def _exceso_rechazado_con_maximo(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-03: 409 PRESUPUESTO_EXCEDIDO con el restante y el máximo de galones."""
+    orden = ESTADO_FASE_6["orden"]
+    combustible = ESTADO_FASE_6["combustible"]
+    exceso = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales",
+        json={"combustible_id": int(combustible), "cantidades": ["30.00"]},
+    )
+    if exceso.status_code != 409:
+        return f"Una emisión que excede devolvió {exceso.status_code}; se esperaba 409."
+    datos = exceso.json()
+    if datos.get("codigo") != "PRESUPUESTO_EXCEDIDO":
+        return f"codigo inesperado: {datos.get('codigo')}"
+    detalles = datos.get("detalles", {})
+    if detalles.get("presupuesto_restante_soles") != "370.00":
+        return "El restante no refleja los dos vales de 315.00."
+    maximo = float(detalles.get("maximo_galones", "0"))
+    if not 23.48 <= maximo <= 23.50:
+        return f"El máximo de galones no cuadra con 370/15.75: {maximo}"
+    return None
+
+
+async def _vale_entidad_y_duplicado(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-05/D-02: el número lo da la institución; repetido en la serie, 409."""
+    orden = ESTADO_FASE_6["orden"]
+    combustible = ESTADO_FASE_6["combustible"]
+    numero = f"VA-ENT-{ESTADO_FASE_6['ms']}-001"
+    ESTADO_FASE_6["numero"] = numero
+    primero = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales-entidad",
+        json={"numero_entidad": numero, "combustible_id": int(combustible), "cantidad": "5.00"},
+    )
+    if primero.status_code != 201:
+        return (
+            "POST vales-entidad devolvió "
+            f"{primero.status_code}: {primero.json().get('mensaje')}"
+        )
+    if primero.json()["numero_entidad"] != numero:
+        return "El número de entidad no se conservó tal como lo envió la institución."
+
+    repetido = await cliente.post(
+        f"/api/v1/ordenes/{orden}/vales-entidad",
+        json={"numero_entidad": numero, "combustible_id": int(combustible), "cantidad": "5.00"},
+    )
+    if repetido.status_code != 409:
+        return f"Un número repetido devolvió {repetido.status_code}; se esperaba 409."
+    if repetido.json().get("codigo") != "NUMERO_ENTIDAD_DUPLICADO":
+        return f"codigo inesperado: {repetido.json().get('codigo')}"
+    return None
+
+
+# --- Fase 7: consumos y correcciones ---------------------------------------
+
+ESTADO_FASE_7: dict[str, object] = {}
+
+
+def _token_fase_7() -> str:
+    return str(uuid.uuid4())
+
+
+def _ruc_aleatorio() -> str:
+    """RUC de 11 dígitos con dígito verificador válido y único por corrida."""
+    base = f"20{secrets.randbelow(100_000_000):08d}"
+    pesos = (5, 4, 3, 2, 7, 6, 5, 4, 3, 2)
+    verificador = 11 - (sum(int(d) * p for d, p in zip(base, pesos, strict=True)) % 11)
+    return base + str({10: 0, 11: 1}.get(verificador, verificador))
+
+
+async def _login_admin_para_fase7(cliente: httpx.AsyncClient) -> str | None:
+    if not CLAVE_SMOKE:
+        return "Define SMOKE_PASSWORD con la contraseña vigente del administrador."
+    respuesta = await cliente.post(
+        "/api/v1/auth/login",
+        json={"correo": CORREO_SMOKE, "password": CLAVE_SMOKE, "recaptcha_token": "smoke"},
+    )
+    if respuesta.status_code != 200:
+        return f"Login devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    cliente.headers["Authorization"] = f"Bearer {respuesta.json()['access_token']}"
+    return None
+
+
+async def _escenario_para_fase7(cliente: httpx.AsyncClient) -> str | None:
+    """Prepara combustible, institución, orden vigente y un vale de 100."""
+    marca = _ms_actuales()  # el nombre debe ser único por corrida (UNIQUE)
+    respuesta = await cliente.post(
+        "/api/v1/combustibles", json={"nombre": f"Consumos Smoke {marca}"}
+    )
+    if respuesta.status_code != 201:
+        return f"POST combustibles devolvió {respuesta.status_code}: {respuesta.text}"
+    combustible = respuesta.json()
+    precio = await cliente.post(
+        f"/api/v1/combustibles/{combustible['id']}/precios",
+        json={"precio_galon": "15.50", "vigente_desde": "2026-01-01"},
+    )
+    if precio.status_code != 201:
+        return f"POST precios devolvió {precio.status_code}: {precio.text}"
+
+    ficha = await cliente.put(
+        "/api/v1/configuracion/estacion",
+        json={"nombre": "Estación San José", "ruc": "20100047218"},
+    )
+    if ficha.status_code not in (200, 201):
+        return f"PUT estación devolvió {ficha.status_code}: {ficha.text}"
+
+    ruc_valido = _ruc_aleatorio()
+
+    institucion = await cliente.post(
+        "/api/v1/instituciones",
+        json={
+            "nombre": "Municipalidad Fase 7",
+            "ruc": ruc_valido,
+            "tipo": "publica",
+            "modalidad_numeracion": "por_orden",
+        },
+    )
+    if institucion.status_code != 201:
+        return f"POST instituciones devolvió {institucion.status_code}: {institucion.text}"
+
+    orden = await cliente.post(
+        "/api/v1/ordenes",
+        json={
+            "institucion_id": institucion.json()["id"],
+            "fecha_emision": _dt.date.today().isoformat(),
+            "presupuesto_soles": "5000.00",
+            "estado": "vigente",
+            "confirmar_duplicado": True,
+        },
+    )
+    if orden.status_code != 201:
+        return f"POST ordenes devolvió {orden.status_code}: {orden.text}"
+    orden = orden.json()
+
+    emision = await cliente.post(
+        f"/api/v1/ordenes/{orden['id']}/vales",
+        json={"combustible_id": combustible["id"],"cantidades": ["100.00"]},
+    )
+    if emision.status_code != 201:
+        return f"POST vales devolvió {emision.status_code}: {emision.text}"
+    vale = emision.json()[0]
+    ESTADO_FASE_7.update({"orden": orden["id"], "vale": vale["id"]})
+    return None
+
+
+def _falta_escenario_fase7(*claves: str) -> str | None:
+    """Un paso previo fallido no debe arrastrar KeyError a los siguientes."""
+    faltan = [clave for clave in claves if clave not in ESTADO_FASE_7]
+    if not faltan:
+        return None
+    return (
+        "Falta el escenario de la fase 7 ("
+        + ", ".join(faltan)
+        + "): el paso anterior no lo preparó."
+    )
+
+
+async def _consume_parcial(cliente: httpx.AsyncClient) -> str | None:
+    """CON-01: consumir 30 de 100 deja saldo 70."""
+    if (falta := _falta_escenario_fase7("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    respuesta = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": _token_fase_7(), "cantidad_galones": "30.00"},
+    )
+    if respuesta.status_code != 201:
+        return f"POST consumos devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    datos = respuesta.json()
+    if datos["saldo_posterior"] != "70.00" or datos["importe_soles"] != "465.00":
+        return f"Movimiento inesperado: {datos}"
+    ESTADO_FASE_7["token"] = datos["token_operacion"]
+    ESTADO_FASE_7["movimiento"] = datos["id"]
+    detalle = (await cliente.get(f"/api/v1/vales/{vale}")).json()
+    if detalle["saldo"] != "70.00":
+        return f"El saldo del vale no es 70.00: {detalle['saldo']}"
+    return None
+
+
+async def _consume_excesivo_rechazado(cliente: httpx.AsyncClient) -> str | None:
+    """CON-03: consumir 80 sobre un saldo de 70 devuelve 409."""
+    if (falta := _falta_escenario_fase7("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    respuesta = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": _token_fase_7(), "cantidad_galones": "80.00"},
+    )
+    if respuesta.status_code != 409:
+        return f"POST consumos devolvió {respuesta.status_code}; se esperaba 409."
+    if respuesta.json().get("codigo") != "SALDO_INSUFICIENTE":
+        return f"codigo inesperado: {respuesta.json().get('codigo')}"
+    if respuesta.json().get("detalles", {}).get("saldo") != "70.00":
+        return "El 409 no declara el saldo disponible."
+    return None
+
+
+async def _reenvio_token_no_duplica(cliente: httpx.AsyncClient) -> str | None:
+    """CON-08: el reenvío con el mismo token devuelve el movimiento original."""
+    if (falta := _falta_escenario_fase7("vale", "token", "movimiento")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    respuesta = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={
+            "token_operacion": ESTADO_FASE_7["token"],
+            "cantidad_galones": "95.00",
+        },
+    )
+    if respuesta.status_code != 201:
+        return f"Reenvío devolvió {respuesta.status_code}; se esperaba 201."
+    if respuesta.json()["id"] != ESTADO_FASE_7["movimiento"]:
+        return "El reenvío devolvió otro movimiento; el token no matchea."
+    if respuesta.json()["saldo_posterior"] != "70.00":
+        return "El reenvío alteró el saldo."
+    historia = (await cliente.get(f"/api/v1/vales/{vale}/movimientos")).json()
+    # La línea de tiempo incluye la emisión (CON-12): emisión + consumo.
+    if len(historia) != 2:
+        return f"Hay {len(historia)} movimientos; el token aprobado duplicó."
+    return None
+
+
+async def _revertir_como_admin(cliente: httpx.AsyncClient) -> str | None:
+    """CON-11: la reversión devuelve los 30 galones; la doble es 409."""
+    if (falta := _falta_escenario_fase7("movimiento")) is not None:
+        return falta
+    movimiento = int(ESTADO_FASE_7["movimiento"])
+    respuesta = await cliente.post(
+        f"/api/v1/consumos/{movimiento}/revertir",
+        json={"motivo": "Despacho grabado dos veces por el smoke"},
+    )
+    if respuesta.status_code != 200:
+        return f"POST revertir devolvió {respuesta.status_code}: {respuesta.json().get('mensaje')}"
+    if respuesta.json()["saldo_posterior"] != "100.00":
+        return f"La reversión no restituyó el saldo: {respuesta.json()}"
+    doble = await cliente.post(
+        f"/api/v1/consumos/{movimiento}/revertir",
+        json={"motivo": "Repetir la reversión debe fallar"},
+    )
+    if doble.status_code != 409 or doble.json().get("codigo") != "CONSUMO_YA_REVERTIDO":
+        return f"La doble reversión devolvió {doble.status_code}: {doble.json().get('codigo')}"
+    return None
+
+
+async def _anula_vale(cliente: httpx.AsyncClient) -> str | None:
+    """VAL-10/P-13: el vale anulado queda sin saldo y compromete lo consumido."""
+    if (falta := _falta_escenario_fase7("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    # Consumo de 10 galones antes de anular: compromiso = 10 x 15.50 = S/ 155.00.
+    consumo = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": _token_fase_7(), "importe_soles": "155.00"},
+    )
+    if consumo.status_code != 201:
+        return f"POST consumos devolvió {consumo.status_code}: {consumo.json().get('mensaje')}"
+    anulacion = await cliente.post(
+        f"/api/v1/vales/{vale}/anular", json={"motivo": "Orden corregida por smoke"}
+    )
+    if anulacion.status_code != 200:
+        return f"POST anular devolvió {anulacion.status_code}: {anulacion.json().get('mensaje')}"
+    detalle = anulacion.json()
+    if detalle["estado"] != "anulado" or detalle["saldo"] != "0.00":
+        return f"El vale anulado no quedó en cero: {detalle}"
+    if detalle["valor_comprometido_soles"] != "155.00":
+        return (
+            "El compromiso no quedó en lo ya consumido: "
+            f"{detalle['valor_comprometido_soles']}"
+        )
+    despacho = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": _token_fase_7(), "cantidad_galones": "1.00"},
+    )
+    if despacho.status_code != 409 or despacho.json().get("codigo") != "VALE_ANULADO":
+        return "Después de anular, el despacho no devolvió VALE_ANULADO."
+    return None
+
+
+async def _orden_con_consumos_no_se_anula(cliente: httpx.AsyncClient) -> str | None:
+    """ORD-09/RN-17: la orden con consumo no se anula (ni sin consumos)."""
+    if (falta := _falta_escenario_fase7("orden")) is not None:
+        return falta
+    orden = int(ESTADO_FASE_7["orden"])
+    respuesta = await cliente.post(
+        f"/api/v1/ordenes/{orden}/anular", json={"motivo": "Orden revisada"}
+    )
+    if respuesta.status_code != 409:
+        return f"POST anular orden devolvió {respuesta.status_code}; se esperaba 409."
+    if respuesta.json().get("codigo") != "ORDEN_CON_CONSUMOS":
+        return f"codigo inesperado: {respuesta.json().get('codigo')}"
+
+    cliente.headers.pop("Authorization", None)
+    ESTADO_FASE_7.clear()
+    return None
+
+
+async def _busca_por_numero_entidad(cliente: httpx.AsyncClient) -> str | None:
+    """QRY-01: el buscador halla el vale de entidad por su número."""
+    respuesta = await cliente.get("/api/v1/vales/buscar", params={"q": ESTADO_FASE_6["numero"]})
+    if respuesta.status_code != 200:
+        return f"GET /vales/buscar devolvió {respuesta.status_code}."
+    candidatos = respuesta.json()
+    hallado = [c for c in candidatos if c["numero_entidad"] == ESTADO_FASE_6["numero"]]
+    if not hallado:
+        return "El buscador no encontró el vale de entidad recién registrado."
+    if not hallado[0].get("saldo") or float(hallado[0]["saldo"]) != 5.0:
+        return f"El saldo del candidato no es 5.00: {hallado[0]}"
+
+    # Cierre de fase: se cierra la sesión del smoke.
+    cliente.headers.pop("Authorization", None)
+    ESTADO_FASE_6.clear()
+    return None
+
+
+# --- Fase 8: auditoría e integridad de saldos ------------------------------
+
+ESTADO_FASE_8: dict[str, object] = {}
+
+
+async def _login_admin_para_fase8(cliente: httpx.AsyncClient) -> str | None:
+    """Sesión del administrador del smoke para auditoría e integridad."""
+    return await _login_admin_para_fase7(cliente)
+
+
+async def _escenario_para_fase8(cliente: httpx.AsyncClient) -> str | None:
+    """Vale de 100 galones con un consumo de 30: saldo 70 y sus movimientos."""
+    falta = await _escenario_para_fase7(cliente)
+    if falta is not None:
+        return falta
+    vale = int(ESTADO_FASE_7["vale"])
+    consumo = await cliente.post(
+        f"/api/v1/vales/{vale}/consumos",
+        json={"token_operacion": str(uuid.uuid4()), "cantidad_galones": "30.00"},
+    )
+    if consumo.status_code != 201:
+        return f"POST consumos devolvió {consumo.status_code}: {consumo.text}"
+    ESTADO_FASE_8.update({"vale": vale, "movimiento": consumo.json()["id"]})
+    ESTADO_FASE_7.clear()
+    return None
+
+
+def _falta_escenario_fase8(*claves: str) -> str | None:
+    faltan = [clave for clave in claves if clave not in ESTADO_FASE_8]
+    if not faltan:
+        return None
+    return (
+        "Falta el escenario de la fase 8 ("
+        + ", ".join(faltan)
+        + "): el paso anterior no lo preparó."
+    )
+
+
+async def _verifica_saldos_sin_diferencias(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-05: con datos coherentes la verificación no encuentra descuadres."""
+    respuesta = await cliente.post("/api/v1/auditoria/integridad/verificar")
+    if respuesta.status_code != 200:
+        return f"POST verificar devolvió {respuesta.status_code}: {respuesta.text}"
+    datos = respuesta.json()
+    if datos["diferencias"] != 0:
+        return f"La verificación reportó {datos['diferencias']} diferencias."
+    if datos["vales_revisados"] < 1:
+        return "La verificación no revisó ningún vale."
+    ESTADO_FASE_8["verificacion"] = datos["id"]
+    return None
+
+
+async def _ultima_verificacion_coincide(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-05: la última corrida es la que se acaba de ejecutar."""
+    if (falta := _falta_escenario_fase8("verificacion")) is not None:
+        return falta
+    respuesta = await cliente.get("/api/v1/auditoria/integridad/ultima")
+    if respuesta.status_code != 200:
+        return f"GET integridad/ultima devolvió {respuesta.status_code}."
+    datos = respuesta.json()
+    if datos["verificacion"] is None:
+        return "La última verificación no quedó registrada."
+    if datos["verificacion"]["id"] != ESTADO_FASE_8["verificacion"]:
+        return "La última verificación no es la recién ejecutada."
+    if datos["diferencias_pendientes"] != 0:
+        return f"Hay {datos['diferencias_pendientes']} diferencias sin revisar."
+    return None
+
+
+async def _bitacora_registra_la_verificacion(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-03: la corrida deja su huella con usuario y resultado."""
+    respuesta = await cliente.get(
+        "/api/v1/auditoria/bitacora", params={"accion": "verificacion_integridad"}
+    )
+    if respuesta.status_code != 200:
+        return f"GET bitacora devolvió {respuesta.status_code}: {respuesta.text}"
+    datos = respuesta.json()
+    if datos["total"] < 1:
+        return "La verificación no dejó entrada en la bitácora."
+    fila = datos["items"][0]
+    if fila["entidad"] != "integridad" or not fila["usuario"]:
+        return f"Entrada de bitácora incompleta: {fila}"
+    return None
+
+
+async def _historial_del_vale(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-04: el historial del vale arranca en la emisión y trae el consumo."""
+    if (falta := _falta_escenario_fase8("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_8["vale"])
+    respuesta = await cliente.get(f"/api/v1/auditoria/historial/vale/{vale}")
+    if respuesta.status_code != 200:
+        return f"GET historial devolvió {respuesta.status_code}: {respuesta.text}"
+    acciones = [item["accion"] for item in respuesta.json()["items"]]
+    for esperada in ("vale_emitido", "consumo_registrado"):
+        if esperada not in acciones:
+            return f"El historial del vale no registra {esperada}: {acciones}"
+    return None
+
+
+async def _saldo_cuadra_con_sus_movimientos(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-05: la suma de variaciones del historial es el saldo del vale."""
+    if (falta := _falta_escenario_fase8("vale")) is not None:
+        return falta
+    vale = int(ESTADO_FASE_8["vale"])
+    detalle = await cliente.get(f"/api/v1/vales/{vale}")
+    movimientos = await cliente.get(f"/api/v1/vales/{vale}/movimientos")
+    if detalle.status_code != 200 or movimientos.status_code != 200:
+        return "No se pudo leer el vale o su historial de movimientos."
+    saldo = detalle.json()["saldo"]
+    if saldo != "70.00":
+        return f"El saldo del vale no es 70.00: {saldo}"
+    suma = sum(float(m["variacion"]) for m in movimientos.json())
+    if round(suma, 2) != float(saldo):
+        return f"La suma de variaciones ({suma}) no cuadra con el saldo ({saldo})."
+    return None
+
+
+async def _sin_diferencias_pendientes(cliente: httpx.AsyncClient) -> str | None:
+    """AUD-06: la base de desarrollo queda sin alertas abiertas."""
+    respuesta = await cliente.get(
+        "/api/v1/auditoria/integridad/diferencias", params={"revisada": False}
+    )
+    if respuesta.status_code != 200:
+        return f"GET diferencias devolvió {respuesta.status_code}: {respuesta.text}"
+    total = respuesta.json()["total"]
+    if total != 0:
+        return (
+            f"Quedan {total} diferencias sin revisar; ciérrelas con el endpoint "
+            "de revisión antes de dar la fase por cerrada."
+        )
+    panel = await cliente.get("/api/v1/panel/indicadores")
+    if panel.status_code != 200:
+        return f"GET panel/indicadores devolvió {panel.status_code}."
+    if panel.json()["diferencias_sin_revisar"] != 0:
+        return f"El panel informa {panel.json()['diferencias_sin_revisar']} pendientes."
+    cliente.headers.pop("Authorization", None)
+    ESTADO_FASE_8.clear()
+    return None
+
+
+FASES: tuple[Fase, ...] = (
+    {
+        "numero": 1,
+        "titulo": "Esqueleto FastAPI, PostgreSQL y migraciones propias",
+        "comprobaciones": (
+            ("001 salud con PostgreSQL y OCR en ok", _salud_en_ok),
+            ("002 catálogos de enums protegidos piden sesión", _enums_protegido),
+            ("003 documentación OpenAPI generada", _openapi_generado),
+        ),
+    },
+    {
+        "numero": 2,
+        "titulo": "Autenticación, sesiones y auditoría base",
+        "comprobaciones": (
+            ("004 login rechaza credenciales erróneas", _login_con_clave_erronea),
+            ("005 login con SMOKE_CORREO/SMOKE_PASSWORD", _login_correcto),
+            ("006 /auth/yo devuelve user y permisos", _yo_con_permisos),
+            ("007 enums con sesión y listas completas", _enums_con_sesion),
+            ("008 refresh rota con la cookie y CSRF", _refresh_rota_con_csrf),
+            ("009 reutilizar refresh sin CSRF es rechazado", _sin_csrf_rechaza),
+            ("010 logout cierra la sesión", _logout_revoca),
+            ("011 sin sesión ya no hay datos", _yo_sin_sesion_rechaza),
+        ),
+    },
+    {
+        "numero": 3,
+        "titulo": "Usuarios, roles y permisos",
+        "comprobaciones": (
+            ("012 /usuarios pide sesión sin bearer", _usuarios_sin_sesion_rechaza),
+            ("013 login del administrador del smoke", _login_admin_para_usuarios),
+            ("014 el admin crea un operador y lo halla", _crea_operador),
+            ("015 el operador entra con su clave temporal", _login_operador_con_temporal),
+            ("016 cambio pendiente bloquea /usuarios", _operador_restringido_al_cambiar),
+            ("017 el operador cambia su contraseña", _operador_cambia_password),
+            ("018 sin el permiso, /usuarios responde 403 SIN_PERMISO", _operador_sin_permiso),
+            ("019 el único administrador no puede cambiar su rol", _ultimo_admin_protegido),
+            ("020 restablecer-password entrega una temporal nueva", _restablece_operador),
+        ),
+    },
+    {
+        "numero": 4,
+        "titulo": "Configuración, combustibles y precios",
+        "comprobaciones": (
+            ("021 login del administrador del smoke", _login_admin_para_fase4),
+            ("022 combustible creado y listado con precio nulo", _combustible_creado_y_listado),
+            ("023 precio del día registrado y vigente en el catálogo",
+             _precio_registrado_vigente_primero),
+            ("024 fecha retroactiva de precio rechazada (409)", _precio_historico_inmutable),
+            ("025 parámetros con rango y guardado inmediato", _parametros_leen_rango_y_guardan),
+            ("026 ficha de la estación se guarda y se lee", _estacion_gestionada_y_protegida),
+            ("027 logo impostor rechazado por contenido", _logo_rechazado_por_contenido),
+        ),
+    },
+    {
+        "numero": 6,
+        "titulo": "Vales: emisión y vales de entidad",
+        "comprobaciones": (
+            ("028 login del administrador del smoke", _login_admin_para_fase6),
+            ("029 escenario: combustible con precio, institución y orden vigente",
+             _escenario_para_fase6),
+            ("030 simulación entrega techo y total sin guardar nada", _simulacion_no_guarda),
+            ("031 emisión de 2 vales con precio retenido y numeración",
+             _emite_dos_vales),
+            ("032 emisión excedida rechazada con máximo de galones",
+             _exceso_rechazado_con_maximo),
+            ("033 vale de entidad registra y su duplicado da 409",
+             _vale_entidad_y_duplicado),
+            ("034 búsqueda global halla el vale por número de entidad",
+             _busca_por_numero_entidad),
+        ),
+    },
+    {
+        "numero": 7,
+        "titulo": "Consumos y correcciones",
+        "comprobaciones": (
+            ("035 login del administrador del smoke", _login_admin_para_fase7),
+            ("036 escenario: vale de 100 galones listo para despachar", _escenario_para_fase7),
+            ("037 consumir 30 de 100 deja saldo 70", _consume_parcial),
+            ("038 consumir 80 sobre saldo 70 devuelve 409", _consume_excesivo_rechazado),
+            ("039 reenvío con el mismo token no duplica", _reenvio_token_no_duplica),
+            ("040 reversión del consumo y doble reversión 409", _revertir_como_admin),
+            ("041 anulación del vale con compromiso en lo consumido", _anula_vale),
+            ("042 orden con consumos no se anula", _orden_con_consumos_no_se_anula),
+        ),
+    },
+    {
+        "numero": 8,
+        "titulo": "Auditoría e integridad de saldos",
+        "comprobaciones": (
+            ("043 login del administrador del smoke", _login_admin_para_fase8),
+            ("044 escenario: vale de 100 con un consumo de 30", _escenario_para_fase8),
+            ("045 la verificación no halla diferencias", _verifica_saldos_sin_diferencias),
+            ("046 la última verificación es la recién ejecutada", _ultima_verificacion_coincide),
+            ("047 la verificación queda en la bitácora", _bitacora_registra_la_verificacion),
+            ("048 el historial del vale arranca en la emisión", _historial_del_vale),
+            ("049 el saldo cuadra con sus movimientos", _saldo_cuadra_con_sus_movimientos),
+            ("050 sin diferencias pendientes y el panel en cero", _sin_diferencias_pendientes),
+        ),
+    },
+)
+
+
+def construir_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--url", default="http://127.0.0.1:8000", help="origen de la API")
+    parser.add_argument("--hasta", type=int, default=1, help="última fase a comprobar")
+    parser.add_argument("--segundos", type=float, default=10.0, help="segundos por petición")
+    return parser
+
+
+def _fases_hasta(limite: int) -> tuple[Fase, ...]:
+    fases = tuple(fase for fase in FASES if fase["numero"] <= limite)
+    if limite > FASES[-1]["numero"]:
+        print(
+            f"Aviso: la fase {limite} aún no tiene comprobaciones; máximo {FASES[-1]['numero']}.",
+            file=sys.stderr,
+        )
+    return fases
+
+
+async def recorrer(url: str, limite: int, segundos: float) -> int:
+    fallas = 0
+    limite_util = max(1, limite)
+    async with httpx.AsyncClient(base_url=url, timeout=segundos) as cliente:
+        for fase in _fases_hasta(limite_util):
+            print(f"\nFase {fase['numero']}: {fase['titulo']}")
+            for titulo, comprobar in fase["comprobaciones"]:
+                try:
+                    detalle = await comprobar(cliente)
+                except httpx.HTTPError as exc:
+                    detalle = f"No se pudo conectar: {exc}"
+                if detalle is None:
+                    print(f"  OK    {titulo}")
+                else:
+                    fallas += 1
+                    print(f"  FALLA {titulo}: {detalle}")
+    return 1 if fallas else 0
+
+
+def main() -> int:
+    for flujo in (sys.stdout, sys.stderr):
+        if hasattr(flujo, "reconfigure"):
+            with suppress(OSError, ValueError):  # flujo no reconfigurable
+                flujo.reconfigure(encoding="utf-8", errors="replace")
+    argumentos = construir_parser().parse_args()
+    print(f"Recorrido smoke contra {argumentos.url} hasta la fase {argumentos.hasta}.")
+    codigo = asyncio.run(recorrer(argumentos.url, argumentos.hasta, argumentos.segundos))
+    if codigo == 0:
+        print("\nRecorrido terminado en verde.")
+    else:
+        print("\nRecorrido con fallas.", file=sys.stderr)
+    return codigo
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
