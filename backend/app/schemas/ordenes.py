@@ -157,12 +157,14 @@ class OrdenDetalle(BaseModel):
     presupuesto_soles: str
     observaciones: str | None
     estado: str
+    creada_con_ocr: bool
     serie_desde: int | None
     serie_hasta: int | None
     combustible_id: int | None
     archivo_path: str | None
     archivo_tipo: str | None
     archivo_tamano: int | None
+    datos_documento_ocr: dict[str, object] | None = None
     creado_en: datetime
     actualizado_en: datetime
     total_emitido_soles: str

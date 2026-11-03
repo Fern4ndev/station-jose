@@ -98,7 +98,13 @@ def normalizar_monto(texto: str) -> str | None:
     if moneda:
         limpio = limpio[moneda.end():]
     limpio = re.sub(r"\bsoles?\b", "", limpio, flags=re.IGNORECASE)
-    limpio = limpio.translate(CONFUSIONES)
+    # Las confusiones del OCR tocan solo los tokens que ya parecen cifras
+    # (contienen algún dígito): una palabra suelta (`alguna`) no se avanza
+    # a numeral por la `l` que le sale en medio.
+    limpio = "".join(
+        token.translate(CONFUSIONES) if re.search(r"\d", token) else token
+        for token in re.split(r"(\s+)", limpio)
+    )
     cifra = re.sub(r"[^\d.,\-]", "", limpio)
     if not re.search(r"\d", cifra):
         return None
@@ -130,8 +136,13 @@ def normalizar_numero(texto: str) -> str | None:
     el documento no traía.
     """
     limpio = texto.strip()
-    limpio = re.sub(r"^(?:n[°ºo]\b|num(?:ero)?\b|orden\b|#)\s*[:#.]?\s*", "", limpio, flags=re.IGNORECASE)
-    limpio = limpio.replace("–", "-").replace("—", "-")
+    limpio = re.sub(
+        r"^(?:n[°ºo]\b|num(?:ero)?\b|orden\b|#)\s*[:#.]?\s*",
+        "",
+        limpio,
+        flags=re.IGNORECASE,
+    )
+    limpio = limpio.replace("–", "-").replace("—", "-")  # noqa: RUF001
     limpio = limpio.translate(CONFUSIONES)
     numero = re.sub(r"[^\d.\-]", "", limpio)
     numero = re.sub(r"-{2,}", "-", numero).strip(".")

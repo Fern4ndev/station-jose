@@ -14,9 +14,9 @@ reales de ninguna institución. Regenerar:
 
 from __future__ import annotations
 
-import cv2
-import numpy as np
 from pathlib import Path
+
+import cv2
 
 RAIZ = Path(__file__).resolve().parents[1]
 DESTINO = RAIZ / "tests" / "fixtures"
@@ -48,6 +48,7 @@ def generar_pdf(ruta: Path) -> None:
 def generar_foto(ruta: Path, desde_pdf: Path) -> None:
     """Foto de la orden: página del PDF tendida a imagen y pasada a JPG."""
     import pypdfium2 as pdfium
+
     from app.services.ocr.preprocesado import Pasos, preparar
 
     documento = pdfium.PdfDocument(desde_pdf.read_bytes())

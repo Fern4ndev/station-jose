@@ -220,7 +220,7 @@ async def test_precio_invalido_rechazado(cliente, precio):
 def test_no_existen_rutas_para_editar_o_borrar_precios():
     """CMB-02/RN-16: el histórico no se edita ni se elimina por la API."""
     rutas = {
-        (ruta.methods, ruta.path)
+        (frozenset(ruta.methods), ruta.path)
         for ruta in aplicacion.routes
         if isinstance(ruta, APIRoute)
     }

@@ -6,5 +6,15 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 almacenamiento/
+# Datos personales del dataset del OCR (Fase 10); se conservan los .gitkeep.
 datos/documentos/
+datos/verdad_terreno/
+datos/revision_verdad_terreno.csv
+datos/seleccion_fase10.json
+datos/resultados_ordenes/
+!datos/resultados_ordenes/
+datos/resultados_ordenes/*
+!datos/resultados_ordenes/README.md
+!datos/documentos/.gitkeep
+!datos/verdad_terreno/.gitkeep
 node_modules/

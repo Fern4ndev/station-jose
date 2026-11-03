@@ -103,6 +103,49 @@ def _destino_orden(anio: int, extension: str) -> Path:
     return base / f"{uuid_mod.uuid4().hex}{extension}"
 
 
+def _destino_ocr(anio: int, extension: str) -> Path:
+    """Ruta privada, aleatoria y separada para documentos de extracciones OCR."""
+    base = Path(obtener_settings().almacenamiento_dir) / "ocr" / str(anio)
+    base.mkdir(parents=True, exist_ok=True)
+    return base / f"{uuid_mod.uuid4().hex}{extension}"
+
+
+async def guardar_documento_ocr(datos: bytes, extension: str, anio: int) -> DocumentoGuardado:
+    """Persiste el original de OCR antes de ejecutar el motor."""
+    destino = _destino_ocr(anio, extension)
+    await asyncio.to_thread(destino.write_bytes, datos)
+    formato = sniff_formato(datos)
+    if formato is None:
+        raise ErrorArchivo(422, "FORMATO_INVALIDO", "El documento no tiene un formato admitido.")
+    return DocumentoGuardado(
+        path_relativo=str(destino.relative_to(obtener_settings().almacenamiento_dir)),
+        media_type=_MEDIA_POR_FORMATO[formato][0],
+        tamano=len(datos),
+        hash_sha256=hashlib.sha256(datos).hexdigest(),
+    )
+
+
+def ruta_privada(path_relativo: str) -> Path:
+    """Resuelve una ruta guardada y rechaza rutas que escapen del almacén."""
+    raiz = Path(obtener_settings().almacenamiento_dir).resolve()
+    ruta = (raiz / path_relativo).resolve()
+    if not ruta.is_relative_to(raiz):
+        raise ErrorArchivo(404, "ARCHIVO_NO_ENCONTRADO", "El archivo no existe.")
+    return ruta
+
+
+async def leer_documento_ocr(path_relativo: str, hash_esperado: str) -> bytes:
+    """Lee un original OCR y verifica el hash antes de entregarlo al motor."""
+    ruta = ruta_privada(path_relativo)
+    try:
+        contenido = await asyncio.to_thread(ruta.read_bytes)
+    except FileNotFoundError as exc:
+        raise ErrorArchivo(404, "ARCHIVO_NO_ENCONTRADO", "El archivo no existe.") from exc
+    if hashlib.sha256(contenido).hexdigest() != hash_esperado:
+        raise ErrorArchivo(409, "ARCHIVO_CORRUPTO", "El documento ya no coincide con su registro.")
+    return contenido
+
+
 async def guardar_documento_orden(datos: bytes, extension: str, anio: int) -> DocumentoGuardado:
     """ORD-03: guarda el documento en `almacenamiento/ordenes/{año}/` de forma privada.
 
@@ -156,6 +199,4 @@ async def leer_bloques(path_relativo: str, fuente_verificada: str) -> AsyncItera
     finally:
         await asyncio.to_thread(handle.close)
     if hash_calculado.hexdigest() != fuente_verificada:
-        raise ErrorArchivo(
-            409, "ARCHIVO_CORRUPTO", "El documento ya no coincide con su registro."
-        )
+        raise ErrorArchivo(409, "ARCHIVO_CORRUPTO", "El documento ya no coincide con su registro.")

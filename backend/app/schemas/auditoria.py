@@ -115,6 +115,11 @@ class RevisionEntrada(BaseModel):
 
 
 class IndicadoresPanel(BaseModel):
-    """REP-01: la Fase 8 aporta el indicador de integridad; la 12, el resto."""
+    """REP-01: métricas operativas del mes y advertencia de integridad."""
 
+    ordenes_mes: int = 0
+    vales_activos: int = 0
+    galones_mes: str = "0.00"
+    vales_saldo_bajo: int = 0
+    vales_por_vencer: int = 0
     diferencias_sin_revisar: int | None = None

@@ -1,0 +1,9 @@
+{
+  "comentario": "Metas de exactitud por campo del OCR (Fase 10). Se definen ANTES de la primera medicion y no se cambian despues de ver resultados; si una meta resulta inalcanzable con los documentos reales, se deja por escrito el motivo y la nueva meta en una corrida nueva. El evaluador marca cada campo con 'cumple', 'NO cumple' o 'sin meta'.",
+  "campos": {
+    "numero_orden": 0.98,
+    "fecha": 0.95,
+    "monto": 0.95,
+    "institucion": 0.90
+  }
+}

@@ -119,8 +119,8 @@ def _rutas_de_api():
     """Toda APIRoute montada, con su ruta completa (prefijo v1 incluido)."""
     prefijo = obtener_settings().api_v1_prefix
     for ruta in aplicacion.routes:
-        if isinstance(ruta, APIRoute):
-            yield prefijo + ruta.path, ruta
+        if isinstance(ruta, APIRoute) and ruta.path.startswith(f"{prefijo}/"):
+            yield ruta.path, ruta
 
 
 def _dependencias_recursivas(ruta) -> set:

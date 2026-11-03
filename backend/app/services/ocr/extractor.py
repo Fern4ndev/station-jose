@@ -32,7 +32,7 @@ ANCLAS: dict[str, tuple[re.Pattern[str], ...]] = {
 # Respaldo por patrón de valor cuando la etiqueta no deja valor a la derecha
 # ni debajo. La institución no tiene patrón fiable: sin etiqueta, no hay dato.
 PATRONES: dict[str, re.Pattern[str] | None] = {
-    "numero_orden": re.compile(r"\b\d{1,8}\s*[-–]\s*20\d{2}\b"),
+    "numero_orden": re.compile(r"\b\d{1,8}\s*[-–]\s*20\d{2}\b"),  # noqa: RUF001
     "fecha": re.compile(r"\b\d{1,2}[/.\-]\d{1,2}[/.\-]\d{4}\b"),
     "monto": re.compile(r"\bs\s*/\s*\.?\s*\d[\d.,]*"),
     "institucion": None,
@@ -85,10 +85,10 @@ def agrupar_lineas(
             if cambia_pagina or salta_linea:
                 grupos.append([])
                 centro = None
-        if centro is None:
-            centro = palabra.centro_y
-        else:  # el centro del renglón sigue el promedio de sus palabras
-            centro = (centro + palabra.centro_y) / 2
+        # El centro del renglón sigue el promedio de sus palabras.
+        centro = (
+            palabra.centro_y if centro is None else (centro + palabra.centro_y) / 2
+        )
         grupos[-1].append(palabra)
         pagina_previa = palabra.pagina
     return [empaquetar(renglon) for renglon in grupos if renglon]
@@ -144,7 +144,9 @@ def _por_ancla(clave: str, renglones: list[Renglon]) -> _Crudo | None:
                 palabras_bajo, texto_bajo, inicios_bajo = renglones[abajo]
                 if _etiqueta_en(clave, texto_bajo):
                     break
-                segmento = _segmento(palabras_bajo, inicios_bajo, desde=0)
+                segmento = _segmento(
+                    palabras_bajo, texto_bajo, inicios_bajo, desde=0
+                )
                 if segmento.texto:
                     return segmento
     return None
@@ -194,8 +196,11 @@ def _segmento(
                 pagina=palabra.pagina,
             )
         )
-    texto = " ".join(palabra.texto for palabra in seleccionadas if palabra.texto).strip()
-    return _Crudo(texto=texto, palabras=tuple(seleccionadas))
+    # La puntuación del borde la limpia cada normalizador: aquí no se
+    # recorta por fuera para no morder la sigla final de la institución.
+    utiles = [palabra for palabra in seleccionadas if re.search(r"\w", palabra.texto)]
+    texto = " ".join(palabra.texto for palabra in utiles).strip()
+    return _Crudo(texto=texto, palabras=tuple(utiles))
 
 
 def _por_patron(clave: str, renglones: list[Renglon]) -> _Crudo | None:

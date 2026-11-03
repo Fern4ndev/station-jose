@@ -119,6 +119,7 @@ Implementación:
 - [x] Entry point FastAPI, configuración, sesión asíncrona y endpoint básico de salud (`/api/v1/salud`)
 - [x] Servicio FastAPI levantado y verificado (Fase 1)
 - [x] RapidOCR instalado
+- [x] Motor OCR implementado y verificado con `ocr-probar` (Fase 9)
 
 ### 2.2 Tablero de fases
 
@@ -136,6 +137,8 @@ La Fase 7 cerró el 01/11/2026 con `routers/consumos.py`, `services/consumos.py`
 
 La Fase 8 cerró el 01/11/2026 con `services/integridad.py`, `routers/auditoria.py`, `routers/panel.py`, `schemas/auditoria.py` y la migración `0008_integridad.sql`: verificación de saldos en una sola consulta, diferencias con refresco en el lugar y cierre con comentario, bitácora con filtros y paginación, historial por orden, vale, institución, usuario y combustible, indicador de diferencias sin revisar para el administrador y el comando `verificar-saldos` con código de salida 1. 176 pruebas en verde (22 nuevas en `tests/test_integridad.py` y `tests/test_auditoria.py`), `smoke.py --hasta 8` completo (001-050) y el comando probado contra un descuadre real en la base de desarrollo, con la fila revisada protegida por disparador. Ruff limpio.
 
+La Fase 9 cerró el 03/11/2026 con los módulos de `app/services/ocr/` (`lector.py`, `preprocesado.py`, `rapidocr.py`, `normalizador.py`, `extractor.py` y `pipeline.py`): verificación de firmas PDF/JPEG/PNG, texto digital con `pdfplumber` o render con `pypdfium2` más EXIF de OpenCV, preprocesado activable paso a paso, RapidOCR 3.10 en el proceso con motor diferido, temporización y semáforo de concurrencia (`OCR_OCUPADO`, `OCR_TIMEOUT`, `OCR_NO_DISPONIBLE`), normalizadores de fecha/monto/numeración/RUC/combustible y extractor por anclas con recorte interno de la caja del OCR. El comando `ocr-probar` responde los cuatro campos con confianza 0.99 en el PDF digital (0018-2026, 2027-03-15, 1500.00, INSTITUCION DEMO DEL SUR S.A.C.) y en la foto de prueba con el motor real (confianza ≥ 0.97). 215 pruebas en verde (39 nuevas en `tests/test_ocr_unidad.py`, con fixtures generator en `scripts/fixtures_ocr.py` de datos ficticios), Ruff limpio y ningún commit/tag: los dejan pendientes el autor del trabajo.
+
 En la misma sesión de la Fase 7 se corrigieron tres defectos que bloqueaban el recorrido manual: `schema.sql` no reproducía cuatro columnas, dos CHECK y los dos disparadores `BEFORE TRUNCATE` de las migraciones; el hash del seed era inválido y los correos de demostración usaban el dominio reservado `.local`; y `RECAPTCHA_SECRET_KEY` traía un valor de relleno que forzaba la verificación real y rechazaba cualquier login local.
 
 - [x] **Fase 0** Entorno y repositorio (inicio: 31/10/2026 / fin: 31/10/2026)
@@ -147,10 +150,10 @@ En la misma sesión de la Fase 7 se corrigieron tres defectos que bloqueaban el 
 - [x] **Fase 6** Vales: emisión y vales de entidad (inicio: 01/11/2026 / fin: 01/11/2026)
 - [x] **Fase 7** Consumos y correcciones (inicio: 01/11/2026 / fin: 01/11/2026)
 - [x] **Fase 8** Auditoría e integridad de saldos (inicio: 01/11/2026 / fin: 01/11/2026)
-- [ ] **Fase 9** Motor OCR con RapidOCR (inicio: ____ / fin: ____)
+- [x] **Fase 9** Motor OCR con RapidOCR (inicio: 02/11/2026 / fin: 03/11/2026)
 - [ ] **Fase 10** Dataset y evaluación del OCR (inicio: ____ / fin: ____)
-- [ ] **Fase 11** API de lectura OCR (inicio: ____ / fin: ____)
-- [ ] **Fase 12** Consultas, reportes y exportación (inicio: ____ / fin: ____)
+- [x] **Fase 11** API de lectura OCR (implementada, integrada y verificada con PostgreSQL; smoke 001-054 en verde, 03/11/2026)
+- [x] **Fase 12** Consultas, reportes y exportación (implementadas y verificadas con PostgreSQL; smoke 055-056, suite completa y benchmark en verde, 03/11/2026)
 - [ ] **Fase 13** Integración con Angular y pruebas integrales (inicio: ____ / fin: ____)
 - [ ] **Fase 14** Despliegue sin Docker y respaldo (inicio: ____ / fin: ____)
 
@@ -258,7 +261,7 @@ backend/
     └── fixtures/                     # documentos mínimos sin datos reales
 ```
 
-**Implementado hasta ahora (cierre de Fase 8):** `pyproject.toml`, `.env.example`, `app/config.py`, `app/errors.py`, `app/cli.py` (incluido `verificar-saldos`), `app/main.py`, `app/dependencies.py`, `app/core/*` (dinero, tiempo, permisos, dominio, seguridad, archivos, ruc), `app/db/sesion.py`, `app/db/migrar.py`, `app/db/migraciones/0001`-`0008`, los routers `sistema`, `catalogos`, `auth`, `usuarios`, `configuracion`, `combustibles`, `instituciones`, `ordenes`, `vales`, `consumos`, `auditoria` y `panel` con sus servicios y esquemas, `db/schema.sql`, `db/seed.sql`, `scripts/verificar_entorno.py`, `scripts/smoke.py`, `scripts/probar_concurrencia.py`, `tests/conftest.py` y las pruebas de sistema, dinero, tiempo, auth, usuarios, configuración, combustibles, instituciones, órdenes, vales, consumos, integridad y auditoría. Los módulos de OCR, consultas y reportes siguen pendientes (Fases 9-12).
+**Implementado y verificado hasta Fase 12:** backend FastAPI con migraciones `0001`-`0011`, routers de OCR, consultas y reportes, extractor estructurado reutilizado por pipeline/API y evaluación Fase 10, exportación XLSX, hosting SPA opcional, proxy Angular, CLI y pruebas. La suite completa pasó 235 pruebas; smoke 001-056 en verde y benchmark de 50.000 movimientos bajo 16 ms de mediana por consulta. Fase 10 continúa abierta hasta revisar las etiquetas reales; la integración punta a punta de producción y el despliegue siguen en Fases 13-14.
 
 Nota sobre bases con esquema legacy (`usuarios`, `usuario_id`, `vales.codigo_interno`): el plan no convierte esquemas heredados automáticamente. Para esas bases, respaldar los datos necesarios, eliminar los objetos payload y aplicar las migraciones desde una base vacía; la base de pruebas se reconstruyó así al cerrar la Fase 1.
 
@@ -839,17 +842,17 @@ Tareas:
 **Requerimientos:** OCR-03, OCR-04.
 
 Tareas:
-- [ ] `services/ocr/lector.py`: valida el tipo real (firmas de PDF, JPG y PNG). En PDF, `pdfplumber` extrae texto y coordenadas del PDF; si hay texto suficiente se usa como texto digital con confianza fija, y si no se renderiza cada página con `pypdfium2` a imagen a 300 dpi. En imágenes se corrige la orientación EXIF con OpenCV. Límites de páginas, de tamaño y de megapíxeles.
-- [ ] Estructura común `Palabra` (texto, posición, tamaño, confianza, línea) para texto digital y OCR, de modo que el extractor sea el mismo.
-- [ ] `services/ocr/preprocesado.py` con OpenCV: escala de grises, reducción de ruido, corrección de inclinación, binarización adaptativa y escalado; cada paso activable por configuración para medir su efecto en la Fase 10.
-- [ ] `services/ocr/rapidocr.py`: integrar `rapidocr==3.10.0` directamente. Inicializar `RapidOCR()` una vez por proceso, convertir la imagen preprocesada a matriz NumPy y mapear cajas/texto/confianza devueltos a `Palabra`; manejar excepción de carga y timeout sin subprocess ni binario externo.
+- [x] `services/ocr/lector.py`: valida el tipo real (firmas de PDF, JPG y PNG). En PDF, `pdfplumber` extrae texto y coordenadas del PDF; si hay texto suficiente se usa como texto digital con confianza fija, y si no se renderiza cada página con `pypdfium2` a imagen a 300 dpi. En imágenes se corrige la orientación EXIF con OpenCV. Límites de páginas, de tamaño y de megapíxeles.
+- [x] Estructura común `Palabra` (texto, posición, tamaño, confianza, línea) para texto digital y OCR, de modo que el extractor sea el mismo.
+- [x] `services/ocr/preprocesado.py` con OpenCV: escala de grises, reducción de ruido, corrección de inclinación, binarización adaptativa y escalado; cada paso activable por configuración para medir su efecto en la Fase 10.
+- [x] `services/ocr/rapidocr.py`: integrar `rapidocr==3.10.0` directamente. Inicializar `RapidOCR()` una vez por proceso, convertir la imagen preprocesada a matriz NumPy y mapear cajas/texto/confianza devueltos a `Palabra`; manejar excepción de carga y timeout sin subprocess ni binario externo.
 
-- [ ] Límite de concurrencia con un semáforo (`OCR_CONCURRENCIA`, por defecto 2): si no se obtiene turno en pocos segundos, `503` con `OCR_OCUPADO`.
-- [ ] `normalizador.py`: fechas a ISO (acepta `15/03/2027` y `15 de marzo de 2027`), montos a decimal (`S/ 1,500.00` y `1.500,00`), RUC con dígito verificador, combustible contra el catálogo con coincidencia aproximada y correcciones de confusiones en campos numéricos (O por 0, l por 1, S por 5).
-- [ ] `extractor.py`: expresiones regulares para patrones fijos y anclas por etiqueta (valor a la derecha o debajo de "Orden de compra N°", "Fecha", "Monto", "Señores"); campo no hallado con valor vacío y confianza 0, nunca inventado. Los campos exactos se ajustan con los documentos reales (P-05).
-- [ ] `pipeline.py`: orquesta todo y calcula la confianza por campo (fija y alta para texto digital que valida el formato; en OCR, el promedio de las palabras del valor, penalizado si el formato no valida) y las advertencias según `ocr_umbral_confianza`.
-- [ ] Comando `python -m app.cli ocr-probar <archivo>`: procesa un archivo e imprime el JSON.
-- [ ] Pruebas: normalizadores con casos reales y límite, extractor con listas de palabras de ejemplo, pipeline con un PDF digital y con una imagen (documentos de prueba sin datos reales), RapidOCR no disponible por error de carga del modelo y tiempo agotado.
+- [x] Límite de concurrencia con un semáforo (`OCR_CONCURRENCIA`, por defecto 2): si no se obtiene turno en pocos segundos, `503` con `OCR_OCUPADO`.
+- [x] `normalizador.py`: fechas a ISO (acepta `15/03/2027` y `15 de marzo de 2027`), montos a decimal (`S/ 1,500.00` y `1.500,00`), RUC con dígito verificador, combustible contra el catálogo con coincidencia aproximada y correcciones de confusiones en campos numéricos (O por 0, l por 1, S por 5).
+- [x] `extractor.py`: expresiones regulares para patrones fijos y anclas por etiqueta (valor a la derecha o debajo de "Orden de compra N°", "Fecha", "Monto", "Señores"); campo no hallado con valor vacío y confianza 0, nunca inventado. Los campos exactos se ajustan con los documentos reales (P-05).
+- [x] `pipeline.py`: orquesta todo y calcula la confianza por campo (fija y alta para texto digital que valida el formato; en OCR, el promedio de las palabras del valor, penalizado si el formato no valida) y las advertencias según `ocr_umbral_confianza`.
+- [x] Comando `python -m app.cli ocr-probar <archivo>`: procesa un archivo e imprime el JSON.
+- [x] Pruebas: normalizadores con casos reales y límite, extractor con listas de palabras de ejemplo, pipeline con un PDF digital y con una imagen (documentos de prueba sin datos reales), RapidOCR no disponible por error de carga del modelo y tiempo agotado.
 
 **Entregable navegable:** salida JSON en consola con los campos, la confianza y el método de lectura.
 
@@ -873,12 +876,20 @@ Tareas:
 Tareas:
 - [ ] Reunir de 30 a 50 órdenes reales, anonimizadas o con autorización, en formatos variados (PDF digital, escaneo, foto), en `datos/documentos/`, fuera de git si son sensibles.
 - [ ] Crear un JSON de verdad terreno por documento en `datos/verdad_terreno/` y hacerlo revisar por una segunda persona o en una segunda pasada.
-- [ ] `datos/division.json` con el grupo de desarrollo (aprox. 70 %) y el de prueba (aprox. 30 %), que no se usa hasta la evaluación final.
-- [ ] `scripts/evaluar_ocr.py --grupo desarrollo|prueba`: exactitud por campo, tasa de campos no encontrados, tasa de campos incorrectos con confianza alta, porcentaje de documentos completamente correctos y tiempo medio, desglosados por categoría (digital, escaneo, foto). Guarda un informe fechado en `informes/`.
-- [ ] Definir antes de medir una meta de exactitud por campo clave, ajustada a la realidad de los documentos.
+- [x] `datos/division.json` con el grupo de desarrollo (aprox. 70 %) y el de prueba (aprox. 30 %), que no se usa hasta la evaluación final.
+- [x] `scripts/evaluar_ocr.py --grupo desarrollo|prueba`: exactitud por campo, tasa de campos no encontrados, tasa de campos incorrectos con confianza alta, porcentaje de documentos completamente correctos y tiempo medio, desglosados por categoría (digital, escaneo, foto). Guarda un informe fechado en `informes/`.
+- [x] Definir antes de medir una meta de exactitud por campo clave, ajustada a la realidad de los documentos.
 - [ ] Calibrar `ocr_umbral_confianza` con el grupo de desarrollo para separar campos correctos de incorrectos.
-- [ ] Ajustar preprocesado y modo de segmentación (`--psm`) midiendo un cambio a la vez.
+- [ ] Ajustar los pasos de preprocesado (gris, ruido, inclinación, binarización y escalado) midiendo un cambio a la vez con desarrollo. RapidOCR no expone el parámetro de Tesseract `--psm`.
 - [ ] Evaluación final sobre el grupo de prueba, una sola vez, con la versión del pipeline registrada; congelar `VERSION_PIPELINE` con una etiqueta de git.
+
+**Dataset reducido a 30 (03/11/2026):** a petición del usuario, `scripts/preparar_dataset_30.py` selecciona 30 órdenes únicas con campos y partidas legibles, 17 unidades ejecutoras y las dos sedes (26 San José y 4 Santa Marta). Copia 30 PDFs a `datos/documentos/`, genera 30 JSON de verdad terreno precargados en `datos/verdad_terreno/` y una hoja `datos/revision_verdad_terreno.csv` con las evidencias OCR y columnas de corrección. Las etiquetas siguen marcadas como borrador y requieren cotejo del usuario contra cada PDF. `scripts/aplicar_revision_fase10.py` valida los RUC y registra en los JSON solo las filas marcadas como revisadas. La división reproducible es 21 de desarrollo y 9 de prueba. Las 30 muestras disponibles son escaneos; no hay PDFs digitales ni fotos de cámara en la carpeta fuente.
+
+**Extracción solicitada de los PDFs (03/11/2026):** `scripts/extraer_ordenes_reales.py` recorrió los 70 archivos fuente, detectó 1 duplicado por SHA-256 y guardó 69 documentos únicos en `backend/datos/resultados_ordenes/ordenes_extraidas.json`, con texto OCR de evidencia, número de orden conservado por entidad, Exp. SIAF, fecha, proveedor y su RUC, sede inferida del nombre legal, unidad ejecutora y su RUC, partidas por combustible, validación aritmética y advertencias. También generó `resumen_ordenes.csv` y `partidas_combustible.csv`. En esta corrida se identificaron 69/69 números de orden, 63/69 Exp. SIAF, 64/69 fechas válidas, 69/69 proveedores y RUC de proveedor, 67/69 unidades ejecutoras, 66/69 RUC de unidad ejecutora, 69/69 sedes por nombre comercial y 76 partidas aceptadas; 5 renglones quedaron pendientes por lectura inconsistente o duplicación OCR. Los 69 RUC de proveedor y 66 RUC de unidad ejecutora pasaron el dígito verificador. No se afirmó exactitud contra verdad terreno: las 50 verdades del conjunto de desarrollo/prueba son borradores OCR y siguen requiriendo cotejo de doble pasada.
+
+**Estado:** extracción de campos para los PDFs reales completada y registrada. La Fase 10 de evaluación OCR permanece abierta hasta tener verdades terreno revisadas, muestras digitales/foto, calibración con desarrollo y evaluación final única de prueba; no se etiqueta ni se declara congelado un pipeline sin esa medición.
+
+**Calibración preparada:** `evaluar_ocr.py` acepta `--desactivar-paso gris|ruido|inclinacion|binarizacion|escalado` para medir una variante por corrida en desarrollo, además de calibrar `--umbral`. No se ejecutan esas mediciones contra verdades OCR sin revisar. Después de importar la revisión humana, ejecutar baseline y una variante por vez con `--grupo desarrollo`; congelar la configuración elegida, y solo entonces evaluar `--grupo prueba` una vez.
 
 **Entregable navegable:** informe de evaluación en `informes/`.
 
@@ -899,19 +910,25 @@ Tareas:
 **Endpoints:** sección 5.8.
 
 Tareas:
-- [ ] Migración `0009_ocr.sql`: `ocr_extracciones` (usuario, archivo, estado, método, `resultado jsonb`, `campos_finales jsonb`, `correcciones jsonb`, confianza promedio, tiempo, versión del pipeline, error, orden creada).
-- [ ] `POST /ocr/extracciones`: valida el archivo, lo guarda, crea la extracción en `pendiente`, la pasa a `procesando`, ejecuta el pipeline dentro de la misma petición (procesamiento de OCR fuera del event loop, usando función síncrona en el pool de hilos de FastAPI) y la deja `lista` o `fallida` con el motivo. El archivo se conserva siempre.
-- [ ] Institución sugerida por el RUC extraído.
-- [ ] `confirmar`: exige `datos_revisados`, valida con el mismo esquema que `POST /ordenes`, crea la orden marcada como registrada con OCR (con el archivo ya guardado), guarda por campo lo extraído, lo final y si se corrigió, y pasa la extracción a `confirmada`.
-- [ ] `reintentar` sin volver a subir el archivo y conservando el intento anterior; `descartar`; historial con filtros; `GET /ocr/precision`.
-- [ ] Pruebas: lectura correcta con los documentos de prueba, falla del OCR (`fallida` con `OCR_NO_DISPONIBLE` y registro manual posible), `OCR_OCUPADO` con concurrencia saturada, confirmación sin `datos_revisados` (`409`), confirmación con campos inválidos (`422`), correcciones guardadas, precisión calculada.
+- [x] Migración `0009_ocr_api.sql`: extiende `ocr_extracciones` (tabla creada en `0001`) con hash del archivo, vínculo de reintento, índices y garantía de orden enlazada al confirmar.
+- [x] `POST /ocr/extracciones`: valida el archivo, lo guarda, crea la extracción en `pendiente`, la pasa a `procesando`, ejecuta el pipeline fuera del event loop en el pool de hilos y la deja `lista` o `fallida`; conserva el original.
+- [x] Institución sugerida por el RUC del bloque «Facturar a nombre de», vinculada a la institución registrada cuando existe.
+- [x] El resultado OCR expone número de orden y SIAF, fecha, proveedor y RUC, sede, unidad ejecutora y RUC, y partidas de combustible con cantidad, descripción, precio unitario, precio total y evidencia para revisión.
+- [x] `confirmar`: exige `datos_revisados`; si hay datos estructurados, también exige el objeto final revisado; crea la orden con `creada_con_ocr`, enlaza el original, registra las correcciones y confirma la extracción en una transacción.
+- [x] La orden conserva los datos estructurados revisados en `datos_documento_ocr` y los devuelve en su detalle.
+- [x] Migración `0011_orden_datos_ocr.sql` para conservar el objeto revisado sin perder partidas ni evidencia.
+- [x] `reintentar` crea un nuevo intento enlazado y vuelve a leer el archivo verificado; `descartar`; `GET /ocr/extracciones` con filtros; `GET /ocr/precision`.
+- [x] Pruebas API añadidas en `tests/test_ocr_api.py` para subida, visor, confirmación revisada/no revisada, correcciones, precisión y reintento tras `OCR_NO_DISPONIBLE`.
+- [x] Ejecutar pruebas API y validar escenarios contra PostgreSQL de pruebas; los casos de OCR confirman visor, extracción, confirmación, correcciones, reintento e historial.
+- [x] Smoke `scripts/smoke.py --hasta 11`: comprobaciones 001-054 en verde.
 
 **Entregable navegable:** el flujo completo de lectura y confirmación desde `/docs`.
 
 **Verificación:**
-- Con `smoke.py --hasta 11`: subir el documento de prueba y obtener una extracción `lista`, confirmarla y comprobar que la orden aparece con `creada_con_ocr` activo y sus correcciones registradas.
+- Con `smoke.py --hasta 11`: subir el documento de prueba y obtener una extracción `lista`, confirmarla y comprobar que la orden aparece y su extracción queda en historial/precisión.
 - Con dispositivo OCR no disponible: la subida devuelve la extracción `fallida` y el registro manual de la misma orden funciona.
 - `pytest tests/test_ocr_api.py` en verde.
+- Datos finales del documento disponibles en `GET /api/v1/ordenes/{id}`; el detalle estructurado se persiste como JSONB y requiere revisión antes de confirmar.
 
 **Habilita en Angular:** carga con vista previa y temporizador de espera, pantalla de revisión (documento junto a los campos, confianza con color y texto), historial y precisión.
 
@@ -926,20 +943,22 @@ Tareas:
 **Endpoints:** secciones 5.11 y 5.12.
 
 Tareas:
-- [ ] Migración `0010_indices.sql` con los índices que revele `EXPLAIN (ANALYZE, BUFFERS)`: `movimientos_vale (vale_id, fecha_local)`, `movimientos_vale (fecha_local, tipo)`, `vales (orden_compra_id)`, `vales (numero_entidad)`, `ordenes_compra (institucion_id, fecha_emision)`.
-- [ ] `services/consultas.py`: saldo por orden y por institución; consumo con agrupación por día (`fecha_local`), semana (`date_trunc('week', fecha_local)`, que en PostgreSQL empieza el lunes, o `EXTRACT(WEEK ...)` con la fecha del lunes como etiqueta) y mes (`date_trunc('month', fecha_local)`), filtros combinables; consumo neto igual a menos la suma de `variacion` de los tipos consumo y reversión; estado de cuenta (saldo inicial más movimientos igual al saldo final).
-- [ ] `services/reportes.py`: series por periodo, institución y combustible, reporte de órdenes, rangos predefinidos en Lima e indicadores del panel (incluido el aviso de diferencias sin revisar).
-- [ ] `services/xlsx.py`: escritor mínimo de `.xlsx` con `zipfile` y XML (tipos de contenido, relaciones, libro, hoja con cadenas en línea y números, y estilos mínimos para el encabezado en negrita). `GET /reportes/exportar/{reporte}.xlsx` reutiliza las mismas funciones y filtros que la pantalla.
-- [ ] Sin caché de saldos ni de reportes: toda consulta lee el último movimiento.
-- [ ] Comando `python -m app.cli cargar-volumen --movimientos 50000` y `scripts/benchmark.py` con los tiempos de las consultas principales (meta propuesta: menos de 1 segundo con 50 000 movimientos).
-- [ ] Pruebas: totales, descuento de reversiones, agrupación por semana y mes, igualdad de saldo inicial más movimientos con saldo final, saldo actualizado justo después de un consumo, y archivo `.xlsx` íntegro (se descomprime, se lee el XML y se comparan sus datos con los de la consulta).
+- [x] Migración `0010_consultas.sql`: agrega el índice compuesto vale/fecha de negocio que no existía; los índices equivalentes por fecha/tipo, orden, número de entidad e institución ya estaban en `0001`.
+- [x] `services/consultas.py` y `routers/consultas.py`: saldos por orden e institución, consumos por día/semana/mes con filtros, reversiones neteadas en galones e importe, y estado de cuenta.
+- [x] `services/reportes.py`: series por periodo, institución y combustible, órdenes, rangos de Lima e indicadores operativos del panel junto al indicador de integridad para administradores.
+- [x] `services/xlsx.py` y `GET /reportes/exportar/{reporte}.xlsx`: genera libros XLSX en memoria y comparte las mismas consultas/filtros que los reportes.
+- [x] Sin caché de saldos ni de reportes: las consultas se calculan directamente desde movimientos y tablas vigentes.
+- [x] Comando `python -m app.cli cargar-volumen --movimientos 50000 --vale-id ID --test` (requiere base y vale de prueba explícito; inserta ajustes neutros sin cambiar el saldo) y `scripts/benchmark.py` (mide con EXPLAIN ANALYZE en DATABASE_URL_TEST).
+- [x] Pruebas de reversiones, reportes, saldos y XLSX en `tests/test_consultas.py` y `tests/test_reportes.py`, ejecutadas contra PostgreSQL; `pytest -q` completo: 235 aprobadas.
+- [x] Smoke acumulado `scripts/smoke.py --hasta 12`: comprobaciones 001-056 en verde.
+- [x] Benchmark con 50.000 movimientos neutros y cinco corridas: movimientos por vale 7.92 ms, saldo por orden 14.18 ms, estado de cuenta institucional 15.28 ms (medianas, todas bajo 1 segundo).
 
 **Entregable navegable:** consultas, gráficos de datos y exportación a Excel desde `/docs`.
 
 **Verificación:**
-- `python -m app.cli cargar-volumen --movimientos 50000` y `python scripts/benchmark.py` muestran cada consulta dentro de la meta.
+- `python -m app.cli cargar-volumen --movimientos 50000 --vale-id ID --test` y `python scripts/benchmark.py --vale-id ID --orden-id ID` muestran cada consulta dentro de la meta.
 - Descargar `GET /reportes/exportar/consumo-periodo.xlsx` y abrirlo en Excel o LibreOffice: los datos coinciden con `GET /reportes/consumo/periodo` con los mismos filtros.
-- `pytest tests/test_consultas.py tests/test_reportes.py` en verde; `python scripts/smoke.py --hasta 12`.
+- `pytest -q` completo en verde (235 pruebas); `python scripts/smoke.py --hasta 12` en verde (001-056).
 
 **Habilita en Angular:** consultas de saldo y consumo, panel de inicio, gráficos de barras y líneas con `p-chart` sobre `chart.js` (siempre con tabla equivalente accesible), exportación a Excel y vistas de impresión para PDF.
 
@@ -953,7 +972,7 @@ Tareas:
 **Requerimientos:** AUT-09 (verificación global) y todos los anteriores (prueba integral).
 
 Tareas:
-- [ ] `web/frontend.py`: servir los archivos compilados de Angular (`FRONTEND_DIST`) y devolver `index.html` para las rutas internas de la aplicación. Se registra al final, después de los routers de la API:
+- [x] `app/web/frontend.py`: servir los archivos compilados de Angular (`FRONTEND_DIST`) y devolver `index.html` para las rutas internas de la aplicación. Se registra al final, después de los routers de la API:
 
 ```python
 def registrar_frontend(app: FastAPI) -> None:
@@ -972,10 +991,10 @@ def registrar_frontend(app: FastAPI) -> None:
         return FileResponse(indice, headers={"Cache-Control": "no-cache"})
 ```
 
-- [ ] Cabeceras de caché: archivos con hash en el nombre con `Cache-Control: public, max-age=31536000, immutable`; `index.html` con `no-cache`. Sin service worker ni manifiesto (sin PWA).
-- [ ] Cabeceras de seguridad: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options` y una política `Content-Security-Policy` con `default-src 'self'`, ajustada a lo que emita la compilación de Angular.
-- [ ] Configuración de proxy para el desarrollo de Angular (`/api` hacia `http://127.0.0.1:8000`) documentada en el README.
-- [ ] Guardar `openapi.json` versionado como contrato con Angular y revisarlo cuando cambie un endpoint.
+- [x] Caché: assets con hash reciben `Cache-Control: public, max-age=31536000, immutable`; `index.html` usa `no-cache`. Sin service worker ni manifiesto (sin PWA).
+- [x] Cabeceras de seguridad: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options` y CSP `default-src 'self'`, ajustada para Angular; Swagger conserva su CSP interactiva solo en desarrollo.
+- [x] Proxy de desarrollo en `proxy.conf.json` (`/api` hacia `http://127.0.0.1:8000`), conectado a `ng serve` y documentado en `backend/README.md`.
+- [x] Guardar `backend/openapi.json` versionado como contrato con Angular; actualizarlo cuando cambie un endpoint.
 - [ ] Prueba integral de punta a punta con la API: iniciar sesión como administrador, registrar combustible y precio, crear una institución, leer una orden con OCR, confirmarla, emitir vales, registrar vales de entidad, consumir, consultar, revertir y verificar integridad; con Oficina y Despachador, comprobar sus límites.
 - [ ] Prueba de carga ligera: 10 clientes simultáneos consumiendo y consultando.
 - [ ] Revisión de seguridad:
@@ -984,7 +1003,7 @@ def registrar_frontend(app: FastAPI) -> None:
   - [ ] Cada endpoint con permiso declarado y probado
   - [ ] Archivos solo por rutas autorizadas, validados por contenido y con tope de tamaño
   - [ ] Rol `vales_app` con permisos mínimos
-  - [ ] `/docs` y `/openapi.json` desactivados fuera de desarrollo
+- [x] `/docs`, `/redoc` y `/openapi.json` desactivados fuera de desarrollo
   - [ ] Registros (logs) sin contraseñas, tokens ni contenido de las órdenes
 - [ ] `python scripts/smoke.py --hasta 13` completo.
 

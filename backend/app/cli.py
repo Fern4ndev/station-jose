@@ -14,6 +14,9 @@ Comandos disponibles en la Fase 2:
 - `vencimientos`             marca vencidos los vales activos por fecha (VAL-09).
 - `verificar-saldos`         compara cada saldo con sus movimientos y sale con
                              código 1 si encuentra diferencias (AUD-05).
+- `cargar-volumen --movimientos N --test`
+                             genera movimientos de ajuste neutros en una base
+                             de pruebas para el benchmark de consultas (Fase 12).
 - `ocr-probar <archivo>`    lee un PDF/JPG/PNG con el motor OCR (Fase 9) e
                              imprime la extracción en JSON con la
                              confianza por campo.
@@ -29,6 +32,7 @@ import sys
 from collections.abc import Sequence
 from contextlib import suppress
 from pathlib import Path as RutaSistema
+from urllib.parse import urlparse
 
 import asyncpg
 
@@ -70,32 +74,24 @@ def construir_parser() -> argparse.ArgumentParser:
     migrar_parser = comandos.add_parser("migrar", help="migraciones SQL numeradas")
     migrar_parser.add_argument("accion", choices=["estado", "aplicar", "nueva"])
     migrar_parser.add_argument("nombre", nargs="?", help="nombre de la migración (solo con nueva)")
-    migrar_parser.add_argument(
-        "--test", action="store_true", help="opera sobre la base de pruebas"
-    )
+    migrar_parser.add_argument("--test", action="store_true", help="opera sobre la base de pruebas")
 
     admin_parser = comandos.add_parser(
         "crear-admin", help="crea el administrador inicial con contraseña temporal"
     )
-    admin_parser.add_argument(
-        "--nombre", required=True, help="nombre visible del administrador"
-    )
+    admin_parser.add_argument("--nombre", required=True, help="nombre visible del administrador")
     admin_parser.add_argument("--correo", required=True, help="correo de acceso (único)")
     admin_parser.add_argument(
         "--test", action="store_true", help="crea el usuario en la base de pruebas"
     )
 
-    demo_parser = comandos.add_parser(
-        "sembrar-demo", help="datos de ejemplo para desarrollo"
-    )
+    demo_parser = comandos.add_parser("sembrar-demo", help="datos de ejemplo para desarrollo")
     demo_parser.add_argument(
         "--catalogos",
         action="store_true",
         help="combustibles (Diésel B5, Gasohol 90, Gasohol 95, GLP) y precios de ejemplo",
     )
-    demo_parser.add_argument(
-        "--test", action="store_true", help="siembra en la base de pruebas"
-    )
+    demo_parser.add_argument("--test", action="store_true", help="siembra en la base de pruebas")
 
     ocr_parser = comandos.add_parser(
         "ocr-probar",
@@ -110,6 +106,16 @@ def construir_parser() -> argparse.ArgumentParser:
     comandos.add_parser(
         "verificar-saldos",
         help="compara cada saldo con sus movimientos; código 1 si hay diferencias (AUD-05)",
+    )
+    volumen_parser = comandos.add_parser(
+        "cargar-volumen", help="genera movimientos de ajuste neutros para benchmark (solo pruebas)"
+    )
+    volumen_parser.add_argument("--movimientos", type=int, default=50_000)
+    volumen_parser.add_argument(
+        "--vale-id", type=int, required=True, help="vale creado para pruebas"
+    )
+    volumen_parser.add_argument(
+        "--test", action="store_true", help="obligatorio: evita escribir en desarrollo/producción"
     )
     return parser
 
@@ -364,6 +370,72 @@ async def ejecutar_sembrar_demo(usar_pruebas: bool) -> int:
     return 0
 
 
+async def ejecutar_cargar_volumen(movimientos: int, vale_id: int | None, solo_pruebas: bool) -> int:
+    """Crea movimientos neutros sin modificar el saldo del vale seleccionado."""
+    if not solo_pruebas:
+        print("FALLA: cargar-volumen exige --test; no escribe en la base normal.", file=sys.stderr)
+        return 2
+    if not 1 <= movimientos <= 1_000_000:
+        print("FALLA: --movimientos debe estar entre 1 y 1 000 000.", file=sys.stderr)
+        return 2
+    ajustes = obtener_settings()
+    if not ajustes.migrador_url_test:
+        print("FALLA: falta MIGRADOR_URL_TEST; se canceló la carga.", file=sys.stderr)
+        return 2
+    nombre_base = urlparse(migrar.a_dsn(ajustes.migrador_url_test)).path.rstrip("/").split("/")[-1]
+    if not nombre_base.endswith("_test"):
+        print(
+            "FALLA: MIGRADOR_URL_TEST debe apuntar a una base cuyo nombre termine en _test.",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        conexion = await asyncpg.connect(migrar.a_dsn(ajustes.migrador_url_test))
+    except asyncpg.PostgresError as exc:
+        print(f"FALLA: no se pudo conectar a PostgreSQL de pruebas: {exc}", file=sys.stderr)
+        return 1
+    try:
+        async with conexion.transaction():
+            elegido = await conexion.fetchrow(
+                """
+                SELECT v.id, v.creado_por, v.saldo, e.id AS estacion_id
+                FROM vales v CROSS JOIN LATERAL (
+                    SELECT id FROM estaciones ORDER BY id LIMIT 1
+                ) e
+                WHERE ($1::bigint IS NULL OR v.id=$1)
+                ORDER BY v.id LIMIT 1 FOR UPDATE OF v
+                """,
+                vale_id,
+            )
+            if elegido is None:
+                print(
+                    "FALLA: no existe un vale ni una estación en la base de pruebas.",
+                    file=sys.stderr,
+                )
+                return 1
+            await conexion.execute(
+                """
+                INSERT INTO movimientos_vale
+                    (vale_id,tipo,variacion,saldo_posterior,app_user_id,estacion_id,motivo,fecha_local)
+                SELECT $1,'ajuste',0,$2,$3,$4,'BENCHMARK_FASE12',
+                       (CURRENT_DATE - (serie.n % 30)::int)
+                FROM generate_series(1,$5::bigint) AS serie(n)
+                """,
+                elegido["id"],
+                elegido["saldo"],
+                elegido["creado_por"],
+                elegido["estacion_id"],
+                movimientos,
+            )
+        print(f"✓ Insertados {movimientos} movimientos neutros en vale {elegido['id']}.")
+        return 0
+    except asyncpg.PostgresError as exc:
+        print(f"FALLA: no se pudo cargar el volumen de pruebas: {exc}", file=sys.stderr)
+        return 1
+    finally:
+        await conexion.close()
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     preparar_salida()
     args = construir_parser().parse_args(argv)
@@ -379,6 +451,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return asyncio.run(ejecutar_verificar_saldos())
     if args.comando == "ocr-probar":
         return ejecutar_ocr_probar(args.archivo)
+    if args.comando == "cargar-volumen":
+        return asyncio.run(ejecutar_cargar_volumen(args.movimientos, args.vale_id, args.test))
     return 2
 
 

@@ -16,7 +16,7 @@ from fastapi.responses import StreamingResponse
 from app.core import archivos, dinero
 from app.db.sesion import SesionBd
 from app.dependencies import (
-        UsuarioAutenticado,
+    UsuarioAutenticado,
     ip_de_peticion,
     requiere_permiso,
     user_agent_de_peticion,
@@ -90,12 +90,14 @@ def _orden_detalle(fila: dict) -> OrdenDetalle:
         presupuesto_soles=str(fila["presupuesto_soles"]),
         observaciones=fila["observaciones"],
         estado=str(fila["estado"]),
+        creada_con_ocr=bool(fila["creada_con_ocr"]),
         serie_desde=fila["serie_desde"],
         serie_hasta=fila["serie_hasta"],
         combustible_id=fila["combustible_id"],
         archivo_path=fila["archivo_path"],
         archivo_tipo=fila["archivo_tipo"],
         archivo_tamano=fila["archivo_tamano"],
+        datos_documento_ocr=fila.get("datos_documento_ocr"),
         creado_en=fila["creado_en"],
         actualizado_en=fila["actualizado_en"],
         total_emitido_soles=fila["total_emitido_soles"],

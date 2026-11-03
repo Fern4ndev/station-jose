@@ -94,7 +94,7 @@ def inferir(motor: Any, matriz: np.ndarray) -> tuple[str, np.ndarray, float]:
         return ()
     return tuple(
         (texto, np.asarray(caja), float(puntaje))
-        for texto, caja, puntaje in zip(salida.txts, salida.boxes, salida.scores)
+        for texto, caja, puntaje in zip(salida.txts, salida.boxes, salida.scores, strict=False)
     )
 
 

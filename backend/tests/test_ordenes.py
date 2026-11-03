@@ -602,7 +602,7 @@ def test_no_existen_rutas_para_eliminar_ordenes_ni_instituciones():
     from app.main import app as aplicacion
 
     rutas = {
-        (ruta.methods, ruta.path)
+        (frozenset(ruta.methods), ruta.path)
         for ruta in aplicacion.routes
         if isinstance(ruta, APIRoute)
     }

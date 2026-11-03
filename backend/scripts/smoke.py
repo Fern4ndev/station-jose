@@ -22,6 +22,7 @@ import sys
 import uuid
 from collections.abc import Awaitable, Callable
 from contextlib import suppress
+from pathlib import Path
 from typing import TypedDict
 
 import httpx
@@ -245,8 +246,7 @@ async def _login_admin_para_usuarios(cliente: httpx.AsyncClient) -> str | None:
     if respuesta.status_code != 200:
         cuerpo = respuesta.json()
         return (
-            "Login del administrador devolvió "
-            f"{respuesta.status_code}: {cuerpo.get('mensaje')}"
+            "Login del administrador devolvió " f"{respuesta.status_code}: {cuerpo.get('mensaje')}"
         )
     ESTADO_FASE_3["access_admin"] = respuesta.json()["access_token"]
     cliente.headers["Authorization"] = f"Bearer {ESTADO_FASE_3['access_admin']}"
@@ -300,10 +300,7 @@ async def _login_operador_con_temporal(cliente: httpx.AsyncClient) -> str | None
     )
     if respuesta.status_code != 200:
         cuerpo = respuesta.json()
-        return (
-            "Login del operador devolvió "
-            f"{respuesta.status_code}: {cuerpo.get('mensaje')}"
-        )
+        return "Login del operador devolvió " f"{respuesta.status_code}: {cuerpo.get('mensaje')}"
     datos = respuesta.json()
     if not datos.get("must_change_password"):
         return "El operador debería tener must_change_password en TRUE."
@@ -449,11 +446,7 @@ async def _precio_registrado_vigente_primero(cliente: httpx.AsyncClient) -> str 
         return f"POST precios devolvió {precio.status_code}: {precio.json().get('mensaje')}"
 
     listado = await cliente.get("/api/v1/combustibles", params={"activo": "true"})
-    hallado = next(
-        c
-        for c in listado.json()["items"]
-        if str(c["id"]) == combustible
-    )
+    hallado = next(c for c in listado.json()["items"] if str(c["id"]) == combustible)
     vigente = hallado["precio_vigente"]
     if not vigente or vigente["vigente_desde"] != hoy:
         return f"El precio vigente no es el de hoy: {vigente}"
@@ -501,9 +494,7 @@ async def _parametros_leen_rango_y_guardan(cliente: httpx.AsyncClient) -> str | 
     if ajustado.status_code != 200:
         return f"PUT de un valor válido devolvió {ajustado.status_code}."
     confirmado = await cliente.get("/api/v1/configuracion/parametros")
-    valor = next(
-        p for p in confirmado.json()["items"] if p["clave"] == "ocr_umbral_confianza"
-    )
+    valor = next(p for p in confirmado.json()["items"] if p["clave"] == "ocr_umbral_confianza")
     if valor["valor"] != "0.85":
         return f"El valor no rige de inmediato: {valor['valor']}"
     return None
@@ -714,8 +705,7 @@ async def _vale_entidad_y_duplicado(cliente: httpx.AsyncClient) -> str | None:
     )
     if primero.status_code != 201:
         return (
-            "POST vales-entidad devolvió "
-            f"{primero.status_code}: {primero.json().get('mensaje')}"
+            "POST vales-entidad devolvió " f"{primero.status_code}: {primero.json().get('mensaje')}"
         )
     if primero.json()["numero_entidad"] != numero:
         return "El número de entidad no se conservó tal como lo envió la institución."
@@ -814,7 +804,7 @@ async def _escenario_para_fase7(cliente: httpx.AsyncClient) -> str | None:
 
     emision = await cliente.post(
         f"/api/v1/ordenes/{orden['id']}/vales",
-        json={"combustible_id": combustible["id"],"cantidades": ["100.00"]},
+        json={"combustible_id": combustible["id"], "cantidades": ["100.00"]},
     )
     if emision.status_code != 201:
         return f"POST vales devolvió {emision.status_code}: {emision.text}"
@@ -944,8 +934,7 @@ async def _anula_vale(cliente: httpx.AsyncClient) -> str | None:
         return f"El vale anulado no quedó en cero: {detalle}"
     if detalle["valor_comprometido_soles"] != "155.00":
         return (
-            "El compromiso no quedó en lo ya consumido: "
-            f"{detalle['valor_comprometido_soles']}"
+            "El compromiso no quedó en lo ya consumido: " f"{detalle['valor_comprometido_soles']}"
         )
     despacho = await cliente.post(
         f"/api/v1/vales/{vale}/consumos",
@@ -986,9 +975,8 @@ async def _busca_por_numero_entidad(cliente: httpx.AsyncClient) -> str | None:
     if not hallado[0].get("saldo") or float(hallado[0]["saldo"]) != 5.0:
         return f"El saldo del candidato no es 5.00: {hallado[0]}"
 
-    # Cierre de fase: se cierra la sesión del smoke.
+    # Conserva orden e institución: las fases OCR y consultas las reutilizan.
     cliente.headers.pop("Authorization", None)
-    ESTADO_FASE_6.clear()
     return None
 
 
@@ -1133,6 +1121,129 @@ async def _sin_diferencias_pendientes(cliente: httpx.AsyncClient) -> str | None:
     return None
 
 
+# --- Fase 11: extracción, revisión y confirmación OCR --------------------------
+
+ESTADO_FASE_11: dict[str, str] = {}
+
+
+async def _login_admin_para_fase11(cliente: httpx.AsyncClient) -> str | None:
+    return await _login_admin_para_fase8(cliente)
+
+
+async def _subir_documento_ocr(cliente: httpx.AsyncClient) -> str | None:
+    """Sube el PDF digital de smoke y conserva el archivo para la revisión."""
+    if "institucion" not in ESTADO_FASE_6:
+        return "La fase 6 no dejó una institución de prueba para confirmar la orden."
+    documento = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "oc_digital.pdf"
+    if not documento.is_file():
+        return f"Falta el documento de smoke: {documento.name}."
+    try:
+        contenido = documento.read_bytes()
+    except OSError as exc:
+        return f"No se pudo leer el PDF de smoke: {exc}"
+    respuesta = await cliente.post(
+        "/api/v1/ocr/extracciones",
+        files={"archivo": (documento.name, contenido, "application/pdf")},
+    )
+    if respuesta.status_code != 201:
+        return f"POST /ocr/extracciones devolvió {respuesta.status_code}: {respuesta.text}"
+    datos = respuesta.json()
+    if datos.get("estado") != "lista":
+        return f"El documento de smoke quedó {datos.get('estado')}: {datos.get('error_codigo')}"
+    ESTADO_FASE_11["extraccion"] = str(datos["id"])
+    ESTADO_FASE_11["datos_orden"] = datos.get("datos_orden")
+    visor = await cliente.get(f"/api/v1/ocr/extracciones/{datos['id']}/archivo")
+    if visor.status_code != 200 or visor.content != contenido:
+        return "El visor no devolvió los mismos bytes del documento original."
+    return None
+
+
+async def _confirmar_orden_ocr(cliente: httpx.AsyncClient) -> str | None:
+    if "extraccion" not in ESTADO_FASE_11:
+        return "Falta la extracción OCR creada por la comprobación anterior."
+    numero = int(_ms_actuales()) % 99_999_999 or 1
+    peticion = {
+        "datos_revisados": True,
+        "orden": {
+            "institucion_id": int(ESTADO_FASE_6["institucion"]),
+            "numero": numero,
+            "fecha_emision": _dt.date.today().isoformat(),
+            "presupuesto_soles": "1000.00",
+            "confirmar_duplicado": True,
+        },
+    }
+    if ESTADO_FASE_11.get("datos_orden"):
+        peticion["datos_orden"] = ESTADO_FASE_11["datos_orden"]
+    respuesta = await cliente.post(
+        f"/api/v1/ocr/extracciones/{ESTADO_FASE_11['extraccion']}/confirmar",
+        json=peticion,
+    )
+    if respuesta.status_code != 201:
+        return f"Confirmar OCR devolvió {respuesta.status_code}: {respuesta.text}"
+    ESTADO_FASE_11["orden"] = str(respuesta.json()["orden_id"])
+    orden = await cliente.get(f"/api/v1/ordenes/{ESTADO_FASE_11['orden']}")
+    if orden.status_code != 200:
+        return "La orden confirmada por OCR no aparece en el módulo de órdenes."
+    if not orden.json().get("creada_con_ocr"):
+        return "La orden creada no quedó marcada como registrada con OCR."
+    return None
+
+
+async def _precision_ocr_con_historial(cliente: httpx.AsyncClient) -> str | None:
+    precision = await cliente.get("/api/v1/ocr/precision")
+    historial = await cliente.get("/api/v1/ocr/extracciones", params={"estado": "confirmada"})
+    if precision.status_code != 200 or historial.status_code != 200:
+        return "No se pudo consultar la precisión OCR o el historial de confirmaciones."
+    if precision.json()["total_confirmadas"] < 1 or historial.json()["total"] < 1:
+        return "La orden confirmada no aparece en las métricas del OCR."
+    ESTADO_FASE_11.clear()
+    cliente.headers.pop("Authorization", None)
+    return None
+
+
+# --- Fase 12: consultas, reportes y exportación --------------------------------
+
+
+async def _login_admin_para_fase12(cliente: httpx.AsyncClient) -> str | None:
+    return await _login_admin_para_fase8(cliente)
+
+
+async def _consultas_saldos_y_reportes(cliente: httpx.AsyncClient) -> str | None:
+    if not ESTADO_FASE_6.get("orden") or not ESTADO_FASE_6.get("institucion"):
+        return "La fase 6 no dejó la orden e institución de prueba para las consultas."
+    orden_id = ESTADO_FASE_6["orden"]
+    institucion_id = ESTADO_FASE_6["institucion"]
+    hoy = _dt.date.today().isoformat()
+    peticiones = (
+        ("saldo de orden", f"/api/v1/consultas/saldo/ordenes/{orden_id}"),
+        ("saldo de institución", f"/api/v1/consultas/saldo/instituciones/{institucion_id}"),
+        ("consumo agrupado", "/api/v1/consultas/consumo?agrupacion=semana"),
+        ("estado de cuenta", f"/api/v1/consultas/estado-cuenta/{institucion_id}"),
+        ("rangos", "/api/v1/reportes/rangos"),
+        ("reporte periodo", f"/api/v1/reportes/consumo/periodo?desde={hoy}&hasta={hoy}"),
+        (
+            "reporte instituciones",
+            f"/api/v1/reportes/consumo/instituciones?desde={hoy}&hasta={hoy}",
+        ),
+        ("reporte combustibles", f"/api/v1/reportes/consumo/combustibles?desde={hoy}&hasta={hoy}"),
+        ("reporte órdenes", f"/api/v1/reportes/ordenes?desde={hoy}&hasta={hoy}"),
+    )
+    for nombre, ruta in peticiones:
+        respuesta = await cliente.get(ruta)
+        if respuesta.status_code != 200:
+            return f"{nombre} devolvió {respuesta.status_code}: {respuesta.text}"
+    excel = await cliente.get(
+        f"/api/v1/reportes/exportar/consumo-periodo.xlsx?desde={hoy}&hasta={hoy}"
+    )
+    if excel.status_code != 200 or not excel.content.startswith(b"PK"):
+        return f"La exportación XLSX no produjo un archivo válido ({excel.status_code})."
+    panel = await cliente.get("/api/v1/panel/indicadores")
+    if panel.status_code != 200 or "galones_mes" not in panel.json():
+        return f"El panel no entregó indicadores: {panel.status_code}."
+    cliente.headers.pop("Authorization", None)
+    return None
+
+
 FASES: tuple[Fase, ...] = (
     {
         "numero": 1,
@@ -1178,8 +1289,10 @@ FASES: tuple[Fase, ...] = (
         "comprobaciones": (
             ("021 login del administrador del smoke", _login_admin_para_fase4),
             ("022 combustible creado y listado con precio nulo", _combustible_creado_y_listado),
-            ("023 precio del día registrado y vigente en el catálogo",
-             _precio_registrado_vigente_primero),
+            (
+                "023 precio del día registrado y vigente en el catálogo",
+                _precio_registrado_vigente_primero,
+            ),
             ("024 fecha retroactiva de precio rechazada (409)", _precio_historico_inmutable),
             ("025 parámetros con rango y guardado inmediato", _parametros_leen_rango_y_guardan),
             ("026 ficha de la estación se guarda y se lee", _estacion_gestionada_y_protegida),
@@ -1191,17 +1304,15 @@ FASES: tuple[Fase, ...] = (
         "titulo": "Vales: emisión y vales de entidad",
         "comprobaciones": (
             ("028 login del administrador del smoke", _login_admin_para_fase6),
-            ("029 escenario: combustible con precio, institución y orden vigente",
-             _escenario_para_fase6),
+            (
+                "029 escenario: combustible con precio, institución y orden vigente",
+                _escenario_para_fase6,
+            ),
             ("030 simulación entrega techo y total sin guardar nada", _simulacion_no_guarda),
-            ("031 emisión de 2 vales con precio retenido y numeración",
-             _emite_dos_vales),
-            ("032 emisión excedida rechazada con máximo de galones",
-             _exceso_rechazado_con_maximo),
-            ("033 vale de entidad registra y su duplicado da 409",
-             _vale_entidad_y_duplicado),
-            ("034 búsqueda global halla el vale por número de entidad",
-             _busca_por_numero_entidad),
+            ("031 emisión de 2 vales con precio retenido y numeración", _emite_dos_vales),
+            ("032 emisión excedida rechazada con máximo de galones", _exceso_rechazado_con_maximo),
+            ("033 vale de entidad registra y su duplicado da 409", _vale_entidad_y_duplicado),
+            ("034 búsqueda global halla el vale por número de entidad", _busca_por_numero_entidad),
         ),
     },
     {
@@ -1230,6 +1341,24 @@ FASES: tuple[Fase, ...] = (
             ("048 el historial del vale arranca en la emisión", _historial_del_vale),
             ("049 el saldo cuadra con sus movimientos", _saldo_cuadra_con_sus_movimientos),
             ("050 sin diferencias pendientes y el panel en cero", _sin_diferencias_pendientes),
+        ),
+    },
+    {
+        "numero": 11,
+        "titulo": "API de lectura, revisión y confirmación OCR",
+        "comprobaciones": (
+            ("051 login del administrador del smoke", _login_admin_para_fase11),
+            ("052 extracción OCR y visor conservan el documento", _subir_documento_ocr),
+            ("053 confirmación crea y devuelve la orden", _confirmar_orden_ocr),
+            ("054 precisión e historial reflejan la confirmación", _precision_ocr_con_historial),
+        ),
+    },
+    {
+        "numero": 12,
+        "titulo": "Consultas, reportes y exportación",
+        "comprobaciones": (
+            ("055 login del administrador del smoke", _login_admin_para_fase12),
+            ("056 saldos, consumo, reportes, panel y XLSX", _consultas_saldos_y_reportes),
         ),
     },
 )

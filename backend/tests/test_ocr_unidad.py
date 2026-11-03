@@ -8,7 +8,6 @@ que la suite no pende de que el modelo cargue rápido o lento.
 
 from __future__ import annotations
 
-import threading
 from pathlib import Path
 
 import pytest
@@ -28,7 +27,7 @@ def _fixture(nombre: str) -> bytes:
     return ruta.read_bytes()
 
 
-def _ruc_valido(base: str = "20481234560") -> str:
+def _ruc_valido(base: str = "2048123456") -> str:
     """RUC válido construido con el mismo algoritmo del core (módulo 11)."""
     digitos = [int(letra) for letra in base]
     suma = sum(digito * peso for digito, peso in zip(digitos[:10], PESOS, strict=True))
@@ -164,23 +163,23 @@ def test_extraer_con_valor_debajo_de_la_etiqueta():
 
 def test_extraer_de_texto_digital_palabra_a_palabra():
     # El texto digital de pdfplumber ya trae cada palabra cortada.
-    import re
-
     digital = []
     y = 0.0
-    for texto in (
-        "MUNICIPALIDAD DEMO",
+    for texto_linea in (
+        "SEÑORES: MUNICIPALIDAD DEMO",
         "ORDEN DE COMPRA N° 0018-2026",
         "FECHA: 15/03/2027",
         "MONTO: S/ 1,500.00",
     ):
-        for palabra in texto.split():
+        # pdfplumber deja las palabras del renglón en orden X creciente.
+        for j, texto in enumerate(texto_linea.split()):
+            x0 = 50.0 + j * 10.0
             digital.append(
                 Palabra(
-                    texto=palabra,
-                    x0=50.0 + (len(digital) % 10) * 10.0,
+                    texto=texto,
+                    x0=x0,
                     y0=y,
-                    x1=50.0 + (len(digital) % 10) * 10.0 + len(palabra) * 8.0,
+                    x1=x0 + len(texto) * 8.0,
                     y1=y + 16.0,
                     confianza=lector.CONFIANZA_DIGITAL,
                     pagina=0,
@@ -192,7 +191,6 @@ def test_extraer_de_texto_digital_palabra_a_palabra():
     assert campos["fecha"].valor == "2027-03-15"
     assert campos["monto"].valor == "1500.00"
     assert campos["institucion"].valor == "MUNICIPALIDAD DEMO"
-    del re  # el import acompaña a la construcción explícita de las cajas
 
 
 def test_extraer_sin_pistas_deja_valores_vacios():
@@ -213,12 +211,12 @@ def test_leer_pdf_digital_termina_en_texto_digital():
     assert documento.metodo == lector.TIPO_DIGITAL
     textos = " ".join(palabra.texto for palabra in documento.palabras)
     assert "0018-2026" in textos
-    assert "1500.00" in textos
+    assert "1,500.00" in textos
 
 
 def test_leer_imagen_correccion_exif():
-    import cv2
     import numpy as np
+
     from app.services.ocr.lector import _corregir_orientacion
 
     imagen = np.zeros((60, 120), dtype=np.uint8)
@@ -268,9 +266,13 @@ def test_pipeline_no_disponible_por_carga_fallida(monkeypatch):
         raise RuntimeError("no se encontró el modelo")
 
     monkeypatch.setattr(rapidocr, "crear_motor", crear_motor_fallido)
-    with pytest.raises(ErrorDominio) as captura:
-        pipeline.procesar(_fixture("oc_foto.jpg"), ajustes=AJUSTES)
-    assert captura.value.codigo == "OCR_NO_DISPONIBLE"
+    rapidocr.reiniciar_motor()
+    try:
+        with pytest.raises(ErrorDominio) as captura:
+            pipeline.procesar(_fixture("oc_foto.jpg"), ajustes=AJUSTES)
+        assert captura.value.codigo == "OCR_NO_DISPONIBLE"
+    finally:
+        rapidocr.reiniciar_motor()
     assert captura.value.status_code == 503
     # Sin trazas internas: el mensaje estándar no expone la excepción.
     assert "RuntimeError" not in captura.value.mensaje
@@ -296,16 +298,19 @@ def test_pipeline_tiempo_agotado(monkeypatch):
 
 
 def test_pipeline_concurrencia_saturada():
-    # Se toman los turnos del semáforo del proceso: sin turno dentro del
-    # margen, el pipeline responde OCR_OCUPADO (503) sin esperar.
+    # Sin turno dentro del margen, el pipeline responde OCR_OCUPADO (503)
+    # sin esperar. Los ajustes fijan la concurrencia prevista: 2 turnos.
+    pipeline.reiniciar_concurrencia()
     try:
-        semaforo = pipeline._semaphore(1)
+        semaforo = pipeline._semaphore(2)
         semaforo.acquire()
         semaforo.acquire()
-        ajustes = AjustesOcr(tiempo_segundos=60.0, turno_segundos=0.05, concurrencia=1)
+        ajustes = AjustesOcr(tiempo_segundos=60.0, turno_segundos=0.05, concurrencia=2)
         with pytest.raises(ErrorDominio) as captura:
-            pipeline.procesar(_fixture("oc_digital.pdf"), ajustes=ajustes)
+            pipeline.procesar(_fixture("oc_foto.jpg"), ajustes=ajustes)
         assert captura.value.codigo == "OCR_OCUPADO"
         assert captura.value.status_code == 503
     finally:
+        semaforo.release()
+        semaforo.release()
         pipeline.reiniciar_concurrencia()

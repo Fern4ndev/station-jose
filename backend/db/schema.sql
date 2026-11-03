@@ -178,6 +178,7 @@ CREATE TABLE IF NOT EXISTS ordenes_compra (
     archivo_tipo        text,
     archivo_tamano      bigint,
     archivo_hash        text,
+    datos_documento_ocr jsonb,
     observaciones       text,
     motivo_anulacion    text,
     creado_por          bigint NOT NULL REFERENCES app_users(id) ON DELETE RESTRICT,
@@ -217,15 +218,21 @@ CREATE TABLE IF NOT EXISTS ocr_extracciones (
     error_codigo        text,
     error_detalle       text,
     orden_compra_id     bigint REFERENCES ordenes_compra(id) ON DELETE RESTRICT,
+    reintento_de_id     bigint REFERENCES ocr_extracciones(id) ON DELETE RESTRICT,
+    archivo_hash        text,
+    archivo_tamano      bigint,
     creado_en           timestamptz NOT NULL DEFAULT now(),
     actualizado_en      timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT ocr_estado_valido CHECK (estado IN ('pendiente', 'procesando', 'lista', 'fallida', 'confirmada', 'descartada')),
     CONSTRAINT ocr_metodo_valido CHECK (metodo IS NULL OR metodo IN ('texto_digital', 'ocr')),
     CONSTRAINT ocr_confianza_valida CHECK (confianza_promedio IS NULL OR confianza_promedio BETWEEN 0 AND 1),
-    CONSTRAINT ocr_tiempo_valido CHECK (tiempo_ms IS NULL OR tiempo_ms >= 0)
+    CONSTRAINT ocr_tiempo_valido CHECK (tiempo_ms IS NULL OR tiempo_ms >= 0),
+    CONSTRAINT ocr_confirmada_con_orden CHECK (estado <> 'confirmada' OR orden_compra_id IS NOT NULL)
 );
 CREATE INDEX IF NOT EXISTS ix_ocr_usuario_fecha ON ocr_extracciones (app_user_id, creado_en DESC);
 CREATE INDEX IF NOT EXISTS ix_ocr_estado_fecha ON ocr_extracciones (estado, creado_en DESC);
+CREATE INDEX IF NOT EXISTS ix_ocr_reintento ON ocr_extracciones (reintento_de_id) WHERE reintento_de_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS ix_ocr_orden ON ocr_extracciones (orden_compra_id) WHERE orden_compra_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS secuencias (
     nombre      text NOT NULL,
@@ -308,6 +315,7 @@ CREATE TABLE IF NOT EXISTS movimientos_vale (
 CREATE UNIQUE INDEX IF NOT EXISTS ux_movimientos_token_operacion ON movimientos_vale (token_operacion) WHERE token_operacion IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS ux_movimientos_reversion_origen ON movimientos_vale (movimiento_origen_id) WHERE tipo = 'reversion' AND movimiento_origen_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS ix_movimientos_vale_fecha ON movimientos_vale (vale_id, creado_en DESC);
+CREATE INDEX IF NOT EXISTS ix_movimientos_vale_fecha_local ON movimientos_vale (vale_id, fecha_local);
 CREATE INDEX IF NOT EXISTS ix_movimientos_fecha_tipo ON movimientos_vale (fecha_local, tipo);
 CREATE INDEX IF NOT EXISTS ix_movimientos_estacion_fecha ON movimientos_vale (estacion_id, creado_en DESC);
 

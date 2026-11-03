@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends
 from app.db.sesion import SesionBd
 from app.dependencies import UsuarioAutenticado, requiere_permiso
 from app.schemas.auditoria import IndicadoresPanel
-from app.services import integridad
+from app.services import integridad, reportes
 
 router = APIRouter(prefix="/panel", tags=["panel"])
 
@@ -26,8 +26,7 @@ async def indicadores(
     usuario: UsuarioAutenticado = Depends(_sesion()),  # noqa: B008
 ) -> IndicadoresPanel:
     """REP-01/AUD-06: diferencia sin revisar, solo para el administrador."""
-    if usuario.rol != "administrador":
-        return IndicadoresPanel()
-    return IndicadoresPanel(
-        diferencias_sin_revisar=await integridad.pendientes(sesion)
-    )
+    datos = await reportes.indicadores(sesion)
+    if usuario.rol == "administrador":
+        datos["diferencias_sin_revisar"] = await integridad.pendientes(sesion)
+    return IndicadoresPanel(**datos)

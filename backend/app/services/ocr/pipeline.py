@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from typing import Final
 
 from app.errors import ErrorDominio
-from app.services.ocr import extractor, lector, preprocesado, rapidocr
+from app.services.ocr import extractor, lector, orden_compra, preprocesado, rapidocr, sugerencia
 from app.services.ocr.preprocesado import Pasos
 
 # Penalización aplicada a la confianza de un valor de OCR cuyo formato no valida.
@@ -74,6 +74,8 @@ class Extraccion:
     paginas: int
     tiempo_ms: int
     motivo: str = ""
+    institucion_sugerida: dict | None = None
+    datos_orden: dict | None = None
 
 
 _turno: threading.Semaphore | None = None
@@ -113,7 +115,8 @@ def procesar(contenido: bytes, *, ajustes: AjustesOcr | None = None) -> Extracci
     )
     if documento.metodo == lector.TIPO_DIGITAL:
         crudos = extractor.extraer(documento.palabras)
-        if all(not crudo.valor for crudo in crudos.values()):
+        datos_orden = _datos_orden(documento.palabras)
+        if all(not crudo.valor for crudo in crudos.values()) and not _hay_datos_orden(datos_orden):
             return _fallida(MOTIVO_ILEGIBLE, documento.metodo, 1, inicio)
         return _armar(
             crudos=crudos,
@@ -122,13 +125,13 @@ def procesar(contenido: bytes, *, ajustes: AjustesOcr | None = None) -> Extracci
             confianza_digital=True,
             ajustes=ajustes,
             inicio=inicio,
+            institucion_sugerida=sugerencia.desde_palabras(documento.palabras),
+            datos_orden=datos_orden,
         )
     return _leer_ocr(documento, ajustes, inicio)
 
 
-def _leer_ocr(
-    documento: lector.DocumentoLeido, ajustes: AjustesOcr, inicio: float
-) -> Extraccion:
+def _leer_ocr(documento: lector.DocumentoLeido, ajustes: AjustesOcr, inicio: float) -> Extraccion:
     """Turno de proceso, preprocesado y lectura de las páginas en secuencia."""
     semaforo = _semaphore(ajustes.concurrencia)
     if not semaforo.acquire(timeout=max(0.0, ajustes.turno_segundos)):
@@ -144,9 +147,7 @@ def _leer_ocr(
             if restante <= 0:
                 return _fallida(MOTIVO_TIEMPO, lector.TIPO_OCR, indice + 1, inicio)
             try:
-                palabras.extend(
-                    rapidocr.leer(preparada, timeout_segundos=restante, pagina=indice)
-                )
+                palabras.extend(rapidocr.leer(preparada, timeout_segundos=restante, pagina=indice))
             except rapidocr.TiempoAgotado:
                 return _fallida(MOTIVO_TIEMPO, lector.TIPO_OCR, indice + 1, inicio)
     finally:
@@ -155,7 +156,8 @@ def _leer_ocr(
     if not palabras:
         return _fallida(MOTIVO_ILEGIBLE, lector.TIPO_OCR, len(documento.paginas), inicio)
     crudos = extractor.extraer(tuple(palabras))
-    if all(not crudo.valor for crudo in crudos.values()):
+    datos_orden = _datos_orden(palabras)
+    if all(not crudo.valor for crudo in crudos.values()) and not _hay_datos_orden(datos_orden):
         return _fallida(MOTIVO_ILEGIBLE, lector.TIPO_OCR, len(documento.paginas), inicio)
     return _armar(
         crudos=crudos,
@@ -164,6 +166,32 @@ def _leer_ocr(
         confianza_digital=False,
         ajustes=ajustes,
         inicio=inicio,
+        institucion_sugerida=sugerencia.desde_palabras(tuple(palabras)),
+        datos_orden=datos_orden,
+    )
+
+
+def _datos_orden(palabras: tuple[lector.Palabra, ...] | list[lector.Palabra]) -> dict:
+    """Extrae los campos SIGA y las partidas por combustible desde las líneas OCR."""
+    lineas = [texto for _, texto, _ in extractor.agrupar_lineas(palabras)]
+    return orden_compra.extraer_campos("\n".join(lineas), lineas)
+
+
+def _hay_datos_orden(datos: dict) -> bool:
+    """No clasifica como ilegible un documento que solo tenga datos estructurados."""
+    proveedor = datos.get("proveedor") or {}
+    return any(
+        (
+            datos.get("numero_orden"),
+            datos.get("numero_siaf"),
+            datos.get("fecha"),
+            proveedor.get("razon_social"),
+            proveedor.get("ruc"),
+            datos.get("sede_estacion"),
+            datos.get("unidad_ejecutora"),
+            datos.get("ruc_unidad_ejecutora"),
+            datos.get("partidas_combustible"),
+        )
     )
 
 
@@ -175,6 +203,8 @@ def _armar(
     confianza_digital: bool,
     ajustes: AjustesOcr,
     inicio: float,
+    institucion_sugerida: dict | None = None,
+    datos_orden: dict | None = None,
 ) -> Extraccion:
     """Calcula la confianza por campo, el estado final y las advertencias."""
     campos: list[Campo] = []
@@ -211,9 +241,7 @@ def _armar(
             )
         )
         if not formato_valido:
-            advertencias.append(
-                f"{clave}: el valor '{crudo.valor}' no valida su formato."
-            )
+            advertencias.append(f"{clave}: el valor '{crudo.valor}' no valida su formato.")
         elif requiere:
             advertencias.append(f"{clave}: confianza {confianza:.2f} bajo el umbral.")
     return Extraccion(
@@ -223,6 +251,8 @@ def _armar(
         advertencias=tuple(advertencias),
         paginas=paginas,
         tiempo_ms=int((time.monotonic() - inicio) * 1000),
+        institucion_sugerida=institucion_sugerida,
+        datos_orden=datos_orden,
     )
 
 
