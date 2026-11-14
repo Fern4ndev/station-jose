@@ -2119,7 +2119,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 
 # 27.1. Checklist operativo de implementación backend
 
-> Convención: `[ ]` pendiente, `[x]` realizado. Una tarea solo se marca como realizada cuando existe implementación y evidencia verificable.
+> Convención: `[ ]` pendiente, `[x]` realizado. Una tarea solo se marca como realizada cuando existe implementación y evidencia verificable. F1–F3 tienen implementación de código registrada; los gates de ejecución que requieren dependencias instaladas y PostgreSQL permanecen pendientes hasta ejecutarse.
 
 | Fase | Tarea | Estado |
 |---|---|---|
@@ -2153,23 +2153,23 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F1 | Ejecutar prueba de configuración inválida | [ ] |
 | F1 | Ejecutar suite de health checks | [ ] |
 | F1 | Confirmar fallo controlado sin PostgreSQL | [ ] |
-| F2 | Crear modelos ORM de sedes, usuarios, sesiones y combustibles | [ ] |
-| F2 | Crear modelos ORM de órdenes y líneas | [ ] |
-| F2 | Crear modelos ORM de vales y líneas | [ ] |
-| F2 | Crear modelos ORM de atenciones, líneas y verificaciones | [ ] |
-| F2 | Definir relaciones, restricciones, índices y `ON DELETE RESTRICT` | [ ] |
-| F2 | Crear migración inicial | [ ] |
-| F2 | Crear seeds idempotentes de sedes y combustibles | [ ] |
-| F2 | Crear procedimiento seguro para el primer Admin | [ ] |
+| F2 | Crear modelos ORM de sedes, usuarios, sesiones y combustibles | [x] |
+| F2 | Crear modelos ORM de órdenes y líneas | [x] |
+| F2 | Crear modelos ORM de vales y líneas | [x] |
+| F2 | Crear modelos ORM de atenciones, líneas y verificaciones | [x] |
+| F2 | Definir relaciones, restricciones, índices y `ON DELETE RESTRICT` | [x] |
+| F2 | Crear migración inicial | [x] |
+| F2 | Crear seeds idempotentes de sedes y combustibles | [x] |
+| F2 | Crear procedimiento seguro para el primer Admin | [x] |
 | F2 | Probar migración desde una base vacía | [ ] |
 | F2 | Probar FK, unicidad, integridad de líneas y seeds | [ ] |
-| F3 | Implementar hashing Argon2 | [ ] |
-| F3 | Implementar tokens y sesiones revocables | [ ] |
-| F3 | Implementar login, logout y usuario actual | [ ] |
-| F3 | Implementar políticas por rol | [ ] |
-| F3 | Implementar schemas y servicios de usuario | [ ] |
-| F3 | Implementar habilitación y deshabilitación de cuentas | [ ] |
-| F3 | Proteger al último Admin activo | [ ] |
+| F3 | Implementar hashing Argon2 | [x] |
+| F3 | Implementar tokens y sesiones revocables | [x] |
+| F3 | Implementar login, logout y usuario actual | [x] |
+| F3 | Implementar políticas por rol | [x] |
+| F3 | Implementar schemas y servicios de usuario | [x] |
+| F3 | Implementar habilitación y deshabilitación de cuentas | [x] |
+| F3 | Proteger al último Admin activo | [x] |
 | F3 | Probar autorización, revocación, cuentas inactivas e historial | [ ] |
 | F4 | Crear schemas de cabecera y líneas de orden | [ ] |
 | F4 | Implementar registro multi-combustible | [ ] |

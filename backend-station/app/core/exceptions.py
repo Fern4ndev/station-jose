@@ -21,3 +21,13 @@ class ResourceNotFoundError(AppError):
 class DatabaseUnavailableError(AppError):
     status_code = 503
     code = "DATABASE_UNAVAILABLE"
+
+
+class AuthenticationRequiredError(AppError):
+    status_code = 401
+    code = "AUTHENTICATION_REQUIRED"
+
+
+class PermissionDeniedError(AppError):
+    status_code = 403
+    code = "PERMISSION_DENIED"
