@@ -2117,6 +2117,110 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 
 ---
 
+# 27.1. Checklist operativo de implementación backend
+
+> Convención: `[ ]` pendiente, `[x]` realizado. Una tarea solo se marca como realizada cuando existe implementación y evidencia verificable.
+
+| Fase | Tarea | Estado |
+|---|---|---|
+| F0 | Aprobar identidad única de órdenes y vales | [ ] |
+| F0 | Aprobar catálogo de combustibles | [ ] |
+| F0 | Aprobar asociación de vale a una o varias líneas | [ ] |
+| F0 | Aprobar reglas de cantidades decimales, redondeos y zona horaria | [ ] |
+| F0 | Aprobar política de despachos parciales | [ ] |
+| F0 | Definir sede del usuario y contexto de atención | [ ] |
+| F0 | Aprobar verificación, observaciones y corrección de despachos | [ ] |
+| F0 | Definir datos confidenciales y límites OCR | [ ] |
+| F0 | Definir columnas de reportes | [ ] |
+| F0 | Documentar ADR, ER lógico y matriz de permisos | [ ] |
+| F0 | Ejecutar escenarios de aceptación 10/5, 10/10 y múltiples combustibles | [ ] |
+| F1 | Crear entorno Python y estructura ejecutable | [ ] |
+| F1 | Configurar FastAPI y comando `fastapi dev` | [x] |
+| F1 | Configurar Pydantic Settings y `.env.example` | [x] |
+| F1 | Configurar SQLAlchemy 2.x y Psycopg 3 | [x] |
+| F1 | Configurar PostgreSQL como base de datos objetivo | [x] |
+| F1 | Configurar Alembic como fuente de migraciones | [x] |
+| F1 | Crear routers versionados bajo `/api/v1` | [x] |
+| F1 | Crear excepciones y respuestas estándar de error | [x] |
+| F1 | Configurar logging sin información sensible | [x] |
+| F1 | Configurar Ruff | [x] |
+| F1 | Configurar Mypy | [x] |
+| F1 | Configurar Pytest y HTTPX | [x] |
+| F1 | Implementar `GET /api/v1/health/live` | [x] |
+| F1 | Implementar `GET /api/v1/health/ready` con verificación de PostgreSQL | [x] |
+| F1 | Ejecutar prueba de arranque de la aplicación | [ ] |
+| F1 | Ejecutar prueba real de conexión a PostgreSQL | [ ] |
+| F1 | Ejecutar prueba de configuración inválida | [ ] |
+| F1 | Ejecutar suite de health checks | [ ] |
+| F1 | Confirmar fallo controlado sin PostgreSQL | [ ] |
+| F2 | Crear modelos ORM de sedes, usuarios, sesiones y combustibles | [ ] |
+| F2 | Crear modelos ORM de órdenes y líneas | [ ] |
+| F2 | Crear modelos ORM de vales y líneas | [ ] |
+| F2 | Crear modelos ORM de atenciones, líneas y verificaciones | [ ] |
+| F2 | Definir relaciones, restricciones, índices y `ON DELETE RESTRICT` | [ ] |
+| F2 | Crear migración inicial | [ ] |
+| F2 | Crear seeds idempotentes de sedes y combustibles | [ ] |
+| F2 | Crear procedimiento seguro para el primer Admin | [ ] |
+| F2 | Probar migración desde una base vacía | [ ] |
+| F2 | Probar FK, unicidad, integridad de líneas y seeds | [ ] |
+| F3 | Implementar hashing Argon2 | [ ] |
+| F3 | Implementar tokens y sesiones revocables | [ ] |
+| F3 | Implementar login, logout y usuario actual | [ ] |
+| F3 | Implementar políticas por rol | [ ] |
+| F3 | Implementar schemas y servicios de usuario | [ ] |
+| F3 | Implementar habilitación y deshabilitación de cuentas | [ ] |
+| F3 | Proteger al último Admin activo | [ ] |
+| F3 | Probar autorización, revocación, cuentas inactivas e historial | [ ] |
+| F4 | Crear schemas de cabecera y líneas de orden | [ ] |
+| F4 | Implementar registro multi-combustible | [ ] |
+| F4 | Implementar detalle y consulta de órdenes | [ ] |
+| F4 | Implementar búsqueda, filtros, paginación y ordenamiento allowlist | [ ] |
+| F4 | Implementar edición protegida por galones ya despachados | [ ] |
+| F4 | Implementar eliminación solo sin vales | [ ] |
+| F4 | Probar líneas múltiples, duplicados y restricciones | [ ] |
+| F5 | Implementar identidad única del vale | [ ] |
+| F5 | Implementar captura de cabecera y líneas en el primer despacho | [ ] |
+| F5 | Implementar atención inicial atómica | [ ] |
+| F5 | Implementar atenciones parciales posteriores | [ ] |
+| F5 | Implementar múltiples combustibles y saldos independientes por línea | [ ] |
+| F5 | Implementar transacciones y `SELECT FOR UPDATE` | [ ] |
+| F5 | Implementar idempotencia | [ ] |
+| F5 | Implementar estados derivados y contexto de sede/usuario | [ ] |
+| F5 | Ejecutar TC-001 a TC-011 | [ ] |
+| F5 | Probar concurrencia, reintentos y consumos parciales/completos | [ ] |
+| F6 | Implementar bandeja pendiente de verificación | [ ] |
+| F6 | Implementar detalle y resultado `VERIFIED`/`OBSERVED` | [ ] |
+| F6 | Exigir observación en discrepancias | [ ] |
+| F6 | Registrar revisor y fecha | [ ] |
+| F6 | Proteger movimientos y saldos durante verificación | [ ] |
+| F6 | Implementar corrección descriptiva autorizada | [ ] |
+| F6 | Bloquear eliminación de vales atendidos | [ ] |
+| F6 | Probar que verificar no modifica consumo | [ ] |
+| F7 | Implementar queries agregadas de reportes | [ ] |
+| F7 | Implementar agrupación por hora, día, semana y mes | [ ] |
+| F7 | Implementar filtros por fecha, usuario y estado | [ ] |
+| F7 | Implementar dataset por combustible y dashboard | [ ] |
+| F7 | Implementar exportación ReportLab/openpyxl | [ ] |
+| F7 | Aplicar restricciones de datos sensibles por rol | [ ] |
+| F7 | Probar agregaciones, timezone, filtros y exportaciones | [ ] |
+| F8 | Implementar upload temporal y detección MIME | [ ] |
+| F8 | Implementar extracción y renderizado PDF con PyMuPDF | [ ] |
+| F8 | Integrar RapidOCR | [ ] |
+| F8 | Normalizar campos y devolver resultados parciales | [ ] |
+| F8 | Limpiar temporales incluso ante errores | [ ] |
+| F8 | Mantener revisión humana y captura manual alternativa | [ ] |
+| F8 | Probar PDF legible, escaneado, corrupto, protegido, grande y multipágina | [ ] |
+| F9 | Ejecutar pruebas E2E de los flujos habilitados | [ ] |
+| F9 | Ejecutar pruebas simultáneas y de permisos | [ ] |
+| F9 | Revisar límites OCR y exportaciones | [ ] |
+| F9 | Revisar logs y migraciones desde una copia reciente | [ ] |
+| F9 | Configurar backups, HTTPS y CORS de producción | [ ] |
+| F9 | Validar OpenAPI y guía de operación | [ ] |
+| F9 | Ejecutar prueba de restauración y registrar evidencias | [ ] |
+| F9 | Confirmar despliegue reproducible sin Docker | [ ] |
+
+---
+
 # 28. Matriz de trazabilidad RF → backend
 
 La matriz resume el componente backend principal. Los endpoints son **propuestos** para el contrato `/api/v1`; no se consideran implementados hasta existir código y OpenAPI verificado.
