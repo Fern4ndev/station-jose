@@ -15,13 +15,6 @@ dependencies = [
   "sqlalchemy==2.0.43",
 ]
 
-[dependency-groups]
-dev = [
-  "mypy==1.17.1",
-  "pytest==8.4.1",
-  "ruff==0.12.10",
-]
-
 [tool.fastapi]
 entrypoint = "app.main:app"
 

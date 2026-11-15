@@ -6,3 +6,6 @@ pydantic-settings==2.10.1
 pyjwt==2.10.1
 pwdlib[argon2]==0.2.1
 sqlalchemy==2.0.43
+mypy==1.17.1
+pytest==8.4.1
+ruff==0.12.10

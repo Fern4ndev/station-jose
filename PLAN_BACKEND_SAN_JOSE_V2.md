@@ -6,13 +6,15 @@
 **Sedes:** San José y Santa Marta  
 **Backend:** Python + FastAPI  
 **Base de datos:** PostgreSQL  
-**Versión del plan:** 2.1  
+**Versión del plan:** 2.2
 **Fuente funcional:** `REQUERIMIENTOS_FUNCIONALES_SAN_JOSE_V2.md`  
 **Estado:** Plan técnico actualizado; no representa funcionalidades implementadas.
 
 > **Actualización 2.1:** se adopta una arquitectura por capas organizada por responsabilidad, similar al árbol de referencia compartido (`app/core`, `app/routers`, `app/schemas`, `app/services`, `app/database.py` y `app/tables.py`). Se añade una capa de repositorios para aislar las consultas SQL y proteger las operaciones transaccionales del dominio.
 >
 > **Cambio funcional principal respecto a la versión anterior:** el vale no se registra anticipadamente por Oficina. Se crea junto con su primer despacho, realizado por el grifero. Un mismo vale puede tener múltiples atenciones parciales. Cada atención descuenta exclusivamente los galones realmente despachados del saldo del vale y del saldo de la línea de combustible de la orden. Oficina verifica posteriormente el registro contra el vale físico, sin volver a capturarlo.
+>
+> **Actualización 2.2:** el esquema se mantendrá manualmente en SQL. `db/001_schema.sql` y `db/002_seed.sql` serán la fuente para una instalación nueva; los ALTER numerados serán el puente temporal para bases existentes. No se utilizarán Alembic, Flyway ni herramientas equivalentes. El checkout conserva todavía andamiaje y dependencia Alembic, además de los antiguos `schema.sql`/`seed.sql`; retirarlos y consolidar los scripts manuales queda como trabajo pendiente.
 
 ---
 
@@ -113,7 +115,7 @@ No se adjuntó código fuente del backend, repositorio, esquema de base de datos
 ## 4.2. Componentes por construir
 
 1. Aplicación FastAPI, configuración y manejo global de errores.
-2. PostgreSQL, SQLAlchemy 2.x y migraciones Alembic.
+2. PostgreSQL, SQLAlchemy 2.x y scripts SQL manuales para el esquema y los datos iniciales.
 3. Catálogos de sedes y tipos de combustible.
 4. Autenticación, sesiones y autorización por rol.
 5. Usuarios y deshabilitación lógica.
@@ -345,14 +347,15 @@ El backend no permitirá crear otro vale con la misma identidad funcional. Para 
 
 | Componente | Tecnología | Uso |
 |---|---|---|
-| Lenguaje | Python 3.12 o versión estable compatible con dependencias | Backend. |
+| Lenguaje | Python 3.13.15 en el entorno de desarrollo; proyecto compatible desde Python 3.12 | Backend. |
 | Framework | FastAPI | API REST y OpenAPI. |
 | ASGI | Uvicorn | Servidor. |
 | Validación | Pydantic v2 | Requests, responses y configuración. |
 | Configuración | `pydantic-settings` | Variables de entorno. |
 | ORM | SQLAlchemy 2.x | Persistencia relacional. |
 | Driver | Psycopg 3 | Conexión PostgreSQL. |
-| Migraciones | Alembic | Versionado del esquema. |
+| Esquema | SQL manual | `db/001_schema.sql`, `db/002_seed.sql` y ALTER numerados temporales; sin herramientas de migraciones. |
+| Sistema local | Windows nativo | Desarrollo sin Docker. |
 | JWT | PyJWT | Firma y validación de tokens. |
 | Password hashing | `pwdlib` + Argon2 | Hash seguro de contraseñas. |
 | Pruebas | Pytest + HTTPX | Unitarias, integración y API. |
@@ -362,9 +365,7 @@ El backend no permitirá crear otro vale con la misma identidad funcional. Para 
 | OCR | RapidOCR | Reconocimiento de texto de órdenes. |
 | PDF rendering | PyMuPDF | Renderizar páginas del PDF para RapidOCR. |
 | Upload | `python-multipart` | Recepción `multipart/form-data` del PDF. |
-| Contenedores | Docker + Compose | Desarrollo y despliegue reproducible. |
-
-Las versiones exactas se fijarán en `requirements.txt` y `requirements-dev.txt` después de comprobar compatibilidad. `pyproject.toml` conservará la configuración del proyecto y de las herramientas. No se utilizarán dependencias flotantes en producción.
+Todas las dependencias Python, incluidas las herramientas de pruebas y calidad, se fijarán únicamente en `requirements.txt`. `pyproject.toml` conservará los metadatos de la aplicación y la configuración de FastAPI y herramientas. No se utilizarán dependencias flotantes.
 
 ## 7.2. Base de datos
 
@@ -382,7 +383,6 @@ Dependencias base previstas:
 - `pydantic-settings`
 - `sqlalchemy`
 - `psycopg`
-- `alembic`
 - `pyjwt`
 - `pwdlib[argon2]`
 - `email-validator`
@@ -562,14 +562,13 @@ backend/
 │   ├── database.py                     # Engine, SessionLocal, get_db y ciclo de vida
 │   ├── tables.py                       # Base y entidades SQLAlchemy del sistema
 │   └── main.py                         # Creación y configuración de FastAPI
-├── alembic/
-│   ├── versions/                       # Migraciones versionadas
-│   └── env.py
 ├── db/
-│   └── README.md                       # Convenciones y notas de base de datos; Alembic es la fuente del esquema
+│   ├── 001_schema.sql                  # Fuente de verdad del esquema para bases nuevas
+│   ├── 002_seed.sql                    # Datos iniciales/demo para bases nuevas
+│   ├── 003_*.sql                       # ALTER temporales para bases existentes
+│   └── README.md                       # Regla manual, verificaciones e historial de ALTER consolidados
 ├── scripts/
 │   ├── check_db.py                     # Diagnóstico de conexión
-│   ├── seed_catalogs.py                # Carga inicial controlada de sedes y combustibles
 │   └── create_admin.py                 # Alta segura del primer administrador
 ├── storage/
 │   └── ocr_tmp/                        # Temporales de OCR; ignorados por Git y limpiados
@@ -582,11 +581,7 @@ backend/
 ├── .env.example
 ├── .gitignore
 ├── pyproject.toml                      # Configuración de proyecto y herramientas
-├── requirements.txt                    # Dependencias con versiones fijadas
-├── requirements-dev.txt                # Dependencias de desarrollo y pruebas
-├── alembic.ini
-├── Dockerfile
-├── compose.yaml
+├── requirements.txt                    # Todas las dependencias con versiones fijadas
 └── README.md
 ```
 
@@ -597,9 +592,11 @@ backend/
 - `app/schemas/` centraliza los DTO Pydantic de requests y responses, separados por recurso.
 - `app/services/` implementa los casos de uso. Sus nombres expresan acciones del negocio, no operaciones HTTP.
 - `app/repositories/` encapsula SQLAlchemy. Se añade porque el control concurrente de saldos, los joins y los reportes necesitan consultas de persistencia aisladas; no es una carpeta de endpoints. Sus archivos deben cubrir los repositorios enumerados en la sección 17, incluidos los de líneas de orden, líneas de vale y saldos.
-- `app/database.py` administra conexiones y sesiones. Se conserva SQLAlchemy 2.x síncrono, como establece ADR-003; no se mezclará una sesión asíncrona con operaciones síncronas. `app/tables.py` concentra las entidades SQLAlchemy y restricciones relacionales para mantener una única definición del esquema ORM.
-- `alembic/` es la única fuente de migraciones versionadas. No duplicar el esquema en scripts SQL manuales dentro de `db/`.
-- `db/` puede contener documentación o SQL auxiliar de diagnóstico, pero no una segunda secuencia de migraciones.
+- `app/database.py` administra conexiones y sesiones. Se conserva SQLAlchemy 2.x síncrono, como establece ADR-003; no se mezclará una sesión asíncrona con operaciones síncronas. `app/tables.py` define las entidades y el mapeo ORM; el DDL de `db/001_schema.sql` es la fuente de verdad.
+- `db/001_schema.sql` se actualiza junto con cada cambio de esquema. SQLAlchemy mapea ese esquema, pero no se utiliza para generar ni versionar DDL automáticamente.
+- `db/002_seed.sql` contiene los datos iniciales/demo necesarios para una instalación nueva; no debe sobrescribir usuarios ni credenciales preexistentes.
+- Para una base existente se agrega un ALTER numerado re-ejecutable. Cuando todo el equipo lo haya aplicado, se consolida en `001`/`002`, se elimina el ALTER y se registra su retiro en `db/README.md` y en el commit.
+- No crear ni utilizar Alembic, Flyway u otra herramienta de migraciones. El andamiaje Alembic heredado del checkout debe retirarse como parte de la transición a esta regla.
 - `storage/ocr_tmp/` es temporal, no persistente y debe estar incluido en `.gitignore`. La aplicación debe eliminar cada archivo temporal incluso cuando OCR falle.
 - `.agents/skills/fastapi/` es documentación local opcional para asistentes/desarrolladores; no debe ser dependencia del backend ni contener secretos.
 - No se incluye `frontend.py`: el frontend Angular se mantiene como aplicación independiente, salvo que una decisión de despliegue futura requiera servir sus archivos estáticos desde FastAPI.
@@ -1841,23 +1838,53 @@ No desarrollar endpoint de impresión ni comparación de períodos. La impresió
 
 ---
 
-# 21. Migraciones y datos iniciales
+# 21. Esquema SQL manual y datos iniciales
 
-## 21.1. Alembic
+## 21.1. Regla del proyecto
 
-Alembic será la única vía versionada para crear y modificar el esquema. La migración inicial debe incluir, en orden de dependencia: `branches`, `users`, `auth_sessions`, `fuel_types`, `purchase_orders`, `purchase_order_items`, `vouchers`, `voucher_items`, `attendances`, `attendance_items`, `attendance_verifications` y la tabla de idempotencia si no se resuelve en `attendances`.
+No se utilizarán Alembic, Flyway ni otras herramientas de migraciones. El esquema se mantendrá manualmente en SQL con dos archivos base:
 
-Las restricciones únicas y FK deben corresponder al ER aprobado. No permitir cascadas de eliminación en relaciones que contienen consumo o historial.
+- `db/001_schema.sql` es siempre la fuente de verdad de la estructura y debe representar el esquema de desarrollo. Todo cambio estructural se incorpora aquí en el mismo cambio de código.
+- `db/002_seed.sql` se actualiza cuando cambien los datos demo o parámetros iniciales, o cuando el esquema agregue columnas `NOT NULL` a tablas que el seed inserta.
 
-## 21.2. Seeds
+Ambos scripts se ejecutan sobre una base vacía. No necesitan ser idempotentes a nivel de esquema. El orden de columnas de `001_schema.sql` debe coincidir con el de la base de desarrollo.
+
+## 21.2. Actualización de bases existentes
+
+Para una base ya creada, agrega un ALTER numerado (`db/003_<cambio>.sql`, `db/004_<cambio>.sql`, etc.), además de actualizar `001_schema.sql` y, cuando corresponda, `002_seed.sql`. El ALTER se aplica una vez en cada base existente y debe ser re-ejecutable:
+
+- Usa `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS` y `DROP CONSTRAINT IF EXISTS` cuando apliquen.
+- Para objetos que no admitan esas cláusulas, usa un bloque `DO $$ ... EXCEPTION WHEN duplicate_object THEN NULL; END $$`.
+- Nunca recrea tablas ni elimina datos existentes.
+- `ALTER TYPE ... ADD VALUE` debe ir en un archivo separado, porque el valor enum no se puede utilizar en la misma transacción que lo agrega.
+
+Cuando todo el equipo haya aplicado el ALTER:
+
+1. Verifica una base antigua + ALTER frente a una instalación nueva con `001_schema.sql` + `002_seed.sql`.
+2. Consolida los cambios en los dos scripts base.
+3. Elimina el ALTER y registra en el commit qué archivo se retiró y qué cambio se consolidó.
+4. Anota archivo, fecha y descripción en la tabla de historial de `backend-station/db/README.md`.
+
+El orden físico de columnas también forma parte de la verificación. Una columna agregada por ALTER se escribe al final de su tabla en `001_schema.sql`. `DROP COLUMN` es la excepción: PostgreSQL no reordena físicamente las columnas restantes. En esos casos se documenta la excepción y se compara por nombre, tipo, nulabilidad y default, no por posición.
+
+## 21.3. Verificación obligatoria
+
+La estructura de una base antigua actualizada con el ALTER y una base nueva preparada con `001_schema.sql` + `002_seed.sql` debe ser equivalente. La verificación utiliza `pg_dump --schema-only --no-owner --no-acl`; en PostgreSQL 17 se excluyen las líneas aleatorias `\restrict` y `\unrestrict` antes de comparar. Después se ejecuta la suite de pruebas contra la base actualizada y se comprueban FK, unicidad, restricciones, índices y datos iniciales afectados.
+
+No se aceptará un cambio de base de datos si se verifica únicamente el estado final nuevo: también debe probarse la ruta de actualización de una base existente y la re-ejecución del ALTER.
+
+## 21.4. Datos iniciales
 
 - Sedes San José y Santa Marta.
 - Catálogo de tipos de combustible confirmado por la estación.
-- Cuenta Admin inicial creada por comando/secretos de entorno de instalación.
+- Datos demo o parámetros iniciales aprobados en `002_seed.sql`.
+- Cuenta Admin inicial creada por comando/secretos de entorno de instalación, nunca con una contraseña real codificada en SQL.
 - Roles como enum fijo de aplicación; no crear catálogo editable de roles.
-- Seeds idempotentes; no sobrescribir usuarios ni credenciales preexistentes.
+- El seed no debe sobrescribir usuarios ni credenciales preexistentes.
 
-## 21.3. Datos históricos
+El checkout actual aún tiene `db/schema.sql`, `db/seed.sql` y andamiaje Alembic. La conversión de esos archivos al contrato `001`/`002` y la retirada del andamiaje heredado son tareas pendientes; no se debe seguir creando migraciones Alembic.
+
+## 21.5. Datos históricos
 
 No importar Excel/PDF existentes ni realizar migración histórica en esta versión, según el alcance confirmado. Los reportes incluirán los registros creados en el sistema desde su puesta en producción.
 
@@ -2033,19 +2060,19 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 **Objetivo:** aplicación ejecutable con configuración, DB, logging y pruebas.  
 **Dependencias:** F0.  
 **RF:** transversal.  
-**Tareas:** crear entorno Python; configurar FastAPI/Uvicorn, Pydantic Settings, SQLAlchemy, PostgreSQL, Alembic, routers `/api/v1`, excepciones, logging, Ruff, Mypy, Pytest, HTTPX y Docker Compose; implementar health checks.  
+**Tareas:** crear entorno Python nativo en Windows; configurar FastAPI/Uvicorn, Pydantic Settings, SQLAlchemy, PostgreSQL, scripts SQL manuales, routers `/api/v1`, excepciones, logging, Ruff, Mypy, Pytest y HTTPX; implementar health checks. Retirar el andamiaje Alembic heredado.
 **Pruebas:** arranque, conexión DB, configuración inválida y health checks.  
 **Gate:** app inicia y falla de forma controlada cuando PostgreSQL no está disponible.
 
-## F2 — Modelo de datos, migraciones y catálogos
+## F2 — Modelo de datos, scripts SQL y catálogos
 
 **Objetivo:** persistencia normalizada con restricciones.  
 **Dependencias:** F1 y decisiones de F0.  
 **RF:** RF-001, RF-007, RF-013–RF-026.  
 **Tablas:** sedes, usuarios, sesiones, combustibles, órdenes, líneas, vales, líneas de vale, atenciones, líneas de atención y verificaciones.  
-**Tareas:** modelos ORM; relaciones; checks; índices; `ON DELETE RESTRICT`; migración inicial; seeds de sedes y combustibles; creación segura de Admin.  
-**Pruebas:** migración desde DB vacía, FK, unicidad, integridad de líneas y seeds idempotentes.  
-**Gate:** DB construida únicamente con Alembic y modelo probado en PostgreSQL.
+**Tareas:** modelos ORM; relaciones; checks; índices; `ON DELETE RESTRICT`; crear `db/001_schema.sql` y `db/002_seed.sql`; seeds de sedes y combustibles; creación segura de Admin; definir el procedimiento temporal para ALTER numerados.
+**Pruebas:** instalación desde DB vacía con `001` + `002`; aplicar dos veces cada ALTER contra una copia; comparar DDL de base antigua actualizada con base nueva; probar FK, unicidad, integridad de líneas y datos seed.
+**Gate:** esquema construido desde SQL manual y equivalencia verificada en PostgreSQL; no se usa una herramienta de migraciones.
 
 ## F3 — Autenticación, usuarios y RBAC
 
@@ -2112,7 +2139,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 **Objetivo:** estabilizar, documentar y preparar despliegue.  
 **Dependencias:** F1–F8 según alcance habilitado.  
 **RF:** todos.  
-**Tareas:** pruebas E2E de flujos; pruebas simultáneas; permisos por endpoint; límites OCR/exportación; revisión de logs; migraciones desde una copia reciente; backups; HTTPS; CORS de producción; documentación OpenAPI; guía de operación; prueba de restauración.  
+**Tareas:** pruebas E2E de flujos; pruebas simultáneas; permisos por endpoint; límites OCR/exportación; revisión de logs; prueba del ALTER desde una copia reciente y comparación con una base nueva; backups; HTTPS; CORS de producción; documentación OpenAPI; guía de operación; prueba de restauración.
 **Gate:** todos los RF habilitados tienen evidencia de pruebas, no existen fallos críticos y el despliegue puede reproducirse.
 
 ---
@@ -2139,7 +2166,8 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F1 | Configurar Pydantic Settings y `.env.example` | [x] |
 | F1 | Configurar SQLAlchemy 2.x y Psycopg 3 | [x] |
 | F1 | Configurar PostgreSQL como base de datos objetivo | [x] |
-| F1 | Configurar Alembic como fuente de migraciones | [x] |
+| F1 | Documentar SQL manual como única política para cambios de esquema | [x] |
+| F1 | Retirar Alembic, su configuración y dependencia heredada | [ ] |
 | F1 | Crear routers versionados bajo `/api/v1` | [x] |
 | F1 | Crear excepciones y respuestas estándar de error | [x] |
 | F1 | Configurar logging sin información sensible | [x] |
@@ -2158,10 +2186,11 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F2 | Crear modelos ORM de vales y líneas | [x] |
 | F2 | Crear modelos ORM de atenciones, líneas y verificaciones | [x] |
 | F2 | Definir relaciones, restricciones, índices y `ON DELETE RESTRICT` | [x] |
-| F2 | Crear migración inicial | [x] |
-| F2 | Crear seeds idempotentes de sedes y combustibles | [x] |
+| F2 | Crear `db/001_schema.sql` y `db/002_seed.sql` como fuente base | [ ] |
+| F2 | Consolidar seeds de sedes y combustibles en `db/002_seed.sql` | [ ] |
 | F2 | Crear procedimiento seguro para el primer Admin | [x] |
-| F2 | Probar migración desde una base vacía | [ ] |
+| F2 | Probar instalación desde una base vacía usando `001` + `002` | [ ] |
+| F2 | Probar ALTER re-ejecutable y equivalencia con instalación nueva | [ ] |
 | F2 | Probar FK, unicidad, integridad de líneas y seeds | [ ] |
 | F3 | Implementar hashing Argon2 | [x] |
 | F3 | Implementar tokens y sesiones revocables | [x] |
@@ -2213,7 +2242,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F9 | Ejecutar pruebas E2E de los flujos habilitados | [ ] |
 | F9 | Ejecutar pruebas simultáneas y de permisos | [ ] |
 | F9 | Revisar límites OCR y exportaciones | [ ] |
-| F9 | Revisar logs y migraciones desde una copia reciente | [ ] |
+| F9 | Probar ALTER desde una copia reciente y comparar con una base nueva | [ ] |
 | F9 | Configurar backups, HTTPS y CORS de producción | [ ] |
 | F9 | Validar OpenAPI y guía de operación | [ ] |
 | F9 | Ejecutar prueba de restauración y registrar evidencias | [ ] |
@@ -2333,7 +2362,7 @@ Una fase estará terminada solo cuando:
 7. Las líneas de combustibles no comparten ni compensan saldos.
 8. La verificación administrativa no modifica consumo.
 9. Las dependencias protegen el historial y no hay cascadas destructivas.
-10. Las migraciones Alembic están versionadas y probadas.
+10. `001_schema.sql` y `002_seed.sql` están actualizados; el ALTER de cada cambio existente es re-ejecutable y la equivalencia del esquema está verificada.
 11. Las pruebas unitarias, integración y API relevantes pasan.
 12. Ruff y Mypy cumplen las reglas configuradas.
 13. No existen secretos ni datos sensibles en logs/repositorio.

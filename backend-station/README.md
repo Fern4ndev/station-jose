@@ -1,19 +1,19 @@
 # San José Fuel Control API
 
-API backend del sistema de control de combustible de la Estación de Servicio San José. Proporciona autenticación, administración de usuarios y verificaciones de salud; utiliza PostgreSQL para persistir usuarios y datos operativos.
+API backend del sistema de control de combustible de la Estación de Servicio San José. Proporciona autenticación, administración de usuarios y verificaciones de salud; utiliza PostgreSQL para persistir usuarios y datos operativos. El entorno de desarrollo se ejecuta de forma nativa en Windows, sin Docker.
 
 ## Tabla de contenidos
 
 - [1. Descripción](#1-descripción-del-proyecto)
 - [2. Características](#2-características-principales)
-- [3. Tecnologías](#3-tecnologías-utilizadas)
+- [3. Stack](#3-stack)
 - [4. Arquitectura](#4-arquitectura-del-proyecto)
 - [5. Estructura](#5-estructura-de-directorios)
 - [6. Requisitos](#6-requisitos-previos)
 - [7. Instalación](#7-instalación)
 - [8. Configuración](#8-configuración-del-entorno)
 - [9. Base de datos](#9-base-de-datos)
-- [10. Ejecución](#10-ejecución-del-proyecto)
+- [10. Puesta en marcha](#10-puesta-en-marcha)
 - [11. Uso de la API](#11-uso-del-sistema)
 - [12. Pruebas y calidad](#12-pruebas)
 - [13. Convenciones](#13-convenciones-y-buenas-prácticas)
@@ -36,19 +36,23 @@ El repositorio contiene modelos para sucursales, usuarios, tipos de combustible,
 - Administración de usuarios: listado paginado, creación, consulta y actualización de datos, rol y estado.
 - Control de acceso a la administración de usuarios mediante permisos.
 - Comprobaciones de disponibilidad del proceso y de conexión a la base de datos.
-- Migraciones de esquema con Alembic y scripts para verificar la base de datos, crear un administrador y cargar catálogos iniciales.
+- Gestión manual del esquema mediante SQL, con scripts para comprobar la base de datos y crear el primer administrador.
 - Configuración de CORS y parámetros operativos mediante variables de entorno.
 
-## 3. Tecnologías utilizadas
+## 3. Stack
 
 | Categoría | Tecnologías |
 | --- | --- |
-| Lenguaje | Python 3.12 o superior |
-| API | FastAPI, Pydantic y pydantic-settings |
-| Persistencia | PostgreSQL, SQLAlchemy 2 y Psycopg 3 |
-| Migraciones | Alembic |
+| Lenguaje | Python 3.13.15 en el entorno de desarrollo; el proyecto declara Python 3.12 o superior |
+| API | FastAPI, FastAPI CLI, Uvicorn, Pydantic y pydantic-settings |
+| Persistencia | PostgreSQL 17 (instalador oficial EDB en el entorno local), SQLAlchemy 2 síncrono y Psycopg 3 |
+| Esquema de base de datos | SQL manual: `db/001_schema.sql`, `db/002_seed.sql` y ALTER numerados temporales |
 | Autenticación y seguridad | PyJWT y pwdlib con Argon2 |
 | Pruebas y calidad | pytest, Ruff y mypy |
+
+El backend actual no utiliza `asyncpg` ni SQLModel. Tampoco implementa OCR: `RapidOCR` y `pypdfium2` no están entre sus dependencias; las variables `OCR_*` son únicamente parámetros de configuración, sin rutas de OCR expuestas.
+
+La regla vigente del proyecto es mantener el esquema a mano en SQL; no se deben crear ni aplicar migraciones con Alembic, Flyway u otra herramienta. El checkout aún conserva archivos de Alembic y su dependencia, y usa los nombres anteriores `db/schema.sql` y `db/seed.sql`; su conversión al flujo `001_schema.sql` + `002_seed.sql` está pendiente. No uses Alembic para cambios de base de datos.
 
 ## 4. Arquitectura del proyecto
 
@@ -63,7 +67,7 @@ flowchart LR
     Repositories --> ORM["SQLAlchemy"]
     ORM --> PostgreSQL
     API --> Core["Configuración, seguridad y errores"]
-    Alembic --> ORM
+    DBSetup["Scripts SQL versionados"] --> PostgreSQL
 ```
 
 ## 5. Estructura de directorios
@@ -80,11 +84,10 @@ backend-station/
 │   ├── database.py         # Motor, sesiones y base ORM
 │   ├── main.py             # Aplicación FastAPI
 │   └── tables.py           # Entidades y relaciones SQLAlchemy
-├── alembic/
-│   └── versions/           # Migraciones versionadas del esquema
+├── alembic/                # Configuración heredada; no usar para cambios de esquema
 ├── db/
-│   ├── schema.sql          # Definición SQL del esquema
-│   └── seed.sql            # Datos de demostración
+│   ├── schema.sql          # Esquema actual; pendiente de consolidar en 001_schema.sql
+│   └── seed.sql            # Datos demo actuales; pendiente de consolidar en 002_seed.sql
 ├── scripts/                # Utilidades de base de datos y administración
 ├── storage/ocr_tmp/        # Directorio de almacenamiento temporal de OCR
 ├── tests/
@@ -93,48 +96,25 @@ backend-station/
 │   ├── integration/        # Espacio para pruebas de integración
 │   └── unit/               # Pruebas unitarias
 ├── .env.example            # Ejemplo de configuración local
-├── alembic.ini             # Configuración de Alembic
 ├── pyproject.toml          # Metadatos, dependencias de desarrollo y herramientas
-├── requirements.txt        # Dependencias de ejecución
-└── requirements-dev.txt    # Dependencias de desarrollo y pruebas
+└── requirements.txt        # Todas las dependencias de ejecución, pruebas y calidad
 ```
 
 ## 6. Requisitos previos
 
-- Python 3.12 o superior.
-- PostgreSQL accesible desde el entorno donde se ejecuta la API.
+- Windows con Python 3.12 o superior (el entorno de desarrollo indicado utiliza Python 3.13.15).
+- PostgreSQL accesible desde el entorno donde se ejecuta la API; el entorno local indicado usa PostgreSQL 17 instalado con EDB.
 - `pip` y `venv`, incluidos en las distribuciones habituales de Python.
 
-Docker y archivos de configuración de contenedores no están incluidos en este backend.
+El proyecto se ejecuta de forma nativa, sin Docker ni archivos de configuración de contenedores.
 
 ## 7. Instalación
 
-Desde el directorio `backend-station`, crea y activa un entorno virtual e instala las dependencias de desarrollo:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -r requirements-dev.txt
-```
-
-En Linux o macOS, activa el entorno con:
-
-```bash
-source .venv/bin/activate
-```
-
-Después, configura el entorno según la sección siguiente y prepara PostgreSQL antes de aplicar la migración.
+La secuencia completa para Windows está en [Puesta en marcha en Windows](#puesta-en-marcha-en-windows). Todas las dependencias de ejecución, pruebas y calidad se instalan desde `requirements.txt`.
 
 ## 8. Configuración del entorno
 
-La configuración se lee de variables de entorno o de un archivo `.env` en el directorio de trabajo. Para desarrollo, parte del archivo de ejemplo:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Edita `.env` con los datos de tu entorno. Los siguientes ejemplos son ilustrativos; reemplaza los valores de conexión y secretos. En producción, define un `JWT_SECRET_KEY` aleatorio de al menos 32 caracteres.
+La configuración se lee de variables de entorno o de un archivo `.env` en el directorio de trabajo. La puesta en marcha copia `.env.example`; edita después `.env` con los datos de tu entorno. Los siguientes ejemplos son ilustrativos; reemplaza los valores de conexión y secretos. En producción, define un `JWT_SECRET_KEY` aleatorio de al menos 32 caracteres.
 
 | Variable | Descripción | Ejemplo |
 | --- | --- | --- |
@@ -160,31 +140,29 @@ Los parámetros OCR están disponibles en la configuración, pero actualmente no
 
 ## 9. Base de datos
 
-PostgreSQL es el motor de persistencia. `DATABASE_URL` debe usar el controlador `postgresql+psycopg` y apuntar a una base de datos ya creada. Por ejemplo, con `psql`:
+PostgreSQL es el motor de persistencia y SQLAlchemy utiliza el controlador síncrono Psycopg. `DATABASE_URL` debe usar el esquema `postgresql+psycopg` y apuntar a una base de datos ya creada.
 
-```sql
-CREATE DATABASE sanjosedb;
-```
+### Instalación nueva
 
-Aplica la migración inicial y cualquier migración posterior con Alembic:
+Desde la sección [Puesta en marcha en Windows](#puesta-en-marcha-en-windows), crea `sanjosedb` y aplica los dos scripts SQL que existen actualmente. `schema.sql` define el esquema y `seed.sql` contiene datos iniciales/demo. Ambos se aplican sobre una base vacía; no son scripts para reconstruir una base con datos existentes. La convención aprobada para los siguientes cambios es renombrarlos/consolidarlos como `001_schema.sql` y `002_seed.sql`.
 
-```powershell
-alembic upgrade head
-```
+### Actualización de una base existente
 
-La migración `0001_initial_schema` crea las tablas declaradas por los modelos SQLAlchemy. Para comprobar la conexión:
+Cada cambio de esquema requiere actualizar `001_schema.sql` en el mismo cambio y, si corresponde, `002_seed.sql`. Para una base que ya tiene datos, agrega además un ALTER numerado (`003_*.sql`, `004_*.sql`, etc.), en orden. El ALTER debe ser re-ejecutable y nunca recrear ni borrar datos. Una vez que todo el equipo lo haya aplicado, consolida el cambio en `001_schema.sql` y/o `002_seed.sql`, elimina el ALTER y deja constancia en el commit y en el historial de [base de datos](db/README.md).
+
+La regla del proyecto permite únicamente esta fuente SQL manual: no uses Alembic, Flyway ni otra herramienta de migraciones. En el checkout actual siguen presentes archivos y dependencias heredados de Alembic; la conversión de nombres y la retirada del andamiaje están pendientes.
+
+Para comprobar la conexión:
 
 ```powershell
 python scripts/check_db.py
 ```
 
-Para cargar las sucursales y tipos de combustible definidos por el script:
+El catálogo inicial de sucursales y combustibles debe formar parte de `002_seed.sql`. El script Python `scripts/seed_catalogs.py` aún existe en el checkout, pero es legado: no lo uses como sustituto del seed SQL; su retirada o consolidación queda pendiente.
 
-```powershell
-python scripts/seed_catalogs.py
-```
+El archivo `db/seed.sql` contiene datos de demostración; úsalo únicamente en desarrollo. Las cuentas de demostración están deshabilitadas y no tienen credenciales de acceso, por lo que no hay un usuario de demostración listo para iniciar sesión.
 
-El archivo `db/seed.sql` contiene datos de demostración; úsalo únicamente en desarrollo. Para crear el primer usuario administrador, el script requiere los datos por argumentos:
+Para crear el primer usuario administrador, el script requiere los datos por argumentos:
 
 ```powershell
 python scripts/create_admin.py --first-name "Nombre" --last-name "Apellido" --dni "DNI-DE-PRUEBA" --email "admin@example.test" --password "CAMBIAR-POR-UNA-CLAVE-SEGURA"
@@ -192,15 +170,43 @@ python scripts/create_admin.py --first-name "Nombre" --last-name "Apellido" --dn
 
 No uses credenciales reales en comandos visibles o guardados en el historial del shell. El script no crea otro administrador si ya existe uno.
 
-## 10. Ejecución del proyecto
+## 10. Puesta en marcha
 
-Con el entorno virtual activo, PostgreSQL preparado y `.env` configurado, inicia el servidor de desarrollo:
+### Puesta en marcha en Windows
+
+Desde la raíz del repositorio, ejecuta en PowerShell:
+
+```powershell
+Set-Location .\backend-station
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+Copy-Item .env.example .env
+```
+
+Edita `.env` para que `DATABASE_URL` apunte a tu PostgreSQL local y reemplaza el secreto JWT de ejemplo. Luego, en una base nueva:
+
+```powershell
+psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE sanjosedb;"
+psql -U postgres -d sanjosedb -v ON_ERROR_STOP=1 -f db/schema.sql
+psql -U postgres -d sanjosedb -v ON_ERROR_STOP=1 -f db/seed.sql
+```
+
+Estos son los nombres de archivo presentes actualmente. Al completar la transición a `001_schema.sql` y `002_seed.sql`, los comandos deberán apuntar a esos nombres.
+
+Con el entorno virtual activo, PostgreSQL preparado y `.env` configurado, inicia la API:
 
 ```powershell
 fastapi dev
 ```
 
-La aplicación se configura en `app.main:app`. La documentación interactiva de FastAPI queda disponible por defecto en `http://localhost:8000/docs`; el esquema OpenAPI está en `http://localhost:8000/openapi.json`.
+El comando `fastapi dev` usa el entrypoint `app.main:app` definido en `pyproject.toml`. Como alternativa, se puede iniciar con `uvicorn app.main:app --reload`.
+
+- Swagger: [http://localhost:8000/docs](http://localhost:8000/docs)
+- OpenAPI: [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json)
+- Health de proceso: `GET /api/v1/health/live` → `{"status":"ok"}`
+- Health de base de datos: `GET /api/v1/health/ready` → `{"status":"ok","database":"ok"}` cuando PostgreSQL responde.
 
 ## 11. Uso del sistema
 
@@ -257,7 +263,7 @@ mypy app
 
 - Mantén las rutas HTTP en `app/routers`, la lógica de negocio en `app/services` y el acceso a datos en `app/repositories`.
 - Usa esquemas Pydantic para validar entradas y definir respuestas, y modelos SQLAlchemy para persistencia.
-- Gestiona cambios de esquema mediante migraciones de Alembic.
+- Gestiona cambios de esquema con `001_schema.sql`, `002_seed.sql` y ALTER numerados re-ejecutables; no uses herramientas de migraciones.
 - Ruff aplica reglas `E`, `F`, `I`, `B` y `UP`, con longitud de línea de 100 caracteres y objetivo Python 3.12.
 - mypy está configurado en modo estricto.
 - No se encontró una convención de formato de commits definida en la configuración del proyecto.
