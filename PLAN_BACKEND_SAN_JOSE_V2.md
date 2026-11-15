@@ -14,7 +14,7 @@
 >
 > **Cambio funcional principal respecto a la versión anterior:** el vale no se registra anticipadamente por Oficina. Se crea junto con su primer despacho, realizado por el grifero. Un mismo vale puede tener múltiples atenciones parciales. Cada atención descuenta exclusivamente los galones realmente despachados del saldo del vale y del saldo de la línea de combustible de la orden. Oficina verifica posteriormente el registro contra el vale físico, sin volver a capturarlo.
 >
-> **Actualización 2.2:** el esquema se mantendrá manualmente en SQL. `db/001_schema.sql` y `db/002_seed.sql` serán la fuente para una instalación nueva; los ALTER numerados serán el puente temporal para bases existentes. No se utilizarán Alembic, Flyway ni herramientas equivalentes. El checkout conserva todavía andamiaje y dependencia Alembic, además de los antiguos `schema.sql`/`seed.sql`; retirarlos y consolidar los scripts manuales queda como trabajo pendiente.
+> **Actualización 2.2:** el esquema se mantendrá manualmente en SQL. `db/001_schema.sql` y `db/002_seed.sql` serán la fuente para una instalación nueva; los ALTER numerados serán el puente temporal para bases existentes. No se utilizarán herramientas automatizadas de migración. El checkout conserva los antiguos `schema.sql`/`seed.sql`; consolidarlos bajo los nombres acordados queda como trabajo pendiente.
 
 ---
 
@@ -596,7 +596,7 @@ backend/
 - `db/001_schema.sql` se actualiza junto con cada cambio de esquema. SQLAlchemy mapea ese esquema, pero no se utiliza para generar ni versionar DDL automáticamente.
 - `db/002_seed.sql` contiene los datos iniciales/demo necesarios para una instalación nueva; no debe sobrescribir usuarios ni credenciales preexistentes.
 - Para una base existente se agrega un ALTER numerado re-ejecutable. Cuando todo el equipo lo haya aplicado, se consolida en `001`/`002`, se elimina el ALTER y se registra su retiro en `db/README.md` y en el commit.
-- No crear ni utilizar Alembic, Flyway u otra herramienta de migraciones. El andamiaje Alembic heredado del checkout debe retirarse como parte de la transición a esta regla.
+- No crear ni utilizar herramientas automatizadas de migración.
 - `storage/ocr_tmp/` es temporal, no persistente y debe estar incluido en `.gitignore`. La aplicación debe eliminar cada archivo temporal incluso cuando OCR falle.
 - `.agents/skills/fastapi/` es documentación local opcional para asistentes/desarrolladores; no debe ser dependencia del backend ni contener secretos.
 - No se incluye `frontend.py`: el frontend Angular se mantiene como aplicación independiente, salvo que una decisión de despliegue futura requiera servir sus archivos estáticos desde FastAPI.
@@ -1842,7 +1842,7 @@ No desarrollar endpoint de impresión ni comparación de períodos. La impresió
 
 ## 21.1. Regla del proyecto
 
-No se utilizarán Alembic, Flyway ni otras herramientas de migraciones. El esquema se mantendrá manualmente en SQL con dos archivos base:
+El esquema se mantendrá manualmente en SQL con dos archivos base, sin herramientas automatizadas de migración:
 
 - `db/001_schema.sql` es siempre la fuente de verdad de la estructura y debe representar el esquema de desarrollo. Todo cambio estructural se incorpora aquí en el mismo cambio de código.
 - `db/002_seed.sql` se actualiza cuando cambien los datos demo o parámetros iniciales, o cuando el esquema agregue columnas `NOT NULL` a tablas que el seed inserta.
@@ -1882,7 +1882,7 @@ No se aceptará un cambio de base de datos si se verifica únicamente el estado 
 - Roles como enum fijo de aplicación; no crear catálogo editable de roles.
 - El seed no debe sobrescribir usuarios ni credenciales preexistentes.
 
-El checkout actual aún tiene `db/schema.sql`, `db/seed.sql` y andamiaje Alembic. La conversión de esos archivos al contrato `001`/`002` y la retirada del andamiaje heredado son tareas pendientes; no se debe seguir creando migraciones Alembic.
+El checkout actual aún tiene `db/schema.sql` y `db/seed.sql`. La conversión de esos archivos al contrato `001`/`002` sigue pendiente.
 
 ## 21.5. Datos históricos
 
@@ -2060,7 +2060,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 **Objetivo:** aplicación ejecutable con configuración, DB, logging y pruebas.  
 **Dependencias:** F0.  
 **RF:** transversal.  
-**Tareas:** crear entorno Python nativo en Windows; configurar FastAPI/Uvicorn, Pydantic Settings, SQLAlchemy, PostgreSQL, scripts SQL manuales, routers `/api/v1`, excepciones, logging, Ruff, Mypy, Pytest y HTTPX; implementar health checks. Retirar el andamiaje Alembic heredado.
+**Tareas:** crear entorno Python nativo en Windows; configurar FastAPI/Uvicorn, Pydantic Settings, SQLAlchemy, PostgreSQL, scripts SQL manuales, routers `/api/v1`, excepciones, logging, Ruff, Mypy, Pytest y HTTPX; implementar health checks.
 **Pruebas:** arranque, conexión DB, configuración inválida y health checks.  
 **Gate:** app inicia y falla de forma controlada cuando PostgreSQL no está disponible.
 
@@ -2167,7 +2167,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F1 | Configurar SQLAlchemy 2.x y Psycopg 3 | [x] |
 | F1 | Configurar PostgreSQL como base de datos objetivo | [x] |
 | F1 | Documentar SQL manual como única política para cambios de esquema | [x] |
-| F1 | Retirar Alembic, su configuración y dependencia heredada | [ ] |
+| F1 | Retirar infraestructura heredada de migraciones automatizadas | [x] |
 | F1 | Crear routers versionados bajo `/api/v1` | [x] |
 | F1 | Crear excepciones y respuestas estándar de error | [x] |
 | F1 | Configurar logging sin información sensible | [x] |

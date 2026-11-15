@@ -52,7 +52,7 @@ El repositorio contiene modelos para sucursales, usuarios, tipos de combustible,
 
 El backend actual no utiliza `asyncpg` ni SQLModel. Tampoco implementa OCR: `RapidOCR` y `pypdfium2` no están entre sus dependencias; las variables `OCR_*` son únicamente parámetros de configuración, sin rutas de OCR expuestas.
 
-La regla vigente del proyecto es mantener el esquema a mano en SQL; no se deben crear ni aplicar migraciones con Alembic, Flyway u otra herramienta. El checkout aún conserva archivos de Alembic y su dependencia, y usa los nombres anteriores `db/schema.sql` y `db/seed.sql`; su conversión al flujo `001_schema.sql` + `002_seed.sql` está pendiente. No uses Alembic para cambios de base de datos.
+La regla vigente es mantener el esquema manualmente en SQL, sin herramientas automatizadas de migración. El checkout todavía usa los nombres anteriores `db/schema.sql` y `db/seed.sql`; la conversión al flujo `001_schema.sql` + `002_seed.sql` sigue pendiente.
 
 ## 4. Arquitectura del proyecto
 
@@ -84,7 +84,6 @@ backend-station/
 │   ├── database.py         # Motor, sesiones y base ORM
 │   ├── main.py             # Aplicación FastAPI
 │   └── tables.py           # Entidades y relaciones SQLAlchemy
-├── alembic/                # Configuración heredada; no usar para cambios de esquema
 ├── db/
 │   ├── schema.sql          # Esquema actual; pendiente de consolidar en 001_schema.sql
 │   └── seed.sql            # Datos demo actuales; pendiente de consolidar en 002_seed.sql
@@ -150,7 +149,7 @@ Desde la sección [Puesta en marcha en Windows](#puesta-en-marcha-en-windows), c
 
 Cada cambio de esquema requiere actualizar `001_schema.sql` en el mismo cambio y, si corresponde, `002_seed.sql`. Para una base que ya tiene datos, agrega además un ALTER numerado (`003_*.sql`, `004_*.sql`, etc.), en orden. El ALTER debe ser re-ejecutable y nunca recrear ni borrar datos. Una vez que todo el equipo lo haya aplicado, consolida el cambio en `001_schema.sql` y/o `002_seed.sql`, elimina el ALTER y deja constancia en el commit y en el historial de [base de datos](db/README.md).
 
-La regla del proyecto permite únicamente esta fuente SQL manual: no uses Alembic, Flyway ni otra herramienta de migraciones. En el checkout actual siguen presentes archivos y dependencias heredados de Alembic; la conversión de nombres y la retirada del andamiaje están pendientes.
+La regla del proyecto es mantener el esquema mediante SQL manual. En el checkout actual todavía se llaman `schema.sql` y `seed.sql`; la conversión a `001_schema.sql` y `002_seed.sql` está pendiente.
 
 Para comprobar la conexión:
 

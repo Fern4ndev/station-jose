@@ -1,5 +1,4 @@
 -- Esquema inicial PostgreSQL para Estación de Servicio San José.
--- Alembic sigue siendo la fuente de migraciones versionadas.
 -- Las unicidades de órdenes (PD-001) y vales (PD-002) quedan pendientes
 -- de aprobación y no se imponen aquí.
 

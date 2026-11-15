@@ -1,6 +1,6 @@
 # Base de datos
 
-PostgreSQL es el motor de persistencia. El esquema se mantiene manualmente en SQL; Alembic, Flyway u otra herramienta de migraciones no forman parte del flujo aprobado.
+PostgreSQL es el motor de persistencia. El esquema se mantiene manualmente en SQL, sin herramientas automatizadas de migración.
 
 ## Regla de cambios
 
@@ -80,6 +80,6 @@ Compare-Object (Get-Content $migrada) (Get-Content $nueva)
 
 ## Estado de transición del checkout
 
-El repositorio todavía contiene `schema.sql`, `seed.sql`, la dependencia y los archivos de configuración de Alembic heredados; aún no contiene `001_schema.sql` ni `002_seed.sql`. La regla manual descrita aquí es la política aprobada para los siguientes cambios. La conversión de esos archivos y la retirada de Alembic siguen pendientes; no uses Alembic para crear o modificar el esquema.
+El checkout actual todavía contiene `schema.sql` y `seed.sql`; aún no contiene `001_schema.sql` ni `002_seed.sql`. La conversión de esos archivos al contrato manual descrito aquí sigue pendiente.
 
 El seed actual contiene datos de demostración para desarrollo. Las cuentas incluidas están deshabilitadas y no tienen credenciales de acceso. El catálogo de combustible de ejemplo no representa un catálogo aprobado por la estación.

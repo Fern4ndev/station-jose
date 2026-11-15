@@ -2003,7 +2003,7 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 |---|---|---|---|
 | F0 | Decisiones funcionales, ER y permisos | FE-0 | RF V2, pendientes, contratos y estructura. |
 | F1 | FastAPI, configuración, health y errores | FE-0/FE-1 | Configuración HTTP y manejo de errores. |
-| F2 | Modelos, scripts SQL manuales y catálogos | FE-0/FE-3 | DTOs, combustibles y formularios de órdenes; el esquema se mantiene con `001_schema.sql`, `002_seed.sql` y ALTER numerados temporales, sin Alembic. |
+| F2 | Modelos, scripts SQL manuales y catálogos | FE-0/FE-3 | DTOs, combustibles y formularios de órdenes; el esquema se mantiene con `001_schema.sql`, `002_seed.sql` y ALTER numerados temporales, sin herramientas automatizadas de migración. |
 | F3 | Login, sesiones, usuarios y RBAC | FE-1/FE-2 | Login, guards, shell y usuarios. |
 | F4 | Órdenes y líneas | FE-3 | Alta, consulta, edición y eliminación de órdenes. |
 | F5 | Vales y atenciones parciales | FE-4/FE-5 | Consulta de vales, primera atención y siguientes atenciones. |

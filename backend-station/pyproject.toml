@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Backend API for Estación de Servicio San José"
 requires-python = ">=3.12"
 dependencies = [
-  "alembic==1.16.5",
   "email-validator==2.2.0",
   "fastapi[standard]==0.116.1",
   "httpx==0.28.1",
