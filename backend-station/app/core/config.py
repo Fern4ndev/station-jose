@@ -23,9 +23,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     TIMEZONE: str = "America/Lima"
 
-    DATABASE_URL: str = (
-        "postgresql+psycopg://user:password@localhost:5432/sanjose"
-    )
+    DATABASE_URL: str = "postgresql+psycopg://user:password@localhost:5432/sanjose"
 
     JWT_SECRET_KEY: SecretStr = SecretStr("development-only-change-me")
     JWT_ALGORITHM: str = "HS256"
@@ -50,11 +48,7 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> list[str]:
-        return [
-            origin.strip()
-            for origin in self.CORS_ORIGINS.split(",")
-            if origin.strip()
-        ]
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
     @property
     def is_production(self) -> bool:

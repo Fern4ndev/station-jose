@@ -17,18 +17,18 @@ INSERT INTO users (
 VALUES
     (
         '20000000-0000-4000-8000-000000000001',
-        'Admin', 'Demo', 'DEMO-ADMIN', 'admin@example.test',
+        'Admin', 'Demo', NULL, 'admin@example.test',
         'seed-disabled-no-login', 'ADMIN', NULL, FALSE
     ),
     (
         '20000000-0000-4000-8000-000000000002',
-        'Oficina', 'Demo', 'DEMO-OFFICE', 'office@example.test',
+        'Oficina', 'Demo', '76548234', 'office@example.test',
         'seed-disabled-no-login', 'OFFICE',
         (SELECT id FROM branches WHERE code = 'SAN_JOSE'), FALSE
     ),
     (
         '20000000-0000-4000-8000-000000000003',
-        'Grifero', 'Demo', 'DEMO-ATTENDANT', 'attendant@example.test',
+        'Grifero', 'Demo', '76548234', 'attendant@example.test',
         'seed-disabled-no-login', 'ATTENDANT',
         (SELECT id FROM branches WHERE code = 'SAN_JOSE'), FALSE
     )

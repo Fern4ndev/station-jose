@@ -19,7 +19,9 @@ def verify_password(password: str, encoded_hash: str) -> bool:
     return password_hash.verify(password, encoded_hash)
 
 
-def create_access_token(*, user_id: UUID, jti: str, expires_at: datetime, settings: Settings) -> str:
+def create_access_token(
+    *, user_id: UUID, jti: str, expires_at: datetime, settings: Settings
+) -> str:
     now = datetime.now(UTC)
     payload = {
         "sub": str(user_id),
@@ -44,10 +46,11 @@ def new_jti() -> str:
 
 
 def decode_access_token(token: str, settings: Settings) -> dict[str, object]:
-    return jwt.decode(
+    payload = jwt.decode(
         token,
         settings.JWT_SECRET_KEY.get_secret_value(),
         algorithms=[settings.JWT_ALGORITHM],
         issuer=settings.JWT_ISSUER,
         options={"require": ["sub", "jti", "iss", "exp"]},
     )
+    return {str(key): value for key, value in payload.items()}

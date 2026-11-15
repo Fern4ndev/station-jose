@@ -14,7 +14,7 @@
 >
 > **Cambio funcional principal respecto a la versión anterior:** el vale no se registra anticipadamente por Oficina. Se crea junto con su primer despacho, realizado por el grifero. Un mismo vale puede tener múltiples atenciones parciales. Cada atención descuenta exclusivamente los galones realmente despachados del saldo del vale y del saldo de la línea de combustible de la orden. Oficina verifica posteriormente el registro contra el vale físico, sin volver a capturarlo.
 >
-> **Actualización 2.2:** el esquema se mantendrá manualmente en SQL. `db/001_schema.sql` y `db/002_seed.sql` serán la fuente para una instalación nueva; los ALTER numerados serán el puente temporal para bases existentes. No se utilizarán herramientas automatizadas de migración. El checkout conserva los antiguos `schema.sql`/`seed.sql`; consolidarlos bajo los nombres acordados queda como trabajo pendiente.
+> **Actualización 2.2:** el esquema se mantiene manualmente en SQL. `db/001_schema.sql` y `db/002_seed.sql` son la fuente para una instalación nueva; los ALTER numerados son el puente temporal para bases existentes. No se utilizan herramientas automatizadas de migración.
 
 ---
 
@@ -1882,7 +1882,7 @@ No se aceptará un cambio de base de datos si se verifica únicamente el estado 
 - Roles como enum fijo de aplicación; no crear catálogo editable de roles.
 - El seed no debe sobrescribir usuarios ni credenciales preexistentes.
 
-El checkout actual aún tiene `db/schema.sql` y `db/seed.sql`. La conversión de esos archivos al contrato `001`/`002` sigue pendiente.
+El checkout utiliza `db/001_schema.sql` y `db/002_seed.sql` como scripts base del esquema manual.
 
 ## 21.5. Datos históricos
 
@@ -2200,12 +2200,12 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F3 | Implementar habilitación y deshabilitación de cuentas | [x] |
 | F3 | Proteger al último Admin activo | [x] |
 | F3 | Probar autorización, revocación, cuentas inactivas e historial | [ ] |
-| F4 | Crear schemas de cabecera y líneas de orden | [ ] |
-| F4 | Implementar registro multi-combustible | [ ] |
-| F4 | Implementar detalle y consulta de órdenes | [ ] |
-| F4 | Implementar búsqueda, filtros, paginación y ordenamiento allowlist | [ ] |
-| F4 | Implementar edición protegida por galones ya despachados | [ ] |
-| F4 | Implementar eliminación solo sin vales | [ ] |
+| F4 | Crear schemas de cabecera y líneas de orden | [x] |
+| F4 | Implementar registro multi-combustible | [x] |
+| F4 | Implementar detalle y consulta de órdenes | [x] |
+| F4 | Implementar búsqueda, filtros, paginación y ordenamiento allowlist | [x] |
+| F4 | Implementar edición protegida por galones ya despachados | [x] |
+| F4 | Implementar eliminación solo sin vales | [x] |
 | F4 | Probar líneas múltiples, duplicados y restricciones | [ ] |
 | F5 | Implementar identidad única del vale | [ ] |
 | F5 | Implementar captura de cabecera y líneas en el primer despacho | [ ] |

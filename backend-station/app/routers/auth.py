@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
 from app.core.dependencies import CurrentUser
+from app.core.permissions import permissions_for_role
 from app.database import get_db
 from app.schemas.auth import CurrentUserResponse, LoginRequest, TokenResponse
 from app.services.auth_service import AuthService
@@ -37,8 +38,5 @@ def logout(
 
 @router.get("/me", response_model=CurrentUserResponse)
 def me(user: CurrentUser) -> CurrentUserResponse:
-    from app.core.permissions import permissions_for_role
-
-    return CurrentUserResponse.model_validate(
-        {**user.__dict__, "permissions": sorted(permissions_for_role(user.role))}
-    )
+    response = CurrentUserResponse.model_validate(user, from_attributes=True)
+    return response.model_copy(update={"permissions": sorted(permissions_for_role(user.role))})

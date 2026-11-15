@@ -1,8 +1,10 @@
 """Common API response schemas."""
 
-from typing import Any
+from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+from app.core.permissions import UserRole
 
 
 class Pagination(BaseModel):
@@ -12,6 +14,27 @@ class Pagination(BaseModel):
     pages: int = Field(ge=0)
 
 
+class BranchSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    code: str
+    name: str
+
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    first_name: str
+    last_name: str
+    dni: str
+    email: EmailStr
+    role: UserRole
+    branch: BranchSummary | None = None
+    is_active: bool
+
+
 class UserListResponse(BaseModel):
-    items: list[Any]
+    items: list[UserResponse]
     pagination: Pagination

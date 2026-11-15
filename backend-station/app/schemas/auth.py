@@ -1,36 +1,13 @@
 """Authentication schemas."""
 
-from uuid import UUID
+from pydantic import BaseModel, EmailStr, Field
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
-
-from app.core.permissions import UserRole
+from app.schemas.common import UserResponse
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-
-
-class BranchSummary(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: UUID
-    code: str
-    name: str
-
-
-class UserResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: UUID
-    first_name: str
-    last_name: str
-    dni: str
-    email: EmailStr
-    role: UserRole
-    branch: BranchSummary | None = None
-    is_active: bool
 
 
 class TokenResponse(BaseModel):

@@ -15,7 +15,9 @@ class AuthSessionRepository:
         db.add(session)
         return session
 
-    def get_active(self, db: Session, *, user_id: UUID, jti: str, now: datetime) -> AuthSession | None:
+    def get_active(
+        self, db: Session, *, user_id: UUID, jti: str, now: datetime
+    ) -> AuthSession | None:
         return db.scalar(
             select(AuthSession).where(
                 AuthSession.user_id == user_id,
@@ -30,7 +32,9 @@ class AuthSessionRepository:
 
     def revoke_all_for_user(self, db: Session, *, user_id: UUID, now: datetime) -> None:
         sessions = db.scalars(
-            select(AuthSession).where(AuthSession.user_id == user_id, AuthSession.revoked_at.is_(None))
+            select(AuthSession).where(
+                AuthSession.user_id == user_id, AuthSession.revoked_at.is_(None)
+            )
         )
         for session in sessions:
             session.revoked_at = now

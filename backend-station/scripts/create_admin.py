@@ -2,12 +2,10 @@
 
 import argparse
 
-from sqlalchemy import select
-
 from app.core.security import hash_password
 from app.database import SessionLocal
 from app.tables import User
-
+from sqlalchemy import select
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

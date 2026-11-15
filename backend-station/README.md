@@ -36,6 +36,8 @@ El repositorio contiene modelos para sucursales, usuarios, tipos de combustible,
 - Administración de usuarios: listado paginado, creación, consulta y actualización de datos, rol y estado.
 - Control de acceso a la administración de usuarios mediante permisos.
 - Comprobaciones de disponibilidad del proceso y de conexión a la base de datos.
+- Catálogos autenticados de sedes y combustibles.
+- Gestión de órdenes de compra con líneas independientes por combustible, filtros, paginación y saldos derivados.
 - Gestión manual del esquema mediante SQL, con scripts para comprobar la base de datos y crear el primer administrador.
 - Configuración de CORS y parámetros operativos mediante variables de entorno.
 
@@ -78,7 +80,7 @@ backend-station/
 │   ├── ai/                 # Espacio reservado; no contiene implementación actualmente
 │   ├── core/               # Configuración, seguridad, permisos, dependencias y errores
 │   ├── repositories/       # Acceso a datos
-│   ├── routers/            # Rutas de salud, autenticación y usuarios
+│   ├── routers/            # Rutas de salud, auth, usuarios, catálogos y órdenes
 │   ├── schemas/            # Modelos de entrada y salida de la API
 │   ├── services/           # Lógica de autenticación y usuarios
 │   ├── database.py         # Motor, sesiones y base ORM
@@ -222,6 +224,13 @@ Las rutas de la API tienen el prefijo `API_V1_PREFIX` (por defecto `/api/v1`).
 | `PATCH` | `/api/v1/users/{user_id}` | Actualiza datos del usuario | Requiere `users.manage` |
 | `PATCH` | `/api/v1/users/{user_id}/role` | Cambia el rol del usuario | Requiere `users.manage` |
 | `PATCH` | `/api/v1/users/{user_id}/status` | Cambia el estado del usuario | Requiere `users.manage` |
+| `GET` | `/api/v1/branches` | Lista sedes activas | Autenticado |
+| `GET` | `/api/v1/fuel-types` | Lista combustibles activos | Autenticado |
+| `GET` | `/api/v1/purchase-orders` | Busca y pagina órdenes | Requiere `purchase_orders.read` |
+| `POST` | `/api/v1/purchase-orders` | Registra una orden multi-combustible | Requiere `purchase_orders.create` |
+| `GET` | `/api/v1/purchase-orders/{order_id}` | Consulta el detalle y saldos derivados | Requiere `purchase_orders.read` |
+| `PATCH` | `/api/v1/purchase-orders/{order_id}` | Actualiza una orden según sus restricciones | Requiere `purchase_orders.update` |
+| `DELETE` | `/api/v1/purchase-orders/{order_id}` | Eliminación lógica sin vales asociados | Requiere `purchase_orders.delete` |
 
 Las rutas protegidas utilizan el encabezado `Authorization: Bearer <token>`. El listado acepta `page` (mínimo 1) y `page_size` (entre 1 y 100; por defecto 20). Los esquemas de solicitud y respuesta están disponibles en `/docs`.
 
@@ -231,7 +240,7 @@ Ejemplo de comprobación de salud:
 curl http://localhost:8000/api/v1/health/live
 ```
 
-Las rutas de órdenes, vales y atenciones no están implementadas en los routers actuales, aunque existen modelos de datos relacionados.
+Las rutas de vales y atenciones todavía no están implementadas; corresponden a las fases F5 y posteriores. Las rutas de órdenes y catálogos de F4 sí están disponibles.
 
 ## 12. Pruebas
 

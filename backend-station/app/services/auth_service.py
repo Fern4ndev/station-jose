@@ -19,6 +19,7 @@ from app.core.security import (
 from app.repositories.auth_session_repository import AuthSessionRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.common import UserResponse
 from app.tables import User
 
 
@@ -51,12 +52,14 @@ class AuthService:
         expires_at = token_expiration(settings)
         jti = new_jti()
         self.sessions.create(db, user_id=user.id, jti=jti, expires_at=expires_at)
-        token = create_access_token(user_id=user.id, jti=jti, expires_at=expires_at, settings=settings)
+        token = create_access_token(
+            user_id=user.id, jti=jti, expires_at=expires_at, settings=settings
+        )
         db.commit()
         return TokenResponse(
             access_token=token,
             expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            user=user,
+            user=UserResponse.model_validate(user, from_attributes=True),
             permissions=sorted(permissions_for_role(user.role)),
         )
 
@@ -79,7 +82,7 @@ class AuthService:
         try:
             payload = decode_access_token(token, settings)
             jti = str(payload["jti"])
-        except Exception as exc:
+        except (PyJWTError, KeyError, TypeError) as exc:
             raise InvalidTokenError("El token no es válido.") from exc
         session = self.sessions.get_active(db, user_id=user.id, jti=jti, now=datetime.now(UTC))
         if session is not None:

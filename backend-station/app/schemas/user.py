@@ -2,10 +2,9 @@
 
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 from app.core.permissions import UserRole
-from app.schemas.auth import BranchSummary
 
 
 class UserCreate(BaseModel):
@@ -42,16 +41,3 @@ class UserRoleUpdate(BaseModel):
         if self.role == UserRole.ATTENDANT and self.branch_id is None:
             raise ValueError("branch_id is required for ATTENDANT users")
         return self
-
-
-class UserResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: UUID
-    first_name: str
-    last_name: str
-    dni: str
-    email: EmailStr
-    role: UserRole
-    branch: BranchSummary | None = None
-    is_active: bool

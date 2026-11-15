@@ -1,9 +1,7 @@
 """Check PostgreSQL connectivity."""
 
-from sqlalchemy import text
-
 from app.database import engine
-
+from sqlalchemy import text
 
 if __name__ == "__main__":
     with engine.connect() as connection:

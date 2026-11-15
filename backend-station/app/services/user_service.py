@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import AppError, ResourceNotFoundError
 from app.core.permissions import UserRole
 from app.core.security import hash_password
-from app.repositories.branch_repository import BranchRepository
 from app.repositories.auth_session_repository import AuthSessionRepository
+from app.repositories.branch_repository import BranchRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserRoleUpdate, UserStatusUpdate, UserUpdate
 from app.tables import User
@@ -52,6 +52,9 @@ class UserService:
             raise DuplicateUserError("El correo o DNI ya está registrado.") from exc
         return user
 
+    def list_users(self, db: Session, *, page: int, page_size: int) -> tuple[list[User], int]:
+        return self.users.list(db, offset=(page - 1) * page_size, limit=page_size)
+
     def update_user(self, db: Session, user_id: UUID, data: UserUpdate) -> User:
         user = self.get_user(db, user_id)
         if data.first_name is not None:
@@ -65,7 +68,9 @@ class UserService:
         user = self.get_user(db, user_id)
         if user.is_active and not data.is_active and user.role == UserRole.ADMIN.value:
             if self.users.count_active_admins(db) <= 1:
-                raise LastActiveAdminError("No se puede deshabilitar el último administrador activo.")
+                raise LastActiveAdminError(
+                    "No se puede deshabilitar el último administrador activo."
+                )
         user.is_active = data.is_active
         if not data.is_active:
             self.sessions.revoke_all_for_user(db, user_id=user.id, now=datetime.now(UTC))
@@ -76,7 +81,9 @@ class UserService:
         user = self.get_user(db, user_id)
         if user.role == UserRole.ADMIN.value and data.role != UserRole.ADMIN:
             if user.is_active and self.users.count_active_admins(db) <= 1:
-                raise LastActiveAdminError("No se puede retirar el rol del último administrador activo.")
+                raise LastActiveAdminError(
+                    "No se puede retirar el rol del último administrador activo."
+                )
         self._validate_branch(db, data.role, data.branch_id)
         user.role = data.role.value
         user.branch_id = data.branch_id
@@ -91,6 +98,8 @@ class UserService:
 
     def _validate_branch(self, db: Session, role: UserRole, branch_id: UUID | None) -> None:
         if role == UserRole.ATTENDANT and branch_id is None:
-            raise AppError("La sede es obligatoria para un grifero.", details={"field": "branch_id"})
+            raise AppError(
+                "La sede es obligatoria para un grifero.", details={"field": "branch_id"}
+            )
         if branch_id is not None and self.branches.get_by_id(db, branch_id) is None:
             raise ResourceNotFoundError("Sede no encontrada.")
