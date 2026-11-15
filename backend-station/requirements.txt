@@ -1,10 +1,22 @@
-email-validator==2.2.0
-fastapi[standard]==0.116.1
+# API y servidor ASGI
+fastapi[standard]==0.141.1
+uvicorn[standard]==0.54.0
+
+# Validación y configuración
+email-validator==2.3.0
+pydantic==2.13.5
+pydantic-settings==2.15.0
+
+# Persistencia síncrona con PostgreSQL
 psycopg[binary]==3.2.9
-pydantic-settings==2.10.1
+sqlalchemy==2.0.43
+
+# Autenticación y seguridad
 pyjwt==2.10.1
 pwdlib[argon2]==0.2.1
-sqlalchemy==2.0.43
+
+# Pruebas y calidad
+httpx==0.28.1
 mypy==1.17.1
 pytest==8.4.1
 ruff==0.12.10

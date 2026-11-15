@@ -1901,27 +1901,27 @@ No importar Excel/PDF existentes ni realizar migración histórica en esta versi
 ## 22.2. `.env.example`
 
 ```env
-APP_NAME="San Jose Fuel Control API"
+APP_NAME=San Jose API
 APP_ENV=development
-DEBUG=true
 API_V1_PREFIX=/api/v1
+CORS_ORIGINS=http://localhost:4200,http://127.0.0.1:4200
+
 TIMEZONE=America/Lima
 
-DATABASE_URL=postgresql+psycopg://user:password@localhost:5432/sanjose
+DATABASE_URL=postgresql+psycopg://postgres:CAMBIAR_EN_LOCAL@localhost:5432/sanjose
+SANJOSE_TEST_DB=postgresql+psycopg://postgres:CAMBIAR_EN_LOCAL@localhost:5432/sanjose_test
 
-JWT_SECRET_KEY=replace-with-a-long-random-secret
+JWT_SECRET_KEY=replace-with-a-long-random-secret-at-least-32-characters
 JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+ACCESS_TOKEN_EXPIRE_MINUTES=120
 JWT_ISSUER=san-jose-api
-
-CORS_ORIGINS=http://localhost:4200
-LOG_LEVEL=INFO
 
 OCR_ENABLED=true
 OCR_MAX_UPLOAD_BYTES=10485760
-OCR_MAX_PDF_PAGES=20
-OCR_TIMEOUT_SECONDS=60
+OCR_MAX_PDF_PAGES=5
+OCR_TIMEOUT_SECONDS=30
 OCR_TEMP_DIR=/tmp/san-jose-ocr
+
 ```
 
 Los límites OCR son valores iniciales propuestos y deben aprobarse con PD-012. No codificar claves reales en el repositorio. Validar configuración al arranque, usar `DEBUG=false` en producción y restringir CORS a dominios conocidos.
