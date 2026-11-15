@@ -1882,7 +1882,7 @@ No se aceptará un cambio de base de datos si se verifica únicamente el estado 
 - Roles como enum fijo de aplicación; no crear catálogo editable de roles.
 - El seed no debe sobrescribir usuarios ni credenciales preexistentes.
 
-El checkout actual aún tiene `db/schema.sql` y `db/seed.sql`. La conversión de esos archivos al contrato `001`/`002` sigue pendiente.
+El checkout utiliza `db/001_schema.sql` y `db/002_seed.sql` como scripts base del esquema manual.
 
 ## 21.5. Datos históricos
 
@@ -2177,17 +2177,17 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F1 | Implementar `GET /api/v1/health/live` | [x] |
 | F1 | Implementar `GET /api/v1/health/ready` con verificación de PostgreSQL | [x] |
 | F1 | Ejecutar prueba de arranque de la aplicación | [x] |
-| F1 | Ejecutar prueba real de conexión a PostgreSQL | [ ] |
-| F1 | Ejecutar prueba de configuración inválida | [ ] |
-| F1 | Ejecutar suite de health checks | [ ] |
-| F1 | Confirmar fallo controlado sin PostgreSQL | [ ] |
+| F1 | Ejecutar prueba real de conexión a PostgreSQL | [x] |
+| F1 | Ejecutar prueba de configuración inválida | [x] |
+| F1 | Ejecutar suite de health checks | [x] |
+| F1 | Confirmar fallo controlado sin PostgreSQL | [x] |
 | F2 | Crear modelos ORM de sedes, usuarios, sesiones y combustibles | [x] |
 | F2 | Crear modelos ORM de órdenes y líneas | [x] |
 | F2 | Crear modelos ORM de vales y líneas | [x] |
 | F2 | Crear modelos ORM de atenciones, líneas y verificaciones | [x] |
 | F2 | Definir relaciones, restricciones, índices y `ON DELETE RESTRICT` | [x] |
-| F2 | Crear `db/001_schema.sql` y `db/002_seed.sql` como fuente base | [ ] |
-| F2 | Consolidar seeds de sedes y combustibles en `db/002_seed.sql` | [ ] |
+| F2 | Crear `db/001_schema.sql` y `db/002_seed.sql` como fuente base | [x] |
+| F2 | Consolidar seeds de sedes y combustibles en `db/002_seed.sql` | [x] |
 | F2 | Crear procedimiento seguro para el primer Admin | [x] |
 | F2 | Probar instalación desde una base vacía usando `001` + `002` | [ ] |
 | F2 | Probar ALTER re-ejecutable y equivalencia con instalación nueva | [ ] |

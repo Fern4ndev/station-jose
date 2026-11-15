@@ -105,7 +105,6 @@ class FuelType(Base):
 class PurchaseOrder(Base):
     __tablename__ = "purchase_orders"
     __table_args__ = (
-        UniqueConstraint("executing_unit_ruc", "order_number", name="uq_purchase_order_identity"),
         Index("ix_purchase_orders_issue_date", "issue_date"),
         Index("ix_purchase_orders_institution_name", "institution_name"),
     )
@@ -134,7 +133,6 @@ class PurchaseOrder(Base):
 class PurchaseOrderItem(Base):
     __tablename__ = "purchase_order_items"
     __table_args__ = (
-        UniqueConstraint("purchase_order_id", "fuel_type_id", name="uq_order_item_fuel"),
         UniqueConstraint("id", "purchase_order_id", name="uq_order_item_composite"),
         CheckConstraint("authorized_gallons > 0", name="ck_order_item_gallons_positive"),
         CheckConstraint("unit_price >= 0", name="ck_order_item_unit_price_nonnegative"),
@@ -160,10 +158,7 @@ class PurchaseOrderItem(Base):
 class Voucher(Base):
     __tablename__ = "vouchers"
     __table_args__ = (
-        UniqueConstraint(
-            "purchase_order_id", "issuer_type", "issuer_normalized", "voucher_number_normalized",
-            name="uq_voucher_institution_identity",
-        ),
+        UniqueConstraint("id", "purchase_order_id", name="uq_voucher_order_composite"),
         Index("ix_vouchers_number_normalized", "voucher_number_normalized"),
         CheckConstraint("issuer_type IN ('INSTITUTION', 'STATION')", name="ck_vouchers_issuer_type"),
     )
@@ -212,7 +207,11 @@ class VoucherItem(Base):
 
 class Attendance(Base):
     __tablename__ = "attendances"
-    __table_args__ = (UniqueConstraint("idempotency_key"), Index("ix_attendances_attended_at", "attended_at"))
+    __table_args__ = (
+        UniqueConstraint("idempotency_key"),
+        UniqueConstraint("id", "voucher_id", name="uq_attendance_voucher_composite"),
+        Index("ix_attendances_attended_at", "attended_at"),
+    )
 
     id: Mapped[UUID] = mapped_column(UUIDType, primary_key=True, default=uuid4)
     voucher_id: Mapped[UUID] = mapped_column(UUIDType, ForeignKey("vouchers.id", ondelete="RESTRICT"), nullable=False)
@@ -234,14 +233,27 @@ class AttendanceItem(Base):
     __tablename__ = "attendance_items"
     __table_args__ = (
         UniqueConstraint("attendance_id", "voucher_item_id", name="uq_attendance_item_voucher_item"),
+        ForeignKeyConstraint(
+            ["attendance_id", "voucher_id"],
+            ["attendances.id", "attendances.voucher_id"],
+            ondelete="RESTRICT",
+            name="fk_attendance_item_attendance_same_voucher",
+        ),
+        ForeignKeyConstraint(
+            ["voucher_item_id", "voucher_id"],
+            ["voucher_items.id", "voucher_items.voucher_id"],
+            ondelete="RESTRICT",
+            name="fk_attendance_item_voucher_item_same_voucher",
+        ),
         CheckConstraint("attended_gallons > 0", name="ck_attendance_item_gallons_positive"),
         CheckConstraint("unit_price_snapshot >= 0", name="ck_attendance_item_unit_price_nonnegative"),
         CheckConstraint("attended_amount >= 0", name="ck_attendance_item_amount_nonnegative"),
     )
 
     id: Mapped[UUID] = mapped_column(UUIDType, primary_key=True, default=uuid4)
-    attendance_id: Mapped[UUID] = mapped_column(UUIDType, ForeignKey("attendances.id", ondelete="RESTRICT"), nullable=False)
-    voucher_item_id: Mapped[UUID] = mapped_column(UUIDType, ForeignKey("voucher_items.id", ondelete="RESTRICT"), nullable=False)
+    attendance_id: Mapped[UUID] = mapped_column(UUIDType, nullable=False)
+    voucher_id: Mapped[UUID] = mapped_column(UUIDType, nullable=False)
+    voucher_item_id: Mapped[UUID] = mapped_column(UUIDType, nullable=False)
     attended_gallons: Mapped[Decimal] = mapped_column(Numeric(14, 3), nullable=False)
     unit_price_snapshot: Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)
     attended_amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)

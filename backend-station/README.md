@@ -52,7 +52,7 @@ El repositorio contiene modelos para sucursales, usuarios, tipos de combustible,
 
 El backend actual no utiliza `asyncpg` ni SQLModel. Tampoco implementa OCR: `RapidOCR` y `pypdfium2` no están entre sus dependencias; las variables `OCR_*` son únicamente parámetros de configuración, sin rutas de OCR expuestas.
 
-La regla vigente es mantener el esquema manualmente en SQL, sin herramientas automatizadas de migración. El checkout todavía usa los nombres anteriores `db/schema.sql` y `db/seed.sql`; la conversión al flujo `001_schema.sql` + `002_seed.sql` sigue pendiente.
+La regla vigente es mantener el esquema manualmente en SQL, sin herramientas automatizadas de migración. El contrato vigente utiliza `db/001_schema.sql` y `db/002_seed.sql`; los cambios para bases existentes se gestionan mediante ALTER numerados.
 
 ## 4. Arquitectura del proyecto
 
@@ -85,8 +85,8 @@ backend-station/
 │   ├── main.py             # Aplicación FastAPI
 │   └── tables.py           # Entidades y relaciones SQLAlchemy
 ├── db/
-│   ├── schema.sql          # Esquema actual; pendiente de consolidar en 001_schema.sql
-│   └── seed.sql            # Datos demo actuales; pendiente de consolidar en 002_seed.sql
+│   ├── 001_schema.sql      # Fuente de verdad del esquema
+│   └── 002_seed.sql        # Datos iniciales/demo para una base nueva
 ├── scripts/                # Utilidades de base de datos y administración
 ├── storage/ocr_tmp/        # Directorio de almacenamiento temporal de OCR
 ├── tests/
@@ -143,13 +143,13 @@ PostgreSQL es el motor de persistencia y SQLAlchemy utiliza el controlador sínc
 
 ### Instalación nueva
 
-Desde la sección [Puesta en marcha en Windows](#puesta-en-marcha-en-windows), crea `sanjose` y aplica los dos scripts SQL que existen actualmente. `schema.sql` define el esquema y `seed.sql` contiene datos iniciales/demo. Ambos se aplican sobre una base vacía; no son scripts para reconstruir una base con datos existentes. La convención aprobada para los siguientes cambios es renombrarlos/consolidarlos como `001_schema.sql` y `002_seed.sql`.
+Desde la sección [Puesta en marcha en Windows](#puesta-en-marcha-en-windows), crea `sanjose` y aplica `001_schema.sql` y `002_seed.sql`. El primer archivo define el esquema y el segundo contiene datos iniciales/demo. Ambos se aplican sobre una base vacía; no son scripts para reconstruir una base con datos existentes.
 
 ### Actualización de una base existente
 
 Cada cambio de esquema requiere actualizar `001_schema.sql` en el mismo cambio y, si corresponde, `002_seed.sql`. Para una base que ya tiene datos, agrega además un ALTER numerado (`003_*.sql`, `004_*.sql`, etc.), en orden. El ALTER debe ser re-ejecutable y nunca recrear ni borrar datos. Una vez que todo el equipo lo haya aplicado, consolida el cambio en `001_schema.sql` y/o `002_seed.sql`, elimina el ALTER y deja constancia en el commit y en el historial de [base de datos](db/README.md).
 
-La regla del proyecto es mantener el esquema mediante SQL manual. En el checkout actual todavía se llaman `schema.sql` y `seed.sql`; la conversión a `001_schema.sql` y `002_seed.sql` está pendiente.
+La regla del proyecto es mantener el esquema mediante SQL manual. Los nombres vigentes son `001_schema.sql` y `002_seed.sql`; las bases existentes se actualizan con ALTER numerados re-ejecutables.
 
 Para comprobar la conexión:
 
@@ -157,9 +157,9 @@ Para comprobar la conexión:
 python scripts/check_db.py
 ```
 
-El catálogo inicial de sucursales y combustibles debe formar parte de `002_seed.sql`. El script Python `scripts/seed_catalogs.py` aún existe en el checkout, pero es legado: no lo uses como sustituto del seed SQL; su retirada o consolidación queda pendiente.
+El catálogo inicial de sedes y combustibles se carga desde `002_seed.sql`. No existe un seed Python alternativo.
 
-El archivo `db/seed.sql` contiene datos de demostración; úsalo únicamente en desarrollo. Las cuentas de demostración están deshabilitadas y no tienen credenciales de acceso, por lo que no hay un usuario de demostración listo para iniciar sesión.
+El archivo `db/002_seed.sql` contiene datos de demostración; úsalo únicamente en desarrollo. Las cuentas de demostración están deshabilitadas y no tienen credenciales de acceso, por lo que no hay un usuario de demostración listo para iniciar sesión.
 
 Para crear el primer usuario administrador, el script requiere los datos por argumentos:
 
@@ -188,11 +188,9 @@ Edita `.env` para que `DATABASE_URL` apunte a tu PostgreSQL local y reemplaza el
 
 ```powershell
 psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE sanjose;"
-psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/schema.sql
-psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/seed.sql
+psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/001_schema.sql
+psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/002_seed.sql
 ```
-
-Estos son los nombres de archivo presentes actualmente. Al completar la transición a `001_schema.sql` y `002_seed.sql`, los comandos deberán apuntar a esos nombres.
 
 Con el entorno virtual activo, PostgreSQL preparado y `.env` configurado, inicia la API:
 

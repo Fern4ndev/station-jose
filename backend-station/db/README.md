@@ -78,8 +78,8 @@ Compare-Object (Get-Content $migrada) (Get-Content $nueva)
 
 `Compare-Object` no debe mostrar diferencias. PostgreSQL 17 añade líneas `\restrict` y `\unrestrict` con tokens distintos en cada dump; por eso se excluyen antes de comparar. Tras comprobar la estructura, ejecuta la suite de pruebas contra la base actualizada y comprueba claves foráneas, restricciones, índices y datos iniciales afectados.
 
-## Estado de transición del checkout
+## Estado actual del checkout
 
-El checkout actual todavía contiene `schema.sql` y `seed.sql`; aún no contiene `001_schema.sql` ni `002_seed.sql`. La conversión de esos archivos al contrato manual descrito aquí sigue pendiente.
+El checkout utiliza `001_schema.sql` y `002_seed.sql` como scripts base. Los cambios para bases existentes se documentan mediante ALTER numerados y se consolidan posteriormente en esos dos archivos.
 
 El seed actual contiene datos de demostración para desarrollo. Las cuentas incluidas están deshabilitadas y no tienen credenciales de acceso. El catálogo de combustible de ejemplo no representa un catálogo aprobado por la estación.
