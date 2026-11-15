@@ -2123,18 +2123,18 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 
 | Fase | Tarea | Estado |
 |---|---|---|
-| F0 | Aprobar identidad única de órdenes y vales | [ ] |
-| F0 | Aprobar catálogo de combustibles | [ ] |
-| F0 | Aprobar asociación de vale a una o varias líneas | [ ] |
-| F0 | Aprobar reglas de cantidades decimales, redondeos y zona horaria | [ ] |
-| F0 | Aprobar política de despachos parciales | [ ] |
-| F0 | Definir sede del usuario y contexto de atención | [ ] |
-| F0 | Aprobar verificación, observaciones y corrección de despachos | [ ] |
-| F0 | Definir datos confidenciales y límites OCR | [ ] |
-| F0 | Definir columnas de reportes | [ ] |
-| F0 | Documentar ADR, ER lógico y matriz de permisos | [ ] |
-| F0 | Ejecutar escenarios de aceptación 10/5, 10/10 y múltiples combustibles | [ ] |
-| F1 | Crear entorno Python y estructura ejecutable | [ ] |
+| F0 | Aprobar identidad única de órdenes y vales | [x] |
+| F0 | Aprobar catálogo de combustibles | [x] |
+| F0 | Aprobar asociación de vale a una o varias líneas | [x] |
+| F0 | Aprobar reglas de cantidades decimales, redondeos y zona horaria | [x] |
+| F0 | Aprobar política de despachos parciales | [x] |
+| F0 | Definir sede del usuario y contexto de atención | [x] |
+| F0 | Aprobar verificación, observaciones y corrección de despachos | [x] |
+| F0 | Definir datos confidenciales y límites OCR | [x] |
+| F0 | Definir columnas de reportes | [x] |
+| F0 | Documentar ADR, ER lógico y matriz de permisos | [x] |
+| F0 | Ejecutar escenarios de aceptación 10/5, 10/10 y múltiples combustibles | [x] |
+| F1 | Crear entorno Python y estructura ejecutable | [x] |
 | F1 | Configurar FastAPI y comando `fastapi dev` | [x] |
 | F1 | Configurar Pydantic Settings y `.env.example` | [x] |
 | F1 | Configurar SQLAlchemy 2.x y Psycopg 3 | [x] |
@@ -2148,7 +2148,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F1 | Configurar Pytest y HTTPX | [x] |
 | F1 | Implementar `GET /api/v1/health/live` | [x] |
 | F1 | Implementar `GET /api/v1/health/ready` con verificación de PostgreSQL | [x] |
-| F1 | Ejecutar prueba de arranque de la aplicación | [ ] |
+| F1 | Ejecutar prueba de arranque de la aplicación | [x] |
 | F1 | Ejecutar prueba real de conexión a PostgreSQL | [ ] |
 | F1 | Ejecutar prueba de configuración inválida | [ ] |
 | F1 | Ejecutar suite de health checks | [ ] |
