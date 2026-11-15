@@ -29,6 +29,8 @@ CREATE TABLE users (
     CONSTRAINT users_role_check CHECK (role IN ('ADMIN', 'OFFICE', 'ATTENDANT')),
     CONSTRAINT users_attendant_branch_check
         CHECK (role <> 'ATTENDANT' OR branch_id IS NOT NULL),
+    CONSTRAINT users_office_branch_check
+        CHECK (role <> 'OFFICE' OR branch_id IS NULL),
     CONSTRAINT users_first_name_not_blank CHECK (btrim(first_name) <> ''),
     CONSTRAINT users_last_name_not_blank CHECK (btrim(last_name) <> ''),
     CONSTRAINT users_dni_not_blank CHECK (btrim(dni) <> ''),

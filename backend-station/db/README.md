@@ -13,6 +13,8 @@ Ambos se ejecutan sobre una base vacía. `001_schema.sql` y `002_seed.sql` no ti
 
 Para una base que ya contiene datos, agrega además un ALTER numerado por cada cambio (`003_*.sql`, `004_*.sql`, etc.) y aplícalos en orden. Cada ALTER debe ser re-ejecutable y nunca recrear ni borrar datos. Usa, según corresponda, `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `DROP CONSTRAINT IF EXISTS` o bloques `DO $$ ... EXCEPTION WHEN duplicate_object THEN NULL; END $$`.
 
+`003_office_users_without_branch.sql` es la migración de este cambio: deja `branch_id` en `NULL` para usuarios `OFFICE` existentes y agrega la restricción que impide volver a asignarles una sede.
+
 Cuando todo el equipo haya aplicado el ALTER:
 
 1. Consolida sus cambios en `001_schema.sql` y, si aplica, `002_seed.sql`.

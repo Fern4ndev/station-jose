@@ -20,6 +20,8 @@ class UserCreate(BaseModel):
     def validate_branch(self) -> "UserCreate":
         if self.role == UserRole.ATTENDANT and self.branch_id is None:
             raise ValueError("branch_id is required for ATTENDANT users")
+        if self.role == UserRole.OFFICE and self.branch_id is not None:
+            raise ValueError("branch_id must be omitted for OFFICE users")
         return self
 
 
@@ -40,4 +42,6 @@ class UserRoleUpdate(BaseModel):
     def validate_branch(self) -> "UserRoleUpdate":
         if self.role == UserRole.ATTENDANT and self.branch_id is None:
             raise ValueError("branch_id is required for ATTENDANT users")
+        if self.role == UserRole.OFFICE and self.branch_id is not None:
+            raise ValueError("branch_id must be omitted for OFFICE users")
         return self

@@ -101,5 +101,10 @@ class UserService:
             raise AppError(
                 "La sede es obligatoria para un grifero.", details={"field": "branch_id"}
             )
+        if role == UserRole.OFFICE and branch_id is not None:
+            raise AppError(
+                "Los usuarios de oficina no se asignan a una sede.",
+                details={"field": "branch_id"},
+            )
         if branch_id is not None and self.branches.get_by_id(db, branch_id) is None:
             raise ResourceNotFoundError("Sede no encontrada.")

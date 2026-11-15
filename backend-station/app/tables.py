@@ -53,6 +53,11 @@ class User(Base):
         UniqueConstraint("dni"),
         UniqueConstraint("email"),
         CheckConstraint("role IN ('ADMIN', 'OFFICE', 'ATTENDANT')", name="ck_users_role"),
+        CheckConstraint(
+            "role <> 'ATTENDANT' OR branch_id IS NOT NULL",
+            name="ck_users_attendant_branch",
+        ),
+        CheckConstraint("role <> 'OFFICE' OR branch_id IS NULL", name="ck_users_office_branch"),
     )
 
     id: Mapped[UUID] = mapped_column(UUIDType, primary_key=True, default=uuid4)

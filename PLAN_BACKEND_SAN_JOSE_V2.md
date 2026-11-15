@@ -792,7 +792,7 @@ Seeds iniciales: `SAN_JOSE` y `SANTA_MARTA`. No crear CRUD de sedes, porque no e
 | `email` | VARCHAR(254) | NOT NULL, UNIQUE | Correo/login. |
 | `password_hash` | VARCHAR(255) | NOT NULL | Hash Argon2. |
 | `role` | VARCHAR(20) | NOT NULL, CHECK | `ADMIN`, `OFFICE`, `ATTENDANT`. |
-| `branch_id` | UUID | FK, NULL según rol | Sede habitual; obligatoria para Grifero según la propuesta. |
+| `branch_id` | UUID | FK, NULL según rol | Sede habitual; obligatoria para Grifero y nula para usuarios de oficina. |
 | `is_active` | BOOLEAN | NOT NULL, DEFAULT TRUE | Habilitación. |
 | `created_at` | TIMESTAMPTZ | NOT NULL | Alta. |
 | `updated_at` | TIMESTAMPTZ | NOT NULL | Modificación. |
