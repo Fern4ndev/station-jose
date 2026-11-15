@@ -55,7 +55,7 @@ class AuthService:
         db.commit()
         return TokenResponse(
             access_token=token,
-            expires_in=settings.access_token_expire_minutes * 60,
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             user=user,
             permissions=sorted(permissions_for_role(user.role)),
         )

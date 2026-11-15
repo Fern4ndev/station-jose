@@ -118,22 +118,22 @@ La configuración se lee de variables de entorno o de un archivo `.env` en el di
 
 | Variable | Descripción | Ejemplo |
 | --- | --- | --- |
-| `APP_NAME` | Nombre de la aplicación | `San Jose Fuel Control API` |
+| `APP_NAME` | Nombre de la aplicación | `San Jose API` |
 | `APP_ENV` | Entorno: `development`, `testing` o `production` | `development` |
 | `DEBUG` | Activa el modo de depuración | `false` |
 | `API_V1_PREFIX` | Prefijo de las rutas versionadas | `/api/v1` |
 | `TIMEZONE` | Zona horaria configurada | `America/Lima` |
-| `DATABASE_URL` | URL de conexión SQLAlchemy a PostgreSQL | `postgresql+psycopg://usuario:clave-local@localhost:5432/sanjosedb` |
+| `DATABASE_URL` | URL de conexión SQLAlchemy a PostgreSQL | `postgresql+psycopg://postgres:CAMBIAR_EN_LOCAL@localhost:5432/sanjose` |
 | `JWT_SECRET_KEY` | Secreto de firma JWT | `reemplazar-por-un-secreto-aleatorio-de-32-caracteres` |
 | `JWT_ALGORITHM` | Algoritmo JWT | `HS256` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Duración del token de acceso, entre 1 y 1440 minutos | `30` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Duración del token de acceso, entre 1 y 1440 minutos | `120` |
 | `JWT_ISSUER` | Emisor declarado en el token | `san-jose-api` |
-| `CORS_ORIGINS` | Orígenes permitidos, separados por comas | `http://localhost:4200` |
+| `CORS_ORIGINS` | Orígenes permitidos, separados por comas | `http://localhost:4200,http://127.0.0.1:4200` |
 | `LOG_LEVEL` | Nivel de registro: `DEBUG`, `INFO`, `WARNING`, `ERROR` o `CRITICAL` | `INFO` |
 | `OCR_ENABLED` | Indicador de configuración de OCR | `true` |
 | `OCR_MAX_UPLOAD_BYTES` | Límite configurado de carga en bytes | `10485760` |
-| `OCR_MAX_PDF_PAGES` | Máximo configurado de páginas PDF | `20` |
-| `OCR_TIMEOUT_SECONDS` | Tiempo límite configurado para OCR | `60` |
+| `OCR_MAX_PDF_PAGES` | Máximo configurado de páginas PDF | `5` |
+| `OCR_TIMEOUT_SECONDS` | Tiempo límite configurado para OCR | `30` |
 | `OCR_TEMP_DIR` | Directorio temporal configurado para OCR | `/tmp/san-jose-ocr` |
 
 Los parámetros OCR están disponibles en la configuración, pero actualmente no hay rutas de OCR expuestas por la API.
@@ -144,7 +144,7 @@ PostgreSQL es el motor de persistencia y SQLAlchemy utiliza el controlador sínc
 
 ### Instalación nueva
 
-Desde la sección [Puesta en marcha en Windows](#puesta-en-marcha-en-windows), crea `sanjosedb` y aplica los dos scripts SQL que existen actualmente. `schema.sql` define el esquema y `seed.sql` contiene datos iniciales/demo. Ambos se aplican sobre una base vacía; no son scripts para reconstruir una base con datos existentes. La convención aprobada para los siguientes cambios es renombrarlos/consolidarlos como `001_schema.sql` y `002_seed.sql`.
+Desde la sección [Puesta en marcha en Windows](#puesta-en-marcha-en-windows), crea `sanjose` y aplica los dos scripts SQL que existen actualmente. `schema.sql` define el esquema y `seed.sql` contiene datos iniciales/demo. Ambos se aplican sobre una base vacía; no son scripts para reconstruir una base con datos existentes. La convención aprobada para los siguientes cambios es renombrarlos/consolidarlos como `001_schema.sql` y `002_seed.sql`.
 
 ### Actualización de una base existente
 
@@ -188,9 +188,9 @@ Copy-Item .env.example .env
 Edita `.env` para que `DATABASE_URL` apunte a tu PostgreSQL local y reemplaza el secreto JWT de ejemplo. Luego, en una base nueva:
 
 ```powershell
-psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE sanjosedb;"
-psql -U postgres -d sanjosedb -v ON_ERROR_STOP=1 -f db/schema.sql
-psql -U postgres -d sanjosedb -v ON_ERROR_STOP=1 -f db/seed.sql
+psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE sanjose;"
+psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/schema.sql
+psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/seed.sql
 ```
 
 Estos son los nombres de archivo presentes actualmente. Al completar la transición a `001_schema.sql` y `002_seed.sql`, los comandos deberán apuntar a esos nombres.

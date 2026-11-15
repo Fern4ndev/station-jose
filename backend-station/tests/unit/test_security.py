@@ -35,4 +35,4 @@ def test_access_token_contains_required_claims() -> None:
     payload = decode_access_token(token, settings)
 
     assert payload["jti"] == jti
-    assert payload["iss"] == settings.jwt_issuer
+    assert payload["iss"] == settings.JWT_ISSUER

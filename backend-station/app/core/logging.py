@@ -25,7 +25,7 @@ def configure_logging(settings: Settings) -> None:
                 },
             },
             "root": {
-                "level": settings.log_level,
+                "level": settings.LOG_LEVEL,
                 "handlers": ["console"],
             },
         }
