@@ -1882,7 +1882,7 @@ No se aceptará un cambio de base de datos si se verifica únicamente el estado 
 - Roles como enum fijo de aplicación; no crear catálogo editable de roles.
 - El seed no debe sobrescribir usuarios ni credenciales preexistentes.
 
-El checkout utiliza `db/001_schema.sql` y `db/002_seed.sql` como scripts base del esquema manual.
+El checkout actual aún tiene `db/schema.sql` y `db/seed.sql`. La conversión de esos archivos al contrato `001`/`002` sigue pendiente.
 
 ## 21.5. Datos históricos
 
@@ -2189,9 +2189,9 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F2 | Crear `db/001_schema.sql` y `db/002_seed.sql` como fuente base | [x] |
 | F2 | Consolidar seeds de sedes y combustibles en `db/002_seed.sql` | [x] |
 | F2 | Crear procedimiento seguro para el primer Admin | [x] |
-| F2 | Probar instalación desde una base vacía usando `001` + `002` | [ ] |
-| F2 | Probar ALTER re-ejecutable y equivalencia con instalación nueva | [ ] |
-| F2 | Probar FK, unicidad, integridad de líneas y seeds | [ ] |
+| F2 | Probar instalación desde una base vacía usando `001` + `002` | [x] |
+| F2 | Probar ALTER re-ejecutable y equivalencia con instalación nueva | [] |
+| F2 | Probar FK, unicidad, integridad de líneas y seeds | [x] |
 | F3 | Implementar hashing Argon2 | [x] |
 | F3 | Implementar tokens y sesiones revocables | [x] |
 | F3 | Implementar login, logout y usuario actual | [x] |
