@@ -2199,22 +2199,22 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F3 | Implementar schemas y servicios de usuario | [x] |
 | F3 | Implementar habilitación y deshabilitación de cuentas | [x] |
 | F3 | Proteger al último Admin activo | [x] |
-| F3 | Probar autorización, revocación, cuentas inactivas e historial | [ ] |
+| F3 | Probar autorización, revocación, cuentas inactivas e historial | [x] |
 | F4 | Crear schemas de cabecera y líneas de orden | [x] |
 | F4 | Implementar registro multi-combustible | [x] |
 | F4 | Implementar detalle y consulta de órdenes | [x] |
 | F4 | Implementar búsqueda, filtros, paginación y ordenamiento allowlist | [x] |
 | F4 | Implementar edición protegida por galones ya despachados | [x] |
 | F4 | Implementar eliminación solo sin vales | [x] |
-| F4 | Probar líneas múltiples, duplicados y restricciones | [ ] |
-| F5 | Implementar identidad única del vale | [ ] |
-| F5 | Implementar captura de cabecera y líneas en el primer despacho | [ ] |
-| F5 | Implementar atención inicial atómica | [ ] |
-| F5 | Implementar atenciones parciales posteriores | [ ] |
-| F5 | Implementar múltiples combustibles y saldos independientes por línea | [ ] |
-| F5 | Implementar transacciones y `SELECT FOR UPDATE` | [ ] |
-| F5 | Implementar idempotencia | [ ] |
-| F5 | Implementar estados derivados y contexto de sede/usuario | [ ] |
+| F4 | Probar líneas múltiples, duplicados y restricciones | [x] |
+| F5 | Implementar identidad única del vale | [x] |
+| F5 | Implementar captura de cabecera y líneas en el primer despacho | [x] |
+| F5 | Implementar atención inicial atómica | [x] |
+| F5 | Implementar atenciones parciales posteriores | [x] |
+| F5 | Implementar múltiples combustibles y saldos independientes por línea | [x] |
+| F5 | Implementar transacciones y `SELECT FOR UPDATE` | [x] |
+| F5 | Implementar idempotencia | [x] |
+| F5 | Implementar estados derivados y contexto de sede/usuario | [x] |
 | F5 | Ejecutar TC-001 a TC-011 | [ ] |
 | F5 | Probar concurrencia, reintentos y consumos parciales/completos | [ ] |
 | F6 | Implementar bandeja pendiente de verificación | [ ] |

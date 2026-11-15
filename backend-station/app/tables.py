@@ -191,6 +191,12 @@ class Voucher(Base):
     __tablename__ = "vouchers"
     __table_args__ = (
         UniqueConstraint("id", "purchase_order_id", name="uq_voucher_order_composite"),
+        UniqueConstraint(
+            "purchase_order_id",
+            "issuer_normalized",
+            "voucher_number_normalized",
+            name="uq_voucher_identity",
+        ),
         Index("ix_vouchers_number_normalized", "voucher_number_normalized"),
         CheckConstraint(
             "issuer_type IN ('INSTITUTION', 'STATION')", name="ck_vouchers_issuer_type"

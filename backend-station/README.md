@@ -231,6 +231,10 @@ Las rutas de la API tienen el prefijo `API_V1_PREFIX` (por defecto `/api/v1`).
 | `GET` | `/api/v1/purchase-orders/{order_id}` | Consulta el detalle y saldos derivados | Requiere `purchase_orders.read` |
 | `PATCH` | `/api/v1/purchase-orders/{order_id}` | Actualiza una orden según sus restricciones | Requiere `purchase_orders.update` |
 | `DELETE` | `/api/v1/purchase-orders/{order_id}` | Eliminación lógica sin vales asociados | Requiere `purchase_orders.delete` |
+| `POST` | `/api/v1/purchase-orders/{order_id}/attendances` | Crea el vale y su primera atención atómica | Requiere `attendances.create` |
+| `POST` | `/api/v1/vouchers/{voucher_id}/attendances` | Registra una atención parcial posterior | Requiere `attendances.create` |
+| `GET` | `/api/v1/vouchers` | Lista y filtra vales paginados | Requiere `vouchers.read` |
+| `GET` | `/api/v1/vouchers/{voucher_id}` | Consulta el vale, sus saldos y atenciones | Requiere `vouchers.read` |
 
 Las rutas protegidas utilizan el encabezado `Authorization: Bearer <token>`. El listado acepta `page` (mínimo 1) y `page_size` (entre 1 y 100; por defecto 20). Los esquemas de solicitud y respuesta están disponibles en `/docs`.
 
@@ -240,7 +244,7 @@ Ejemplo de comprobación de salud:
 curl http://localhost:8000/api/v1/health/live
 ```
 
-Las rutas de vales y atenciones todavía no están implementadas; corresponden a las fases F5 y posteriores. Las rutas de órdenes y catálogos de F4 sí están disponibles.
+Para crear una atención se requiere el encabezado `Idempotency-Key` con un UUID. La primera atención recibe los datos descriptivos del vale y líneas referenciadas a la orden; las siguientes reciben `voucher_item_id`. Los saldos y estados se derivan de los despachos persistidos y no se aceptan desde el cliente.
 
 ## 12. Pruebas
 

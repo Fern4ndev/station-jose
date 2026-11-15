@@ -123,6 +123,8 @@ CREATE TABLE vouchers (
     CONSTRAINT vouchers_number_normalized_not_blank
         CHECK (btrim(voucher_number_normalized) <> ''),
     CONSTRAINT vouchers_id_order_unique UNIQUE (id, purchase_order_id),
+    CONSTRAINT vouchers_identity_unique
+        UNIQUE (purchase_order_id, issuer_normalized, voucher_number_normalized),
     CONSTRAINT vouchers_purchase_order_fk
         FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders (id) ON DELETE RESTRICT
 );
