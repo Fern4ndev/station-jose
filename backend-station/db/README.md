@@ -37,16 +37,16 @@ Cuando todo el equipo haya aplicado el ALTER:
 Desde `backend-station`, con PostgreSQL 17 instalado y `psql` disponible:
 
 ```powershell
-createdb -U postgres sanjosedb
-psql -U postgres -d sanjosedb -v ON_ERROR_STOP=1 -f db/001_schema.sql
-psql -U postgres -d sanjosedb -v ON_ERROR_STOP=1 -f db/002_seed.sql
+createdb -U postgres sanjose
+psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/001_schema.sql
+psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/002_seed.sql
 ```
 
 Para una base existente, aplica solo el ALTER pendiente. Ejecútalo dos veces en la base de prueba para comprobar que es re-ejecutable, por ejemplo:
 
 ```powershell
-psql -U postgres -d sanjosedb -v ON_ERROR_STOP=1 -f db/003_nombre_del_cambio.sql
-psql -U postgres -d sanjosedb -v ON_ERROR_STOP=1 -f db/003_nombre_del_cambio.sql
+psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/003_nombre_del_cambio.sql
+psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/003_nombre_del_cambio.sql
 ```
 
 ## Comprobación del contrato de esquema
@@ -63,12 +63,12 @@ Los DDL deben coincidir. En PowerShell, genera los dos dumps y compara su conten
 $migrada = Join-Path $env:TEMP "schema-migrada.sql"
 $nueva = Join-Path $env:TEMP "schema-nueva.sql"
 
-pg_dump -U postgres -d sanjosedb_migrada --schema-only --no-owner --no-acl |
+pg_dump -U postgres -d sanjose_migrada --schema-only --no-owner --no-acl |
   Select-String -NotMatch '^\\(?:un)?restrict' |
   ForEach-Object { $_.Line } |
   Set-Content -Path $migrada -Encoding UTF8
 
-pg_dump -U postgres -d sanjosedb_nueva --schema-only --no-owner --no-acl |
+pg_dump -U postgres -d sanjose_nueva --schema-only --no-owner --no-acl |
   Select-String -NotMatch '^\\(?:un)?restrict' |
   ForEach-Object { $_.Line } |
   Set-Content -Path $nueva -Encoding UTF8

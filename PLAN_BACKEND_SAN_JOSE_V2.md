@@ -1907,7 +1907,7 @@ DEBUG=true
 API_V1_PREFIX=/api/v1
 TIMEZONE=America/Lima
 
-DATABASE_URL=postgresql+psycopg://user:password@localhost:5432/san_jose_db
+DATABASE_URL=postgresql+psycopg://user:password@localhost:5432/sanjose
 
 JWT_SECRET_KEY=replace-with-a-long-random-secret
 JWT_ALGORITHM=HS256
