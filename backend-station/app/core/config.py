@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 from typing import Annotated, Literal
+from urllib.parse import urlparse
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -38,6 +39,7 @@ class Settings(BaseSettings):
     OCR_MAX_PDF_PAGES: Annotated[int, Field(gt=0)] = 20
     OCR_TIMEOUT_SECONDS: Annotated[int, Field(gt=0)] = 60
     OCR_TEMP_DIR: str = "/tmp/san-jose-ocr"
+    REPORT_MAX_EXPORT_ROWS: Annotated[int, Field(gt=0)] = 10_000
 
     @field_validator("API_V1_PREFIX")
     @classmethod
@@ -56,8 +58,19 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production_secret(self) -> "Settings":
-        if self.is_production and len(self.JWT_SECRET_KEY.get_secret_value()) < 32:
+        if not self.is_production:
+            return self
+        if len(self.JWT_SECRET_KEY.get_secret_value()) < 32:
             raise ValueError("JWT_SECRET_KEY must contain at least 32 characters in production")
+        if self.DEBUG:
+            raise ValueError("DEBUG must be false in production")
+        origins = self.cors_origins
+        if not origins or "*" in origins:
+            raise ValueError("CORS_ORIGINS must contain explicit origins in production")
+        for origin in origins:
+            parsed = urlparse(origin)
+            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+                raise ValueError("CORS_ORIGINS contains an invalid origin")
         return self
 
 

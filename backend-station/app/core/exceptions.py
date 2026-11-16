@@ -78,3 +78,23 @@ class InvalidVerificationError(AppError):
 class InvalidReportFilterError(AppError):
     status_code = 422
     code = "INVALID_REPORT_FILTER"
+
+
+class OcrDisabledError(AppError):
+    status_code = 503
+    code = "OCR_DISABLED"
+
+
+class InvalidPdfError(AppError):
+    status_code = 422
+    code = "INVALID_PDF"
+
+
+class OcrProcessingError(AppError):
+    status_code = 422
+    code = "OCR_PROCESSING_ERROR"
+
+
+class OcrTimeoutError(AppError):
+    status_code = 408
+    code = "OCR_TIMEOUT"

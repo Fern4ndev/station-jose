@@ -2232,19 +2232,19 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F7 | Implementar exportación ReportLab/openpyxl | [x] |
 | F7 | Aplicar restricciones de datos sensibles por rol | [x] |
 | F7 | Probar agregaciones, timezone, filtros y exportaciones | [ ] |
-| F8 | Implementar upload temporal y detección MIME | [ ] |
-| F8 | Implementar extracción y renderizado PDF con PyMuPDF | [ ] |
-| F8 | Integrar RapidOCR | [ ] |
-| F8 | Normalizar campos y devolver resultados parciales | [ ] |
-| F8 | Limpiar temporales incluso ante errores | [ ] |
-| F8 | Mantener revisión humana y captura manual alternativa | [ ] |
+| F8 | Implementar upload temporal y detección MIME | [x] |
+| F8 | Implementar extracción y renderizado PDF con PyMuPDF | [x] |
+| F8 | Integrar RapidOCR | [x] |
+| F8 | Normalizar campos y devolver resultados parciales | [x] |
+| F8 | Limpiar temporales incluso ante errores | [x] |
+| F8 | Mantener revisión humana y captura manual alternativa | [x] |
 | F8 | Probar PDF legible, escaneado, corrupto, protegido, grande y multipágina | [ ] |
 | F9 | Ejecutar pruebas E2E de los flujos habilitados | [ ] |
 | F9 | Ejecutar pruebas simultáneas y de permisos | [ ] |
-| F9 | Revisar límites OCR y exportaciones | [ ] |
+| F9 | Revisar límites OCR y exportaciones | [x] |
 | F9 | Probar ALTER desde una copia reciente y comparar con una base nueva | [ ] |
 | F9 | Configurar backups, HTTPS y CORS de producción | [ ] |
-| F9 | Validar OpenAPI y guía de operación | [ ] |
+| F9 | Validar OpenAPI y guía de operación | [x] |
 | F9 | Ejecutar prueba de restauración y registrar evidencias | [ ] |
 | F9 | Confirmar despliegue reproducible sin Docker | [ ] |
 

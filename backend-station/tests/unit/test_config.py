@@ -12,6 +12,16 @@ def test_production_rejects_short_jwt_secret() -> None:
         Settings(APP_ENV="production", JWT_SECRET_KEY="too-short")
 
 
+def test_production_rejects_debug_and_wildcard_cors() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            APP_ENV="production",
+            JWT_SECRET_KEY="a" * 32,
+            DEBUG=True,
+            CORS_ORIGINS="*",
+        )
+
+
 def test_cors_origins_accept_comma_separated_values() -> None:
     settings = Settings(CORS_ORIGINS="http://localhost:4200, https://example.test")
 

@@ -52,7 +52,7 @@ El repositorio contiene modelos para sucursales, usuarios, tipos de combustible,
 | Autenticación y seguridad | PyJWT y pwdlib con Argon2 |
 | Pruebas y calidad | pytest, Ruff y mypy |
 
-El backend actual no utiliza `asyncpg` ni SQLModel. Tampoco implementa OCR: `RapidOCR` y `pypdfium2` no están entre sus dependencias; las variables `OCR_*` son únicamente parámetros de configuración, sin rutas de OCR expuestas.
+El backend actual no utiliza `asyncpg` ni SQLModel. F8 incorpora `PyMuPDF`, `numpy` y `RapidOCR` para generar previsualizaciones OCR de órdenes PDF. El OCR no guarda órdenes automáticamente; los campos devueltos deben ser revisados y confirmados mediante el flujo normal de órdenes.
 
 La regla vigente es mantener el esquema manualmente en SQL, sin herramientas automatizadas de migración. El contrato vigente utiliza `db/001_schema.sql` y `db/002_seed.sql`; los cambios para bases existentes se gestionan mediante ALTER numerados.
 
@@ -91,6 +91,7 @@ backend-station/
 │   └── 002_seed.sql        # Datos iniciales/demo para una base nueva
 ├── scripts/                # Utilidades de base de datos y administración
 ├── storage/ocr_tmp/        # Directorio de almacenamiento temporal de OCR
+├── docs/OPERATIONS.md      # Guía operativa de despliegue, backup y restauración
 ├── tests/
 │   ├── api/                # Pruebas de contrato y salud de la API
 │   ├── concurrency/        # Espacio para pruebas de concurrencia
@@ -133,11 +134,12 @@ La configuración se lee de variables de entorno o de un archivo `.env` en el di
 | `LOG_LEVEL` | Nivel de registro: `DEBUG`, `INFO`, `WARNING`, `ERROR` o `CRITICAL` | `INFO` |
 | `OCR_ENABLED` | Indicador de configuración de OCR | `true` |
 | `OCR_MAX_UPLOAD_BYTES` | Límite configurado de carga en bytes | `10485760` |
-| `OCR_MAX_PDF_PAGES` | Máximo configurado de páginas PDF | `5` |
-| `OCR_TIMEOUT_SECONDS` | Tiempo límite configurado para OCR | `30` |
+| `OCR_MAX_PDF_PAGES` | Máximo configurado de páginas PDF | `20` |
+| `OCR_TIMEOUT_SECONDS` | Tiempo límite configurado para OCR | `60` |
 | `OCR_TEMP_DIR` | Directorio temporal configurado para OCR | `/tmp/san-jose-ocr` |
+| `REPORT_MAX_EXPORT_ROWS` | Máximo de filas por archivo exportado | `10000` |
 
-Los parámetros OCR están disponibles en la configuración, pero actualmente no hay rutas de OCR expuestas por la API.
+La ruta `POST /api/v1/ocr/purchase-order-previews` procesa únicamente PDF de órdenes y devuelve una previsualización. El archivo se almacena temporalmente y se elimina al terminar; el OCR nunca crea una orden automáticamente. Si un campo no puede reconocerse, se devuelve en `unrecognized_fields` para completar el formulario manualmente.
 
 ## 9. Base de datos
 
@@ -239,6 +241,7 @@ Las rutas de la API tienen el prefijo `API_V1_PREFIX` (por defecto `/api/v1`).
 | `POST` | `/api/v1/attendances/{attendance_id}/verifications` | Verifica u observa una atención | Requiere `vouchers.verify` |
 | `PATCH` | `/api/v1/vouchers/{voucher_id}/descriptive-data` | Corrige datos descriptivos del vale | Requiere `vouchers.correct_descriptive` |
 | `DELETE` | `/api/v1/vouchers/{voucher_id}` | Rechaza el borrado de vales con historial | Requiere `vouchers.delete` |
+| `POST` | `/api/v1/ocr/purchase-order-previews` | Extrae campos candidatos de un PDF sin guardar la orden | Requiere `ocr.purchase_orders.process` |
 | `GET` | `/api/v1/reports/purchase-orders` | Reporte de órdenes y saldos por combustible | Requiere `reports.read` |
 | `GET` | `/api/v1/reports/attendances` | Reporte de despachos por período, usuario o sede | Requiere `reports.read` |
 | `GET` | `/api/v1/reports/dashboard` | Resumen y agrupaciones para el panel | Requiere `reports.read` |

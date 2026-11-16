@@ -7,6 +7,7 @@ from io import BytesIO
 
 from sqlalchemy.orm import Session
 
+from app.core.config import Settings, get_settings
 from app.core.exceptions import AppError
 from app.repositories.balance_repository import BalanceRepository
 from app.repositories.report_repository import ReportRepository
@@ -28,8 +29,14 @@ class ReportExportUnavailableError(AppError):
     code = "REPORT_EXPORT_UNAVAILABLE"
 
 
+class ReportExportLimitError(AppError):
+    status_code = 413
+    code = "REPORT_EXPORT_LIMIT_EXCEEDED"
+
+
 class ReportService:
-    def __init__(self) -> None:
+    def __init__(self, settings: Settings | None = None) -> None:
+        self.settings = settings or get_settings()
         self.reports = ReportRepository()
         self.balances = BalanceRepository()
 
@@ -186,6 +193,7 @@ class ReportService:
         self, db: Session, filters: ReportFilters, file_format: str
     ) -> tuple[bytes, str, str]:
         report = self.purchase_orders(db, filters)
+        self._validate_export_size(report.total)
         return _export_rows(
             [row.model_dump(mode="json") for row in report.items],
             "purchase-orders",
@@ -196,11 +204,19 @@ class ReportService:
         self, db: Session, filters: ReportFilters, file_format: str
     ) -> tuple[bytes, str, str]:
         report = self.attendances(db, filters)
+        self._validate_export_size(report.total)
         return _export_rows(
             [row.model_dump(mode="json") for row in report.items],
             "attendances",
             file_format,
         )
+
+    def _validate_export_size(self, total: int) -> None:
+        if total > self.settings.REPORT_MAX_EXPORT_ROWS:
+            raise ReportExportLimitError(
+                "El reporte supera el máximo de filas exportables.",
+                details={"max_rows": self.settings.REPORT_MAX_EXPORT_ROWS},
+            )
 
 
 def _verification_status(attendance: Attendance) -> str:

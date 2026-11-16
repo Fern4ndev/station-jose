@@ -1,14 +1,17 @@
 """FastAPI application entrypoint."""
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
 
 from app.core.config import get_settings
 from app.core.constants import API_TITLE, API_VERSION
 from app.core.error_handlers import register_error_handlers
+from app.core.http_middleware import security_headers_middleware
 from app.core.logging import configure_logging
 from app.routers.api_v1 import router as api_v1_router
 
@@ -35,4 +38,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 register_error_handlers(app)
+
+
+@app.middleware("http")
+async def add_security_headers(
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+) -> Response:
+    return await security_headers_middleware(request, call_next, settings=settings)
+
+
 app.include_router(api_v1_router, prefix=settings.API_V1_PREFIX)
