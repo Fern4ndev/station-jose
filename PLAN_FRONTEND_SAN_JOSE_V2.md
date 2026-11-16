@@ -310,7 +310,7 @@ frontend/
 │   ├── environments/
 │   ├── styles/
 │   ├── index.html
-│   └── styles.scss
+│   └── styles.css
 ├── e2e/
 ├── angular.json
 ├── package.json
@@ -356,8 +356,8 @@ No será obligatorio crear todos los archivos si la feature es pequeña. No se m
 | Lenguaje | TypeScript en versión soportada por Angular | Tipado y mantenimiento. |
 | Runtime | Node.js LTS compatible con Angular elegido | Desarrollo y compilación. |
 | Gestor | npm | Dependencias y lockfile. |
-| Estilos | SCSS + variables CSS | Tema y responsive. |
-| UI | PrimeNG | Tablas, formularios, diálogos, menús y selectores. |
+| Estilos | Tailwindcss | Tema y responsive. |
+| UI | PrimeNG v21| Tablas, formularios, diálogos, menús y selectores. |
 | HTTP | Angular `HttpClient` | Consumo de FastAPI. |
 | Estado | Signals + RxJS | Estado local y flujos asíncronos. |
 | Formularios | Reactive Forms tipados | Captura y validación. |
