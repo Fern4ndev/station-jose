@@ -12,7 +12,7 @@
 **Versión del documento:** 2.0  
 **Base funcional:** `REQUERIMIENTOS_FUNCIONALES_SAN_JOSE_V2.md`  
 **Contrato técnico de referencia:** `PLAN_BACKEND_SAN_JOSE_V2.md`  
-**Estado:** Plan técnico propuesto. No se proporcionó un repositorio Angular ejecutable ni un OpenAPI real validado; los endpoints descritos son planificados y deben contrastarse con el backend implementado.
+**Estado:** Plan técnico en implementación. El repositorio Angular y FastAPI están disponibles; los endpoints y DTOs deben contrastarse con el código backend antes de integrar cada flujo.
 
 ---
 
@@ -93,13 +93,13 @@ Las clasificaciones siguientes permiten distinguir lo establecido por los RF, lo
 | **Contrato backend propuesto** | Endpoint, permiso, DTO o comportamiento incluido en `PLAN_BACKEND_SAN_JOSE_V2.md`, pendiente de validación contra una implementación real. |
 | **Decisión frontend propuesta** | Decisión de navegación, presentación, accesibilidad o experiencia de usuario necesaria para implementar el requerimiento sin inventar reglas de negocio. |
 | **Pendiente de aprobación (PD)** | Definición de negocio que aparece en la sección 9 de RF V2 y no debe presentarse como aprobada. |
-| **Bloqueado por backend** | Funcionalidad que no se considera integrada hasta que exista un endpoint y contrato OpenAPI probado. |
+| **Bloqueado por backend** | Funcionalidad que no se considera integrada hasta que exista un endpoint y contrato manual documentado y verificado. |
 
 ## 2.1. Jerarquía de fuentes
 
 1. Requerimientos funcionales V2 y decisiones posteriores formalmente aprobadas por el negocio.
 2. Backend realmente implementado y probado, cuando esté disponible.
-3. OpenAPI generado y sincronizado con la implementación real.
+3. Rutas, permisos, request/response y errores contrastados con la implementación real.
 4. `PLAN_BACKEND_SAN_JOSE_V2.md` como contrato técnico planificado.
 5. `PLAN_FRONTEND_SAN_JOSE.md` como guía de arquitectura, pantallas y fases.
 
@@ -119,28 +119,26 @@ Cuando un documento técnico proponga un detalle todavía no aprobado en RF V2, 
 
 ## 3.2. Estado actual del frontend
 
-**Clasificación:** frontend nuevo, según la documentación disponible.
-
-No se proporcionó un repositorio Angular existente. Por tanto, no es posible afirmar que haya componentes, rutas, estilos, servicios, pruebas o integraciones reutilizables.
+**Clasificación:** existe un esqueleto Angular standalone; la aplicación funcional todavía no está implementada.
 
 | Elemento | Estado | Acción propuesta |
 |---|---|---|
-| Proyecto Angular | No proporcionado | Crear aplicación nueva. |
-| Versiones Angular/Node | No verificables | Seleccionar versiones compatibles y fijarlas en FE-0. |
-| Diseño visual | No proporcionado | Definir sistema visual administrativo y mobile-first para atención. |
-| Rutas y layouts | No proporcionados | Crear rutas standalone con carga diferida. |
-| Autenticación | No proporcionada | Integrar login/logout y consulta del usuario actual. |
-| Servicios API | No proporcionados | Generar cliente tipado desde OpenAPI. |
-| Permisos | No proporcionados | Aplicar navegación y visibilidad de acciones según permisos backend. |
-| Pruebas | No proporcionadas | Configurar unitarias, integración y E2E desde FE-0. |
-
-No se ha ejecutado build, lint ni pruebas porque no existe un repositorio que permita ejecutarlos.
+| Proyecto Angular | Angular standalone en `src/`; todavía sin rutas ni funciones de negocio. | Mantener standalone y organizar por features lazy-loaded. |
+| Versiones | Angular 21.2, PrimeNG 21.1, Tailwind CSS 4, Chart.js 4; TypeScript 5.9; Node 24.22.1. | Versiones, `.nvmrc` y lockfile alineados para FE-0. |
+| Estilos | Tailwind 4 está importado globalmente; clases utilitarias en línea y tokens San José. | Mantener utilidades Tailwind; excluir mockups HTML del escaneo de producción. |
+| UI | PrimeNG con preset Aura y capas CSS configuradas; sin pantallas de negocio. | Definir componentes por feature y verificar accesibilidad en cada flujo. |
+| Rutas y layouts | `app.routes.ts` no contiene rutas. | Implementar autenticación y shell en FE-1. |
+| Autenticación | Sin servicios ni guards frontend. | Integrar login/logout y consulta de `/auth/me` en FE-1. |
+| Servicios API | No existe cliente API ni catálogo contractual frontend. | Documentar endpoints y mantener manualmente tipos TypeScript y servicios tipados. |
+| Gráficos | Chart.js está instalado; aún no integrado. | Integrarlo solo en los reportes/dashboard definidos. |
+| Calidad | TypeScript strict activado y Prettier disponible; faltan lint, CI y configuración de ambientes. | Completar configuración de calidad y build de CI. |
+| Verificación | `npm run build` de producción completó sin advertencias tras excluir los mockups del escaneo; no se ejecutaron pruebas. | Mantener exclusiones y ejecutar la suite cuando se solicite. |
 
 ## 3.3. Estado del backend de referencia
 
-`PLAN_BACKEND_SAN_JOSE_V2.md` propone un backend nuevo con FastAPI y PostgreSQL. Define las operaciones necesarias para el flujo V2, pero no acredita que el backend esté implementado. Tampoco se recibió un archivo OpenAPI real.
+El repositorio incluye una implementación FastAPI con routers, servicios, repositorios, esquemas Pydantic, SQL numerado y pruebas unitarias/API. Aún falta un catálogo frontend versionado que contraste cada ruta y DTO con el código actual. El plan backend es una referencia, no una prueba de que todas sus rutas propuestas coincidan con la implementación.
 
-**Consecuencia:** este frontend se diseña para el contrato propuesto en backend V2. Ningún endpoint se considera disponible o probado hasta contrastarlo con OpenAPI y ejecutar pruebas de integración.
+**Hallazgos FE-0:** `/api/v1` contiene autenticación, órdenes, vales, atenciones, verificaciones, usuarios, catálogos, reportes y OCR. Sin embargo, los endpoints de órdenes usan `PurchaseOrderResponse` para todos los roles y `PurchaseOrderItemResponse` incluye `unit_price` y `total_amount`; como `ATTENDANT` tiene `purchase_orders.read`, la respuesta actual no cumple la regla de no exponer precios/importes al Grifero. La separación de DTOs/consultas por rol es un bloqueo de seguridad antes de integrar esas respuestas. También falta contrastar rutas, estados, códigos de error y comportamiento endpoint por endpoint. Ninguna integración frontend se declara lista.
 
 ## 3.4. Correcciones realizadas respecto al frontend 1.0
 
@@ -352,21 +350,21 @@ No será obligatorio crear todos los archivos si la feature es pequeña. No se m
 
 | Componente | Selección propuesta | Propósito |
 |---|---|---|
-| Framework | Angular standalone, versión estable compatible al iniciar | Aplicación web. |
-| Lenguaje | TypeScript en versión soportada por Angular | Tipado y mantenimiento. |
-| Runtime | Node.js LTS compatible con Angular elegido | Desarrollo y compilación. |
-| Gestor | npm | Dependencias y lockfile. |
-| Estilos | Tailwindcss | Tema y responsive. |
-| UI | PrimeNG v21| Tablas, formularios, diálogos, menús y selectores. |
+| Framework | Angular standalone 21.2 | Aplicación web. |
+| Lenguaje | TypeScript 5.9 | Tipado y mantenimiento. |
+| Runtime | Node.js 24.22.1 | Desarrollo y compilación; versión fijada en `.nvmrc`. |
+| Gestor | npm 11.19.1 | Dependencias y lockfile. |
+| Estilos | Tailwind CSS 4 | Utilidades en línea, tema y responsive. |
+| UI | PrimeNG 21.1 | Tablas, formularios, diálogos, menús y selectores. |
 | HTTP | Angular `HttpClient` | Consumo de FastAPI. |
 | Estado | Signals + RxJS | Estado local y flujos asíncronos. |
 | Formularios | Reactive Forms tipados | Captura y validación. |
-| Gráficos | Chart.js mediante integración Angular compatible | Gráficos RF-030. |
-| Cliente OpenAPI | Evaluar `ng-openapi-gen` según el contrato final | Cliente y tipos generados. |
-| Pruebas unitarias | Vitest o runner recomendado por Angular seleccionado | Pruebas unitarias. |
+| Gráficos | Chart.js 4.6 | Gráficos RF-030. |
+| Contrato API frontend | Catálogo manual de endpoints y DTOs alineado con FastAPI | Servicios Angular y tipos TypeScript mantenidos en el repositorio. |
+| Pruebas unitarias | Vitest 4 | Pruebas unitarias. |
 | E2E | Playwright | Flujos completos de navegador. |
 
-No se fijan números de versión porque no existe un repositorio y las versiones deben verificarse contra la matriz de compatibilidad vigente al crear el proyecto. FE-0 fijará versiones compatibles en `package.json` y `package-lock.json`.
+Las dependencias frontend están fijadas mediante `package.json` y `package-lock.json`; ejecutar `npm ci` para respetar las versiones resueltas.
 
 ## 6.2. Criterios de selección
 
@@ -377,7 +375,7 @@ No se fijan números de versión porque no existe un repositorio y las versiones
 - No se agregará una biblioteca frontend para generar PDF o Excel; los archivos los genera el backend.
 - No se agregará IndexedDB ni service worker para almacenar despachos offline.
 - Los mensajes/toasts se usarán solo para feedback de operaciones, no como sistema de notificaciones persistentes.
-- El cliente OpenAPI generado no se modificará manualmente. Las adaptaciones se colocarán en servicios o mappers propios.
+- Los tipos y servicios API se mantendrán manualmente; los cambios de contrato requieren revisar juntos el esquema backend y el catálogo frontend.
 
 ## 6.3. Calidad de código
 
@@ -616,15 +614,15 @@ La URL absoluta se configurará por ambiente. Ningún componente concatenará di
 
 ## 9.2. Estado del contrato
 
-Los endpoints siguientes se encuentran planificados en `PLAN_BACKEND_SAN_JOSE_V2.md`. No se proporcionó OpenAPI generado ni un backend ejecutable. Todos se consideran **planificados / pendientes de verificar**.
+Los endpoints siguientes se describen en `PLAN_BACKEND_SAN_JOSE_V2.md` y deben contrastarse con el backend ejecutable. Todos se consideran **planificados / pendientes de verificar** hasta completar esa revisión.
 
 Antes de integrar cada feature se deberá:
 
-1. Obtener `openapi.json` desde el backend ejecutable.
-2. Comparar rutas, parámetros, permisos, DTOs y códigos de error con este plan.
-3. Regenerar el cliente TypeScript.
-4. Registrar discrepancias y resolverlas con backend antes de crear adaptaciones locales.
-5. Añadir pruebas de servicios para los requests y responses reales.
+1. Revisar rutas, parámetros, permisos, DTOs y códigos de error directamente en routers y schemas del backend.
+2. Mantener un catálogo contractual versionado en `docs/API_INTEGRATION.md`.
+3. Escribir y actualizar manualmente los tipos TypeScript de request/response y sus servicios.
+4. Registrar discrepancias y resolverlas con backend antes de implementar adaptaciones locales.
+5. Añadir pruebas de servicios para los requests y responses acordados.
 
 ## 9.3. Convenciones HTTP y formatos
 
@@ -633,7 +631,7 @@ Antes de integrar cada feature se deberá:
 - `multipart/form-data` para OCR.
 - Fechas documentales: `YYYY-MM-DD`.
 - Timestamps: ISO 8601 con zona horaria.
-- Decimales: preservar como strings si OpenAPI los define así. No convertir cantidades/precios a `number` para cálculos.
+- Decimales: los tipos frontend los preservarán como strings y el backend validará precisión y límites. No convertir cantidades/precios a `number` para cálculos.
 - Listados paginados: `items` y `pagination`.
 - Filtros y ordenación: solo parámetros admitidos por cada endpoint.
 - Archivos PDF/XLSX: respuesta binaria (`Blob`) con nombre de archivo desde headers cuando esté presente.
@@ -775,14 +773,13 @@ Para `409 VOUCHER_ALREADY_EXISTS`, si backend devuelve el ID del vale existente,
 
 Para `409 IDEMPOTENCY_KEY_REUSED`, no generar automáticamente otra clave ni volver a enviar un payload diferente. Registrar el error técnico y solicitar una nueva operación explícita solo después de resolver el intento anterior.
 
-## 9.6. Generación del cliente API
+## 9.6. Cliente API y contratos manuales
 
-- Generar tipos y servicios desde OpenAPI.
-- Fijar la versión/commit del contrato utilizado para generar el cliente.
-- No editar los archivos generados a mano.
-- Crear servicios de dominio/facades encima del cliente generado.
-- Verificar en CI que una actualización de OpenAPI no genere cambios inesperados.
-- Evitar modelos duplicados que discrepen de los DTOs del backend.
+- Implementar servicios de transporte con Angular `HttpClient` y tipos TypeScript escritos en el frontend.
+- Mantener un catálogo versionado de endpoint, método, parámetros, permisos, request, response y errores esperados.
+- Revisar cambios de contrato en conjunto con backend y actualizar los tipos/servicios correspondientes.
+- Mantener separados los DTOs de Grifero y Oficina/Administrador cuando difieran por permisos o confidencialidad.
+- Centralizar autenticación, manejo de errores e idempotencia en infraestructura compartida; evitar duplicar esa lógica en componentes.
 
 ---
 
@@ -929,13 +926,13 @@ El estado de consumo del vale y el estado de verificación de cada atención se 
 - Reset de página al cambiar filtros.
 - Mantener filtros en query parameters cuando sea apropiado.
 - No descargar todos los datos para paginar/ordenar localmente.
-- Tamaño de página inicial configurable según contrato; la propuesta backend sugiere 20 por defecto y un máximo de 100, pendiente de OpenAPI.
+- Tamaño de página inicial configurable según contrato documentado; la propuesta backend sugiere 20 por defecto y un máximo de 100, pendiente de verificación.
 
 ---
 
 # 12. Modelos y contratos TypeScript
 
-Los modelos se derivarán del OpenAPI real. Los siguientes tipos son conceptuales y describen responsabilidades; no deben duplicarse de forma incompatible con los esquemas backend.
+Los modelos TypeScript se mantendrán manualmente y se contrastarán con los schemas y servicios reales del backend. Los siguientes tipos son conceptuales y describen responsabilidades; no deben duplicarse de forma incompatible con los DTOs acordados.
 
 ## 12.1. Modelos compartidos
 
@@ -1121,11 +1118,11 @@ Si la decisión es `OBSERVED`, la interfaz requerirá una observación no vacía
 
 ## 12.6. Modelos de saldos y reportes
 
-Los DTOs de saldo serán los devueltos por `/balances`. Los DTOs de reportes/dashboard deben modelar únicamente columnas, totales y series presentes en OpenAPI. No crear campos calculados en cliente para completar datos que el backend no proporcione.
+Los DTOs de saldo serán los devueltos por el endpoint que se acuerde con backend. Los DTOs de reportes/dashboard modelarán únicamente columnas, totales y series presentes en el contrato documentado. No crear campos calculados en cliente para completar datos que el backend no proporcione.
 
 ## 12.7. Precisión decimal
 
-- Tratar galones, precios e importes como strings decimales si así aparecen en OpenAPI.
+- Tratar galones, precios e importes como strings decimales en los modelos y payloads frontend.
 - No usar `parseFloat` ni aritmética binaria `number` para validar saldos.
 - Validar formato, signo y máximo de decimales localmente para mejorar experiencia, con reglas finales recibidas de backend.
 - La precisión sugerida por backend es galones a 3 decimales, precio unitario a 4 e importe a 2; permanece pendiente de aprobación PD-020.
@@ -1517,7 +1514,7 @@ Validaciones UI:
 - Mostrar datos del vale y de la atención recibida.
 - Decisión `VERIFIED` o `OBSERVED`.
 - Para `OBSERVED`, requerir descripción de la diferencia.
-- Para `VERIFIED`, la observación puede omitirse o ser nula según OpenAPI.
+- Para `VERIFIED`, la observación puede omitirse o ser nula según el contrato confirmado con backend.
 - No incluir inputs de galones, usuario, sede o fecha/hora.
 - Confirmar antes de registrar.
 - Tras éxito, refrescar bandeja e historial; no modificar saldos.
@@ -1597,7 +1594,7 @@ Las rutas de la tabla omiten `/api/v1` solo para facilitar lectura. La API compl
 
 # 17. Plan de implementación por fases
 
-Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en paralelo, pero ninguna operación se considerará integrada hasta disponer del endpoint real y OpenAPI sincronizado.
+Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en paralelo, pero ninguna operación se considerará integrada hasta disponer del endpoint real y del contrato manual contrastado con backend.
 
 ## FE-0 — Alineación funcional, contrato y preparación
 
@@ -1619,7 +1616,7 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 9. Fijar versiones compatibles, lockfile y scripts.
 10. Configurar TypeScript strict, lint, formato, ambientes y CI.
 11. Configurar PrimeNG, tema, layout base y accesibilidad.
-12. Definir cliente OpenAPI y generación reproducible.
+12. Definir catálogo manual de endpoints, DTOs y errores; acordar revisión de cambios de contrato con backend.
 13. Definir formato decimal visual sin operaciones de saldo en frontend.
 
 **Entregables:** proyecto base, matriz RF-permisos, decisiones registradas, estructura inicial y checklist de integración.
@@ -1641,7 +1638,7 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 **Endpoints:** login, logout y `/auth/me`.
 
 **Tareas:**
-1. Crear modelos desde OpenAPI.
+1. Crear tipos TypeScript de request/response desde el contrato manual acordado con backend.
 2. Implementar login y mensajes de credenciales inválidas.
 3. Inicializar usuario, rol, sede y permisos.
 4. Implementar estrategia de token aprobada.
@@ -1711,7 +1708,7 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 
 **Pruebas:** campos requeridos, varias líneas, cantidades decimales, duplicado, filtros, paginación, orden, edición con consumo y eliminación con/sin vales.
 
-**Gate:** backend F4, OpenAPI sincronizado y pruebas integradas aprobadas.
+**Gate:** backend F4, catálogo de contratos actualizado y pruebas integradas aprobadas.
 
 ## FE-4 — Consulta de vales y verificación administrativa
 
@@ -1877,23 +1874,25 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 
 > Convención: `[ ]` pendiente, `[x]` realizado. Una tarea solo se marca como realizada cuando existe implementación y evidencia verificable.
 
+**Avance FE-0 (16/11/2026):** se contrastó el repositorio Angular con RF V2, el plan backend y sus rutas/esquemas actuales. La base se alineó a Angular 21 + PrimeNG 21; Tailwind CSS 4 queda como utilidades inline en plantillas y Chart.js 4 como biblioteca de gráficos. La revisión del backend encontró contratos pendientes de seguridad y alineación; por ello FE-0 sigue abierto y no se presentan endpoints como integrados.
+
 | Fase | Tarea | Estado |
 |---|---|---|
-| FE-0 | Fijar RF V2 como fuente funcional | [ ] |
-| FE-0 | Confirmar `PLAN_BACKEND_SAN_JOSE_V2.md` como estructura técnica | [ ] |
-| FE-0 | Revisar con backend permisos, DTOs, estados y endpoints | [ ] |
+| FE-0 | Fijar RF V2 como fuente funcional | [x] `REQUERIMIENTOS_FUNCIONALES_SAN_JOSE_V2.md` |
+| FE-0 | Confirmar `PLAN_BACKEND_SAN_JOSE_V2.md` como estructura técnica | [x] Contrato de referencia; validar discrepancias con el backend implementado |
+| FE-0 | Revisar con backend permisos, DTOs, estados y endpoints | [x] Revisión inicial de routers, permisos y esquemas; ver hallazgos FE-0 debajo |
 | FE-0 | Cerrar decisiones sobre vale, líneas, sede y correcciones | [ ] |
 | FE-0 | Resolver o registrar PD-001 a PD-020 con responsable y fecha | [ ] |
 | FE-0 | Definir DTOs separados para Grifero, Oficina y Administrador | [ ] |
 | FE-0 | Confirmar estrategia de sesión y token | [ ] |
-| FE-0 | Crear proyecto Angular standalone | [ ] |
-| FE-0 | Fijar versiones, lockfile y scripts | [ ] |
-| FE-0 | Configurar TypeScript strict, lint, formato, ambientes y CI | [ ] |
-| FE-0 | Configurar PrimeNG, tema, layout base y accesibilidad | [ ] |
-| FE-0 | Definir cliente OpenAPI y generación reproducible | [ ] |
+| FE-0 | Crear proyecto Angular standalone | [x] Aplicación standalone existente en `src/main.ts` |
+| FE-0 | Fijar versiones, lockfile y scripts | [x] Node 24.22.1, Angular 21.2, PrimeNG 21.1, Tailwind 4, Chart.js 4; lockfile actualizado |
+| FE-0 | Configurar TypeScript strict, lint, formato, ambientes y CI | [ ] Strict habilitado; lint, ambientes y CI pendientes |
+| FE-0 | Configurar PrimeNG, tema, layout base y accesibilidad | [x] Aura, capas CSS compatibles con Tailwind, enlace para saltar al contenido y foco visible |
+| FE-0 | Definir catálogo manual de API y política de sincronización de contratos | [ ] |
 | FE-0 | Definir formato decimal visual sin calcular saldos en frontend | [ ] |
-| FE-0 | Ejecutar instalación limpia, build, lint y prueba base | [ ] |
-| FE-1 | Crear modelos desde OpenAPI | [ ] |
+| FE-0 | Ejecutar instalación limpia, build, lint y prueba base | [ ] Build de producción correcto; faltan instalación limpia, lint y prueba base |
+| FE-1 | Crear tipos TypeScript manuales desde contratos acordados | [ ] |
 | FE-1 | Implementar login y credenciales inválidas | [ ] |
 | FE-1 | Inicializar usuario, rol, sede y permisos | [ ] |
 | FE-1 | Implementar estrategia de token | [ ] |
@@ -1994,6 +1993,14 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 | FE-8 | Actualizar README y documentación | [ ] |
 | FE-8 | Validar build de producción | [ ] |
 | FE-8 | Registrar evidencias, defectos conocidos y aprobación funcional | [ ] |
+
+### Hallazgos y bloqueos registrados en FE-0
+
+- **Seguridad de datos:** los endpoints de órdenes permiten `purchase_orders.read` a `ATTENDANT`, pero responden con `PurchaseOrderResponse` y líneas que incluyen `unit_price` y `total_amount`. Backend debe separar la respuesta operativa del Grifero antes de integrar esas respuestas.
+- **Contrato API:** aún no existe un catálogo versionado y contrastado de rutas, permisos, estados, DTOs y errores. Mantenerlo manualmente y definir los modelos frontend después de resolver los DTOs por rol.
+- **Saldos:** el plan frontend describe `/balances`; no se encontró un router `balances` en la implementación. Confirmar si los saldos embebidos en las respuestas de órdenes/vales reemplazan ese recurso.
+- **Decisiones de negocio:** PD-001 a PD-020 siguen como propuestas o preguntas en los requerimientos. No inventar responsable, fecha de aprobación ni comportamiento final desde el frontend.
+- **Suite frontend:** hay una especificación inicial `app.spec.ts` heredada del placeholder que espera el título anterior. No se ejecutó ni actualizó en este inicio de FE-0.
 
 ---
 
@@ -2136,7 +2143,7 @@ Los puntos PD-001 a PD-020 proceden de RF V2. El frontend aplicará una polític
 |---|---|---|---|
 | PD-001 | Identificación única de órdenes | Capturar los campos definidos por RF; mostrar conflicto de duplicado del backend. No inventar una clave única visible. | Afecta alta/búsqueda. Resolver antes de cerrar FE-3. |
 | PD-002 | Identidad/emisor de vale | Capturar emisor y número; tratar duplicidad según respuesta backend. | Afecta primera atención y deduplicación. |
-| PD-003 | Datos de proveedor | Usar campos y estructura definitivos de OpenAPI; no crear campos adicionales por intuición. | Afecta formulario y OCR. |
+| PD-003 | Datos de proveedor | Usar campos y estructura confirmados en el contrato manual con backend; no crear campos adicionales por intuición. | Afecta formulario y OCR. |
 | PD-004 | Varias líneas por vale | Modelo UI preparado para líneas dinámicas relacionadas con líneas de orden; habilitación productiva sujeta a confirmación. | Afecta captura y balances; bloquea cierre de formulario final. |
 | PD-005 | Orden agotada con vale aún con saldo | Mostrar saldo propio positivo y disponibilidad bloqueada por orden como dos datos/estados distintos. | No debe ocultarse ni confundirse con vale atendido. |
 | PD-006 | Corrección de galones despachados | No ofrecer edición/anulación; atenciones inmutables. Implementar ajuste únicamente con flujo y endpoint aprobados. | No bloquea despacho normal; bloquea correcciones cuantitativas. |
@@ -2153,7 +2160,7 @@ Los puntos PD-001 a PD-020 proceden de RF V2. El frontend aplicará una polític
 | PD-017 | Consulta fuera de horario | No bloquear acceso en UI por hora. La disponibilidad/horario operativo deberá decidirse en operación y backend. | Bloquea definición de disponibilidad operativa final. |
 | PD-018 | Campos de ordenación | Mostrar solo columnas que el backend incluya en su whitelist. | Afecta cierre de listados. |
 | PD-019 | Zona horaria | Presentar tiempos conforme a la zona confirmada por backend; propuesta `America/Lima`. No crear fecha de atención en cliente. | Afecta filtros y reportes. |
-| PD-020 | Precisión y redondeo | Preservar strings decimales; no redondear en cliente. Aplicar límites publicados por OpenAPI. | Afecta formularios y formatos. |
+| PD-020 | Precisión y redondeo | Preservar strings decimales; no redondear en cliente. Aplicar límites confirmados por backend. | Afecta formularios y formatos. |
 
 ## 21.1. Decisiones frontend adoptadas
 
@@ -2211,7 +2218,7 @@ El procedimiento de corrección cuantitativa (PD-006) debe permanecer fuera de l
 - Formularios reactivos tipados.
 - No existe lógica crítica de saldo/autorización duplicada en frontend.
 - No existen dependencias circulares ni `any` injustificados.
-- Cliente generado desde OpenAPI y no modificado manualmente.
+- Servicios API y tipos TypeScript mantenidos manualmente y contrastados con el catálogo acordado.
 - Las cantidades decimales se preservan sin cálculos binarios de saldo.
 
 ## Seguridad
@@ -2237,7 +2244,7 @@ El procedimiento de corrección cuantitativa (PD-006) debe permanecer fuera de l
 
 ## Integración y operación
 
-- Cliente generado desde OpenAPI vigente.
+- Catálogo manual de endpoints/DTOs vigente y revisado con backend.
 - No existen mocks en build productivo.
 - Variables de ambiente documentadas.
 - CORS/HTTPS coordinado con backend.
@@ -2254,7 +2261,7 @@ Se mantendrán:
 - `PLAN_FRONTEND_SAN_JOSE.md`: este plan técnico.
 - `README.md`: instalación, configuración, ejecución y build.
 - `docs/ROUTES.md`: rutas y permisos.
-- `docs/API_INTEGRATION.md`: base URL, OpenAPI y generación de cliente.
+- `docs/API_INTEGRATION.md`: base URL, endpoints, DTOs, permisos, errores y política manual de sincronización.
 - `docs/AUTHENTICATION.md`: login, token, logout y expiración.
 - `docs/FEATURES.md`: módulos, pantallas y flujos.
 - `docs/ATTENDANCE_FLOW.md`: primera atención, atenciones posteriores, idempotencia y manejo de conflictos.
@@ -2310,7 +2317,7 @@ Decisiones centrales:
 - PrimeNG y SCSS como base de interfaz.
 - Signals y RxJS, sin introducir NgRx inicialmente.
 - API REST versionada bajo `/api/v1`.
-- Cliente tipado sincronizado con OpenAPI.
+- Cliente HTTP tipado manualmente y sincronizado con el catálogo de contratos acordado con backend.
 - Roles predefinidos `ADMIN`, `OFFICE` y `ATTENDANT`.
 - Vale creado en la primera atención, no por pre-registro.
 - Atenciones parciales repetidas y registro inmutable.

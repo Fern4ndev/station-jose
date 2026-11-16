@@ -102,7 +102,7 @@ La API no ofrecerá operaciones offline. Si se interrumpe la conexión durante u
 | `PLAN_BACKEND_FASTAPI.md` | Estructura técnica de referencia para arquitectura, datos, API, servicios, seguridad, pruebas, fases y trazabilidad. |
 | Árbol `back-fareas/` compartido en la solicitud de actualización | Referencia de organización por capas: `app/core`, `app/routers`, `app/schemas`, `app/services`, archivos centrales de base de datos y entidades. Se adapta al dominio de órdenes, vales y atenciones; no se incorporan componentes ajenos como reconocimiento facial o firmware ESP32. |
 
-No se adjuntó código fuente del backend, repositorio, esquema de base de datos desplegado ni contrato OpenAPI implementado. Por tanto, el diagnóstico es documental. Los endpoints de este plan son contratos propuestos, no endpoints existentes ni verificados.
+El repositorio ahora incluye el código backend y los esquemas SQL. Los endpoints descritos en este documento son contratos propuestos y deben contrastarse con la implementación vigente.
 
 ---
 
@@ -110,9 +110,9 @@ No se adjuntó código fuente del backend, repositorio, esquema de base de datos
 
 ## 4.1. Estado actual
 
-**Clasificación:** backend nuevo o pendiente de implementación verificable. No se proporcionó código fuente que permita afirmar que exista una implementación parcial.
+**Clasificación:** existe una implementación parcial FastAPI en el repositorio. Las fases y los contratos de este plan deben contrastarse con ese código y completarse según los RF V2.
 
-## 4.2. Componentes por construir
+## 4.2. Componentes por completar o validar
 
 1. Aplicación FastAPI, configuración y manejo global de errores.
 2. PostgreSQL, SQLAlchemy 2.x y scripts SQL manuales para el esquema y los datos iniciales.
@@ -127,7 +127,7 @@ No se adjuntó código fuente del backend, repositorio, esquema de base de datos
 11. Reportes, dashboard y exportación PDF/XLSX.
 12. Procesamiento temporal de PDF mediante RapidOCR.
 13. Pruebas unitarias, de integración, API, concurrencia y seguridad.
-14. Documentación OpenAPI, despliegue y procedimientos operativos.
+14. Catálogo de API, despliegue y procedimientos operativos.
 
 ## 4.3. Correcciones obligatorias respecto al plan anterior
 
@@ -348,7 +348,7 @@ El backend no permitirá crear otro vale con la misma identidad funcional. Para 
 | Componente | Tecnología | Uso |
 |---|---|---|
 | Lenguaje | Python 3.13.15 en el entorno de desarrollo; proyecto compatible desde Python 3.12 | Backend. |
-| Framework | FastAPI | API REST y OpenAPI. |
+| Framework | FastAPI | API REST y documentación técnica de rutas. |
 | ASGI | Uvicorn | Servidor. |
 | Validación | Pydantic v2 | Requests, responses y configuración. |
 | Configuración | `pydantic-settings` | Variables de entorno. |
@@ -648,7 +648,7 @@ Inglés para tablas, columnas, rutas, parámetros, archivos, carpetas, clases, f
 
 ## 10.5. JSON
 
-Usar `snake_case`. Cantidades e importes deben transportarse con precisión decimal. Se recomienda serializar decimales como strings (`"5.000"`) de forma consistente para evitar pérdida de precisión en clientes TypeScript. La decisión final se reflejará en OpenAPI y no se mezclarán strings y números para el mismo campo.
+Usar `snake_case`. Cantidades e importes deben transportarse con precisión decimal. Se recomienda serializar decimales como strings (`"5.000"`) de forma consistente para evitar pérdida de precisión en clientes TypeScript. La decisión final se documentará en el contrato API y no se mezclarán strings y números para el mismo campo.
 
 ---
 
@@ -1155,7 +1155,7 @@ El resultado OCR es una previsualización, no una entidad `PurchaseOrder` ni un 
 - Listados paginados.
 - Filtros y ordenamiento por whitelist.
 - No devolver información administrativa sensible al Grifero.
-- OpenAPI será la fuente del cliente Angular cuando el backend esté implementado.
+- El cliente Angular mantendrá manualmente sus tipos y servicios con base en el catálogo de rutas y DTOs acordado con backend.
 
 ## 14.2. Catálogo de endpoints
 
@@ -1928,15 +1928,15 @@ Los límites OCR son valores iniciales propuestos y deben aprobarse con PD-012. 
 
 ---
 
-# 23. Documentación OpenAPI y contrato con Angular
+# 23. Documentación de API y contrato manual con Angular
 
-FastAPI será la fuente del contrato OpenAPI una vez implementados los endpoints. Título: `San José Fuel Control API`; versión inicial de API: `1.0.0`; prefijo `/api/v1`.
+El contrato API se mantendrá documentado por endpoint, con versión inicial `1.0.0` y prefijo `/api/v1`.
 
 Tags: `Auth`, `Users`, `Branches`, `Catalogs`, `Purchase Orders`, `Vouchers`, `Attendances`, `Balances`, `Verifications`, `Reports`, `OCR` y `Health`.
 
-Cada operación documentará roles autorizados, request/response schemas, filtros, paginación, códigos de error y ejemplos sin datos reales. El frontend Angular podrá generar o sincronizar clientes a partir del OpenAPI real; los archivos generados no se editarán manualmente.
+Cada operación documentará roles autorizados, tipos de request/response, filtros, paginación, códigos de error y ejemplos sin datos reales. Angular mantendrá manualmente los tipos TypeScript y sus servicios HTTP; los cambios se revisarán contra este catálogo.
 
-El contrato se considera **planificado** hasta que exista implementación, OpenAPI generado y pruebas de integración. Cualquier discrepancia entre RF, el plan y OpenAPI debe corregirse antes de cerrar la fase correspondiente.
+El contrato se considera **planificado** hasta que exista implementación y pruebas de integración. Cualquier discrepancia entre RF, el plan y el código debe corregirse antes de cerrar la fase correspondiente.
 
 ---
 
@@ -2139,7 +2139,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 **Objetivo:** estabilizar, documentar y preparar despliegue.  
 **Dependencias:** F1–F8 según alcance habilitado.  
 **RF:** todos.  
-**Tareas:** pruebas E2E de flujos; pruebas simultáneas; permisos por endpoint; límites OCR/exportación; revisión de logs; prueba del ALTER desde una copia reciente y comparación con una base nueva; backups; HTTPS; CORS de producción; documentación OpenAPI; guía de operación; prueba de restauración.
+**Tareas:** pruebas E2E de flujos; pruebas simultáneas; permisos por endpoint; límites OCR/exportación; revisión de logs; prueba del ALTER desde una copia reciente y comparación con una base nueva; backups; HTTPS; CORS de producción; catálogo de rutas y DTOs; guía de operación; prueba de restauración.
 **Gate:** todos los RF habilitados tienen evidencia de pruebas, no existen fallos críticos y el despliegue puede reproducirse.
 
 ---
@@ -2244,7 +2244,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F9 | Revisar límites OCR y exportaciones | [x] |
 | F9 | Probar ALTER desde una copia reciente y comparar con una base nueva | [ ] |
 | F9 | Configurar backups, HTTPS y CORS de producción | [ ] |
-| F9 | Validar OpenAPI y guía de operación | [x] |
+| F9 | Validar catálogo de API y guía de operación | [ ] |
 | F9 | Ejecutar prueba de restauración y registrar evidencias | [ ] |
 | F9 | Confirmar despliegue reproducible sin Docker | [ ] |
 
@@ -2252,7 +2252,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 
 # 28. Matriz de trazabilidad RF → backend
 
-La matriz resume el componente backend principal. Los endpoints son **propuestos** para el contrato `/api/v1`; no se consideran implementados hasta existir código y OpenAPI verificado.
+La matriz resume el componente backend principal. Los endpoints son **propuestos** para el contrato `/api/v1`; deben comprobarse contra el código implementado y el catálogo manual de API.
 
 | RF | Funcionalidad | Módulo/servicio | Endpoint(s) principal(es) | Fase |
 |---|---|---|---|---|
@@ -2366,7 +2366,7 @@ Una fase estará terminada solo cuando:
 11. Las pruebas unitarias, integración y API relevantes pasan.
 12. Ruff y Mypy cumplen las reglas configuradas.
 13. No existen secretos ni datos sensibles en logs/repositorio.
-14. OpenAPI refleja las rutas reales.
+14. El catálogo de API refleja las rutas, permisos y DTOs reales.
 15. Se documentan decisiones y pendientes que bloquean el alcance.
 16. No se marca como implementado aquello que solo está planificado.
 

@@ -1,3 +1,154 @@
-/* You can add global styles to this file, and also import other style files */
+@layer theme, base, primeng, components, utilities;
 
-@import 'tailwindcss';
+@import "tailwindcss";
+@source not "../mockup.html";
+@source not "../mockup.tailwind-preview.html";
+
+@theme {
+  --color-primary-50: #f2f5fc;
+  --color-primary-100: #e2e9f8;
+  --color-primary-200: #cbd8f2;
+  --color-primary-300: #a6bee9;
+  --color-primary-400: #7a9cdd;
+  --color-primary-500: #557ad1;
+  --color-primary-600: #395cc1;
+  --color-primary-700: #1f3975;
+  /* <-- Tu color base */
+  --color-primary-800: #1b3163;
+  --color-primary-900: #192b53;
+  --color-primary-950: #111c37;
+
+  /* Colores Neutrales y de Superficie */
+  --color-secondary: #64748b;
+  --color-surface: #ffffff;
+  --color-canvas: #f2f5fc;
+
+  /* Gradiente de marca (ej. para badges, sidebars o cabeceras) */
+  --background-image-sanjose-pill: radial-gradient(circle at 20% 20%, #395cc1 0%, #1f3975 55%, #111c37 100%);
+}
+
+:root {
+  /* Tokens Semánticos de Marca */
+  --sanjose-primary: var(--color-primary-700);
+  --sanjose-primary-hover: var(--color-primary-600);
+  --sanjose-primary-active: var(--color-primary-800);
+  --sanjose-primary-soft: var(--color-primary-100);
+  --sanjose-canvas: var(--color-primary-50);
+  --sanjose-surface: var(--color-surface);
+  --sanjose-text-main: #0f172a;
+  --sanjose-text-muted: #475569;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--sanjose-canvas);
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid var(--p-primary-color, var(--sanjose-primary));
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.bg-admin-pill {
+  background-image: var(--background-image-admin-pill);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 10px;
+  border: 2px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-aura {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.auth-aura::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  mix-blend-mode: overlay;
+  opacity: 0.18;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 200 200'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.99' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.181 0.608 0.061 0 0.075 0.181 0.608 0.061 0 0.075 0.181 0.608 0.061 0 0.075 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+
+}
+
+.auth-aura-layer-1,
+.auth-aura-layer-2 {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: multiply;
+  transform: translateZ(0);
+  will-change: transform;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auth-aura-layer-1 {
+  background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(77, 139, 255, 0.12) 30%, rgb(255, 255, 255) 20%, rgb(13, 59, 159) 70%, rgb(36, 41, 92) 100%);
+  filter: blur(75px);
+}
+
+.auth-aura-layer-2 {
+  background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(208, 213, 221, 0.22) 35%, rgb(255, 255, 255) 70%, rgb(36, 41, 92) 80%, rgb(13, 59, 159) 100%);
+  filter: blur(125px);
+}
+
+@media (min-width: 768px) {
+  .auth-aura-layer-1 {
+    filter: blur(108px);
+  }
+
+  .auth-aura-layer-2 {
+    filter: blur(180px);
+  }
+}
