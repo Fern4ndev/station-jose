@@ -17,47 +17,46 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "San Jose Fuel Control API"
-    app_env: Literal["development", "testing", "production"] = "development"
-    debug: bool = False
-    api_v1_prefix: str = "/api/v1"
-    timezone: str = "America/Lima"
+    APP_NAME: str = "San Jose Fuel Control API"
+    APP_ENV: Literal["development", "testing", "production"] = "development"
+    DEBUG: bool = False
+    API_V1_PREFIX: str = "/api/v1"
+    TIMEZONE: str = "America/Lima"
 
-    database_url: str = (
-        "postgresql+psycopg://user:password@localhost:5432/san_jose_db"
-    )
+    DATABASE_URL: str = "postgresql+psycopg://user:password@localhost:5432/sanjose"
 
-    jwt_secret_key: SecretStr = SecretStr("development-only-change-me")
-    jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: Annotated[int, Field(gt=0, le=1440)] = 30
-    jwt_issuer: str = "san-jose-api"
+    JWT_SECRET_KEY: SecretStr = SecretStr("development-only-change-me")
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: Annotated[int, Field(gt=0, le=1440)] = 30
+    JWT_ISSUER: str = "san-jose-api"
 
-    cors_origins: list[str] = ["http://localhost:4200"]
-    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    CORS_ORIGINS: str = "http://localhost:4200"
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
-    ocr_enabled: bool = True
-    ocr_max_upload_bytes: Annotated[int, Field(gt=0)] = 10_485_760
-    ocr_max_pdf_pages: Annotated[int, Field(gt=0)] = 20
-    ocr_timeout_seconds: Annotated[int, Field(gt=0)] = 60
-    ocr_temp_dir: str = "/tmp/san-jose-ocr"
+    OCR_ENABLED: bool = True
+    OCR_MAX_UPLOAD_BYTES: Annotated[int, Field(gt=0)] = 10_485_760
+    OCR_MAX_PDF_PAGES: Annotated[int, Field(gt=0)] = 20
+    OCR_TIMEOUT_SECONDS: Annotated[int, Field(gt=0)] = 60
+    OCR_TEMP_DIR: str = "/tmp/san-jose-ocr"
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, value: object) -> object:
-        if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
-        return value
-
-    @field_validator("api_v1_prefix")
+    @field_validator("API_V1_PREFIX")
     @classmethod
     def validate_api_prefix(cls, value: str) -> str:
         if not value.startswith("/") or value.endswith("/"):
-            raise ValueError("api_v1_prefix must start with / and not end with /")
+            raise ValueError("API_V1_PREFIX must start with / and not end with /")
         return value
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+
+    @property
+    def is_production(self) -> bool:
+        return self.APP_ENV == "production"
 
     @model_validator(mode="after")
     def validate_production_secret(self) -> "Settings":
-        if self.app_env == "production" and len(self.jwt_secret_key.get_secret_value()) < 32:
+        if self.is_production and len(self.JWT_SECRET_KEY.get_secret_value()) < 32:
             raise ValueError("JWT_SECRET_KEY must contain at least 32 characters in production")
         return self
 

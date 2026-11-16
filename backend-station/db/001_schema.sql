@@ -1,5 +1,4 @@
 -- Esquema inicial PostgreSQL para Estación de Servicio San José.
--- Alembic sigue siendo la fuente de migraciones versionadas.
 -- Las unicidades de órdenes (PD-001) y vales (PD-002) quedan pendientes
 -- de aprobación y no se imponen aquí.
 
@@ -30,6 +29,8 @@ CREATE TABLE users (
     CONSTRAINT users_role_check CHECK (role IN ('ADMIN', 'OFFICE', 'ATTENDANT')),
     CONSTRAINT users_attendant_branch_check
         CHECK (role <> 'ATTENDANT' OR branch_id IS NOT NULL),
+    CONSTRAINT users_office_branch_check
+        CHECK (role <> 'OFFICE' OR branch_id IS NULL),
     CONSTRAINT users_first_name_not_blank CHECK (btrim(first_name) <> ''),
     CONSTRAINT users_last_name_not_blank CHECK (btrim(last_name) <> ''),
     CONSTRAINT users_dni_not_blank CHECK (btrim(dni) <> ''),
@@ -122,6 +123,8 @@ CREATE TABLE vouchers (
     CONSTRAINT vouchers_number_normalized_not_blank
         CHECK (btrim(voucher_number_normalized) <> ''),
     CONSTRAINT vouchers_id_order_unique UNIQUE (id, purchase_order_id),
+    CONSTRAINT vouchers_identity_unique
+        UNIQUE (purchase_order_id, issuer_normalized, voucher_number_normalized),
     CONSTRAINT vouchers_purchase_order_fk
         FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders (id) ON DELETE RESTRICT
 );

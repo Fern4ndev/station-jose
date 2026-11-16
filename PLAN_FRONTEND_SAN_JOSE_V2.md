@@ -1873,13 +1873,137 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 
 ---
 
+# 17.1. Checklist operativo de implementación frontend
+
+> Convención: `[ ]` pendiente, `[x]` realizado. Una tarea solo se marca como realizada cuando existe implementación y evidencia verificable.
+
+| Fase | Tarea | Estado |
+|---|---|---|
+| FE-0 | Fijar RF V2 como fuente funcional | [ ] |
+| FE-0 | Confirmar `PLAN_BACKEND_SAN_JOSE_V2.md` como estructura técnica | [ ] |
+| FE-0 | Revisar con backend permisos, DTOs, estados y endpoints | [ ] |
+| FE-0 | Cerrar decisiones sobre vale, líneas, sede y correcciones | [ ] |
+| FE-0 | Resolver o registrar PD-001 a PD-020 con responsable y fecha | [ ] |
+| FE-0 | Definir DTOs separados para Grifero, Oficina y Administrador | [ ] |
+| FE-0 | Confirmar estrategia de sesión y token | [ ] |
+| FE-0 | Crear proyecto Angular standalone | [ ] |
+| FE-0 | Fijar versiones, lockfile y scripts | [ ] |
+| FE-0 | Configurar TypeScript strict, lint, formato, ambientes y CI | [ ] |
+| FE-0 | Configurar PrimeNG, tema, layout base y accesibilidad | [ ] |
+| FE-0 | Definir cliente OpenAPI y generación reproducible | [ ] |
+| FE-0 | Definir formato decimal visual sin calcular saldos en frontend | [ ] |
+| FE-0 | Ejecutar instalación limpia, build, lint y prueba base | [ ] |
+| FE-1 | Crear modelos desde OpenAPI | [ ] |
+| FE-1 | Implementar login y credenciales inválidas | [ ] |
+| FE-1 | Inicializar usuario, rol, sede y permisos | [ ] |
+| FE-1 | Implementar estrategia de token | [ ] |
+| FE-1 | Implementar interceptor Bearer | [ ] |
+| FE-1 | Implementar guards de autenticación, invitado y permiso | [ ] |
+| FE-1 | Implementar logout y limpieza de datos locales | [ ] |
+| FE-1 | Crear shell responsive y menú por permiso | [ ] |
+| FE-1 | Centralizar manejo de respuestas 401/403 | [ ] |
+| FE-1 | Ocultar módulos no permitidos | [ ] |
+| FE-1 | Probar login, expiración, usuario deshabilitado, logout y navegación por rol | [ ] |
+| FE-2 | Crear listado y búsqueda de usuarios | [ ] |
+| FE-2 | Crear formulario de usuario | [ ] |
+| FE-2 | Implementar roles predefinidos | [ ] |
+| FE-2 | Resolver selección de sede según contrato y PD-014 | [ ] |
+| FE-2 | Mostrar duplicidad de correo/DNI | [ ] |
+| FE-2 | Implementar cambio de rol con confirmación | [ ] |
+| FE-2 | Implementar habilitación/deshabilitación con confirmación | [ ] |
+| FE-2 | Refrescar permisos y estado | [ ] |
+| FE-2 | No implementar borrado físico ni recuperación de contraseña | [ ] |
+| FE-2 | Probar acceso Admin, alta, validaciones, duplicados y estados | [ ] |
+| FE-3 | Construir listado de órdenes con búsqueda y filtros | [ ] |
+| FE-3 | Implementar paginación del servidor | [ ] |
+| FE-3 | Implementar ordenación por allowlist backend | [ ] |
+| FE-3 | Cargar catálogos de combustibles y sedes | [ ] |
+| FE-3 | Crear formulario de cabecera y líneas dinámicas | [ ] |
+| FE-3 | Validar campos RN-003 | [ ] |
+| FE-3 | Integrar creación completa en un request | [ ] |
+| FE-3 | Crear detalle con saldos, vales y estado | [ ] |
+| FE-3 | Implementar edición de campos permitidos | [ ] |
+| FE-3 | Aplicar confirmaciones y restricciones de RF-011 | [ ] |
+| FE-3 | Implementar eliminación condicionada y respuesta 409 | [ ] |
+| FE-3 | Verificar permisos y DTOs por rol | [ ] |
+| FE-3 | Probar campos, líneas, decimales, filtros, paginación, edición y eliminación | [ ] |
+| FE-4 | Crear listado de vales con búsqueda | [ ] |
+| FE-4 | Implementar paginación y ordenación del servidor | [ ] |
+| FE-4 | Crear detalle de vale con líneas, saldos y atenciones | [ ] |
+| FE-4 | Separar estado de consumo y verificación | [ ] |
+| FE-4 | Implementar corrección descriptiva solo para Admin | [ ] |
+| FE-4 | No construir alta independiente de vale | [ ] |
+| FE-4 | Omitir eliminación de vales atendidos | [ ] |
+| FE-4 | Crear bandeja de atenciones pendientes/observadas | [ ] |
+| FE-4 | Crear detalle para comparación con documento físico | [ ] |
+| FE-4 | Implementar `VERIFIED`/`OBSERVED` y observación obligatoria | [ ] |
+| FE-4 | Mostrar historial de verificaciones | [ ] |
+| FE-4 | Mantener saldo inalterado durante verificación | [ ] |
+| FE-4 | Probar búsqueda, roles, corrección, verificación e inmutabilidad | [ ] |
+| FE-5 | Crear búsqueda de órdenes por número/entidad | [ ] |
+| FE-5 | Mostrar saldos por combustible | [ ] |
+| FE-5 | Crear búsqueda de vales existentes | [ ] |
+| FE-5 | Diferenciar primera atención y atención posterior | [ ] |
+| FE-5 | Capturar vale nuevo y despacho en una operación | [ ] |
+| FE-5 | Enviar atenciones posteriores por `voucher_item_id` | [ ] |
+| FE-5 | Soportar múltiples líneas | [ ] |
+| FE-5 | Mostrar autorización, acumulado y saldo por línea | [ ] |
+| FE-5 | Separar saldo del vale y saldo de la orden | [ ] |
+| FE-5 | Generar `Idempotency-Key` estable | [ ] |
+| FE-5 | Bloquear doble envío y gestionar resultado incierto | [ ] |
+| FE-5 | Procesar duplicidad y dirigir al vale existente | [ ] |
+| FE-5 | Mostrar usuario, sede, hora y saldos tras éxito | [ ] |
+| FE-5 | Refrescar datos sin optimistic update | [ ] |
+| FE-5 | Implementar consulta de atenciones según permisos | [ ] |
+| FE-5 | Probar consulta desde ambas sedes | [ ] |
+| FE-5 | Mantener controles conectados al backend real | [ ] |
+| FE-5 | Probar parciales, completos, concurrencia, idempotencia y roles | [ ] |
+| FE-6 | Crear dashboard con estados loading/empty/error | [ ] |
+| FE-6 | Presentar tarjetas definidas por backend | [ ] |
+| FE-6 | Integrar Chart.js | [ ] |
+| FE-6 | Implementar filtros por fecha, usuario y estado | [ ] |
+| FE-6 | Implementar agrupación temporal | [ ] |
+| FE-6 | Crear reportes tabulares | [ ] |
+| FE-6 | Respetar permisos financieros | [ ] |
+| FE-6 | Implementar descarga PDF/XLSX mediante Blob | [ ] |
+| FE-6 | Preservar filtros en exportación | [ ] |
+| FE-6 | No implementar comparación de períodos ni impresión | [ ] |
+| FE-6 | Validar nombres, unidades, totales y datasets | [ ] |
+| FE-6 | Probar filtros, rangos, permisos y equivalencia de exportaciones | [ ] |
+| FE-7 | Implementar selector de PDF | [ ] |
+| FE-7 | Validar PDF y límites del backend | [ ] |
+| FE-7 | Enviar `multipart/form-data` | [ ] |
+| FE-7 | Mostrar progreso, campos detectados y no reconocidos | [ ] |
+| FE-7 | Prellenar sin marcar datos como validados | [ ] |
+| FE-7 | Permitir corrección manual | [ ] |
+| FE-7 | Exigir revisión y confirmación humana | [ ] |
+| FE-7 | Manejar PDF protegido, dañado, vacío, timeout y errores OCR | [ ] |
+| FE-7 | Limpiar temporales, preview y object URLs | [ ] |
+| FE-7 | Mantener captura manual alternativa | [ ] |
+| FE-7 | Probar escenarios OCR y confirmación humana | [ ] |
+| FE-8 | Ejecutar E2E de los tres roles | [ ] |
+| FE-8 | Validar permisos en UI y servidor | [ ] |
+| FE-8 | Ejecutar ciclo completo de orden a reporte | [ ] |
+| FE-8 | Probar dos sedes sobre la misma orden y vale | [ ] |
+| FE-8 | Probar errores 401, 403, 404, 409, 413, 415, 422, 500 y 503 | [ ] |
+| FE-8 | Revisar mobile, tablet y escritorio | [ ] |
+| FE-8 | Revisar accesibilidad y teclado | [ ] |
+| FE-8 | Optimizar lazy loading y bundles | [ ] |
+| FE-8 | Verificar ambientes, HTTPS y CORS | [ ] |
+| FE-8 | Eliminar mocks del build productivo | [ ] |
+| FE-8 | Actualizar README y documentación | [ ] |
+| FE-8 | Validar build de producción | [ ] |
+| FE-8 | Registrar evidencias, defectos conocidos y aprobación funcional | [ ] |
+
+---
+
 # 18. Trazabilidad backend → frontend
 
 | Fase backend | Entregable backend | Fase frontend | Funcionalidad |
 |---|---|---|---|
 | F0 | Decisiones funcionales, ER y permisos | FE-0 | RF V2, pendientes, contratos y estructura. |
 | F1 | FastAPI, configuración, health y errores | FE-0/FE-1 | Configuración HTTP y manejo de errores. |
-| F2 | Modelos, migraciones y catálogos | FE-0/FE-3 | DTOs, combustibles y formularios de órdenes. |
+| F2 | Modelos, scripts SQL manuales y catálogos | FE-0/FE-3 | DTOs, combustibles y formularios de órdenes; el esquema se mantiene con `001_schema.sql`, `002_seed.sql` y ALTER numerados temporales, sin herramientas automatizadas de migración. |
 | F3 | Login, sesiones, usuarios y RBAC | FE-1/FE-2 | Login, guards, shell y usuarios. |
 | F4 | Órdenes y líneas | FE-3 | Alta, consulta, edición y eliminación de órdenes. |
 | F5 | Vales y atenciones parciales | FE-4/FE-5 | Consulta de vales, primera atención y siguientes atenciones. |

@@ -1,7 +1,7 @@
 """FastAPI application entrypoint."""
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,7 +24,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     title=API_TITLE,
     version=API_VERSION,
-    debug=settings.debug,
+    debug=settings.DEBUG,
     lifespan=lifespan,
 )
 app.add_middleware(
@@ -35,4 +35,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 register_error_handlers(app)
-app.include_router(api_v1_router, prefix=settings.api_v1_prefix)
+app.include_router(api_v1_router, prefix=settings.API_V1_PREFIX)

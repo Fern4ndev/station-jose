@@ -1,0 +1,2912 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Mockup del sistema de control de combustible de Estación de Servicio San José."
+    />
+    <title>San José — Control de combustible</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "SF Pro Display", "Segoe UI", "sans-serif"],
+            },
+            colors: {
+              ink: "#10202A",
+              mint: "#39C6AE",
+              fuel: "#E9A64A",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #10202a;
+        --muted: #78868d;
+        --line: #e7ecee;
+        --paper: #f3f6f5;
+        --mint: #39c6ae;
+        --deep: #102b32;
+        --amber: #e9a64a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background:
+          radial-gradient(ellipse at 68% 0%, rgba(119, 205, 190, 0.13), transparent 32rem),
+          var(--paper);
+        color: var(--ink);
+        font-family: Inter, "SF Pro Display", "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 3px solid rgba(57, 198, 174, 0.72);
+        outline-offset: 3px;
+      }
+
+      .app-layout {
+        display: grid;
+        grid-template-columns: 252px minmax(0, 1fr);
+        min-height: 100vh;
+        padding: 14px;
+        gap: 14px;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 14px;
+        display: flex;
+        height: calc(100vh - 28px);
+        min-height: 670px;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 24px;
+        background:
+          radial-gradient(ellipse at 8% 0%, rgba(77, 157, 157, 0.21), transparent 48%),
+          linear-gradient(160deg, rgba(20, 54, 61, 0.96), rgba(11, 31, 39, 0.98));
+        box-shadow: 0 22px 60px rgba(27, 55, 59, 0.16);
+        color: #eef7f5;
+        padding: 23px 15px 15px;
+        z-index: 20;
+      }
+
+      .sidebar-scrim {
+        display: none;
+      }
+
+      .brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 0 8px 20px;
+      }
+
+      .brand-symbol {
+        display: grid;
+        width: 40px;
+        height: 40px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 14px;
+        background: linear-gradient(145deg, rgba(75, 204, 180, 0.31), rgba(73, 118, 127, 0.2));
+        box-shadow: inset 0 1px rgba(255, 255, 255, 0.21);
+        color: #8be4d2;
+      }
+
+      .brand-name {
+        font-size: 15px;
+        font-weight: 680;
+        letter-spacing: -0.035em;
+      }
+
+      .brand-caption {
+        margin-top: 3px;
+        color: #9db5b8;
+        font-size: 10px;
+        letter-spacing: 0.02em;
+      }
+
+      .branch-switch {
+        display: flex;
+        min-height: 45px;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 2px 24px;
+        padding: 0 11px;
+        border: 1px solid rgba(218, 243, 237, 0.13);
+        border-radius: 13px;
+        background: rgba(235, 250, 246, 0.075);
+        color: #e7f2ef;
+      }
+
+      .branch-switch .branch-label {
+        color: #a7c0c0;
+        font-size: 11px;
+      }
+
+      .branch-switch select {
+        width: 111px;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font-size: 11px;
+        font-weight: 600;
+        outline: none;
+      }
+
+      .branch-switch option {
+        color: var(--ink);
+      }
+
+      .nav-heading {
+        padding: 0 11px 9px;
+        color: #88a6aa;
+        font-size: 10px;
+        font-weight: 650;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .nav-menu {
+        display: grid;
+        gap: 4px;
+      }
+
+      .nav-link {
+        display: flex;
+        width: 100%;
+        min-height: 43px;
+        align-items: center;
+        gap: 12px;
+        padding: 0 11px;
+        border: 1px solid transparent;
+        border-radius: 13px;
+        background: transparent;
+        color: #b7c9c9;
+        text-align: left;
+        transition:
+          background 180ms ease,
+          color 180ms ease,
+          border-color 180ms ease;
+      }
+
+      .nav-link:hover {
+        background: rgba(237, 249, 246, 0.08);
+        color: white;
+      }
+
+      .nav-link.active {
+        border-color: rgba(149, 231, 211, 0.13);
+        background: linear-gradient(100deg, rgba(61, 198, 174, 0.2), rgba(61, 198, 174, 0.07));
+        color: #9cf0dc;
+      }
+
+      .nav-link span {
+        font-size: 12px;
+        font-weight: 540;
+      }
+
+      .nav-link .nav-count {
+        min-width: 22px;
+        margin-left: auto;
+        padding: 3px 6px;
+        border-radius: 7px;
+        background: rgba(233, 166, 74, 0.16);
+        color: #f2c77f;
+        font-size: 10px;
+        text-align: center;
+      }
+
+      .sidebar-spacer {
+        flex: 1;
+      }
+
+      .side-status {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 0 3px 14px;
+        padding: 13px 12px;
+        border: 1px solid rgba(224, 245, 240, 0.11);
+        border-radius: 14px;
+        background: rgba(238, 250, 247, 0.055);
+      }
+
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        flex: 0 0 auto;
+        margin-top: 4px;
+        border-radius: 50%;
+        background: #64d9ae;
+        box-shadow: 0 0 0 4px rgba(100, 217, 174, 0.13);
+      }
+
+      .side-status strong {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .side-status small {
+        display: block;
+        margin-top: 4px;
+        color: #9cb2b5;
+        font-size: 10px;
+      }
+
+      .profile-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 8px 4px;
+        border-top: 1px solid rgba(230, 245, 241, 0.11);
+      }
+
+      .avatar {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #edd6b0, #9ac9bc);
+        color: #16353a;
+        font-size: 11px;
+        font-weight: 750;
+      }
+
+      .profile-name {
+        color: #f4faf8;
+        font-size: 11px;
+        font-weight: 630;
+      }
+
+      .profile-role {
+        margin-top: 3px;
+        color: #a4b9ba;
+        font-size: 10px;
+      }
+
+      .role-demo {
+        width: 100%;
+        margin-top: 10px;
+        padding: 7px 9px;
+        border: 1px solid rgba(230, 245, 241, 0.13);
+        border-radius: 10px;
+        background: rgba(240, 248, 247, 0.07);
+        color: #c1d0d0;
+        font-size: 10px;
+      }
+
+      .main-area {
+        min-width: 0;
+        padding: 0 17px 38px;
+      }
+
+      .topbar {
+        display: flex;
+        min-height: 73px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .crumbs {
+        color: #87949a;
+        font-size: 11px;
+      }
+
+      .crumbs strong {
+        color: #263b43;
+        font-weight: 620;
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .search-box {
+        display: flex;
+        width: min(250px, 25vw);
+        height: 38px;
+        align-items: center;
+        gap: 8px;
+        padding: 0 11px;
+        border: 1px solid rgba(210, 221, 222, 0.95);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.67);
+        color: #829096;
+        backdrop-filter: blur(18px);
+      }
+
+      .search-box input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        background: transparent;
+        color: var(--ink);
+        font-size: 11px;
+        outline: none;
+      }
+
+      .icon-button {
+        display: grid;
+        width: 39px;
+        height: 39px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid #dfe6e7;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.73);
+        color: #51646a;
+        transition: background 160ms ease;
+      }
+
+      .icon-button:hover {
+        background: white;
+      }
+
+      .notification-button {
+        position: relative;
+      }
+
+      .notification-button::after {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 6px;
+        height: 6px;
+        border: 1px solid white;
+        border-radius: 50%;
+        background: #ef9e4c;
+        content: "";
+      }
+
+      .mobile-menu {
+        display: none;
+      }
+
+      .page-view {
+        animation: arrive 230ms ease both;
+      }
+
+      .page-view[hidden] {
+        display: none;
+      }
+
+      @keyframes arrive {
+        from {
+          opacity: 0.7;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .page-heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin: 10px 0 22px;
+      }
+
+      .page-heading h1 {
+        margin: 0;
+        color: #13262e;
+        font-size: clamp(24px, 3vw, 31px);
+        font-weight: 650;
+        letter-spacing: -0.055em;
+        line-height: 1.08;
+      }
+
+      .page-heading p {
+        margin: 8px 0 0;
+        color: #77868b;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .heading-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 39px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 13px;
+        border: 1px solid transparent;
+        border-radius: 11px;
+        font-size: 11px;
+        font-weight: 620;
+        transition:
+          background 160ms ease,
+          box-shadow 160ms ease;
+        white-space: nowrap;
+      }
+
+      .button-primary {
+        background: #173c42;
+        box-shadow: 0 5px 12px rgba(23, 60, 66, 0.13);
+        color: white;
+      }
+
+      .button-primary:hover {
+        background: #20545a;
+      }
+
+      .button-secondary {
+        border-color: #dce5e6;
+        background: rgba(255, 255, 255, 0.72);
+        color: #53656a;
+      }
+
+      .button-secondary:hover {
+        background: white;
+      }
+
+      .button-soft {
+        background: rgba(57, 198, 174, 0.11);
+        color: #247d70;
+      }
+
+      .button-small {
+        min-height: 31px;
+        padding: 0 9px;
+        border-radius: 9px;
+        font-size: 10px;
+      }
+
+      .glass-panel {
+        border: 1px solid rgba(255, 255, 255, 0.82);
+        background: rgba(255, 255, 255, 0.73);
+        box-shadow:
+          0 10px 32px rgba(34, 62, 65, 0.055),
+          inset 0 1px rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(22px);
+      }
+
+      .hero-panel {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1.22fr) minmax(250px, 0.78fr);
+        min-height: 214px;
+        overflow: hidden;
+        border: 1px solid rgba(37, 75, 79, 0.58);
+        border-radius: 22px;
+        background:
+          radial-gradient(ellipse at 86% 22%, rgba(90, 202, 180, 0.26), transparent 27%),
+          radial-gradient(ellipse at 10% 110%, rgba(234, 166, 74, 0.1), transparent 36%),
+          linear-gradient(110deg, #14373e 0%, #102d35 59%, #153b3e 100%);
+        box-shadow: 0 18px 38px rgba(28, 68, 70, 0.16);
+        color: #f1f8f6;
+      }
+
+      .hero-copy {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 26px 30px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #9bd9cb;
+        font-size: 10px;
+        font-weight: 650;
+        letter-spacing: 0.045em;
+      }
+
+      .eyebrow .live-dot {
+        width: 6px;
+        height: 6px;
+        margin: 0;
+        box-shadow: none;
+      }
+
+      .hero-copy h2 {
+        max-width: 490px;
+        margin: 14px 0 9px;
+        font-size: clamp(23px, 2.5vw, 30px);
+        font-weight: 560;
+        letter-spacing: -0.045em;
+        line-height: 1.15;
+      }
+
+      .hero-copy p {
+        max-width: 430px;
+        margin: 0;
+        color: #b1c9c8;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .hero-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        align-self: flex-start;
+        margin-top: 19px;
+        padding: 8px 0;
+        border: 0;
+        background: transparent;
+        color: #a9ecdc;
+        font-size: 11px;
+        font-weight: 620;
+      }
+
+      .hero-link:hover {
+        color: white;
+      }
+
+      .branch-orbit {
+        position: relative;
+        display: grid;
+        align-content: center;
+        gap: 10px;
+        padding: 26px 26px 26px 4px;
+      }
+
+      .branch-orbit::before {
+        position: absolute;
+        top: 20%;
+        bottom: 20%;
+        left: -12px;
+        width: 1px;
+        background: linear-gradient(transparent, rgba(206, 244, 233, 0.28), transparent);
+        content: "";
+      }
+
+      .branch-glass {
+        display: grid;
+        grid-template-columns: 34px 1fr auto;
+        align-items: center;
+        gap: 10px;
+        min-height: 62px;
+        padding: 10px 12px;
+        border: 1px solid rgba(220, 246, 239, 0.16);
+        border-radius: 15px;
+        background: rgba(233, 250, 245, 0.075);
+        box-shadow: inset 0 1px rgba(255, 255, 255, 0.09);
+        backdrop-filter: blur(18px);
+      }
+
+      .branch-orb {
+        display: grid;
+        width: 31px;
+        height: 31px;
+        place-items: center;
+        border: 1px solid rgba(143, 226, 205, 0.22);
+        border-radius: 11px;
+        background: rgba(79, 194, 169, 0.15);
+        color: #a6ecda;
+      }
+
+      .branch-glass strong {
+        display: block;
+        color: #f2f8f6;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .branch-glass small {
+        display: block;
+        margin-top: 4px;
+        color: #a9c1c0;
+        font-size: 9px;
+      }
+
+      .branch-open {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #9fe3c7;
+        font-size: 9px;
+        white-space: nowrap;
+      }
+
+      .branch-open::before {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #70d7a7;
+        content: "";
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin: 14px 0;
+      }
+
+      .stat-card {
+        min-height: 115px;
+        padding: 15px 16px;
+        border: 1px solid #e6ebeb;
+        border-radius: 17px;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 6px 21px rgba(31, 58, 60, 0.035);
+      }
+
+      .stat-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #77868b;
+        font-size: 10px;
+        font-weight: 540;
+      }
+
+      .stat-icon {
+        display: grid;
+        width: 29px;
+        height: 29px;
+        place-items: center;
+        border-radius: 10px;
+        background: #edf7f4;
+        color: #2e8b7b;
+      }
+
+      .stat-icon.amber {
+        background: #fcf3e7;
+        color: #b87825;
+      }
+
+      .stat-value {
+        margin-top: 11px;
+        color: #183039;
+        font-size: 23px;
+        font-weight: 650;
+        letter-spacing: -0.05em;
+      }
+
+      .stat-note {
+        margin-top: 4px;
+        color: #8b979b;
+        font-size: 9px;
+      }
+
+      .stat-note em {
+        color: #318b77;
+        font-style: normal;
+        font-weight: 650;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+        gap: 13px;
+      }
+
+      .panel {
+        min-width: 0;
+        border: 1px solid #e5ebeb;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.79);
+        box-shadow: 0 7px 23px rgba(31, 58, 60, 0.035);
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 17px 18px 13px;
+      }
+
+      .panel-header h3 {
+        margin: 0;
+        color: #22373e;
+        font-size: 12px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+      }
+
+      .panel-header p {
+        margin: 5px 0 0;
+        color: #8c999d;
+        font-size: 9px;
+      }
+
+      .text-button {
+        display: inline-flex;
+        min-height: 30px;
+        align-items: center;
+        gap: 5px;
+        padding: 0 4px;
+        border: 0;
+        background: transparent;
+        color: #3a8176;
+        font-size: 10px;
+        font-weight: 630;
+      }
+
+      .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      th {
+        padding: 10px 13px;
+        border-top: 1px solid #edf0f0;
+        border-bottom: 1px solid #edf0f0;
+        background: rgba(244, 247, 246, 0.65);
+        color: #839095;
+        font-size: 10px;
+        font-weight: 620;
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 12px 13px;
+        border-bottom: 1px solid #eff2f2;
+        color: #52636a;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+
+      tbody tr:hover {
+        background: rgba(238, 247, 244, 0.5);
+      }
+
+      .cell-primary {
+        display: block;
+        color: #243941;
+        font-size: 11px;
+        font-weight: 630;
+      }
+
+      .cell-secondary {
+        display: block;
+        margin-top: 4px;
+        color: #98a2a5;
+        font-size: 10px;
+      }
+
+      .status {
+        display: inline-flex;
+        min-height: 23px;
+        align-items: center;
+        gap: 5px;
+        padding: 0 8px;
+        border-radius: 8px;
+        font-size: 9px;
+        font-weight: 610;
+      }
+
+      .status::before {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+        content: "";
+      }
+
+      .status-green {
+        background: #e9f6f0;
+        color: #397f67;
+      }
+
+      .status-amber {
+        background: #fbf1e2;
+        color: #a76e24;
+      }
+
+      .status-blue {
+        background: #eaf2f6;
+        color: #4a768d;
+      }
+
+      .status-gray {
+        background: #edf0f0;
+        color: #6f7a7d;
+      }
+
+      .queue-list {
+        display: grid;
+        gap: 0;
+        padding: 0 16px 6px;
+      }
+
+      .queue-item {
+        display: grid;
+        grid-template-columns: 33px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 2px;
+        border-top: 1px solid #edf0f0;
+      }
+
+      .queue-icon {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 11px;
+        background: #fbf3e6;
+        color: #a8752e;
+      }
+
+      .queue-title {
+        color: #2c4148;
+        font-size: 10px;
+        font-weight: 620;
+      }
+
+      .queue-meta {
+        margin-top: 4px;
+        color: #929da0;
+        font-size: 9px;
+      }
+
+      .queue-action {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border: 1px solid #e5eaea;
+        border-radius: 9px;
+        background: white;
+        color: #5d7477;
+      }
+
+      .queue-action:hover {
+        border-color: #a9d8cd;
+        color: #287e6e;
+      }
+
+      .section-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 15px;
+        border-bottom: 1px solid #edf0f0;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .filter-chip {
+        min-height: 30px;
+        padding: 0 10px;
+        border: 1px solid #e2e8e8;
+        border-radius: 9px;
+        background: white;
+        color: #607076;
+        font-size: 10px;
+      }
+
+      .filter-chip.selected {
+        border-color: #b8ddd3;
+        background: #ecf8f4;
+        color: #2c796d;
+      }
+
+      .select-control,
+      .input-control,
+      .textarea-control {
+        min-height: 39px;
+        width: 100%;
+        padding: 0 11px;
+        border: 1px solid #dce5e5;
+        border-radius: 10px;
+        background: white;
+        color: #30464d;
+        font-size: 11px;
+      }
+
+      .textarea-control {
+        min-height: 88px;
+        padding: 10px 11px;
+        resize: vertical;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field.full {
+        grid-column: 1 / -1;
+      }
+
+      .field label {
+        color: #52646a;
+        font-size: 10px;
+        font-weight: 620;
+      }
+
+      .field-hint {
+        color: #919da0;
+        font-size: 9px;
+        line-height: 1.5;
+      }
+
+      .balance-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 14px;
+        border: 1px solid #dceee8;
+        border-radius: 12px;
+        background: #f2faf6;
+        color: #386e61;
+        font-size: 10px;
+      }
+
+      .balance-card strong {
+        color: #225d50;
+        font-size: 14px;
+        letter-spacing: -0.03em;
+      }
+
+      .progress-track {
+        height: 6px;
+        overflow: hidden;
+        border-radius: 99px;
+        background: #e7eeee;
+      }
+
+      .progress-bar {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #59bea6, #a4dbc3);
+      }
+
+      .report-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.75fr);
+        gap: 13px;
+      }
+
+      .chart-wrap {
+        padding: 5px 18px 15px;
+      }
+
+      .chart {
+        display: flex;
+        height: 205px;
+        align-items: flex-end;
+        gap: 15px;
+        padding: 18px 4px 28px;
+        border-bottom: 1px solid #e8eded;
+        background:
+          linear-gradient(to bottom, transparent 24%, #edf1f0 24%, #edf1f0 24.7%, transparent 24.7%),
+          linear-gradient(to bottom, transparent 49%, #edf1f0 49%, #edf1f0 49.7%, transparent 49.7%),
+          linear-gradient(to bottom, transparent 74%, #edf1f0 74%, #edf1f0 74.7%, transparent 74.7%);
+      }
+
+      .bar-set {
+        display: flex;
+        height: 100%;
+        flex: 1;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 4px;
+        position: relative;
+      }
+
+      .bar {
+        width: min(17px, 32%);
+        min-height: 4px;
+        border-radius: 6px 6px 2px 2px;
+        background: linear-gradient(180deg, #5fc7ae, #45a894);
+        transition: height 220ms ease;
+      }
+
+      .bar.secondary {
+        background: linear-gradient(180deg, #a8d7ce, #7ab8ad);
+      }
+
+      .bar-set span {
+        position: absolute;
+        bottom: -19px;
+        color: #89969a;
+        font-size: 9px;
+      }
+
+      .legend {
+        display: flex;
+        gap: 15px;
+        padding-top: 12px;
+        color: #78878b;
+        font-size: 9px;
+      }
+
+      .legend i {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        margin-right: 5px;
+        border-radius: 2px;
+        background: #50b49f;
+      }
+
+      .legend .legend-second {
+        background: #9dcfc4;
+      }
+
+      .summary-list {
+        display: grid;
+        gap: 16px;
+        padding: 4px 18px 19px;
+      }
+
+      .summary-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: #77868b;
+        font-size: 10px;
+      }
+
+      .summary-row strong {
+        color: #263d44;
+        font-size: 11px;
+        font-weight: 650;
+      }
+
+      .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .mini-avatar {
+        display: grid;
+        width: 27px;
+        height: 27px;
+        place-items: center;
+        border-radius: 9px;
+        background: #e8f1ec;
+        color: #49796a;
+        font-size: 9px;
+        font-weight: 700;
+      }
+
+      .toggle {
+        position: relative;
+        width: 34px;
+        height: 20px;
+        padding: 0;
+        border: 0;
+        border-radius: 99px;
+        background: #cbd4d4;
+        transition: background 160ms ease;
+      }
+
+      .toggle::after {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        content: "";
+        transition: transform 160ms ease;
+      }
+
+      .toggle.on {
+        background: #51b89e;
+      }
+
+      .toggle.on::after {
+        transform: translateX(14px);
+      }
+
+      .empty-state {
+        padding: 30px 16px;
+        color: #8b989c;
+        font-size: 11px;
+        text-align: center;
+      }
+
+      dialog {
+        max-width: min(570px, calc(100vw - 28px));
+        width: 100%;
+        max-height: min(90vh, 760px);
+        padding: 0;
+        overflow: auto;
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        background: #fdfefe;
+        box-shadow: 0 28px 90px rgba(9, 32, 38, 0.28);
+        color: var(--ink);
+      }
+
+      dialog::backdrop {
+        background: rgba(13, 35, 40, 0.38);
+        backdrop-filter: blur(6px);
+      }
+
+      .dialog-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 21px 16px;
+        border-bottom: 1px solid #edf0f0;
+      }
+
+      .dialog-head h2 {
+        margin: 0;
+        color: #21383f;
+        font-size: 17px;
+        font-weight: 650;
+        letter-spacing: -0.04em;
+      }
+
+      .dialog-head p {
+        margin: 6px 0 0;
+        color: #839095;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      .dialog-body {
+        padding: 18px 21px;
+      }
+
+      .dialog-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 14px 21px 18px;
+        border-top: 1px solid #edf0f0;
+        background: #fbfcfc;
+      }
+
+      .dropzone {
+        display: grid;
+        min-height: 85px;
+        place-items: center;
+        padding: 12px;
+        border: 1px dashed #bbd5d0;
+        border-radius: 12px;
+        background: #f7fbfa;
+        color: #53746f;
+        text-align: center;
+      }
+
+      .dropzone span {
+        display: block;
+        margin-top: 5px;
+        color: #89999b;
+        font-size: 9px;
+      }
+
+      .toast {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 60;
+        display: flex;
+        max-width: min(360px, calc(100vw - 32px));
+        align-items: center;
+        gap: 10px;
+        padding: 13px 16px;
+        border: 1px solid rgba(219, 239, 232, 0.8);
+        border-radius: 14px;
+        background: rgba(19, 51, 56, 0.95);
+        box-shadow: 0 14px 35px rgba(12, 41, 43, 0.24);
+        color: #f2fbf7;
+        font-size: 11px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition:
+          opacity 180ms ease,
+          transform 180ms ease;
+        backdrop-filter: blur(20px);
+      }
+
+      .toast.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .toast-mark {
+        display: grid;
+        width: 20px;
+        height: 20px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 7px;
+        background: rgba(106, 218, 182, 0.19);
+        color: #a7efd7;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 1050px) {
+        .app-layout {
+          grid-template-columns: 220px minmax(0, 1fr);
+          padding: 10px;
+          gap: 10px;
+        }
+
+        .sidebar {
+          top: 10px;
+          height: calc(100vh - 20px);
+        }
+
+        .main-area {
+          padding-right: 8px;
+          padding-left: 8px;
+        }
+
+        .hero-panel {
+          grid-template-columns: minmax(0, 1fr) minmax(225px, 0.75fr);
+        }
+
+        .hero-copy {
+          padding: 23px;
+        }
+
+        .branch-orbit {
+          padding-right: 18px;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 760px) {
+        .app-layout {
+          display: block;
+          padding: 8px;
+        }
+
+        .sidebar {
+          position: fixed;
+          top: 8px;
+          bottom: 8px;
+          left: 8px;
+          width: min(285px, calc(100vw - 24px));
+          height: auto;
+          min-height: 0;
+          transform: translateX(calc(-100% - 14px));
+          transition: none;
+        }
+
+        .sidebar.open {
+          transform: translateX(0);
+        }
+
+        .sidebar-scrim {
+          position: fixed;
+          inset: 0;
+          z-index: 19;
+          display: none;
+          background: rgba(16, 36, 40, 0.32);
+          backdrop-filter: blur(3px);
+        }
+
+        .sidebar-scrim.visible {
+          display: block;
+        }
+
+        .main-area {
+          padding: 0 5px 28px;
+        }
+
+        .topbar {
+          min-height: 59px;
+        }
+
+        .mobile-menu {
+          display: grid;
+        }
+
+        .topbar-left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .crumbs {
+          font-size: 10px;
+        }
+
+        .search-box {
+          width: 39px;
+          padding: 0 10px;
+          border-radius: 12px;
+        }
+
+        .search-box:focus-within {
+          position: absolute;
+          top: 63px;
+          right: 15px;
+          left: 15px;
+          z-index: 5;
+          width: auto;
+          box-shadow: 0 8px 24px rgba(20, 47, 49, 0.14);
+        }
+
+        .search-box input {
+          width: 0;
+        }
+
+        .search-box:focus-within input {
+          width: 100%;
+        }
+
+        .top-actions {
+          gap: 6px;
+        }
+
+        .top-actions .notification-button {
+          display: none;
+        }
+
+        .page-heading {
+          align-items: flex-start;
+          flex-direction: column;
+          margin: 12px 0 17px;
+        }
+
+        .page-heading h1 {
+          font-size: 25px;
+        }
+
+        .page-heading p {
+          max-width: 310px;
+          font-size: 11px;
+        }
+
+        .hero-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-copy {
+          padding: 23px 21px 12px;
+        }
+
+        .hero-copy h2 {
+          max-width: 380px;
+          font-size: 25px;
+        }
+
+        .branch-orbit {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          padding: 13px 17px 19px;
+        }
+
+        .branch-orbit::before {
+          display: none;
+        }
+
+        .branch-glass {
+          grid-template-columns: 31px 1fr;
+          padding: 9px;
+        }
+
+        .branch-open {
+          grid-column: 2;
+          margin-top: -6px;
+        }
+
+        .stats-grid {
+          gap: 8px;
+          margin: 10px 0;
+        }
+
+        .stat-card {
+          min-height: 104px;
+          padding: 12px;
+          border-radius: 14px;
+        }
+
+        .stat-value {
+          font-size: 21px;
+        }
+
+        .dashboard-grid,
+        .report-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .panel {
+          border-radius: 15px;
+        }
+
+        .panel-header {
+          padding: 15px 14px 12px;
+        }
+
+        .section-toolbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .section-toolbar .input-control {
+          max-width: none !important;
+          width: 100% !important;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .field.full {
+          grid-column: auto;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .branch-orbit {
+          grid-template-columns: 1fr;
+        }
+
+        .branch-glass {
+          grid-template-columns: 32px 1fr auto;
+        }
+
+        .branch-open {
+          grid-column: auto;
+          margin-top: 0;
+        }
+
+        .heading-actions {
+          width: 100%;
+        }
+
+        .heading-actions .button {
+          flex: 1;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-layout min-h-screen w-full">
+      <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
+        <div class="brand-lockup">
+          <div class="brand-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+              <path d="M5 19V6.8C5 5.25 6.25 4 7.8 4h5.4C14.75 4 16 5.25 16 6.8V19M3.5 19h14M8 8h5M8 11h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M16 8.5h2.1a1.4 1.4 0 0 1 1.4 1.4v5.6a1.5 1.5 0 0 0 3 0v-4.1l-2.2-2.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M8.2 19v-3.1a2.3 2.3 0 0 1 4.6 0V19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div>
+            <div class="brand-name">San José</div>
+            <div class="brand-caption">Control de combustible</div>
+          </div>
+        </div>
+
+        <label class="branch-switch" id="branchSelector">
+          <span>
+            <span class="branch-label">Sede activa</span>
+          </span>
+          <select id="branchFilter" aria-label="Filtrar por sede">
+            <option value="Todas las sedes">Todas las sedes</option>
+            <option value="San José">San José</option>
+            <option value="Santa Marta">Santa Marta</option>
+          </select>
+        </label>
+
+        <div class="nav-heading">Espacio de trabajo</div>
+        <nav class="nav-menu" id="navMenu"></nav>
+
+        <div class="sidebar-spacer"></div>
+        <div class="side-status">
+          <span class="live-dot" aria-hidden="true"></span>
+          <div>
+            <strong>Dos sedes conectadas</strong>
+            <small>Los saldos se comparten en línea</small>
+          </div>
+        </div>
+        <div class="profile-card">
+          <div class="avatar" id="profileAvatar">MP</div>
+          <div>
+            <div class="profile-name" id="profileName">María Paredes</div>
+            <div class="profile-role" id="profileRole">Personal de oficina</div>
+          </div>
+        </div>
+        <label class="sr-only" for="roleSwitch">Cambiar perfil de demostración</label>
+        <select class="role-demo" id="roleSwitch">
+          <option value="OFFICE">Vista de oficina</option>
+          <option value="ADMIN">Vista de administrador</option>
+          <option value="ATTENDANT">Vista de grifero</option>
+        </select>
+      </aside>
+
+      <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+      <main class="main-area">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="icon-button mobile-menu" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              </svg>
+            </button>
+            <div class="crumbs">Estación de Servicio <span aria-hidden="true">/</span> <strong id="breadcrumb">Panel de control</strong></div>
+          </div>
+          <div class="top-actions">
+            <label class="search-box">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7" />
+                <path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              </svg>
+              <input id="globalSearch" type="search" placeholder="Buscar orden, vale…" aria-label="Buscar órdenes o vales" />
+            </label>
+            <button class="icon-button notification-button" id="notificationButton" aria-label="Ver pendientes">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+                <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <button class="icon-button" id="profileButton" aria-label="Perfil y sesión">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.3" stroke="currentColor" stroke-width="1.6" />
+                <path d="M5.2 20a6.8 6.8 0 0 1 13.6 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <section class="page-view" id="page-dashboard" data-page-view="dashboard">
+          <div class="page-heading">
+            <div>
+              <h1>Buen día, María</h1>
+              <p>Así se mueve la operación en tus dos sedes hoy.</p>
+            </div>
+            <div class="heading-actions">
+              <span class="crumbs" id="todayLabel"></span>
+              <button class="button button-secondary" id="dashboardReportAction" data-action="reports">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                  <path d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8v-6m4 6v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Ver reportes
+              </button>
+            </div>
+          </div>
+
+          <div class="hero-panel">
+            <div class="hero-copy">
+              <div class="eyebrow"><span class="live-dot" aria-hidden="true"></span> Operación compartida</div>
+              <h2>Una operación.<br />Dos sedes. Un mismo control.</h2>
+              <p>Órdenes, vales y saldos se mantienen sincronizados para que cada despacho empiece con información clara.</p>
+              <button class="hero-link" data-action="orders">
+                Explorar órdenes
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                  <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+            <div class="branch-orbit" aria-label="Estado de las sedes">
+              <div class="branch-glass" data-branch-card="san-jose">
+                <span class="branch-orb" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                    <path d="M4 20V8l8-4 8 4v12M8 20v-6h8v6M8 9h.01M16 9h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span><strong>San José</strong><small><span id="sanJoseOrders">3</span> órdenes con saldo</small></span>
+                <span class="branch-open">Operativa</span>
+              </div>
+              <div class="branch-glass" data-branch-card="santa-marta">
+                <span class="branch-orb" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                    <path d="M4 20V8l8-4 8 4v12M8 20v-6h8v6M8 9h.01M16 9h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span><strong>Santa Marta</strong><small><span id="santaMartaOrders">2</span> órdenes con saldo</small></span>
+                <span class="branch-open">Operativa</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid" aria-label="Resumen de hoy">
+            <article class="stat-card">
+              <div class="stat-top"><span id="metricOrdersLabel">Órdenes activas</span><span class="stat-icon">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M9 13h6m-6 4h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </span></div>
+              <div class="stat-value" id="activeOrdersMetric">07</div>
+              <div class="stat-note"><em>En ambas sedes</em> · con saldo disponible</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span id="metricGallonsLabel">Galones despachados</span><span class="stat-icon">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M12 3.5S6.5 10 6.5 14.6a5.5 5.5 0 1 0 11 0C17.5 10 12 3.5 12 3.5Z" stroke="currentColor" stroke-width="1.6" /><path d="M9.5 15.5a2.5 2.5 0 0 0 2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+              </span></div>
+              <div class="stat-value" id="gallonsMetric">184.5 <small style="font-size: 11px; font-weight: 560; letter-spacing: 0">gal</small></div>
+              <div class="stat-note">Total registrado hoy</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span id="metricVouchersLabel">Vales con saldo</span><span class="stat-icon amber">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6V7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" /><path d="M9 9v.01M9 12v.01M9 15v.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+              </span></div>
+              <div class="stat-value" id="activeVouchersMetric">12</div>
+              <div class="stat-note">Disponibles o parcialmente atendidos</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span id="metricPendingLabel">Por verificar</span><span class="stat-icon amber">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M12 8v4l2.5 1.5M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </span></div>
+              <div class="stat-value" id="pendingMetric">03</div>
+              <div class="stat-note"><em>Revisión de vales físicos</em></div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel" id="dashboardReviewPanel">
+              <div class="panel-header">
+                <div><h3>Actividad reciente</h3><p>Despachos registrados en ambas sedes</p></div>
+                <button class="text-button" data-action="attendances">Ver actividad
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>VALE / ORDEN</th><th>GRIFERO</th><th>SEDE</th><th>DESPACHADO</th><th>ESTADO</th></tr></thead>
+                  <tbody id="recentAttendanceRows"></tbody>
+                </table>
+              </div>
+            </section>
+            <section class="panel">
+              <div class="panel-header">
+                <div><h3>Revisión en oficina</h3><p>Vales físicos pendientes de cotejo</p></div>
+                <span class="status status-amber" id="reviewCount">3 pendientes</span>
+              </div>
+              <div class="queue-list" id="reviewQueue"></div>
+              <div style="padding: 0 17px 13px">
+                <button class="text-button" data-action="verifications">Abrir bandeja de revisión
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="page-view" id="page-orders" data-page-view="orders" hidden>
+          <div class="page-heading">
+            <div><h1>Órdenes de compra</h1><p>Consulta autorizaciones y saldo disponible por combustible.</p></div>
+            <div class="heading-actions">
+              <button class="button button-secondary" id="ocrOrderButton">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M9 13h6m-6 4h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                Importar PDF
+              </button>
+              <button class="button button-primary" id="newOrderButton">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+                Nueva orden
+              </button>
+            </div>
+          </div>
+          <section class="panel">
+            <div class="section-toolbar">
+              <div class="filter-group" role="group" aria-label="Filtrar órdenes">
+                <button class="filter-chip selected" data-filter="order" data-value="Todas">Todas</button>
+                <button class="filter-chip" data-filter="order" data-value="Con saldo">Con saldo</button>
+                <button class="filter-chip" data-filter="order" data-value="Agotadas">Agotadas</button>
+              </div>
+              <input class="input-control" id="orderSearch" type="search" placeholder="Buscar por orden o entidad" style="max-width: 250px" aria-label="Buscar órdenes por número o entidad" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ORDEN / ENTIDAD</th><th>SEDE</th><th>EMITIDA</th><th>COMBUSTIBLE</th><th>AUTORIZADO</th><th>DISPONIBLE</th><th>ESTADO</th><th></th></tr></thead>
+                <tbody id="orderRows"></tbody>
+              </table>
+            </div>
+            <div class="panel-header"><p id="orderCountText">Mostrando órdenes</p><button class="text-button" id="orderMore">Cargar más</button></div>
+          </section>
+        </section>
+
+        <section class="page-view" id="page-vouchers" data-page-view="vouchers" hidden>
+          <div class="page-heading">
+            <div><h1>Vales</h1><p>Cada vale se registra con su primera atención y conserva el saldo pendiente.</p></div>
+            <div class="heading-actions"><button class="button button-secondary" data-action="orders">Consultar órdenes</button></div>
+          </div>
+          <section class="panel">
+            <div class="section-toolbar">
+              <div class="filter-group" role="group" aria-label="Filtrar vales">
+                <button class="filter-chip selected" data-filter="voucher" data-value="Todos">Todos</button>
+                <button class="filter-chip" data-filter="voucher" data-value="Disponible">Disponibles</button>
+                <button class="filter-chip" data-filter="voucher" data-value="Parcial">Parciales</button>
+                <button class="filter-chip" data-filter="voucher" data-value="Agotado">Agotados</button>
+              </div>
+              <input class="input-control" id="voucherSearch" type="search" placeholder="Número, entidad u orden" style="max-width: 250px" aria-label="Buscar vales" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>N.º DE VALE</th><th>ORDEN / EMISOR</th><th>COMBUSTIBLE</th><th>ATENDIDO</th><th>SALDO DEL VALE</th><th>VERIFICACIÓN</th><th></th></tr></thead>
+                <tbody id="voucherRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-view" id="page-attendances" data-page-view="attendances" hidden>
+          <div class="page-heading">
+            <div><h1>Registrar despacho</h1><p>Valida el saldo y registra los galones realmente entregados.</p></div>
+            <div class="heading-actions"><span class="status status-green">Transacción protegida</span></div>
+          </div>
+          <div class="dashboard-grid">
+            <section class="panel" style="padding-bottom: 17px">
+              <div class="panel-header"><div><h3>Nueva atención</h3><p>En la primera atención se capturan los datos del vale físico.</p></div></div>
+              <form id="attendanceForm" style="padding: 4px 18px 0">
+                <div class="form-grid">
+                  <div class="field full"><label for="attendanceOrder">Orden de compra</label><select class="select-control" id="attendanceOrder" required></select></div>
+                  <div class="field"><label for="attendanceVoucher">Número de vale</label><input class="input-control" id="attendanceVoucher" placeholder="Ej. VM-2026-0142" required /><span class="field-hint" id="attendanceVoucherHint">Si el vale ya existe, escribe el mismo número para continuar su saldo.</span></div>
+                  <div class="field"><label for="attendanceIssuerType">Tipo de emisor</label><select class="select-control" id="attendanceIssuerType"><option value="INSTITUTION">Institución</option><option value="STATION">Estación</option></select></div>
+                  <div class="field full"><label for="attendanceIssuer">Nombre del emisor</label><input class="input-control" id="attendanceIssuer" placeholder="Nombre según vale físico" required /></div>
+                  <div class="field"><label for="attendanceAuthorized">Galones autorizados en el vale</label><input class="input-control" id="attendanceAuthorized" type="number" min="0.001" step="0.001" placeholder="0.000" required /></div>
+                  <div class="field"><label for="attendanceGallons">Galones entregados hoy</label><input class="input-control" id="attendanceGallons" type="number" min="0.001" step="0.001" placeholder="0.000" required /></div>
+                  <div class="field"><label for="attendanceBranch">Sede de despacho</label><select class="select-control" id="attendanceBranch"><option>San José</option><option>Santa Marta</option></select></div>
+                  <div class="field full"><label>Saldo de la orden</label><div class="balance-card"><span>Disponible antes del despacho <span class="field-hint" id="orderFuelLabel"></span></span><strong id="orderBalance">— gal</strong></div></div>
+                  <div class="field full"><div class="field-hint">El sistema registra la atención con tu usuario y la hora del servidor. Si el vale ya existe, se conserva su saldo y su historial.</div></div>
+                  <div class="field full"><button class="button button-primary" type="submit" style="width: 100%">Confirmar despacho</button></div>
+                </div>
+              </form>
+            </section>
+            <section class="panel">
+              <div class="panel-header"><div><h3>Últimos despachos</h3><p>Actividad registrada por los griferos</p></div><span class="status status-blue">Hoy</span></div>
+              <div class="queue-list" id="attendanceActivity"></div>
+              <div style="padding: 0 17px 13px"><button class="text-button" data-action="vouchers">Consultar saldos de vales</button></div>
+            </section>
+          </div>
+          <section class="panel" style="margin-top: 13px">
+            <div class="panel-header"><div><h3>Historial de atenciones</h3><p>Las atenciones confirmadas no se editan ni eliminan desde esta vista.</p></div></div>
+            <div class="table-wrap"><table><thead><tr><th>FECHA Y HORA</th><th>VALE / ORDEN</th><th>GRIFERO</th><th>SEDE</th><th>GALONES</th><th>VERIFICACIÓN</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
+          </section>
+        </section>
+
+        <section class="page-view" id="page-verifications" data-page-view="verifications" hidden>
+          <div class="page-heading">
+            <div><h1>Verificación de vales</h1><p>Coteja los datos capturados con el documento físico recibido en oficina.</p></div>
+            <div class="heading-actions"><span class="status status-amber" id="verificationTotal">3 por revisar</span></div>
+          </div>
+          <section class="panel">
+            <div class="section-toolbar">
+              <div class="filter-group" role="group" aria-label="Filtrar verificaciones">
+                <button class="filter-chip selected" data-filter="review" data-value="Pendiente">Pendientes</button>
+                <button class="filter-chip" data-filter="review" data-value="Verificado">Verificados</button>
+                <button class="filter-chip" data-filter="review" data-value="Observado">Observados</button>
+              </div>
+              <span class="crumbs">La oficina verifica; no vuelve a registrar el vale.</span>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>VALE / ENTIDAD</th><th>ORDEN</th><th>CAPTURADO POR</th><th>DESPACHADO</th><th>FECHA</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead><tbody id="verificationRows"></tbody></table></div>
+          </section>
+        </section>
+
+        <section class="page-view" id="page-reports" data-page-view="reports" hidden>
+          <div class="page-heading">
+            <div><h1>Reportes</h1><p>Consulta actividad y saldos por período, sede, usuario o estado.</p></div>
+            <div class="heading-actions">
+              <select class="select-control" id="reportPeriod" style="width: auto"><option>Últimos 7 días</option><option>Este mes</option><option>Este año</option></select>
+              <button class="button button-primary" id="exportReport">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                Exportar
+              </button>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <article class="stat-card"><div class="stat-top"><span>Galones atendidos</span><span class="stat-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M12 3.5S6.5 10 6.5 14.6a5.5 5.5 0 1 0 11 0C17.5 10 12 3.5 12 3.5Z" stroke="currentColor" stroke-width="1.6" /><path d="M9.5 15.5a2.5 2.5 0 0 0 2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></span></div><div class="stat-value">1,284.5</div><div class="stat-note">En el período seleccionado</div></article>
+            <article class="stat-card"><div class="stat-top"><span>Atenciones</span><span class="stat-icon amber"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8v-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span></div><div class="stat-value">86</div><div class="stat-note">En ambas sedes</div></article>
+            <article class="stat-card"><div class="stat-top"><span>Órdenes activas</span><span class="stat-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M9 13h6m-6 4h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span></div><div class="stat-value">07</div><div class="stat-note">Con saldo pendiente</div></article>
+            <article class="stat-card"><div class="stat-top"><span>Vales por verificar</span><span class="stat-icon amber"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6" /><path d="M12 8v4l2.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></span></div><div class="stat-value" id="reportPending">03</div><div class="stat-note">Revisión de documento físico</div></article>
+          </div>
+          <div class="report-grid">
+            <section class="panel">
+              <div class="panel-header"><div><h3>Galones despachados</h3><p>Actividad diaria por sede</p></div><span class="status status-green">Últimos 7 días</span></div>
+              <div class="chart-wrap">
+                <div class="chart" role="img" aria-label="Gráfico de barras de galones diarios por sede">
+                  <div class="bar-set"><i class="bar" style="height: 42%"></i><i class="bar secondary" style="height: 27%"></i><span>Lun</span></div>
+                  <div class="bar-set"><i class="bar" style="height: 64%"></i><i class="bar secondary" style="height: 45%"></i><span>Mar</span></div>
+                  <div class="bar-set"><i class="bar" style="height: 49%"></i><i class="bar secondary" style="height: 59%"></i><span>Mié</span></div>
+                  <div class="bar-set"><i class="bar" style="height: 77%"></i><i class="bar secondary" style="height: 53%"></i><span>Jue</span></div>
+                  <div class="bar-set"><i class="bar" style="height: 58%"></i><i class="bar secondary" style="height: 71%"></i><span>Vie</span></div>
+                  <div class="bar-set"><i class="bar" style="height: 91%"></i><i class="bar secondary" style="height: 68%"></i><span>Sáb</span></div>
+                  <div class="bar-set"><i class="bar" style="height: 52%"></i><i class="bar secondary" style="height: 37%"></i><span>Dom</span></div>
+                </div>
+                <div class="legend"><span><i></i>San José</span><span><i class="legend-second"></i>Santa Marta</span></div>
+              </div>
+            </section>
+            <section class="panel">
+              <div class="panel-header"><div><h3>Resumen operativo</h3><p>Saldo actual del sistema</p></div></div>
+              <div class="summary-list">
+                <div class="summary-row"><span>Combustible autorizado</span><strong>8,420 gal</strong></div>
+                <div class="summary-row"><span>Combustible despachado</span><strong>5,116 gal</strong></div>
+                <div><div class="summary-row" style="margin-bottom: 8px"><span>Saldo global</span><strong>3,304 gal</strong></div><div class="progress-track"><div class="progress-bar" style="width: 61%"></div></div></div>
+                <div class="summary-row"><span>Verificaciones pendientes</span><strong id="reportPendingSummary">03</strong></div>
+                <button class="button button-secondary" id="printReport" style="width: 100%">Imprimir / guardar PDF</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="page-view" id="page-users" data-page-view="users" hidden>
+          <div class="page-heading">
+            <div><h1>Usuarios</h1><p>Administra accesos y roles predefinidos del sistema.</p></div>
+            <div class="heading-actions"><button class="button button-primary" id="newUserButton">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+              Nuevo usuario
+            </button></div>
+          </div>
+          <section class="panel">
+            <div class="section-toolbar"><div class="filter-group"><span class="crumbs">8 cuentas · 3 roles</span></div><input class="input-control" id="userSearch" type="search" placeholder="Buscar por nombre o correo" style="max-width: 250px" aria-label="Buscar usuarios" /></div>
+            <div class="table-wrap"><table><thead><tr><th>USUARIO</th><th>ROL</th><th>SEDE</th><th>ESTADO</th><th>ACCESO</th></tr></thead><tbody id="userRows"></tbody></table></div>
+          </section>
+          <div class="panel" style="margin-top: 13px">
+            <div class="panel-header"><div><h3>Roles del sistema</h3><p>Los permisos se asignan por rol y no se editan por usuario.</p></div></div>
+            <div class="summary-list">
+              <div class="summary-row"><span>Administrador</span><strong>Acceso a todos los módulos</strong></div>
+              <div class="summary-row"><span>Oficina</span><strong>Órdenes, verificación, saldos y reportes</strong></div>
+              <div class="summary-row"><span>Grifero</span><strong>Consulta y registro de sus atenciones</strong></div>
+            </div>
+          </div>
+        </section>
+
+        <footer style="display:flex;justify-content:space-between;gap:12px;padding:20px 2px 0;color:#9aa5a7;font-size:9px">
+          <span>Mockup interactivo · Estación de Servicio San José</span>
+          <span>Los datos mostrados son de demostración</span>
+        </footer>
+      </main>
+    </div>
+
+    <dialog id="appDialog" aria-labelledby="dialogTitle">
+      <form method="dialog" id="dialogForm">
+        <div class="dialog-head">
+          <div><h2 id="dialogTitle"></h2><p id="dialogDescription"></p></div>
+          <button type="button" class="icon-button" id="dialogClose" aria-label="Cerrar ventana">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
+          </button>
+        </div>
+        <div class="dialog-body" id="dialogBody"></div>
+        <div class="dialog-footer" id="dialogFooter"></div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toast-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </span>
+      <span id="toastMessage"></span>
+    </div>
+
+    <script>
+      const iconPaths = {
+        dashboard: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>',
+        orders: '<path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M9 13h6m-6 4h6"/>',
+        vouchers: '<path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a3 3 0 0 0 0 6v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a3 3 0 0 0 0-6V7Z"/><path d="M9 9v.01M9 12v.01M9 15v.01"/>',
+        attendances: '<path d="M12 3.5S6.5 10 6.5 14.6a5.5 5.5 0 1 0 11 0C17.5 10 12 3.5 12 3.5Z"/><path d="M9.5 15.5a2.5 2.5 0 0 0 2.5 2.5"/>',
+        verifications: '<path d="M12 3 5 6v5c0 4.3 2.8 8.2 7 10 4.2-1.8 7-5.7 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/>',
+        reports: '<path d="M4 20V4m0 16h16"/><path d="M8 16v-4m4 4V7m4 9v-6m4 6v-3"/>',
+        users: '<circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 5.5a3 3 0 0 1 0 5.8m1 3a5 5 0 0 1 3.5 4.7"/>',
+        branch: '<path d="M4 20V8l8-4 8 4v12M8 20v-6h8v6M8 9h.01M16 9h.01"/>',
+      };
+
+      const icon = (name, size = 16) =>
+        `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPaths[name] || ""}</svg>`;
+
+      const state = {
+        role: "OFFICE",
+        page: "dashboard",
+        orderFilter: "Todas",
+        voucherFilter: "Todos",
+        reviewFilter: "Pendiente",
+        branch: "Todas las sedes",
+        orders: [
+          { id: "OC-2026-0048", entity: "Municipalidad Provincial", date: "14 nov 2026", branch: "San José", fuel: "Diésel B5", total: 2400, used: 1680, status: "Con saldo" },
+          { id: "OC-2026-0046", entity: "Red de Salud Norte", date: "12 nov 2026", branch: "Santa Marta", fuel: "Gasohol 90", total: 1800, used: 945, status: "Con saldo" },
+          { id: "OC-2026-0044", entity: "Gobierno Regional", date: "10 nov 2026", branch: "San José", fuel: "Diésel B5", total: 3200, used: 3100, status: "Con saldo" },
+          { id: "OC-2026-0041", entity: "Unidad de Gestión Educativa", date: "08 nov 2026", branch: "Santa Marta", fuel: "Gasohol 90", total: 1200, used: 1200, status: "Agotada" },
+          { id: "OC-2026-0038", entity: "Municipalidad Distrital", date: "05 nov 2026", branch: "San José", fuel: "Diésel B5", total: 2800, used: 1375, status: "Con saldo" },
+          { id: "OC-2026-0035", entity: "Red de Salud Norte", date: "02 nov 2026", branch: "Santa Marta", fuel: "Diésel B5", total: 1600, used: 1220, status: "Con saldo" },
+          { id: "OC-2026-0031", entity: "Gobierno Regional", date: "29 oct 2026", branch: "San José", fuel: "Gasohol 90", total: 2000, used: 2000, status: "Agotada" },
+        ],
+        vouchers: [
+          { id: "VM-2026-0142", orderId: "OC-2026-0048", issuer: "Municipalidad Provincial", fuel: "Diésel B5", total: 140, used: 95, verification: "Pendiente", reviewId: "r1" },
+          { id: "VM-2026-0141", orderId: "OC-2026-0046", issuer: "Red de Salud Norte", fuel: "Gasohol 90", total: 80, used: 80, verification: "Verificado", reviewId: "r2" },
+          { id: "VM-2026-0139", orderId: "OC-2026-0044", issuer: "Gobierno Regional", fuel: "Diésel B5", total: 220, used: 110, verification: "Pendiente", reviewId: "r3" },
+          { id: "VM-2026-0137", orderId: "OC-2026-0038", issuer: "Municipalidad Distrital", fuel: "Diésel B5", total: 60, used: 60, verification: "Verificado", reviewId: "r4" },
+          { id: "VM-2026-0135", orderId: "OC-2026-0035", issuer: "Red de Salud Norte", fuel: "Diésel B5", total: 120, used: 40, verification: "Pendiente", reviewId: "r5" },
+          { id: "VM-2026-0134", orderId: "OC-2026-0031", issuer: "Gobierno Regional", fuel: "Gasohol 90", total: 45, used: 45, verification: "Verificado", reviewId: "r6" },
+        ],
+        attendances: [
+          { id: "a1", voucher: "VM-2026-0142", orderId: "OC-2026-0048", attendant: "Luis Cárdenas", branch: "San José", gallons: 35, time: "10:42", verification: "Pendiente" },
+          { id: "a2", voucher: "VM-2026-0141", orderId: "OC-2026-0046", attendant: "Rosa Méndez", branch: "Santa Marta", gallons: 40, time: "10:16", verification: "Verificado" },
+          { id: "a3", voucher: "VM-2026-0139", orderId: "OC-2026-0044", attendant: "Luis Cárdenas", branch: "San José", gallons: 55, time: "09:58", verification: "Pendiente" },
+          { id: "a4", voucher: "VM-2026-0135", orderId: "OC-2026-0035", attendant: "Jorge Silva", branch: "Santa Marta", gallons: 40, time: "09:31", verification: "Pendiente" },
+          { id: "a5", voucher: "VM-2026-0137", orderId: "OC-2026-0038", attendant: "Luis Cárdenas", branch: "San José", gallons: 30, time: "08:57", verification: "Verificado" },
+        ],
+        users: [
+          { name: "Carlos Mendoza", email: "carlos.mendoza@estacion.test", dni: "45812036", role: "Administrador", branch: "—", active: true },
+          { name: "María Paredes", email: "maria.paredes@estacion.test", dni: "42761590", role: "Oficina", branch: "Ambas sedes", active: true },
+          { name: "Ana Salazar", email: "ana.salazar@estacion.test", dni: "41620875", role: "Oficina", branch: "Ambas sedes", active: true },
+          { name: "Luis Cárdenas", email: "luis.cardenas@estacion.test", dni: "43892014", role: "Grifero", branch: "San José", active: true },
+          { name: "Rosa Méndez", email: "rosa.mendez@estacion.test", dni: "46200851", role: "Grifero", branch: "Santa Marta", active: true },
+          { name: "Jorge Silva", email: "jorge.silva@estacion.test", dni: "42917360", role: "Grifero", branch: "Santa Marta", active: false },
+        ],
+      };
+
+      const roleInfo = {
+        OFFICE: { name: "María Paredes", initials: "MP", label: "Personal de oficina", allowed: ["dashboard", "orders", "vouchers", "verifications", "reports"] },
+        ADMIN: { name: "Carlos Mendoza", initials: "CM", label: "Administrador", allowed: ["dashboard", "orders", "vouchers", "attendances", "verifications", "reports", "users"] },
+        ATTENDANT: { name: "Luis Cárdenas", initials: "LC", label: "Grifero · San José", allowed: ["dashboard", "orders", "vouchers", "attendances"] },
+      };
+
+      const pageInfo = {
+        dashboard: "Panel de control",
+        orders: "Órdenes de compra",
+        vouchers: "Vales",
+        attendances: "Atenciones",
+        verifications: "Verificación de vales",
+        reports: "Reportes",
+        users: "Usuarios",
+      };
+
+      const navItems = [
+        { id: "dashboard", label: "Panel de control", icon: "dashboard" },
+        { id: "orders", label: "Órdenes de compra", icon: "orders" },
+        { id: "vouchers", label: "Vales", icon: "vouchers" },
+        { id: "attendances", label: "Atenciones", icon: "attendances" },
+        { id: "verifications", label: "Verificaciones", icon: "verifications", count: () => pendingReviews().length },
+        { id: "reports", label: "Reportes", icon: "reports" },
+        { id: "users", label: "Usuarios", icon: "users" },
+      ];
+
+      const escapeHtml = (value) =>
+        String(value).replace(/[&<>"']/g, (char) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[char]);
+
+      const gallons = (value) => Number(value).toLocaleString("es-PE", { maximumFractionDigits: 3 });
+      const orderBalance = (order) => Math.max(0, order.total - order.used);
+      const voucherBalance = (voucher) => Math.max(0, voucher.total - voucher.used);
+      const visibleAttendances = () => state.attendances.filter((item) => {
+        const matchesRole = state.role !== "ATTENDANT" || item.attendant === roleInfo.ATTENDANT.name;
+        const matchesBranch = state.branch === "Todas las sedes" || item.branch === state.branch;
+        return matchesRole && matchesBranch;
+      });
+      const pendingReviews = () => visibleAttendances().filter((item) => item.verification === "Pendiente");
+      const statusClass = (status) => {
+        if (status === "Verificado" || status === "Disponible" || status === "Con saldo" || status === "Activo") return "status-green";
+        if (status === "Pendiente" || status === "Parcial" || status === "Agotada" || status === "Agotado") return "status-amber";
+        if (status === "Observado") return "status-blue";
+        return "status-gray";
+      };
+
+      function renderNav() {
+        const allowed = roleInfo[state.role].allowed;
+        document.getElementById("navMenu").innerHTML = navItems
+          .filter((item) => allowed.includes(item.id))
+          .map((item) => {
+            const count = item.count ? item.count() : 0;
+            return `<button class="nav-link${state.page === item.id ? " active" : ""}" data-nav="${item.id}" aria-current="${state.page === item.id ? "page" : "false"}">
+              ${icon(item.icon, 16)}<span>${item.label}</span>${count ? `<b class="nav-count">${count}</b>` : ""}
+            </button>`;
+          })
+          .join("");
+      }
+
+      function renderProfile() {
+        const user = roleInfo[state.role];
+        document.getElementById("profileName").textContent = user.name;
+        document.getElementById("profileRole").textContent = user.label;
+        document.getElementById("profileAvatar").textContent = user.initials;
+        document.querySelector("#page-dashboard h1").textContent = `Buen día, ${user.name.split(" ")[0]}`;
+        document.querySelector("#page-dashboard .page-heading p").textContent =
+          state.role === "ATTENDANT"
+            ? "Consulta tus órdenes disponibles y registra cada despacho."
+            : "Así se mueve la operación en tus dos sedes hoy.";
+        document.getElementById("branchSelector").hidden = state.role === "ATTENDANT";
+        document.querySelector('[data-branch-card="santa-marta"]').hidden = state.role === "ATTENDANT";
+        document.getElementById("dashboardReviewPanel").hidden = state.role === "ATTENDANT";
+        document.getElementById("dashboardReportAction").hidden = state.role === "ATTENDANT";
+        document.getElementById("attendanceBranch").value = state.role === "ATTENDANT" ? "San José" : "San José";
+        document.getElementById("attendanceBranch").disabled = state.role === "ATTENDANT";
+        document.getElementById("metricOrdersLabel").textContent = state.role === "ATTENDANT" ? "Órdenes disponibles" : "Órdenes activas";
+        document.getElementById("metricGallonsLabel").textContent = state.role === "ATTENDANT" ? "Mis galones hoy" : "Galones despachados";
+        document.getElementById("metricVouchersLabel").textContent = "Vales con saldo";
+        document.getElementById("metricPendingLabel").textContent = state.role === "ATTENDANT" ? "Mis atenciones hoy" : "Por verificar";
+        document.querySelector("#page-dashboard .stats-grid .stat-card:nth-child(4) .stat-note").innerHTML =
+          state.role === "ATTENDANT" ? "Despachos registrados por ti" : "<em>Revisión de vales físicos</em>";
+      }
+
+      function goTo(page) {
+        if (!roleInfo[state.role].allowed.includes(page)) {
+          showToast("Esta sección no está disponible para este perfil.");
+          return;
+        }
+        state.page = page;
+        document.querySelectorAll("[data-page-view]").forEach((view) => {
+          view.hidden = view.dataset.pageView !== page;
+        });
+        document.getElementById("breadcrumb").textContent = pageInfo[page];
+        renderNav();
+        if (window.innerWidth <= 760) closeMobileMenu();
+        window.scrollTo({
+          top: 0,
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        });
+      }
+
+      function renderOrders() {
+        const query = document.getElementById("orderSearch").value.trim().toLowerCase();
+        const branch = state.branch;
+        const rows = state.orders.filter((order) => {
+          const matchesQuery = `${order.id} ${order.entity} ${order.fuel}`.toLowerCase().includes(query);
+          const matchesBranch = branch === "Todas las sedes" || order.branch === branch;
+          const matchesStatus =
+            state.orderFilter === "Todas" ||
+            (state.orderFilter === "Con saldo" && orderBalance(order) > 0) ||
+            (state.orderFilter === "Agotadas" && orderBalance(order) === 0);
+          return matchesQuery && matchesBranch && matchesStatus;
+        });
+        document.getElementById("orderRows").innerHTML = rows.length
+          ? rows.map((order) => {
+            const remaining = orderBalance(order);
+            return `<tr>
+              <td><span class="cell-primary">${escapeHtml(order.id)}</span><span class="cell-secondary">${escapeHtml(order.entity)}</span></td>
+              <td>${escapeHtml(order.branch)}</td>
+              <td>${escapeHtml(order.date)}</td>
+              <td>${escapeHtml(order.fuel)}</td>
+              <td>${gallons(order.total)} gal</td>
+              <td><span class="cell-primary">${gallons(remaining)} gal</span><span class="cell-secondary">${Math.round((remaining / order.total) * 100)}% del total</span></td>
+              <td><span class="status ${statusClass(remaining ? "Con saldo" : "Agotada")}">${remaining ? "Con saldo" : "Agotada"}</span></td>
+              <td><div style="display:flex;align-items:center;gap:8px">
+                <button class="text-button" data-order-detail="${escapeHtml(order.id)}">Ver</button>
+                <button class="text-button" data-order-edit="${escapeHtml(order.id)}">Editar</button>
+                <button class="text-button" data-order-delete="${escapeHtml(order.id)}" ${state.vouchers.some((voucher) => voucher.orderId === order.id) ? 'aria-disabled="true" title="No se puede eliminar porque tiene vales asociados"' : ""}>Eliminar</button>
+              </div></td>
+            </tr>`;
+          }).join("")
+          : `<tr><td colspan="8"><div class="empty-state">No hay órdenes que coincidan con la búsqueda.</div></td></tr>`;
+        document.getElementById("orderCountText").textContent = `${rows.length} ${rows.length === 1 ? "orden encontrada" : "órdenes encontradas"}`;
+        document.getElementById("attendanceOrder").innerHTML = state.orders
+          .filter((order) => orderBalance(order) > 0 && (state.branch === "Todas las sedes" || order.branch === state.branch))
+          .map((order) => `<option value="${escapeHtml(order.id)}">${escapeHtml(order.id)} · ${escapeHtml(order.entity)} (${gallons(orderBalance(order))} gal disponibles)</option>`)
+          .join("");
+        updateAttendanceBalance();
+      }
+
+      function renderVouchers() {
+        const query = document.getElementById("voucherSearch").value.trim().toLowerCase();
+        const rows = state.vouchers.filter((voucher) => {
+          const balance = voucherBalance(voucher);
+          const status = balance === 0 ? "Agotado" : voucher.used === 0 ? "Disponible" : "Parcial";
+          const matchesStatus = state.voucherFilter === "Todos" || state.voucherFilter === status;
+          const matchesQuery = `${voucher.id} ${voucher.orderId} ${voucher.issuer}`.toLowerCase().includes(query);
+          const order = state.orders.find((item) => item.id === voucher.orderId);
+          const matchesBranch = state.branch === "Todas las sedes" || (order && order.branch === state.branch);
+          return matchesStatus && matchesQuery && matchesBranch;
+        });
+        document.getElementById("voucherRows").innerHTML = rows.length
+          ? rows.map((voucher) => {
+            const balance = voucherBalance(voucher);
+            const status = balance === 0 ? "Agotado" : voucher.used === 0 ? "Disponible" : "Parcial";
+            return `<tr>
+              <td><span class="cell-primary">${escapeHtml(voucher.id)}</span></td>
+              <td><span class="cell-primary">${escapeHtml(voucher.orderId)}</span><span class="cell-secondary">${escapeHtml(voucher.issuer)}</span></td>
+              <td>${escapeHtml(voucher.fuel)}</td>
+              <td>${gallons(voucher.used)} / ${gallons(voucher.total)} gal</td>
+              <td><span class="cell-primary">${gallons(balance)} gal</span><span class="cell-secondary">${Math.round((balance / voucher.total) * 100)}% restante</span></td>
+              <td><span class="status ${statusClass(voucher.verification)}">${escapeHtml(voucher.verification)}</span></td>
+              <td><div style="display:flex;align-items:center;gap:8px">
+                <button class="text-button" data-voucher-detail="${escapeHtml(voucher.id)}">Ver saldo</button>
+                ${state.role === "ADMIN" ? `<button class="text-button" data-voucher-edit="${escapeHtml(voucher.id)}">Corregir datos</button><button class="text-button" data-voucher-delete="${escapeHtml(voucher.id)}">Eliminar</button>` : ""}
+              </div></td>
+            </tr>`;
+          }).join("")
+          : `<tr><td colspan="7"><div class="empty-state">No hay vales que coincidan con la búsqueda.</div></td></tr>`;
+      }
+
+      function renderAttendanceRows() {
+        const rows = [...visibleAttendances()].reverse();
+        document.getElementById("attendanceRows").innerHTML = rows.map((item) => `
+          <tr>
+            <td><span class="cell-primary">15 nov 2026 · ${escapeHtml(item.time)}</span></td>
+            <td><span class="cell-primary">${escapeHtml(item.voucher)}</span><span class="cell-secondary">${escapeHtml(item.orderId)}</span></td>
+            <td>${escapeHtml(item.attendant)}</td>
+            <td>${escapeHtml(item.branch)}</td>
+            <td>${gallons(item.gallons)} gal</td>
+            <td><span class="status ${statusClass(item.verification)}">${escapeHtml(item.verification)}</span></td>
+          </tr>`).join("");
+        document.getElementById("recentAttendanceRows").innerHTML = rows.slice(0, 4).map((item) => `
+          <tr>
+            <td><span class="cell-primary">${escapeHtml(item.voucher)}</span><span class="cell-secondary">${escapeHtml(item.orderId)}</span></td>
+            <td>${escapeHtml(item.attendant.split(" ")[0])}</td>
+            <td>${escapeHtml(item.branch)}</td>
+            <td>${gallons(item.gallons)} gal</td>
+            <td><span class="status ${statusClass(item.verification)}">${escapeHtml(item.verification)}</span></td>
+          </tr>`).join("");
+        document.getElementById("attendanceActivity").innerHTML = rows.slice(0, 4).map((item) => `
+          <div class="queue-item">
+            <span class="queue-icon">${icon("attendances", 15)}</span>
+            <span><span class="queue-title">${escapeHtml(item.voucher)} · ${gallons(item.gallons)} gal</span><span class="queue-meta">${escapeHtml(item.attendant)} · ${escapeHtml(item.time)}</span></span>
+            <span class="status ${statusClass(item.verification)}">${escapeHtml(item.verification)}</span>
+          </div>`).join("");
+        renderReviews();
+      }
+
+      function renderReviews() {
+        const query = document.getElementById("globalSearch").value.trim().toLowerCase();
+        const rows = state.attendances.filter((item) => {
+          const matchesFilter = state.reviewFilter === "Pendiente" || item.verification === state.reviewFilter;
+          const matchesQuery = `${item.voucher} ${item.orderId} ${item.attendant} ${item.branch}`.toLowerCase().includes(query);
+          const matchesBranch = state.branch === "Todas las sedes" || item.branch === state.branch;
+          return matchesFilter && matchesQuery && matchesBranch;
+        });
+        document.getElementById("verificationRows").innerHTML = rows.length
+          ? rows.map((item) => `<tr>
+              <td><span class="cell-primary">${escapeHtml(item.voucher)}</span><span class="cell-secondary">Vale físico recibido</span></td>
+              <td>${escapeHtml(item.orderId)}</td>
+              <td>${escapeHtml(item.attendant)}</td>
+              <td>${gallons(item.gallons)} gal</td>
+              <td>15 nov · ${escapeHtml(item.time)}</td>
+              <td><span class="status ${statusClass(item.verification)}">${escapeHtml(item.verification)}</span></td>
+              <td>${item.verification === "Pendiente"
+                ? `<div style="display:flex;gap:5px"><button class="button button-soft button-small" data-review="${escapeHtml(item.id)}" data-decision="Verificado">Verificar</button><button class="button button-secondary button-small" data-review="${escapeHtml(item.id)}" data-decision="Observado">Observar</button></div>`
+                : `<span class="crumbs">${item.verification === "Observado" ? "Requiere revisión" : "Cotejado"}</span>`}</td>
+            </tr>`).join("")
+          : `<tr><td colspan="7"><div class="empty-state">No hay registros en esta bandeja.</div></td></tr>`;
+        const pending = pendingReviews().length;
+        document.getElementById("verificationTotal").textContent = `${pending} por revisar`;
+        document.getElementById("reviewCount").textContent = `${pending} pendientes`;
+        document.getElementById("reportPending").textContent = String(pending).padStart(2, "0");
+        document.getElementById("reportPendingSummary").textContent = String(pending).padStart(2, "0");
+        document.getElementById("reviewQueue").innerHTML = pendingReviews().slice(0, 3).map((item) => `
+          <div class="queue-item">
+            <span class="queue-icon">${icon("vouchers", 15)}</span>
+            <span><span class="queue-title">${escapeHtml(item.voucher)}</span><span class="queue-meta">${escapeHtml(item.attendant)} · ${escapeHtml(item.branch)}</span></span>
+            <button class="queue-action" data-review-open="${escapeHtml(item.id)}" aria-label="Abrir verificación de ${escapeHtml(item.voucher)}">${icon("verifications", 14)}</button>
+          </div>`).join("") || `<div class="empty-state">Todo está al día. No hay vales pendientes.</div>`;
+        renderNav();
+      }
+
+      function renderUsers() {
+        const query = document.getElementById("userSearch").value.trim().toLowerCase();
+        const users = state.users.filter((user) => `${user.name} ${user.email} ${user.dni}`.toLowerCase().includes(query));
+        document.getElementById("userRows").innerHTML = users.map((user) => {
+          const initials = user.name.split(" ").slice(0, 2).map((word) => word[0]).join("");
+          const userIndex = state.users.indexOf(user);
+          return `<tr>
+            <td><div class="user-cell"><span class="mini-avatar">${escapeHtml(initials)}</span><span><span class="cell-primary">${escapeHtml(user.name)}</span><span class="cell-secondary">${escapeHtml(user.email)}</span></span></div></td>
+            <td>${escapeHtml(user.role)}</td><td>${escapeHtml(user.branch)}</td>
+            <td><span class="status ${user.active ? "status-green" : "status-gray"}">${user.active ? "Activo" : "Deshabilitado"}</span></td>
+            <td><button class="toggle${user.active ? " on" : ""}" data-user-toggle="${userIndex}" aria-label="${user.active ? "Deshabilitar" : "Habilitar"} a ${escapeHtml(user.name)}" aria-pressed="${user.active}"></button></td>
+          </tr>`;
+        }).join("");
+      }
+
+      function renderDashboardMetrics() {
+        const matchesBranch = (branch) => state.branch === "Todas las sedes" || branch === state.branch;
+        const activeOrders = state.orders.filter((item) => orderBalance(item) > 0 && matchesBranch(item.branch)).length;
+        const activeVouchers = state.vouchers.filter((item) => {
+          const order = state.orders.find((candidate) => candidate.id === item.orderId);
+          return voucherBalance(item) > 0 && order && matchesBranch(order.branch);
+        }).length;
+        const visible = visibleAttendances();
+        const gallonsToday = visible.reduce((total, item) => total + Number(item.gallons), 0);
+        document.getElementById("activeOrdersMetric").textContent = String(activeOrders).padStart(2, "0");
+        document.getElementById("activeVouchersMetric").textContent = String(activeVouchers).padStart(2, "0");
+        document.getElementById("gallonsMetric").innerHTML = `${gallons(gallonsToday)} <small style="font-size: 11px; font-weight: 560; letter-spacing: 0">gal</small>`;
+        const fourthMetric = state.role === "ATTENDANT" ? visible.length : visible.filter((item) => item.verification === "Pendiente").length;
+        document.getElementById("pendingMetric").textContent = String(fourthMetric).padStart(2, "0");
+        document.getElementById("sanJoseOrders").textContent = state.orders.filter((item) => item.branch === "San José" && orderBalance(item) > 0).length;
+        document.getElementById("santaMartaOrders").textContent = state.orders.filter((item) => item.branch === "Santa Marta" && orderBalance(item) > 0).length;
+      }
+
+      function renderAll() {
+        renderOrders();
+        renderVouchers();
+        renderAttendanceRows();
+        renderUsers();
+        renderDashboardMetrics();
+        renderNav();
+      }
+
+      let toastTimer;
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        document.getElementById("toastMessage").textContent = message;
+        toast.classList.add("visible");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("visible"), 2800);
+      }
+
+      function openDialog({ title, description, body, confirmLabel = "Guardar", cancelLabel = "Cancelar", onSubmit }) {
+        const dialog = document.getElementById("appDialog");
+        document.getElementById("dialogTitle").textContent = title;
+        document.getElementById("dialogDescription").textContent = description;
+        document.getElementById("dialogBody").innerHTML = body;
+        document.getElementById("dialogFooter").innerHTML = `
+          <button class="button button-secondary" type="button" id="dialogCancel">${cancelLabel}</button>
+          <button class="button button-primary" type="submit">${confirmLabel}</button>`;
+        dialog.showModal();
+        document.getElementById("dialogCancel").addEventListener("click", () => dialog.close());
+        document.getElementById("dialogClose").onclick = () => dialog.close();
+        document.getElementById("dialogForm").onsubmit = (event) => {
+          event.preventDefault();
+          if (onSubmit(event)) dialog.close();
+        };
+        const first = dialog.querySelector("input, select, textarea, button");
+        if (first) first.focus();
+      }
+
+      function orderDialog(orderId = null) {
+        const existing = orderId ? state.orders.find((order) => order.id === orderId) : null;
+        if (orderId && !existing) return;
+        openDialog({
+          title: existing ? "Modificar orden" : "Registrar orden de compra",
+          description: existing
+            ? "Actualiza los datos descriptivos sin alterar las atenciones registradas."
+            : "Completa los datos de la autorización y revisa los galones antes de guardarla.",
+          confirmLabel: existing ? "Guardar cambios" : "Guardar orden",
+          body: `<div class="form-grid">
+            <div class="field full"><label for="newOrderEntity">Entidad / institución</label><input class="input-control" id="newOrderEntity" required placeholder="Nombre de la institución" value="${escapeHtml(existing ? existing.entity : "")}" /></div>
+            <div class="field"><label for="newOrderNumber">Número de orden</label><input class="input-control" id="newOrderNumber" required placeholder="OC-2026-0049" value="${escapeHtml(existing ? existing.id : "")}" ${existing ? "readonly" : ""} /></div>
+            <div class="field"><label for="newOrderDate">Fecha de emisión</label><input class="input-control" id="newOrderDate" type="${existing ? "text" : "date"}" required value="${escapeHtml(existing ? existing.date : "2026-11-15")}" ${existing ? "readonly" : ""} /></div>
+            <div class="field"><label for="newOrderFuel">Combustible</label><select class="select-control" id="newOrderFuel"><option ${existing && existing.fuel === "Diésel B5" ? "selected" : ""}>Diésel B5</option><option ${existing && existing.fuel === "Gasohol 90" ? "selected" : ""}>Gasohol 90</option></select></div>
+            <div class="field"><label for="newOrderGallons">Galones autorizados</label><input class="input-control" id="newOrderGallons" type="number" min="0.001" step="0.001" required placeholder="0.000" value="${existing ? existing.total : ""}" /><span class="field-hint" id="orderFormError">${existing ? `Ya se despacharon ${gallons(existing.used)} gal.` : ""}</span></div>
+            <div class="field full"><label for="newOrderBranch">Sede proveedora</label><select class="select-control" id="newOrderBranch"><option ${existing && existing.branch === "San José" ? "selected" : ""}>San José</option><option ${existing && existing.branch === "Santa Marta" ? "selected" : ""}>Santa Marta</option></select></div>
+            ${existing ? "" : `<div class="field full"><label>Documento de origen (opcional)</label><label class="dropzone" for="orderPdf">${icon("orders", 18)}<span id="pdfLabel">Selecciona un PDF para prellenar los campos</span><input id="orderPdf" type="file" accept="application/pdf,.pdf" class="sr-only" /><span>El OCR propone datos; revísalos antes de guardar.</span></label></div>`}
+          </div>`,
+          onSubmit: () => {
+            const total = Number(document.getElementById("newOrderGallons").value);
+            if (!Number.isFinite(total) || total <= 0) return false;
+            if (existing && total < existing.used) {
+              document.getElementById("orderFormError").textContent = `El total no puede ser menor a los ${gallons(existing.used)} gal ya despachados.`;
+              return false;
+            }
+            const date = document.getElementById("newOrderDate").value;
+            const formattedDate = existing
+              ? existing.date
+              : date
+                ? new Date(`${date}T12:00:00`).toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" })
+                : "15 nov 2026";
+            if (existing) {
+              existing.entity = document.getElementById("newOrderEntity").value.trim();
+              existing.branch = document.getElementById("newOrderBranch").value;
+              existing.fuel = document.getElementById("newOrderFuel").value;
+              existing.total = total;
+            } else {
+              const id = document.getElementById("newOrderNumber").value.trim();
+              if (state.orders.some((order) => order.id.toLowerCase() === id.toLowerCase())) {
+                document.getElementById("orderFormError").textContent = "Ese número de orden ya existe.";
+                return false;
+              }
+              state.orders.unshift({
+                id,
+                entity: document.getElementById("newOrderEntity").value.trim(),
+                date: formattedDate,
+                branch: document.getElementById("newOrderBranch").value,
+                fuel: document.getElementById("newOrderFuel").value,
+                total,
+                used: 0,
+                status: "Con saldo",
+              });
+            }
+            renderAll();
+            showToast(existing ? "Cambios guardados en la orden." : "Orden guardada en este mockup.");
+            return true;
+          },
+        });
+        if (!existing) {
+          document.getElementById("orderPdf").addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            document.getElementById("pdfLabel").textContent = `${file.name} · listo para revisar`;
+            const entityInput = document.getElementById("newOrderEntity");
+            if (!entityInput.value) entityInput.value = file.name.replace(/\.pdf$/i, "").replace(/[_-]/g, " ");
+            showToast("PDF seleccionado. Verifica los datos extraídos antes de guardar.");
+          });
+        }
+      }
+
+      function attendanceDialog(orderId) {
+        const availableOrders = state.orders.filter((order) => orderBalance(order) > 0);
+        const initial = orderId || (availableOrders[0] && availableOrders[0].id);
+        openDialog({
+          title: "Registrar primera atención",
+          description: "Captura el vale presentado y la cantidad realmente despachada.",
+          confirmLabel: "Confirmar despacho",
+          body: `<div class="form-grid">
+            <div class="field full"><label for="modalAttendanceOrder">Orden de compra</label><select class="select-control" id="modalAttendanceOrder">${availableOrders.map((order) => `<option value="${escapeHtml(order.id)}" ${order.id === initial ? "selected" : ""}>${escapeHtml(order.id)} · ${escapeHtml(order.entity)}</option>`).join("")}</select></div>
+            <div class="field"><label for="modalVoucher">Número de vale</label><input class="input-control" id="modalVoucher" required placeholder="VM-2026-0142" /><span class="field-hint" id="modalVoucherHint">Si el vale existe, se recuperan sus datos y saldo.</span></div>
+            <div class="field"><label for="modalIssuerType">Tipo de emisor</label><select class="select-control" id="modalIssuerType"><option value="INSTITUTION">Institución</option><option value="STATION">Estación</option></select></div>
+            <div class="field full"><label for="modalIssuer">Nombre del emisor</label><input class="input-control" id="modalIssuer" required placeholder="Según documento físico" /></div>
+            <div class="field"><label for="modalAuthorized">Galones autorizados en el vale</label><input class="input-control" id="modalAuthorized" type="number" min="0.001" step="0.001" required placeholder="0.000" /></div>
+            <div class="field"><label for="modalGallons">Galones despachados</label><input class="input-control" id="modalGallons" type="number" min="0.001" step="0.001" required placeholder="0.000" /></div>
+            <div class="field"><label for="modalBranch">Sede</label><select class="select-control" id="modalBranch"><option>San José</option><option>Santa Marta</option></select></div>
+            <div class="field full"><div class="balance-card"><span>Saldo máximo en orden</span><strong id="modalBalance"></strong></div><div class="field-hint" id="modalBalanceError" role="alert"></div></div>
+          </div>`,
+          onSubmit: () => {
+            const order = state.orders.find((item) => item.id === document.getElementById("modalAttendanceOrder").value);
+            const amount = Number(document.getElementById("modalGallons").value);
+            const authorized = Number(document.getElementById("modalAuthorized").value);
+            const voucherId = document.getElementById("modalVoucher").value.trim();
+            const existing = state.vouchers.find((voucher) => voucher.id.toLowerCase() === voucherId.toLowerCase());
+            if (!order || amount <= 0 || amount > orderBalance(order)) {
+              document.getElementById("modalBalanceError").textContent = order ? `La cantidad supera el saldo disponible de ${gallons(orderBalance(order))} gal.` : "Selecciona una orden con saldo.";
+              return false;
+            }
+            if ((!existing && (authorized < amount || authorized > orderBalance(order))) || (existing && (existing.orderId !== order.id || amount > voucherBalance(existing)))) {
+              document.getElementById("modalBalanceError").textContent = existing
+                ? `El vale debe corresponder a esta orden y tener al menos ${gallons(amount)} gal disponibles.`
+                : `El vale debe autorizar entre ${gallons(amount)} y ${gallons(orderBalance(order))} gal.`;
+              return false;
+            }
+            return addAttendance({
+              order,
+              voucherId,
+              issuer: document.getElementById("modalIssuer").value.trim(),
+              issuerType: document.getElementById("modalIssuerType").value,
+              authorized,
+              gallons: amount,
+              branch: document.getElementById("modalBranch").value,
+            });
+          },
+        });
+        bindVoucherLookup("#modalVoucher", "#modalIssuer", "#modalIssuerType", "#modalAuthorized", "#modalVoucherHint");
+        const select = document.getElementById("modalAttendanceOrder");
+        const update = () => {
+          const order = state.orders.find((item) => item.id === select.value);
+          document.getElementById("modalBalance").textContent = order ? `${gallons(orderBalance(order))} gal · ${order.fuel}` : "Sin saldo";
+        };
+        select.addEventListener("change", update);
+        update();
+      }
+
+      function bindVoucherLookup(voucherSelector, issuerSelector, typeSelector, authorizedSelector, hintSelector) {
+        const voucherInput = document.querySelector(voucherSelector);
+        const issuerInput = document.querySelector(issuerSelector);
+        const typeInput = document.querySelector(typeSelector);
+        const authorizedInput = document.querySelector(authorizedSelector);
+        const hint = document.querySelector(hintSelector);
+        const sync = () => {
+          const value = voucherInput.value.trim().toLowerCase();
+          const existing = value && state.vouchers.find((voucher) => voucher.id.toLowerCase() === value);
+          if (existing) {
+            issuerInput.value = existing.issuer;
+            typeInput.value = existing.issuerType || "INSTITUTION";
+            authorizedInput.value = existing.total;
+            issuerInput.disabled = true;
+            typeInput.disabled = true;
+            authorizedInput.disabled = true;
+            voucherInput.dataset.lookupPopulated = "true";
+            hint.textContent = `Vale existente: ${gallons(voucherBalance(existing))} gal disponibles. Se conserva su historial.`;
+            return;
+          }
+          if (voucherInput.dataset.lookupPopulated === "true") {
+            issuerInput.value = "";
+            typeInput.value = "INSTITUTION";
+            authorizedInput.value = "";
+          }
+          issuerInput.disabled = false;
+          typeInput.disabled = false;
+          authorizedInput.disabled = false;
+          delete voucherInput.dataset.lookupPopulated;
+          hint.textContent = "Para un vale nuevo, ingresa emisor y galones autorizados.";
+        };
+        voucherInput.addEventListener("input", sync);
+        sync();
+        return sync;
+      }
+
+      function addAttendance({ order, voucherId, issuer, issuerType = "INSTITUTION", authorized, gallons: amount, branch }) {
+        const existing = state.vouchers.find((voucher) => voucher.id.toLowerCase() === voucherId.toLowerCase());
+        if (!order || !voucherId || amount <= 0 || amount > orderBalance(order)) {
+          showToast("La cantidad supera el saldo disponible de la orden.");
+          return false;
+        }
+        if (existing && (existing.orderId !== order.id || amount > voucherBalance(existing))) {
+          showToast("El vale no corresponde a esta orden o no tiene saldo suficiente.");
+          return false;
+        }
+        if (!existing && (authorized < amount || authorized > orderBalance(order))) {
+          showToast("El saldo autorizado del vale debe cubrir el despacho y no superar el saldo de la orden.");
+          return false;
+        }
+        const voucher = existing || {
+          id: voucherId,
+          orderId: order.id,
+          issuer,
+          issuerType,
+          fuel: order.fuel,
+          total: authorized,
+          used: 0,
+          verification: "Pendiente",
+          reviewId: `r${Date.now()}`,
+        };
+        if (!existing) state.vouchers.unshift(voucher);
+        voucher.used += amount;
+        order.used += amount;
+        state.attendances.push({
+          id: `a${Date.now()}`,
+          voucher: voucher.id,
+          orderId: order.id,
+          attendant: roleInfo[state.role].name,
+          branch,
+          gallons: amount,
+          time: new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
+          verification: "Pendiente",
+        });
+        renderAll();
+        showToast(`${gallons(amount)} gal registrados. La atención quedó pendiente de verificación.`);
+        return true;
+      }
+
+      function userDialog() {
+        openDialog({
+          title: "Agregar usuario",
+          description: "Asigna uno de los roles predefinidos. La oficina administra ambas sedes.",
+          confirmLabel: "Crear usuario",
+          body: `<div class="form-grid">
+            <div class="field"><label for="newUserName">Nombre completo</label><input class="input-control" id="newUserName" required placeholder="Nombre y apellidos" /></div>
+            <div class="field"><label for="newUserDni">DNI</label><input class="input-control" id="newUserDni" required placeholder="Número de documento" /></div>
+            <div class="field full"><label for="newUserEmail">Correo electrónico</label><input class="input-control" id="newUserEmail" type="email" required placeholder="nombre@estacion.pe" /></div>
+            <div class="field"><label for="newUserRole">Rol</label><select class="select-control" id="newUserRole"><option value="OFFICE">Oficina</option><option value="ATTENDANT">Grifero</option><option value="ADMIN">Administrador</option></select></div>
+            <div class="field" id="newUserBranchField"><label for="newUserBranch">Sede</label><select class="select-control" id="newUserBranch"><option>San José</option><option>Santa Marta</option></select><span class="field-hint">No aplica al personal de oficina ni al administrador.</span></div>
+            <div class="field full"><div class="field-hint">La cuenta requiere una clave temporal segura al integrarse con el backend.</div></div>
+          </div>`,
+          onSubmit: () => {
+            const name = document.getElementById("newUserName").value.trim();
+            const roleValue = document.getElementById("newUserRole").value;
+            const role = roleValue === "OFFICE" ? "Oficina" : roleValue === "ATTENDANT" ? "Grifero" : "Administrador";
+            state.users.unshift({
+              name,
+              dni: document.getElementById("newUserDni").value.trim(),
+              email: document.getElementById("newUserEmail").value.trim(),
+              role,
+              branch: roleValue === "ATTENDANT" ? document.getElementById("newUserBranch").value : roleValue === "OFFICE" ? "Ambas sedes" : "—",
+              active: true,
+            });
+            renderUsers();
+            showToast("Usuario agregado en este mockup.");
+            return true;
+          },
+        });
+        const roleSelect = document.getElementById("newUserRole");
+        const branchField = document.getElementById("newUserBranchField");
+        const updateBranchField = () => { branchField.hidden = roleSelect.value !== "ATTENDANT"; };
+        roleSelect.addEventListener("change", updateBranchField);
+        updateBranchField();
+      }
+
+      function showOrderDetails(id) {
+        const order = state.orders.find((item) => item.id === id);
+        if (!order) return;
+        const balance = orderBalance(order);
+        openDialog({
+          title: order.id,
+          description: order.entity,
+          confirmLabel: state.role === "ATTENDANT" ? "Iniciar atención" : "Cerrar",
+          cancelLabel: "Listo",
+          body: `<div class="summary-list" style="padding:0">
+            <div class="summary-row"><span>Sede proveedora</span><strong>${escapeHtml(order.branch)}</strong></div>
+            <div class="summary-row"><span>Fecha de emisión</span><strong>${escapeHtml(order.date)}</strong></div>
+            <div class="summary-row"><span>Combustible</span><strong>${escapeHtml(order.fuel)}</strong></div>
+            <div class="summary-row"><span>Autorizado</span><strong>${gallons(order.total)} gal</strong></div>
+            <div class="summary-row"><span>Despachado</span><strong>${gallons(order.used)} gal</strong></div>
+            <div class="balance-card"><span>Saldo disponible</span><strong>${gallons(balance)} gal</strong></div>
+            <div class="field-hint">El saldo es compartido entre San José y Santa Marta y se calcula con las atenciones confirmadas.</div>
+          </div>`,
+          onSubmit: () => {
+            if (state.role === "ATTENDANT") {
+              document.getElementById("appDialog").close();
+              attendanceDialog(id);
+              return false;
+            }
+            return true;
+          },
+        });
+        if (state.role === "ATTENDANT") document.getElementById("dialogFooter").querySelector('[type="submit"]').textContent = "Iniciar atención";
+      }
+
+      function showVoucherDetails(id) {
+        const voucher = state.vouchers.find((item) => item.id === id);
+        if (!voucher) return;
+        const remaining = voucherBalance(voucher);
+        openDialog({
+          title: `Vale ${voucher.id}`,
+          description: `${voucher.issuer} · ${voucher.orderId}`,
+          confirmLabel: "Listo",
+          cancelLabel: "Cerrar",
+          body: `<div class="summary-list" style="padding:0">
+            <div class="summary-row"><span>Combustible</span><strong>${escapeHtml(voucher.fuel)}</strong></div>
+            <div class="summary-row"><span>Autorizado en el vale</span><strong>${gallons(voucher.total)} gal</strong></div>
+            <div class="summary-row"><span>Atendido</span><strong>${gallons(voucher.used)} gal</strong></div>
+            <div class="balance-card"><span>Saldo restante del vale</span><strong>${gallons(remaining)} gal</strong></div>
+            <div class="summary-row"><span>Verificación física</span><strong>${escapeHtml(voucher.verification)}</strong></div>
+          </div>`,
+          onSubmit: () => true,
+        });
+      }
+
+      function editVoucherDialog(id) {
+        if (state.role !== "ADMIN") return;
+        const voucher = state.vouchers.find((item) => item.id === id);
+        if (!voucher) return;
+        openDialog({
+          title: "Corregir datos del vale",
+          description: "Solo se actualizan datos descriptivos; el historial de atenciones no cambia.",
+          confirmLabel: "Guardar corrección",
+          body: `<div class="form-grid">
+            <div class="field"><label for="editVoucherNumber">Número de vale</label><input class="input-control" id="editVoucherNumber" required value="${escapeHtml(voucher.id)}" /></div>
+            <div class="field"><label for="editVoucherType">Tipo de emisor</label><select class="select-control" id="editVoucherType"><option value="INSTITUTION" ${voucher.issuerType !== "STATION" ? "selected" : ""}>Institución</option><option value="STATION" ${voucher.issuerType === "STATION" ? "selected" : ""}>Estación</option></select></div>
+            <div class="field full"><label for="editVoucherIssuer">Nombre del emisor</label><input class="input-control" id="editVoucherIssuer" required value="${escapeHtml(voucher.issuer)}" /></div>
+          </div>`,
+          onSubmit: () => {
+            const newId = document.getElementById("editVoucherNumber").value.trim();
+            if (state.vouchers.some((item) => item !== voucher && item.id.toLowerCase() === newId.toLowerCase())) {
+              showToast("Ese número de vale ya está registrado.");
+              return false;
+            }
+            const oldId = voucher.id;
+            voucher.id = newId;
+            voucher.issuerType = document.getElementById("editVoucherType").value;
+            voucher.issuer = document.getElementById("editVoucherIssuer").value.trim();
+            state.attendances.forEach((item) => {
+              if (item.voucher === oldId) item.voucher = newId;
+            });
+            renderAll();
+            showToast("Datos descriptivos del vale actualizados.");
+            return true;
+          },
+        });
+      }
+
+      function deleteOrder(id) {
+        if (state.vouchers.some((voucher) => voucher.orderId === id)) {
+          showToast("No se puede eliminar una orden que ya tiene vales asociados.");
+          return;
+        }
+        openDialog({
+          title: "Eliminar orden",
+          description: "La orden se quitará de la lista de demostración. Esta acción no se puede deshacer.",
+          confirmLabel: "Eliminar orden",
+          body: `<div class="field-hint">Orden seleccionada: <strong>${escapeHtml(id)}</strong></div>`,
+          onSubmit: () => {
+            state.orders = state.orders.filter((order) => order.id !== id);
+            renderAll();
+            showToast("Orden eliminada del mockup.");
+            return true;
+          },
+        });
+      }
+
+      function deleteVoucher(id) {
+        if (state.attendances.some((item) => item.voucher === id)) {
+          showToast("No se puede eliminar un vale con atenciones registradas.");
+          return;
+        }
+        state.vouchers = state.vouchers.filter((voucher) => voucher.id !== id);
+        renderAll();
+        showToast("Vale eliminado del mockup.");
+      }
+
+      function updateAttendanceBalance() {
+        const select = document.getElementById("attendanceOrder");
+        if (!select || !select.value) {
+          document.getElementById("orderBalance").textContent = "Sin órdenes disponibles";
+          document.getElementById("orderFuelLabel").textContent = "";
+          return;
+        }
+        const order = state.orders.find((item) => item.id === select.value);
+        document.getElementById("orderBalance").textContent = order ? `${gallons(orderBalance(order))} gal` : "— gal";
+        document.getElementById("orderFuelLabel").textContent = order ? `· ${order.fuel}` : "";
+        document.getElementById("attendanceGallons").max = order ? String(orderBalance(order)) : "0";
+      }
+
+      function setReview(id, decision) {
+        const item = state.attendances.find((entry) => entry.id === id);
+        if (!item) return;
+        if (decision === "Observado") {
+          openDialog({
+            title: "Observar documento",
+            description: "Indica qué dato no coincide para orientar la corrección administrativa.",
+            confirmLabel: "Guardar observación",
+            body: `<div class="field"><label for="reviewObservation">Motivo de observación</label><textarea class="textarea-control" id="reviewObservation" required placeholder="Describe la diferencia encontrada"></textarea></div>`,
+            onSubmit: () => {
+              const reason = document.getElementById("reviewObservation").value.trim();
+              if (!reason) return false;
+              item.verification = "Observado";
+              item.observation = reason;
+              const voucher = state.vouchers.find((entry) => entry.id === item.voucher);
+              if (voucher) voucher.verification = "Observado";
+              renderAll();
+              showToast("Observación guardada.");
+              return true;
+            },
+          });
+        } else {
+          item.verification = "Verificado";
+          const voucher = state.vouchers.find((entry) => entry.id === item.voucher);
+          if (voucher) voucher.verification = "Verificado";
+          renderAll();
+          showToast("Vale verificado.");
+        }
+      }
+
+      function exportCsv() {
+        const rows = [
+          ["Orden", "Entidad", "Sede", "Combustible", "Autorizado (gal)", "Despachado (gal)", "Saldo (gal)"],
+          ...state.orders.map((order) => [order.id, order.entity, order.branch, order.fuel, order.total, order.used, orderBalance(order)]),
+        ];
+        const csv = rows.map((row) => row.map((field) => `"${String(field).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+        const blob = new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "reporte-saldos-san-jose.csv";
+        link.click();
+        URL.revokeObjectURL(url);
+        showToast("Reporte de saldos descargado como CSV de demostración.");
+      }
+
+      function updateRole(role) {
+        state.role = role;
+        state.branch = role === "ATTENDANT" ? "San José" : "Todas las sedes";
+        document.getElementById("branchFilter").value = state.branch;
+        if (!roleInfo[role].allowed.includes(state.page)) state.page = "dashboard";
+        renderProfile();
+        renderAll();
+        goTo(state.page);
+        showToast(`Vista de ${roleInfo[role].label.toLowerCase()}.`);
+      }
+
+      function closeMobileMenu() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.remove("open");
+        sidebar.style.removeProperty("transform");
+        document.getElementById("sidebarScrim").classList.remove("visible");
+        document.getElementById("menuToggle").setAttribute("aria-expanded", "false");
+      }
+
+      function openMobileMenu() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.add("open");
+        sidebar.style.transform = "translateX(0)";
+        document.getElementById("sidebarScrim").classList.add("visible");
+        document.getElementById("menuToggle").setAttribute("aria-expanded", "true");
+      }
+
+      function reviewPrint() {
+        window.print();
+      }
+
+      document.getElementById("todayLabel").textContent = new Date().toLocaleDateString("es-PE", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      });
+      document.getElementById("roleSwitch").addEventListener("change", (event) => updateRole(event.target.value));
+      document.getElementById("branchFilter").addEventListener("change", (event) => {
+        state.branch = event.target.value;
+        renderAll();
+      });
+      document.getElementById("globalSearch").addEventListener("input", () => {
+        const query = document.getElementById("globalSearch").value;
+        document.getElementById("orderSearch").value = query;
+        document.getElementById("voucherSearch").value = query;
+        renderOrders();
+        renderVouchers();
+        renderReviews();
+      });
+      document.getElementById("globalSearch").addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && event.target.value.trim()) goTo("orders");
+      });
+      document.getElementById("orderSearch").addEventListener("input", renderOrders);
+      document.getElementById("voucherSearch").addEventListener("input", renderVouchers);
+      document.getElementById("userSearch").addEventListener("input", renderUsers);
+      document.getElementById("attendanceOrder").addEventListener("change", updateAttendanceBalance);
+      const syncAttendanceVoucher = bindVoucherLookup(
+        "#attendanceVoucher",
+        "#attendanceIssuer",
+        "#attendanceIssuerType",
+        "#attendanceAuthorized",
+        "#attendanceVoucherHint",
+      );
+      document.getElementById("attendanceForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const order = state.orders.find((item) => item.id === document.getElementById("attendanceOrder").value);
+        const amount = Number(document.getElementById("attendanceGallons").value);
+        const voucherId = document.getElementById("attendanceVoucher").value.trim();
+        const issuer = document.getElementById("attendanceIssuer").value.trim();
+        const registered = addAttendance({
+          order,
+          voucherId,
+          issuer,
+          issuerType: document.getElementById("attendanceIssuerType").value,
+          authorized: Number(document.getElementById("attendanceAuthorized").value),
+          gallons: amount,
+          branch: document.getElementById("attendanceBranch").value,
+        });
+        if (!registered) return;
+        event.target.reset();
+        syncAttendanceVoucher();
+        renderOrders();
+      });
+      document.getElementById("newOrderButton").addEventListener("click", orderDialog);
+      document.getElementById("ocrOrderButton").addEventListener("click", orderDialog);
+      document.getElementById("newUserButton").addEventListener("click", userDialog);
+      document.getElementById("notificationButton").addEventListener("click", () => goTo("verifications"));
+      document.getElementById("profileButton").addEventListener("click", () => showToast("La sesión de demostración está activa."));
+      document.getElementById("exportReport").addEventListener("click", exportCsv);
+      document.getElementById("printReport").addEventListener("click", reviewPrint);
+      document.getElementById("menuToggle").addEventListener("click", openMobileMenu);
+      document.getElementById("sidebarScrim").addEventListener("click", closeMobileMenu);
+      document.getElementById("dialogClose").addEventListener("click", () => document.getElementById("appDialog").close());
+      document.addEventListener("click", (event) => {
+        const nav = event.target.closest("[data-nav]");
+        if (nav) goTo(nav.dataset.nav);
+
+        const action = event.target.closest("[data-action]");
+        if (action) goTo(action.dataset.action);
+
+        const orderFilter = event.target.closest('[data-filter="order"]');
+        if (orderFilter) {
+          state.orderFilter = orderFilter.dataset.value;
+          document.querySelectorAll('[data-filter="order"]').forEach((button) => button.classList.toggle("selected", button === orderFilter));
+          renderOrders();
+        }
+
+        const voucherFilter = event.target.closest('[data-filter="voucher"]');
+        if (voucherFilter) {
+          state.voucherFilter = voucherFilter.dataset.value;
+          document.querySelectorAll('[data-filter="voucher"]').forEach((button) => button.classList.toggle("selected", button === voucherFilter));
+          renderVouchers();
+        }
+
+        const reviewFilter = event.target.closest('[data-filter="review"]');
+        if (reviewFilter) {
+          state.reviewFilter = reviewFilter.dataset.value;
+          document.querySelectorAll('[data-filter="review"]').forEach((button) => button.classList.toggle("selected", button === reviewFilter));
+          renderReviews();
+        }
+
+        const detail = event.target.closest("[data-order-detail]");
+        if (detail) showOrderDetails(detail.dataset.orderDetail);
+
+        const orderEdit = event.target.closest("[data-order-edit]");
+        if (orderEdit) orderDialog(orderEdit.dataset.orderEdit);
+
+        const orderDelete = event.target.closest("[data-order-delete]");
+        if (orderDelete) deleteOrder(orderDelete.dataset.orderDelete);
+
+        const voucherDetail = event.target.closest("[data-voucher-detail]");
+        if (voucherDetail) showVoucherDetails(voucherDetail.dataset.voucherDetail);
+
+        const voucherEdit = event.target.closest("[data-voucher-edit]");
+        if (voucherEdit) editVoucherDialog(voucherEdit.dataset.voucherEdit);
+
+        const voucherDelete = event.target.closest("[data-voucher-delete]");
+        if (voucherDelete) deleteVoucher(voucherDelete.dataset.voucherDelete);
+
+        const review = event.target.closest("[data-review]");
+        if (review) setReview(review.dataset.review, review.dataset.decision);
+
+        const quickReview = event.target.closest("[data-review-open]");
+        if (quickReview) {
+          goTo("verifications");
+          const row = state.attendances.find((item) => item.id === quickReview.dataset.reviewOpen);
+          if (row) showToast(`Revisando el vale ${row.voucher}.`);
+        }
+
+        const toggle = event.target.closest("[data-user-toggle]");
+        if (toggle) {
+          const user = state.users[Number(toggle.dataset.userToggle)];
+          if (!user) return;
+          user.active = !user.active;
+          renderUsers();
+          showToast(`${user.name}: cuenta ${user.active ? "habilitada" : "deshabilitada"}.`);
+        }
+      });
+      document.getElementById("orderMore").addEventListener("click", () => showToast("Se muestran todas las órdenes de demostración."));
+      document.getElementById("reportPeriod").addEventListener("change", (event) => showToast(`Período seleccionado: ${event.target.value}.`));
+      document.getElementById("appDialog").addEventListener("click", (event) => {
+        if (event.target === event.currentTarget) event.currentTarget.close();
+      });
+
+      renderProfile();
+      renderAll();
+      goTo("dashboard");
+    </script>
+  </body>
+</html>

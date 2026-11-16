@@ -17,20 +17,19 @@ INSERT INTO users (
 VALUES
     (
         '20000000-0000-4000-8000-000000000001',
-        'Admin', 'Demo', 'DEMO-ADMIN', 'admin@example.test',
-        'seed-disabled-no-login', 'ADMIN', NULL, FALSE
+        'Admin', 'Demo', 00000000, 'admin@example.test',
+        'seed-disabled-no-login', 'ADMIN', NULL, TRUE
     ),
     (
         '20000000-0000-4000-8000-000000000002',
-        'Oficina', 'Demo', 'DEMO-OFFICE', 'office@example.test',
-        'seed-disabled-no-login', 'OFFICE',
-        (SELECT id FROM branches WHERE code = 'SAN_JOSE'), FALSE
+        'Oficina', 'Demo', '11111111', 'office@example.test',
+        'seed-disabled-no-login', 'OFFICE', NULL, TRUE
     ),
     (
         '20000000-0000-4000-8000-000000000003',
-        'Grifero', 'Demo', 'DEMO-ATTENDANT', 'attendant@example.test',
+        'Grifero', 'Demo', '22222222', 'attendant@example.test',
         'seed-disabled-no-login', 'ATTENDANT',
-        (SELECT id FROM branches WHERE code = 'SAN_JOSE'), FALSE
+        (SELECT id FROM branches WHERE code = 'SAN_JOSE'), TRUE
     )
 ON CONFLICT (id) DO NOTHING;
 
@@ -49,7 +48,7 @@ INSERT INTO fuel_types (id, code, name, is_active)
 VALUES (
     '40000000-0000-4000-8000-000000000001',
     'DEMO-DIESEL-S50',
-    'Diesel S50 (demo)',
+    'Diesel S50',
     FALSE
 )
 ON CONFLICT (code) DO NOTHING;

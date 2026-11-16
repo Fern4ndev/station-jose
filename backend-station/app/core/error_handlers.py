@@ -28,7 +28,9 @@ def register_error_handlers(app: FastAPI) -> None:
     async def handle_validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
         return JSONResponse(
             status_code=422,
-            content=error_payload("VALIDATION_ERROR", "La solicitud no es válida.", {"errors": exc.errors()}),
+            content=error_payload(
+                "VALIDATION_ERROR", "La solicitud no es válida.", {"errors": exc.errors()}
+            ),
         )
 
     @app.exception_handler(Exception)
