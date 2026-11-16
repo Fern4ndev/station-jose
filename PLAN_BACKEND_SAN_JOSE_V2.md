@@ -2225,12 +2225,12 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F6 | Implementar corrección descriptiva autorizada | [x] |
 | F6 | Bloquear eliminación de vales atendidos | [x] |
 | F6 | Probar que verificar no modifica consumo | [ ] |
-| F7 | Implementar queries agregadas de reportes | [ ] |
-| F7 | Implementar agrupación por hora, día, semana y mes | [ ] |
-| F7 | Implementar filtros por fecha, usuario y estado | [ ] |
-| F7 | Implementar dataset por combustible y dashboard | [ ] |
-| F7 | Implementar exportación ReportLab/openpyxl | [ ] |
-| F7 | Aplicar restricciones de datos sensibles por rol | [ ] |
+| F7 | Implementar queries agregadas de reportes | [x] |
+| F7 | Implementar agrupación por hora, día, semana y mes | [x] |
+| F7 | Implementar filtros por fecha, usuario y estado | [x] |
+| F7 | Implementar dataset por combustible y dashboard | [x] |
+| F7 | Implementar exportación ReportLab/openpyxl | [x] |
+| F7 | Aplicar restricciones de datos sensibles por rol | [x] |
 | F7 | Probar agregaciones, timezone, filtros y exportaciones | [ ] |
 | F8 | Implementar upload temporal y detección MIME | [ ] |
 | F8 | Implementar extracción y renderizado PDF con PyMuPDF | [ ] |

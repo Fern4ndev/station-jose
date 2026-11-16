@@ -15,6 +15,10 @@ sqlalchemy==2.0.43
 pyjwt==2.10.1
 pwdlib[argon2]==0.2.1
 
+# Reportes y exportación
+openpyxl==3.1.5
+reportlab==4.4.9
+
 # Pruebas y calidad
 httpx==0.28.1
 mypy==1.17.1

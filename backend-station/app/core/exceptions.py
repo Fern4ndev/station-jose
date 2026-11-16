@@ -73,3 +73,8 @@ class VoucherHasAttendancesError(AppError):
 class InvalidVerificationError(AppError):
     status_code = 422
     code = "INVALID_VERIFICATION"
+
+
+class InvalidReportFilterError(AppError):
+    status_code = 422
+    code = "INVALID_REPORT_FILTER"
