@@ -235,6 +235,10 @@ Las rutas de la API tienen el prefijo `API_V1_PREFIX` (por defecto `/api/v1`).
 | `POST` | `/api/v1/vouchers/{voucher_id}/attendances` | Registra una atención parcial posterior | Requiere `attendances.create` |
 | `GET` | `/api/v1/vouchers` | Lista y filtra vales paginados | Requiere `vouchers.read` |
 | `GET` | `/api/v1/vouchers/{voucher_id}` | Consulta el vale, sus saldos y atenciones | Requiere `vouchers.read` |
+| `GET` | `/api/v1/verifications/pending` | Lista atenciones pendientes de verificación | Requiere `vouchers.verify` |
+| `POST` | `/api/v1/attendances/{attendance_id}/verifications` | Verifica u observa una atención | Requiere `vouchers.verify` |
+| `PATCH` | `/api/v1/vouchers/{voucher_id}/descriptive-data` | Corrige datos descriptivos del vale | Requiere `vouchers.correct_descriptive` |
+| `DELETE` | `/api/v1/vouchers/{voucher_id}` | Rechaza el borrado de vales con historial | Requiere `vouchers.delete` |
 
 Las rutas protegidas utilizan el encabezado `Authorization: Bearer <token>`. El listado acepta `page` (mínimo 1) y `page_size` (entre 1 y 100; por defecto 20). Los esquemas de solicitud y respuesta están disponibles en `/docs`.
 
@@ -245,6 +249,8 @@ curl http://localhost:8000/api/v1/health/live
 ```
 
 Para crear una atención se requiere el encabezado `Idempotency-Key` con un UUID. La primera atención recibe los datos descriptivos del vale y líneas referenciadas a la orden; las siguientes reciben `voucher_item_id`. Los saldos y estados se derivan de los despachos persistidos y no se aceptan desde el cliente.
+
+Una verificación `VERIFIED` cierra la revisión de la atención. Una verificación `OBSERVED` exige una observación y mantiene el registro pendiente; ninguna verificación modifica galones, importes, grifero o fechas históricas.
 
 ## 12. Pruebas
 

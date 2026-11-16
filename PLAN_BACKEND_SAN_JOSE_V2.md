@@ -2217,13 +2217,13 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F5 | Implementar estados derivados y contexto de sede/usuario | [x] |
 | F5 | Ejecutar TC-001 a TC-011 | [ ] |
 | F5 | Probar concurrencia, reintentos y consumos parciales/completos | [ ] |
-| F6 | Implementar bandeja pendiente de verificación | [ ] |
-| F6 | Implementar detalle y resultado `VERIFIED`/`OBSERVED` | [ ] |
-| F6 | Exigir observación en discrepancias | [ ] |
-| F6 | Registrar revisor y fecha | [ ] |
-| F6 | Proteger movimientos y saldos durante verificación | [ ] |
-| F6 | Implementar corrección descriptiva autorizada | [ ] |
-| F6 | Bloquear eliminación de vales atendidos | [ ] |
+| F6 | Implementar bandeja pendiente de verificación | [x] |
+| F6 | Implementar detalle y resultado `VERIFIED`/`OBSERVED` | [x] |
+| F6 | Exigir observación en discrepancias | [x] |
+| F6 | Registrar revisor y fecha | [x] |
+| F6 | Proteger movimientos y saldos durante verificación | [x] |
+| F6 | Implementar corrección descriptiva autorizada | [x] |
+| F6 | Bloquear eliminación de vales atendidos | [x] |
 | F6 | Probar que verificar no modifica consumo | [ ] |
 | F7 | Implementar queries agregadas de reportes | [ ] |
 | F7 | Implementar agrupación por hora, día, semana y mes | [ ] |

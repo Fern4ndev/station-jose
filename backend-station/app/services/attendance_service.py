@@ -31,6 +31,7 @@ from app.schemas.attendance import (
 )
 from app.schemas.balance import BalanceStatus
 from app.schemas.purchase_order import PaginationResponse
+from app.schemas.verification import VerificationDecision, VerificationResponse
 from app.schemas.voucher import VoucherListResponse
 from app.tables import Attendance, AttendanceItem, PurchaseOrderItem, Voucher, VoucherItem
 
@@ -325,7 +326,12 @@ class AttendanceService:
         return attendance
 
     def _attendance_response(self, attendance: Attendance) -> AttendanceResponse:
-        return AttendanceResponse.model_validate(attendance, from_attributes=True)
+        response = AttendanceResponse.model_validate(attendance, from_attributes=True)
+        response.verifications = [
+            VerificationResponse.model_validate(item, from_attributes=True)
+            for item in attendance.verifications
+        ]
+        return response
 
     def _voucher_response(self, db: Session, voucher: Voucher) -> VoucherResponse:
         item_ids = [item.id for item in voucher.items]
@@ -374,6 +380,7 @@ class AttendanceService:
             voucher_number=voucher.voucher_number,
             created_at=voucher.created_at,
             status=status,
+            verification_status=_voucher_verification_status(voucher),
             items=detail_items,
             attendances=[
                 self._attendance_response(attendance) for attendance in voucher.attendances
@@ -397,6 +404,18 @@ def fingerprint(data: AttendanceCreate) -> str:
         payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
     ).encode()
     return hashlib.sha256(encoded).hexdigest()
+
+
+def _voucher_verification_status(voucher: Voucher) -> str:
+    if not voucher.attendances:
+        return "PENDING_VERIFICATION"
+    for attendance in voucher.attendances:
+        if not attendance.verifications:
+            return "PENDING_VERIFICATION"
+        latest = max(attendance.verifications, key=lambda item: item.reviewed_at)
+        if latest.decision != VerificationDecision.VERIFIED.value:
+            return "PENDING_VERIFICATION"
+    return "VERIFIED"
 
 
 def _item_status(authorized: Decimal, attended: Decimal, order_available: Decimal | None) -> str:

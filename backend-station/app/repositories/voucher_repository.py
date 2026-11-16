@@ -23,6 +23,7 @@ class VoucherRepository:
             .options(
                 selectinload(Voucher.items).selectinload(VoucherItem.purchase_order_item),
                 selectinload(Voucher.attendances).selectinload(Attendance.items),
+                selectinload(Voucher.attendances).selectinload(Attendance.verifications),
             )
             .where(Voucher.id == voucher_id)
         )
@@ -163,6 +164,7 @@ class VoucherRepository:
             base.options(
                 selectinload(Voucher.items).selectinload(VoucherItem.purchase_order_item),
                 selectinload(Voucher.attendances).selectinload(Attendance.items),
+                selectinload(Voucher.attendances).selectinload(Attendance.verifications),
             )
             .order_by(Voucher.created_at.desc())
             .offset(offset)
