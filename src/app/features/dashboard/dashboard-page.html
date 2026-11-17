@@ -1,0 +1,11 @@
+<section aria-labelledby="page-title">
+  <app-page-header title="Panel principal" description="Resumen operativo de órdenes, saldos y atenciones." />
+  <div class="dashboard-grid">
+    <app-section-panel title="Actividad reciente" description="Atenciones registradas según tu acceso">
+      <app-empty-state title="Sin actividad para mostrar" description="La actividad aparecerá cuando el dashboard se conecte al servicio de reportes del backend." />
+    </app-section-panel>
+    <app-section-panel title="Revisión en oficina" description="Atenciones pendientes de cotejo">
+      <app-empty-state title="Bandeja sin datos" description="Los pendientes se cargarán desde la API de verificaciones; el frontend no estima cantidades ni estados." />
+    </app-section-panel>
+  </div>
+</section>

@@ -1,0 +1,13 @@
+<div class="table-wrap" role="region" aria-label="Listado" tabindex="0">
+  <table>
+    <thead>
+      <tr>@for (column of columns(); track column) { <th scope="col">{{ column }}</th> }</tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td [attr.colspan]="columns().length"><app-empty-state [title]="emptyTitle()"
+            [description]="emptyDescription()" /></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

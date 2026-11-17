@@ -1,0 +1,32 @@
+:host { display: block; min-height: 100dvh; }
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 252px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 100dvh;
+  padding: 14px;
+}
+
+.main-area { min-width: 0; padding: 0 17px 38px; }
+.page-content { min-width: 0; }
+.sidebar-scrim { display: none; }
+
+@media (max-width: 1050px) {
+  .app-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 10px; padding: 10px; }
+  .main-area { padding-right: 8px; padding-left: 8px; }
+}
+
+@media (max-width: 760px) {
+  .app-layout { display: block; padding: 8px; }
+  .main-area { padding: 0 5px 28px; }
+  .sidebar-scrim {
+    position: fixed;
+    z-index: 19;
+    display: block;
+    inset: 0;
+    border: 0;
+    background: rgb(16 36 40 / 32%);
+    backdrop-filter: blur(3px);
+  }
+}

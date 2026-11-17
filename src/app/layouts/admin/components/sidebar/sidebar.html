@@ -1,0 +1,23 @@
+<aside class="sidebar" [class.open]="open()" aria-label="Navegación principal">
+  <a class="brand-lockup" routerLink="/app" (click)="onNavigate()" aria-label="San José, ir al inicio">
+    <span class="brand-symbol" aria-hidden="true">SJ</span>
+    <span class="brand-copy"><strong>San José</strong><small>Control de combustible</small></span>
+  </a>
+
+  <div class="branch-label"><span>Sede asignada</span><strong>{{ branchName() }}</strong></div>
+  <p class="nav-heading">Espacio de trabajo</p>
+  <nav class="nav-menu">
+    @for (item of navigation(); track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path === '/app/dashboard' }" (click)="onNavigate()">
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-spacer"></div>
+  <div class="side-status"><span class="live-dot" aria-hidden="true"></span><span><strong>Información compartida</strong><small>San José y Santa Marta</small></span></div>
+  <div class="profile-card">
+    <span class="avatar" aria-hidden="true">{{ user()?.firstName?.slice(0, 1) }}{{ user()?.lastName?.slice(0, 1) }}</span>
+    <span class="profile-copy"><strong>{{ user()?.firstName }} {{ user()?.lastName }}</strong><small>{{ roleLabel() }}</small></span>
+  </div>
+</aside>

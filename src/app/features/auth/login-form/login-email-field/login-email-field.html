@@ -1,0 +1,17 @@
+<div>
+  <label class="mb-2 block text-sm font-medium text-slate-800" for="email">Correo electrónico</label>
+  <input
+    class="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
+    id="email" name="email" type="email" [formControl]="control()" autocomplete="username" inputmode="email"
+    autocapitalize="none" spellcheck="false" placeholder="nombre@empresa.com"
+    [attr.aria-invalid]="control().invalid && (control().touched || showErrors())"
+    aria-describedby="email-help email-error"
+  />
+  <p class="mt-2 text-xs text-slate-500" id="email-help">Usa el correo registrado en tu cuenta.</p>
+  <p class="mt-1 min-h-4 text-xs text-red-700" id="email-error" aria-live="polite">
+    @if (control().invalid && (control().touched || showErrors())) {
+      @if (control().hasError('required')) { Ingresa tu correo electrónico. }
+      @else if (control().hasError('email')) { Revisa el formato del correo electrónico. }
+    }
+  </p>
+</div>

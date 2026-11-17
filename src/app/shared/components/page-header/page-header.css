@@ -1,0 +1,6 @@
+:host { display: block; }
+.page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin: 10px 0 22px; }
+h1 { margin: 0; color: #13262e; font-size: clamp(24px, 3vw, 31px); font-weight: 650; letter-spacing: -.055em; line-height: 1.08; }
+p { margin: 8px 0 0; color: #77868b; font-size: 12px; line-height: 1.5; }
+.heading-actions { display: flex; align-items: center; gap: 8px; }
+@media (max-width: 760px) { .page-heading { align-items: flex-start; flex-direction: column; margin: 12px 0 17px; } h1 { font-size: 25px; } p { max-width: 310px; font-size: 11px; } }

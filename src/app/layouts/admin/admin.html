@@ -1,0 +1,14 @@
+<div class="app-layout">
+  <app-sidebar [open]="menuOpen()" (closeMenu)="closeMenu()" />
+
+  @if (menuOpen()) {
+    <button class="sidebar-scrim" type="button" aria-label="Cerrar menú" (click)="closeMenu()"></button>
+  }
+
+  <main class="main-area" id="main-content">
+    <app-header (menuClick)="openMenu()" (logoutClick)="logout()" />
+    <div class="page-content">
+      <router-outlet />
+    </div>
+  </main>
+</div>

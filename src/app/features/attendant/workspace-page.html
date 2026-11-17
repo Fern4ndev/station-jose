@@ -1,0 +1,11 @@
+<section aria-labelledby="page-title">
+  <app-page-header [title]="title" [description]="description" />
+  <div class="workspace-grid">
+    <app-section-panel title="Buscar una orden" description="Consulta saldos por línea de combustible">
+      <app-empty-state title="Búsqueda disponible al conectar órdenes" description="La pantalla no captura sede, usuario ni fecha de atención. Esos datos pertenecen a la sesión y al backend." />
+    </app-section-panel>
+    <app-section-panel title="Vale y despacho" description="Primera atención o atención posterior">
+      <app-empty-state title="Flujo de atención pendiente de API" description="La creación del vale y su primer despacho se enviarán en una sola operación cuando el contrato esté verificado." />
+    </app-section-panel>
+  </div>
+</section>

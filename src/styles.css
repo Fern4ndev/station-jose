@@ -5,6 +5,9 @@
 @source not "../mockup.tailwind-preview.html";
 
 @theme {
+  --color-ink: #10202a;
+  --color-mint: #39c6ae;
+  --color-fuel: #e9a64a;
   --color-primary-50: #f2f5fc;
   --color-primary-100: #e2e9f8;
   --color-primary-200: #cbd8f2;
@@ -29,14 +32,14 @@
 
 :root {
   /* Tokens Semánticos de Marca */
-  --sanjose-primary: var(--color-primary-700);
-  --sanjose-primary-hover: var(--color-primary-600);
-  --sanjose-primary-active: var(--color-primary-800);
-  --sanjose-primary-soft: var(--color-primary-100);
-  --sanjose-canvas: var(--color-primary-50);
+  --sanjose-primary: #173c42;
+  --sanjose-primary-hover: #20545a;
+  --sanjose-primary-active: #10202a;
+  --sanjose-primary-soft: #e9f6f0;
+  --sanjose-canvas: #f3f6f5;
   --sanjose-surface: var(--color-surface);
-  --sanjose-text-main: #0f172a;
-  --sanjose-text-muted: #475569;
+  --sanjose-text-main: #10202a;
+  --sanjose-text-muted: #77868b;
 }
 
 body {
@@ -45,7 +48,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: var(--sanjose-canvas);
+  background: radial-gradient(ellipse at 68% 0%, rgb(119 205 190 / 13%), transparent 32rem), var(--sanjose-canvas);
 }
 
 button {

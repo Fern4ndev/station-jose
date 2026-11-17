@@ -1,0 +1,34 @@
+<app-auth-layout>
+  <main class="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8">
+    <div class="w-full max-w-[26rem]">
+      <div class="mb-10 flex items-center gap-3 lg:hidden">
+        <span class="grid size-11 place-items-center rounded-xl bg-primary-700 text-sm font-extrabold tracking-tight text-white">SJ</span>
+        <div><p class="text-sm font-semibold text-slate-900">Estación de Servicio</p><p class="text-sm text-slate-500">San José</p></div>
+      </div>
+
+      <div class="mb-8">
+        <p class="text-sm font-semibold text-primary-600">Bienvenido de nuevo</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Iniciar sesión</h2>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Ingresa tus credenciales para acceder al sistema.</p>
+      </div>
+
+      @if (noticeMessage()) {
+        <div class="mb-5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-5 text-blue-900" role="status">{{ noticeMessage() }}</div>
+      }
+      @if (errorMessage()) {
+        <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-5 text-red-800" role="alert">{{ errorMessage() }}</div>
+      }
+
+      <app-login-form
+        [form]="form"
+        [hasSubmitted]="hasSubmitted()"
+        [isSubmitting]="isSubmitting()"
+        [showPassword]="showPassword()"
+        (submitLogin)="submit()"
+        (togglePassword)="togglePasswordVisibility()"
+      />
+
+      <p class="mt-8 text-center text-xs leading-5 text-slate-500">Si necesitas ayuda para acceder, comunícate con el Administrador del sistema.</p>
+    </div>
+  </main>
+</app-auth-layout>
