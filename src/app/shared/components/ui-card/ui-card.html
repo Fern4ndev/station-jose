@@ -1,5 +1,3 @@
-<p-card>
-  @if (title(); as heading) { <ng-template #title>{{ heading }}</ng-template> }
-  @if (subtitle(); as subheading) { <ng-template #subtitle>{{ subheading }}</ng-template> }
+<p-card [header]="title()" [subheader]="subtitle()">
   <ng-content />
 </p-card>

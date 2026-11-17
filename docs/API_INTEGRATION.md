@@ -6,11 +6,26 @@ Ante un cambio, actualizar este documento junto con los esquemas y consumidores.
 
 ## Entorno y sesión
 
-Angular usa `/api/v1` (`src/environments/environment.ts`); en desarrollo el proxy
-de `proxy.conf.json` redirige `/api` a `http://127.0.0.1:8000`. Configurar backend
+Angular usa `http://localhost:8000/api/v1` tanto en `environment.ts` (producción)
+como en `environment.development.ts` (desarrollo). El backend debe permitir el
+origen del frontend en `CORS_ORIGINS`. El proxy solo se utiliza si la URL se cambia
+a una ruta relativa. En un despliegue remoto, cambiar `localhost` por la dirección
+del backend accesible desde los navegadores. Configurar backend
 y PostgreSQL siguiendo `backend-station/README.md`, sus scripts SQL y `.env.example`;
 crear cuentas de desarrollo por los mecanismos del backend, sin guardar credenciales
-en el repositorio. Comprobar `/api/v1/health/live` y `/health/ready` antes de integrar.
+reales en el repositorio. Comprobar `/api/v1/health/live` y `/health/ready` antes de integrar.
+
+### Cuentas locales de prueba
+
+Estas credenciales son exclusivamente para pruebas locales y no deben usarse en
+producción. Juan y Pedro tienen asignada la sede San José.
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| ADMIN | `admin@gmail.com` | `12345678` |
+| OFFICE | `oficina@gmail.com` | `12345678` |
+| ATTENDANT | `juan@gmail.com` | `12345678` |
+| ATTENDANT | `pedro@gmail.com` | `12345678` |
 
 Login recibe `{email,password}` y responde `access_token`, `token_type`, `expires_in`,
 `user` y `permissions`. `GET /auth/me` devuelve usuario y permisos; logout devuelve

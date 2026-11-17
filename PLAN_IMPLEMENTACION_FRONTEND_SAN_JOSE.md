@@ -85,6 +85,8 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 
 ### F0 — Contrato y preparación
 
+**Comprobación:** `/api/v1/health/ready` respondió HTTP 200 con base disponible; CORS permitió `http://localhost:4200` y `/auth/me` sin sesión respondió 401. Pendiente ejecutar los recorridos con cuentas reales de los tres roles y validar los contratos de negocio con datos reales.
+
 - [x] Contrastar estáticamente routers, esquemas, permisos y errores; documentar contrato en `docs/API_INTEGRATION.md`.
 - [ ] Resolver con backend DTOs operativos sin precios, consultas e historial de atenciones, saldos y demás diferencias de §5. Comprobar permisos y alcance por sede/usuario con respuestas reales.
 - [ ] Preparar y verificar PostgreSQL, API, datos de desarrollo y cuentas de los tres roles sin registrar credenciales reales en el repositorio. Los pasos de preparación están documentados en `docs/API_INTEGRATION.md` y `backend-station/README.md`.
@@ -92,6 +94,8 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 - **Verificación:** contrastar catálogo contra routers y respuestas reales con API y base disponibles.
 
 ### F1 — Sesión, navegación y componentes base
+
+**Comprobación 17/11/2026:** pruebas HTTP simuladas cubren login y logout, y la suite verifica permisos del menú. Las constantes de almacenamiento y rate limit añadidas están reservadas y no activan persistencia, refresh ni protección del servidor.
 
 - [x] Implementar manejo de expiración, 401/403, logout y redirección por permiso; documentar sesión en memoria y recarga. Pendiente verificación con API real.
 - [x] Corregir permiso del menú de atenciones, agrupar navegación y proteger el menú móvil cerrado frente al foco. Pendiente recorrido manual de accesibilidad, responsive y rutas directas por rol.
