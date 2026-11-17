@@ -1,10 +1,14 @@
-<app-record-list-page
-  title="Usuarios"
-  description="Administra cuentas y roles predefinidos."
-  listDescription="Acceso y estado de las cuentas del sistema."
-  searchLabel="Buscar por nombre, DNI o correo"
-  [columns]="columns"
-  emptyDescription="No hay usuarios que coincidan con esta búsqueda."
->
-  <a page-actions class="inline-flex min-h-10 items-center rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" routerLink="/app/users/new">Nuevo usuario</a>
-</app-record-list-page>
+<section aria-labelledby="page-title">
+  <app-page-header title="Usuarios" description="Administra cuentas y roles predefinidos."><a page-actions class="inline-flex min-h-10 items-center rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" routerLink="/app/users/new">Nuevo usuario</a></app-page-header>
+  <app-section-panel title="Cuentas" description="Acceso y estado de las cuentas del sistema.">
+    @switch (state()) {
+      @case ('loading') { <div class="p-4" role="status" aria-label="Cargando usuarios"><app-loading-skeleton /></div> }
+      @case ('error') { <app-api-error message="No se pudieron cargar los usuarios." (retry)="load(page())" /> }
+      @case ('ready') { <div class="overflow-x-auto"><p-table [value]="rows()" [tableStyle]="{ 'min-width': '48rem' }">
+        <ng-template #header><tr><th scope="col">Usuario</th><th scope="col">DNI</th><th scope="col">Correo</th><th scope="col">Rol</th><th scope="col">Sede</th><th scope="col">Estado</th><th scope="col">Acción</th></tr></ng-template>
+        <ng-template #body let-user><tr><td>{{ user.firstName }} {{ user.lastName }}</td><td>{{ user.dni }}</td><td>{{ user.email }}</td><td>{{ roleLabel(user.role) }}</td><td>{{ user.branch?.name ?? '—' }}</td><td><app-status-badge [status]="user.isActive ? 'ACTIVE' : 'INACTIVE'" /></td><td><a class="font-semibold text-primary-700 underline" [routerLink]="['/app/users', user.id]">Ver detalle<span class="sr-only"> de {{ user.firstName }} {{ user.lastName }}</span></a></td></tr></ng-template>
+        <ng-template #emptymessage><tr><td colspan="7"><app-empty-state title="Sin usuarios" description="No hay cuentas disponibles." /></td></tr></ng-template>
+      </p-table></div> @if (pages() > 1) { <app-server-pagination [page]="page()" [pages]="pages()" (pageChange)="load($event)" /> } }
+    }
+  </app-section-panel>
+</section>

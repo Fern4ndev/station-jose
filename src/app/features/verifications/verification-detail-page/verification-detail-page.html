@@ -1,5 +1,19 @@
 <section aria-labelledby="page-title">
-  <app-page-header title="Revisar atención" description="Contrasta la información registrada con el vale físico." />
-  <div class="grid gap-4"><app-section-panel title="Datos registrados"><div class="p-4"><app-empty-state title="Atención seleccionada" description="El detalle se cargará desde el servidor antes de permitir la verificación." /></div></app-section-panel><app-section-panel title="Registrar revisión"><div class="p-5"><app-verification-form [form]="form" [enabled]="false" /></div></app-section-panel></div>
-  <p class="mt-3 break-all text-xs text-slate-500">Identificador: {{ attendanceId }}</p>
+  <app-page-header title="Revisar atención" description="Contrasta la información registrada con el vale físico."><a page-actions routerLink="/app/attendances/pending-verification" class="rounded-lg border px-4 py-2 text-sm">Volver a la bandeja</a></app-page-header>
+  @switch (state()) {
+    @case ('loading') { <div role="status" aria-label="Cargando atención"><app-loading-skeleton /></div> }
+    @case ('error') { <app-api-error message="No se pudo cargar la atención." (retry)="load()" /> }
+    @case ('missing') { <app-empty-state title="Atención no disponible" description="La atención no está en la bandeja o no se pudieron identificar todas sus líneas. Vuelve a la bandeja e inténtalo nuevamente." /> }
+    @case ('ready') {
+      @if (pending(); as item) {
+        <div class="grid gap-4 lg:grid-cols-2">
+          <app-section-panel title="Datos registrados" description="Comprueba el vale y los galones despachados.">
+            <dl class="grid gap-4 p-5 text-sm sm:grid-cols-2"><div><dt class="text-slate-500">Número de vale</dt><dd class="mt-1 font-semibold">{{ item.voucher_number }}</dd></div><div><dt class="text-slate-500">Orden</dt><dd class="mt-1 font-semibold">{{ orderNumber() }}</dd></div><div><dt class="text-slate-500">Emisor</dt><dd class="mt-1 font-semibold">{{ item.issuer_name }}</dd></div><div><dt class="text-slate-500">Fecha de atención</dt><dd class="mt-1 font-semibold">{{ item.attended_at | date:'dd/MM/yyyy HH:mm' }}</dd></div></dl>
+            <div class="border-t border-slate-100 p-5"><h3 class="text-sm font-semibold">Galones por combustible</h3>@for (line of lines(); track line.id) { <p class="mt-2 text-sm">{{ line.name }}: <strong>{{ line.gallons }} gal</strong></p> }</div>
+          </app-section-panel>
+          <app-section-panel title="Registrar revisión" description="La decisión no cambia las cantidades despachadas."><div class="p-5">@if (errorMessage()) { <p class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800" role="alert">{{ errorMessage() }}</p> }<app-verification-form [form]="form" [submitting]="submitting()" (submitDecision)="submit()" (cancel)="cancel()" /></div></app-section-panel>
+        </div>
+      }
+    }
+  }
 </section>

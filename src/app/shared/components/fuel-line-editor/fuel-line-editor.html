@@ -4,6 +4,7 @@
       <legend class="px-1 text-sm font-medium">Combustible</legend>
       <label class="grid gap-1 text-xs text-slate-600">Tipo de combustible
         <select class="min-h-10 rounded-lg border px-3 text-sm" [disabled]="!editable()" [value]="line.fuelTypeId" (change)="update(line, 'fuelTypeId', $event)">
+          <option value="">Selecciona un combustible</option>
           @for (fuel of fuelTypes(); track fuel.id) { <option [value]="fuel.id">{{ fuel.name }}</option> }
         </select>
       </label>

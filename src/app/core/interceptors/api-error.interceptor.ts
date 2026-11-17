@@ -10,19 +10,17 @@ export const apiErrorInterceptor: HttpInterceptorFn = (request, next) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
   const isApi = isApiRequest(request.url, inject(API_BASE_URL));
+  const requestToken = authStore.accessToken();
 
   return next(request).pipe(
     catchError((error: unknown) => {
-      if (isApi && error instanceof HttpErrorResponse && error.status === 401 && !request.url.endsWith('/auth/login')) {
-        const isLoginRequest = request.url.endsWith('/auth/login');
-        const hadSession = authStore.isAuthenticated();
+      if (isApi && error instanceof HttpErrorResponse && error.status === 401 &&
+          !request.url.endsWith('/auth/login') && requestToken && requestToken === authStore.accessToken()) {
         authStore.clearSession();
 
-        if (hadSession && !isLoginRequest) {
-          void router.navigate(['/auth/login'], {
-            queryParams: { expired: 'true', returnUrl: router.url },
-          });
-        }
+        void router.navigate(['/auth/login'], {
+          queryParams: { expired: 'true', returnUrl: router.url },
+        });
       }
 
       if (isApi && error instanceof HttpErrorResponse && error.status === 403) {

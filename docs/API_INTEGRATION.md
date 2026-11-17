@@ -69,9 +69,23 @@ consultar `core/exceptions.py` para códigos específicos.
 
 | Brecha | Responsable propuesto | Bloque afectado / salida requerida |
 |---|---|---|
-| Las respuestas de órdenes exponen precios al grifero; `AttendanceResponse` incluye precios e importes y está anidado en `VoucherResponse`. | Backend | F3–F4: separar DTOs y comprobar respuestas reales por rol antes de liberar. Ocultar controles no resuelve la exposición. |
+| Las respuestas operativas de órdenes, vales y creación de atenciones excluyen los campos financieros para el grifero. | Backend + frontend | Validado con listas y detalles reales; falta comprobar creación de atención y alcance de historial con pruebas integrales. |
 | No aparecen routers dedicados de consulta de atenciones, historial de verificación ni `/balances/*` descritos en el plan V2. | Backend + responsable funcional | F4–F5: acordar endpoints/DTO y alcance o documentar fuente alternativa. |
 | Alcance por sede y acceso propio, y decisiones PD aún abiertas. | Responsable funcional + backend | F0/F4: decisión aprobada y controles del servidor verificados. |
 | Catálogo y permisos del plan histórico difieren del código (`/reports/dashboard`, `/verifications/pending`, `vouchers.verify`, `users.manage`). | Backend + frontend | Mantener catálogo sincronizado y pruebas de contrato antes de integrar cada flujo. |
 
 Estos responsables son propuestas de coordinación, no asignaciones confirmadas.
+
+La pantalla de saldos consulta las líneas de órdenes, hasta 20 resultados por
+búsqueda. Las respuestas operativas del grifero omiten precios e importes; el
+detalle de vales permanece deshabilitado para ese perfil mientras se valida el
+alcance del historial por usuario y sede.
+La bandeja de verificación distingue ahora `OBSERVED` de `PENDING_VERIFICATION`.
+
+El contrato actual de primera atención guarda como autorización del vale los mismos
+galones de la primera entrega. Por ello no permite representar una autorización
+mayor que el despacho ni líneas autorizadas que se despacharán después; debe
+alinearse con el ejemplo API-003 del plan backend antes de habilitar el flujo.
+Los reintentos existentes se comprueban por contenido, usuario y orden o vale;
+la concurrencia y la recuperación de reintentos siguen pendientes de pruebas
+integrales contra PostgreSQL.

@@ -23,6 +23,9 @@ export class PurchaseOrderForm {
   readonly fuelTypes = input<readonly FuelTypeOption[]>([]);
   readonly branches = input<readonly BranchSummary[]>([]);
   readonly submitting = input(false);
+  readonly enabled = input(false);
+  readonly isEdit = input(false);
+  readonly ocrEnabled = input(false);
   readonly lineChange = output<FuelLineDraft>();
   readonly lineAdd = output<void>();
   readonly lineRemove = output<string>();

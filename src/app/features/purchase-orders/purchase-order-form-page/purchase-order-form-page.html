@@ -1,4 +1,9 @@
 <section aria-labelledby="page-title">
-  <app-page-header title="Nueva orden de compra" description="Registra la cabecera y una o más líneas de combustible." />
-  <app-section-panel title="Datos y líneas de la orden"><div class="p-5"><app-purchase-order-form [form]="form" [lines]="lines()" (lineChange)="updateLine($event)" (lineAdd)="addLine()" (lineRemove)="removeLine($event)" (cancel)="cancel()" /></div></app-section-panel>
+  <app-page-header [title]="isEdit ? 'Editar orden de compra' : 'Nueva orden de compra'" description="Registra la cabecera y una o más líneas de combustible." />
+  <app-section-panel title="Datos y líneas de la orden"><div class="p-5">
+    @if (error()) { <div class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800" role="alert">{{ error() }} @if (!catalogReady()) { <button type="button" class="font-semibold underline" (click)="loadCatalogs()">Reintentar</button> }</div> }
+    @if (processing()) { <p class="mb-4 text-sm" role="status">Procesando documento…</p> }
+    @if (preview(); as result) { <div class="mb-5"><app-ocr-preview [preview]="result" (applyCandidates)="applyCandidates($event)" (dismiss)="preview.set(null)" /></div> }
+    <app-purchase-order-form [form]="form" [lines]="lines()" [branches]="branches()" [fuelTypes]="fuels()" [isEdit]="isEdit" [ocrEnabled]="auth.hasPermission('ocr.purchase_orders.process') && !processing()" [enabled]="catalogReady()" [submitting]="saving()" (pdfSelected)="processPdf($event)" (save)="save()" (lineChange)="updateLine($event)" (lineAdd)="addLine()" (lineRemove)="removeLine($event)" (cancel)="cancel()" />
+  </div></app-section-panel>
 </section>

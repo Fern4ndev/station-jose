@@ -2,9 +2,8 @@
   @switch (state()) {
     @case ('loading') { <app-loading-skeleton /> }
     @case ('error') { <app-api-error [message]="errorMessage()" (retry)="retry.emit()" /> }
-    @case ('empty') { <app-empty-state [title]="emptyTitle()" [description]="emptyDescription()" /> }
-    @case ('success') {
-      <p-table [value]="tableRows()" [tableStyle]="{ 'min-width': '40rem' }">
+    @default {
+      <p-table [value]="state() === 'success' ? tableRows() : []" [tableStyle]="{ 'min-width': '40rem' }">
         <ng-template #header>
           <tr>@for (column of columns(); track column) { <th scope="col">{{ column }}</th> }</tr>
         </ng-template>

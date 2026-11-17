@@ -1,3 +1,18 @@
-<app-record-list-page title="Órdenes de compra" description="Consulta autorizaciones y saldo disponible por combustible." listDescription="El saldo y los estados provienen del servidor." searchLabel="Buscar por número o entidad" [columns]="columns" emptyDescription="No hay órdenes que coincidan con los filtros.">
-  <a page-actions class="inline-flex min-h-10 items-center rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" routerLink="/app/purchase-orders/new">Nueva orden</a>
-</app-record-list-page>
+<section aria-labelledby="page-title">
+  <app-page-header title="Órdenes de compra" description="Consulta autorizaciones y saldo disponible por combustible.">
+    @if (auth.hasPermission('purchase_orders.create')) { <a page-actions class="inline-flex min-h-10 items-center rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" routerLink="/app/purchase-orders/new">Nueva orden</a> }
+  </app-page-header>
+  <app-section-panel title="Órdenes" description="Busca por número o entidad.">
+    @if (state() !== 'unavailable') { <div class="border-b border-slate-100 p-4"><app-search-field (queryChange)="search($event)">Buscar órdenes</app-search-field></div> }
+    @switch (state()) {
+      @case ('loading') { <div class="p-4" role="status" aria-label="Cargando órdenes"><app-loading-skeleton /></div> }
+      @case ('error') { <app-api-error message="No se pudieron cargar las órdenes." (retry)="load(page())" /> }
+      @case ('unavailable') { <app-empty-state title="Consulta no disponible" description="La consulta operativa de órdenes aún no está disponible para este perfil." /> }
+      @case ('ready') { <div class="overflow-x-auto"><p-table [value]="rows()" [tableStyle]="{ 'min-width': '40rem' }">
+        <ng-template #header><tr><th scope="col">Orden</th><th scope="col">Entidad</th><th scope="col">Sede</th><th scope="col">Fecha</th><th scope="col">Estado</th><th scope="col">Acción</th></tr></ng-template>
+        <ng-template #body let-order><tr><td>{{ order.order_number }}</td><td>{{ order.institution_name }}</td><td>{{ order.branch.name }}</td><td>{{ order.issue_date }}</td><td>{{ order.status }}</td><td><a class="font-semibold text-primary-700 underline" [routerLink]="['/app/purchase-orders', order.id]">Ver detalle<span class="sr-only"> de {{ order.order_number }}</span></a></td></tr></ng-template>
+        <ng-template #emptymessage><tr><td colspan="6"><app-empty-state title="Sin órdenes" description="No hay órdenes para la búsqueda." /></td></tr></ng-template>
+      </p-table></div> @if (pages() > 1) { <app-server-pagination [page]="page()" [pages]="pages()" (pageChange)="load($event)" /> } }
+    }
+  </app-section-panel>
+</section>

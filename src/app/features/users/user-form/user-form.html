@@ -14,5 +14,6 @@
       </label>
     }
   </div>
-  <div class="flex justify-end gap-3"><button class="rounded-lg border px-4 py-2 text-sm" type="button" (click)="cancel.emit()">Cancelar</button><button class="rounded-lg bg-primary-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60" type="submit" [disabled]="submitting() || !canSubmit()">Crear usuario</button></div>
+  @if (!enabled()) { <p class="rounded-lg bg-slate-50 p-3 text-sm text-slate-600" role="status">El registro de usuarios aún no está disponible.</p> }
+  <div class="flex flex-wrap justify-end gap-3"><button class="min-h-11 rounded-lg border px-4 py-2 text-sm" type="button" (click)="cancel.emit()">Cancelar</button><button class="min-h-11 rounded-lg bg-primary-700 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60" type="submit" [disabled]="!enabled() || submitting() || !canSubmit()">Crear usuario</button></div>
 </form>

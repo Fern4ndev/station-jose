@@ -97,6 +97,8 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 
 **Comprobación 17/11/2026:** pruebas HTTP simuladas cubren login y logout, y la suite verifica permisos del menú. Las constantes de almacenamiento y rate limit añadidas están reservadas y no activan persistencia, refresh ni protección del servidor.
 
+**Avance adicional:** pruebas automatizadas de guards verifican redirección sin sesión y acceso por permisos para ADMIN, OFFICE y ATTENDANT. Las cuatro cuentas de desarrollo completaron login, `/auth/me`, logout y revocación HTTP real. Quedan pendientes los recorridos visuales en navegador, validación de componentes con datos reales y las brechas de contrato de F0; estas pruebas no constituyen una verificación completa de interfaz.
+
 - [x] Implementar manejo de expiración, 401/403, logout y redirección por permiso; documentar sesión en memoria y recarga. Pendiente verificación con API real.
 - [x] Corregir permiso del menú de atenciones, agrupar navegación y proteger el menú móvil cerrado frente al foco. Pendiente recorrido manual de accesibilidad, responsive y rutas directas por rol.
 - [ ] Validar `data-table`, `page-header`, alertas, botones, formularios, modal y carga de archivos con consumidores reales; verificar carga, vacío, error, reintento y paginación. Se ajustó el mensaje vacío genérico de la tabla.
@@ -105,6 +107,8 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 
 ### F2 — Usuarios y catálogos
 
+**Avance:** lista, detalle, alta, edición de nombre, cambio de rol y estado conectados; el alta y la edición cargan sedes activas y muestran errores. Falta la verificación integral de las operaciones con la API y el historial de atenciones del grifero.
+
 - [ ] Integrar lista paginada, alta, detalle, edición permitida, cambio de rol y estado con `/users`; resolver errores de duplicidad y reglas del último administrador.
 - [ ] Cargar sedes y combustibles desde `/branches` y `/fuel-types`; aplicar validaciones de formulario y permisos reales.
 - [ ] Enlace a historial de un grifero solo cuando exista contrato de lectura de atenciones.
@@ -112,6 +116,8 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 - **Verificación:** alta, edición, deshabilitación, duplicados, acceso denegado y catálogos vacíos.
 
 ### F3 — Órdenes y OCR
+
+**Avance:** lista con búsqueda y paginación, detalle, alta, edición, baja y previsualización OCR conectados. Los contratos operativos omiten datos financieros para el grifero. Quedan pendientes filtros adicionales, pruebas integrales de mutaciones y OCR con documentos reales, y alcance por sede y usuario.
 
 - [ ] Conectar listado, búsqueda, filtros y paginación soportados, detalle, alta, modificación y baja permitida de órdenes; editar líneas por combustible y reflejar conflictos del backend.
 - [ ] Procesar PDF mediante OCR, mostrar candidatos y permitir corrección antes de enviar el formulario normal; mostrar error y límites proporcionados por contrato.

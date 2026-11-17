@@ -1,6 +1,10 @@
 """Authentication contract tests that do not require a live database."""
 
 from fastapi.testclient import TestClient
+from uuid import uuid4
+from types import SimpleNamespace
+
+from app.routers.auth import me
 
 
 def test_auth_routes_are_exposed(client: TestClient) -> None:
@@ -10,3 +14,11 @@ def test_auth_routes_are_exposed(client: TestClient) -> None:
     assert "/api/v1/auth/logout" in openapi["paths"]
     assert "/api/v1/auth/me" in openapi["paths"]
     assert "/api/v1/users" in openapi["paths"]
+
+
+def test_me_includes_effective_permissions() -> None:
+    user = SimpleNamespace(id=uuid4(), first_name="Ana", last_name="Prueba", dni="12345678",
+                           email="ana@example.com", role="ADMIN", branch=None, is_active=True)
+    response = me(user)
+    assert response.role == "ADMIN"
+    assert "users.manage" in response.permissions

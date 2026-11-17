@@ -3,9 +3,12 @@
     <ng-content select="[page-actions]" />
   </app-page-header>
   <app-section-panel title="Registros" [description]="listDescription()">
-    @if (searchLabel()) {
-      <div class="border-b p-4"><app-search-field (queryChange)="queryChange.emit($event)">{{ searchLabel() }}</app-search-field></div>
-    }
+    <div class="flex flex-wrap items-end justify-between gap-3 border-b border-slate-100 p-4 sm:p-5">
+      @if (searchLabel()) {
+        <div class="w-full max-w-md"><app-search-field (queryChange)="queryChange.emit($event)">{{ searchLabel() }}</app-search-field></div>
+      }
+      <span class="text-xs text-slate-500">{{ columns().length }} columnas</span>
+    </div>
     <app-data-table [columns]="columns()" [emptyDescription]="emptyDescription()" />
   </app-section-panel>
 </section>

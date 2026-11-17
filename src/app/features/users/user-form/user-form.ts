@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import type { BranchSummary } from '../../../core/models/auth.models';
 
@@ -17,10 +17,11 @@ export class UserForm {
   readonly form = input.required<UserFormGroup>();
   readonly branches = input<readonly BranchSummary[]>([]);
   readonly submitting = input(false);
+  readonly enabled = input(false);
   readonly save = output<void>();
   readonly cancel = output<void>();
-  protected readonly canSubmit = computed(() => {
+  protected canSubmit(): boolean {
     const form = this.form();
     return form.valid && (form.controls.role.value !== 'ATTENDANT' || form.controls.branchId.value.length > 0);
-  });
+  }
 }

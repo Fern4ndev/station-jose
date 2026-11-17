@@ -17,19 +17,25 @@ INSERT INTO users (
 VALUES
     (
         '20000000-0000-4000-8000-000000000001',
-        'Admin', 'Demo', 00000000, 'admin@example.test',
-        'seed-disabled-no-login', 'ADMIN', NULL, TRUE
+        'Admin', 'Demo', '00000000', 'admin@example.test',
+        'seed-disabled-no-login', 'ADMIN', NULL, FALSE
     ),
     (
         '20000000-0000-4000-8000-000000000002',
         'Oficina', 'Demo', '11111111', 'office@example.test',
-        'seed-disabled-no-login', 'OFFICE', NULL, TRUE
+        'seed-disabled-no-login', 'OFFICE', NULL, FALSE
     ),
     (
         '20000000-0000-4000-8000-000000000003',
         'Grifero', 'Demo', '22222222', 'attendant@example.test',
         'seed-disabled-no-login', 'ATTENDANT',
-        (SELECT id FROM branches WHERE code = 'SAN_JOSE'), TRUE
+        (SELECT id FROM branches WHERE code = 'SAN_JOSE'), FALSE
+    ),
+    (
+        '20000000-0000-4000-8000-000000000004',
+        'Grifero', 'Demo Santa Marta', '33333333', 'attendant2@example.test',
+        'seed-disabled-no-login', 'ATTENDANT',
+        (SELECT id FROM branches WHERE code = 'SANTA_MARTA'), FALSE
     )
 ON CONFLICT (id) DO NOTHING;
 
@@ -160,6 +166,66 @@ VALUES (
     'DEMO-STATION-VOUCHER',
     1
 )
+ON CONFLICT (id) DO NOTHING;
+
+-- Segunda línea, orden y vale con datos ficticios para explorar los reportes.
+INSERT INTO fuel_types (id, code, name, is_active)
+VALUES ('40000000-0000-4000-8000-000000000002', 'DEMO-GASOHOL-REGULAR', 'Gasohol regular demo', TRUE)
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO purchase_orders (
+    id, order_number, siaf_number, issue_date, institution_name, supplier_name,
+    supplier_details, executing_unit, executing_unit_ruc, branch_id
+)
+VALUES (
+    '50000000-0000-4000-8000-000000000002', 'DEMO-OC-002', 'DEMO-SIAF-002',
+    CURRENT_DATE - 10, 'Municipalidad de demostración', 'Estación de Servicio San José',
+    'Registro ficticio para desarrollo.', 'Unidad ejecutora de demostración', '00000000001',
+    (SELECT id FROM branches WHERE code = 'SANTA_MARTA')
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO purchase_order_items (id, purchase_order_id, fuel_type_id, authorized_gallons, unit_price, total_amount)
+VALUES
+    ('60000000-0000-4000-8000-000000000002', '50000000-0000-4000-8000-000000000002',
+     (SELECT id FROM fuel_types WHERE code = 'DEMO-DIESEL-S50'), 100.000, 15.2500, 1525.00),
+    ('60000000-0000-4000-8000-000000000003', '50000000-0000-4000-8000-000000000002',
+     (SELECT id FROM fuel_types WHERE code = 'DEMO-GASOHOL-REGULAR'), 50.000, 16.0000, 800.00)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO vouchers (id, purchase_order_id, issuer_type, issuer_name, issuer_normalized, voucher_number, voucher_number_normalized)
+VALUES ('70000000-0000-4000-8000-000000000002', '50000000-0000-4000-8000-000000000002',
+        'INSTITUTION', 'Municipalidad de demostración', 'municipalidad de demostracion', 'DEMO-VALE-002', 'DEMO-VALE-002')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO voucher_items (id, voucher_id, purchase_order_id, purchase_order_item_id, authorized_gallons)
+VALUES
+    ('80000000-0000-4000-8000-000000000002', '70000000-0000-4000-8000-000000000002',
+     '50000000-0000-4000-8000-000000000002', '60000000-0000-4000-8000-000000000002', 40.000),
+    ('80000000-0000-4000-8000-000000000003', '70000000-0000-4000-8000-000000000002',
+     '50000000-0000-4000-8000-000000000002', '60000000-0000-4000-8000-000000000003', 20.000)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO attendances (id, voucher_id, performed_by_user_id, branch_id, attended_at, idempotency_key, request_fingerprint)
+VALUES
+    ('90000000-0000-4000-8000-000000000002', '70000000-0000-4000-8000-000000000002',
+     '20000000-0000-4000-8000-000000000004', (SELECT id FROM branches WHERE code = 'SANTA_MARTA'),
+     CURRENT_TIMESTAMP - INTERVAL '3 days', 'a0000000-0000-4000-8000-000000000002', repeat('1', 64)),
+    ('90000000-0000-4000-8000-000000000003', '70000000-0000-4000-8000-000000000002',
+     '20000000-0000-4000-8000-000000000004', (SELECT id FROM branches WHERE code = 'SANTA_MARTA'),
+     CURRENT_TIMESTAMP - INTERVAL '1 day', 'a0000000-0000-4000-8000-000000000003', repeat('2', 64))
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO attendance_items (id, attendance_id, voucher_id, voucher_item_id, attended_gallons, unit_price_snapshot, attended_amount)
+VALUES
+    ('b0000000-0000-4000-8000-000000000002', '90000000-0000-4000-8000-000000000002', '70000000-0000-4000-8000-000000000002', '80000000-0000-4000-8000-000000000002', 15.000, 15.2500, 228.75),
+    ('b0000000-0000-4000-8000-000000000003', '90000000-0000-4000-8000-000000000002', '70000000-0000-4000-8000-000000000002', '80000000-0000-4000-8000-000000000003', 20.000, 16.0000, 320.00),
+    ('b0000000-0000-4000-8000-000000000004', '90000000-0000-4000-8000-000000000003', '70000000-0000-4000-8000-000000000002', '80000000-0000-4000-8000-000000000002', 25.000, 15.2500, 381.25)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO attendance_verifications (id, attendance_id, reviewed_by_user_id, decision, observation, reviewed_at)
+VALUES ('c0000000-0000-4000-8000-000000000002', '90000000-0000-4000-8000-000000000002',
+        '20000000-0000-4000-8000-000000000002', 'OBSERVED', 'Falta cotejar la firma del vale físico.', CURRENT_TIMESTAMP - INTERVAL '2 days')
 ON CONFLICT (id) DO NOTHING;
 
 COMMIT;

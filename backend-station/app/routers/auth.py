@@ -10,6 +10,7 @@ from app.core.dependencies import CurrentUser
 from app.core.permissions import permissions_for_role
 from app.database import get_db
 from app.schemas.auth import CurrentUserResponse, LoginRequest, TokenResponse
+from app.schemas.common import UserResponse
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -38,5 +39,5 @@ def logout(
 
 @router.get("/me", response_model=CurrentUserResponse)
 def me(user: CurrentUser) -> CurrentUserResponse:
-    response = CurrentUserResponse.model_validate(user, from_attributes=True)
-    return response.model_copy(update={"permissions": sorted(permissions_for_role(user.role))})
+    user_data = UserResponse.model_validate(user, from_attributes=True)
+    return CurrentUserResponse(**user_data.model_dump(), permissions=sorted(permissions_for_role(user.role)))

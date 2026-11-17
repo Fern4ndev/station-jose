@@ -5,21 +5,24 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Response, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import require_permission
 from app.database import get_db
 from app.schemas.attendance import VoucherResponse
 from app.schemas.voucher import VoucherDescriptiveUpdate, VoucherListResponse
+from app.schemas.operational import OperationalVoucher, OperationalVoucherList
 from app.services.attendance_service import AttendanceService
 from app.services.verification_service import VerificationService
+from app.tables import User
 
 router = APIRouter(prefix="/vouchers", tags=["Vouchers"])
 
 
-@router.get("", response_model=VoucherListResponse)
+@router.get("", response_model=VoucherListResponse | OperationalVoucherList)
 def list_vouchers(
-    _: Annotated[object, Depends(require_permission("vouchers.read"))],
+    user: Annotated[User, Depends(require_permission("vouchers.read"))],
     db: Annotated[Session, Depends(get_db)],
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
@@ -28,8 +31,8 @@ def list_vouchers(
     issuer_name: Annotated[str | None, Query(max_length=200)] = None,
     created_from: Annotated[datetime | None, Query()] = None,
     created_to: Annotated[datetime | None, Query()] = None,
-) -> VoucherListResponse:
-    return AttendanceService().list_vouchers(
+) -> VoucherListResponse | JSONResponse:
+    result = AttendanceService().list_vouchers(
         db,
         page=page,
         page_size=page_size,
@@ -39,15 +42,21 @@ def list_vouchers(
         created_from=created_from,
         created_to=created_to,
     )
+    if user.role == 'ATTENDANT':
+        return JSONResponse(OperationalVoucherList.model_validate(result).model_dump(mode='json'))
+    return result
 
 
-@router.get("/{voucher_id}", response_model=VoucherResponse)
+@router.get("/{voucher_id}", response_model=VoucherResponse | OperationalVoucher)
 def get_voucher(
     voucher_id: UUID,
-    _: Annotated[object, Depends(require_permission("vouchers.read"))],
+    user: Annotated[User, Depends(require_permission("vouchers.read"))],
     db: Annotated[Session, Depends(get_db)],
-) -> VoucherResponse:
-    return AttendanceService().get_voucher(db, voucher_id)
+) -> VoucherResponse | JSONResponse:
+    result = AttendanceService().get_voucher(db, voucher_id)
+    if user.role == 'ATTENDANT':
+        return JSONResponse(OperationalVoucher.model_validate(result).model_dump(mode='json'))
+    return result
 
 
 @router.patch(

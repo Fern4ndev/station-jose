@@ -1,4 +1,4 @@
-import { afterNextRender, ChangeDetectionStrategy, Component, effect, ElementRef, input, OnDestroy, viewChild } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, effect, ElementRef, inject, Injector, input, OnDestroy, viewChild } from '@angular/core';
 import { BarController, BarElement, CategoryScale, Chart, LinearScale, Tooltip } from 'chart.js';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
@@ -9,6 +9,7 @@ export class DashboardChart implements OnDestroy {
   readonly labels = input.required<readonly string[]>();
   readonly values = input.required<readonly number[]>();
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  private readonly injector = inject(Injector);
   private chart: Chart<'bar', number[], string> | undefined;
 
   constructor() {
@@ -22,7 +23,7 @@ export class DashboardChart implements OnDestroy {
           data: { labels, datasets: [{ data: values, backgroundColor: '#39c6ae', borderRadius: 6, maxBarThickness: 34 }] },
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true } }, scales: { y: { beginAtZero: true } } },
         });
-      });
+      }, { injector: this.injector });
     });
   }
 

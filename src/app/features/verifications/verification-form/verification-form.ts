@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 export type VerificationFormGroup = FormGroup<{
@@ -13,8 +13,8 @@ export class VerificationForm {
   readonly enabled = input(true);
   readonly submitDecision = output<void>();
   readonly cancel = output<void>();
-  protected readonly canSubmit = computed(() => {
+  protected canSubmit(): boolean {
     const form = this.form();
     return form.valid && (form.controls.decision.value !== 'OBSERVED' || form.controls.observation.value.trim().length > 0);
-  });
+  }
 }

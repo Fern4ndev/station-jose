@@ -1,17 +1,50 @@
 <section aria-labelledby="page-title">
-  <app-page-header title="Panel principal" description="Resumen operativo de órdenes, saldos y atenciones." />
-  <div class="dashboard-grid">
-    <app-section-panel title="Despachos por período" description="Agrupación recibida del backend">
-      <div class="p-4">
-        @if (periodLabels.length) { <app-dashboard-chart title="Galones atendidos" [labels]="periodLabels" [values]="gallonsByPeriod" /> }
-        @else { <app-empty-state title="Sin series para graficar" description="El gráfico se dibujará con los datos y la agrupación que entregue el dashboard." /> }
-      </div>
-    </app-section-panel>
-    <app-section-panel title="Actividad reciente" description="Atenciones registradas según tu acceso">
-      <app-empty-state title="Sin actividad para mostrar" description="La actividad aparecerá cuando el dashboard se conecte al servicio de reportes del backend." />
-    </app-section-panel>
-    <app-section-panel title="Revisión en oficina" description="Atenciones pendientes de cotejo">
-      <app-empty-state title="Bandeja sin datos" description="Los pendientes se cargarán desde la API de verificaciones; el frontend no estima cantidades ni estados." />
-    </app-section-panel>
-  </div>
+  <app-page-header title="Panel principal" description="Consulta la actividad y accede a las operaciones de la estación." />
+  <section class="mb-5" aria-labelledby="shortcuts-title">
+    <div class="mb-3"><h2 id="shortcuts-title" class="text-base font-semibold text-slate-900">Accesos rápidos</h2><p class="mt-1 text-sm text-slate-600">Continúa con una operación o revisa la información disponible.</p></div>
+    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      @if (auth.hasPermission('purchase_orders.read')) { <app-dashboard-shortcut title="Órdenes de compra" description="Consulta autorizaciones y saldos por combustible." route="/app/purchase-orders" symbol="OC" /> }
+      @if (auth.hasPermission('vouchers.read')) { <app-dashboard-shortcut title="Vales" description="Consulta documentos y atenciones registradas." route="/app/vouchers" symbol="VA" /> }
+      @if (auth.hasPermission('vouchers.verify')) { <app-dashboard-shortcut title="Verificación" description="Revisa los despachos con el vale físico." route="/app/attendances/pending-verification" symbol="VE" /> }
+      @if (auth.hasPermission('reports.read')) { <app-dashboard-shortcut title="Reportes" description="Consulta los reportes de la estación." route="/app/reports" symbol="RE" /> }
+    </div>
+  </section>
+  @switch (state()) {
+    @case ('loading') { <div role="status" aria-label="Cargando panel"><app-loading-skeleton /></div> }
+    @case ('error') { <app-api-error message="No se pudo cargar el panel. Comprueba tu conexión e inténtalo de nuevo." (retry)="load()" /> }
+    @case ('success') {
+      @if (data(); as dashboard) {
+        <p class="mb-3 text-sm text-slate-600">Actualizado: {{ dashboard.generated_at | date:'dd/MM/yyyy HH:mm' }}</p>
+        <div class="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumen de operaciones">
+          <article class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-sm text-slate-600">Órdenes</p><p class="mt-2 text-2xl font-semibold text-slate-900">{{ dashboard.orders }}</p></article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-sm text-slate-600">Vales atendidos</p><p class="mt-2 text-2xl font-semibold text-slate-900">{{ dashboard.vouchers }}</p></article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-sm text-slate-600">Atenciones</p><p class="mt-2 text-2xl font-semibold text-slate-900">{{ dashboard.attendances }}</p></article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-sm text-slate-600">Galones atendidos</p><p class="mt-2 text-2xl font-semibold text-slate-900">{{ dashboard.attended_gallons }} <span class="text-sm font-normal">gal</span></p></article>
+        </div>
+        <div class="dashboard-grid">
+          <app-section-panel title="Despachos por período" description="Galones atendidos por día">
+            <div class="p-4">
+              @if (periodLabels().length) { <app-dashboard-chart title="Galones atendidos" [labels]="periodLabels()" [values]="gallonsByPeriod()" /> }
+              @else { <app-empty-state title="Sin despachos registrados" description="Las atenciones aparecerán aquí cuando se registren." /> }
+            </div>
+          </app-section-panel>
+          <app-section-panel title="Saldos por combustible" description="Cantidades autorizadas, atendidas y disponibles">
+            @if (dashboard.by_fuel.length) {
+              <div class="divide-y divide-slate-100 px-4">
+                @for (fuel of dashboard.by_fuel; track fuel.fuel_type_code) {
+                  <article class="py-4"><h3 class="text-sm font-semibold text-slate-900">{{ fuel.fuel_type_name }}</h3>
+                    <dl class="mt-3 grid grid-cols-3 gap-2 text-xs text-slate-600">
+                      <div><dt>Autorizado</dt><dd class="mt-1 font-semibold text-slate-900">{{ fuel.authorized_gallons }} gal</dd></div>
+                      <div><dt>Atendido</dt><dd class="mt-1 font-semibold text-slate-900">{{ fuel.attended_gallons }} gal</dd></div>
+                      <div><dt>Disponible</dt><dd class="mt-1 font-semibold text-emerald-800">{{ fuel.available_gallons }} gal</dd></div>
+                    </dl>
+                  </article>
+                }
+              </div>
+            } @else { <app-empty-state title="Sin combustibles" description="No hay órdenes con combustible para mostrar." /> }
+          </app-section-panel>
+        </div>
+      }
+    }
+  }
 </section>

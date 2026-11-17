@@ -52,7 +52,7 @@ class AttendanceService:
         branch_id: UUID | None,
         idempotency_key: UUID,
     ) -> AttendanceResponse:
-        existing = self._resolve_idempotency(db, idempotency_key, data)
+        existing = self._resolve_idempotency(db, idempotency_key, data, user_id=user_id, order_id=order_id)
         if existing is not None:
             return self._attendance_response(existing)
 
@@ -127,7 +127,7 @@ class AttendanceService:
         branch_id: UUID | None,
         idempotency_key: UUID,
     ) -> AttendanceResponse:
-        existing = self._resolve_idempotency(db, idempotency_key, data)
+        existing = self._resolve_idempotency(db, idempotency_key, data, user_id=user_id, voucher_id=voucher_id)
         if existing is not None:
             return self._attendance_response(existing)
         item_ids = [item.voucher_item_id for item in data.items]
@@ -204,12 +204,18 @@ class AttendanceService:
         )
 
     def _resolve_idempotency(
-        self, db: Session, key: UUID, data: AttendanceCreate
+        self, db: Session, key: UUID, data: AttendanceCreate, *, user_id: UUID,
+        order_id: UUID | None = None, voucher_id: UUID | None = None,
     ) -> Attendance | None:
         existing = self.vouchers.get_attendance_by_idempotency(db, key)
         if existing is None:
             return None
-        if existing.request_fingerprint != fingerprint(data):
+        if (
+            existing.request_fingerprint != fingerprint(data)
+            or existing.performed_by_user_id != user_id
+            or (voucher_id is not None and existing.voucher_id != voucher_id)
+            or (order_id is not None and existing.voucher.purchase_order_id != order_id)
+        ):
             raise IdempotencyConflictError(
                 "La clave de idempotencia ya fue utilizada con otro contenido.",
                 details={"attendance_id": str(existing.id)},

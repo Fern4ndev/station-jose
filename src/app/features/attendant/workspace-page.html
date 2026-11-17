@@ -1,11 +1,19 @@
 <section aria-labelledby="page-title">
   <app-page-header [title]="title" [description]="description" />
+  <section class="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 sm:p-5" aria-labelledby="workspace-guide">
+    <h2 id="workspace-guide" class="text-sm font-semibold text-emerald-950">Cómo registrar una atención</h2>
+    <ol class="mt-3 grid gap-3 text-sm text-emerald-900 sm:grid-cols-3">
+      <li><span class="font-semibold">1.</span> Busca la orden y revisa sus saldos.</li>
+      <li><span class="font-semibold">2.</span> Identifica el vale o registra uno nuevo.</li>
+      <li><span class="font-semibold">3.</span> Ingresa los galones y confirma el despacho.</li>
+    </ol>
+  </section>
   <div class="workspace-grid">
     <app-section-panel title="Buscar una orden" description="Consulta saldos por línea de combustible">
-      <div class="grid gap-4 p-4"><app-order-search /><app-empty-state title="Selecciona una orden" description="El saldo por combustible aparecerá después de consultar la orden." /></div>
+      <div class="grid gap-4 p-4"><app-order-search /><app-empty-state title="Consulta no disponible" description="La búsqueda de órdenes aún no está disponible." /></div>
     </app-section-panel>
     <app-section-panel title="Vale y despacho" description="Primera atención o atención posterior">
-      <div class="grid gap-4 p-4"><app-voucher-search /><app-empty-state title="Elige el flujo de atención" description="Si el vale existe, registra otra atención sobre ese vale. Si es nuevo, captura el documento junto con el primer despacho." /></div>
+      <div class="grid gap-4 p-4"><app-voucher-search /><app-empty-state title="Consulta no disponible" description="La búsqueda de vales aún no está disponible." /></div>
     </app-section-panel>
   </div>
 </section>

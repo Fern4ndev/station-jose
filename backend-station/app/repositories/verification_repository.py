@@ -19,7 +19,7 @@ class VerificationRepository:
         statement = (
             select(Attendance)
             .join(Attendance.voucher)
-            .options(joinedload(Attendance.voucher))
+            .options(joinedload(Attendance.voucher), selectinload(Attendance.verifications))
             .where(~verified)
             .order_by(Attendance.attended_at.asc(), Attendance.id.asc())
         )

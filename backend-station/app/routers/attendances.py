@@ -4,6 +4,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import CurrentUser, require_permission
@@ -14,13 +15,14 @@ from app.schemas.attendance import (
     FirstAttendanceCreate,
 )
 from app.services.attendance_service import AttendanceService
+from app.schemas.operational import OperationalAttendance
 
 router = APIRouter(tags=["Attendances"])
 
 
 @router.post(
     "/purchase-orders/{order_id}/attendances",
-    response_model=AttendanceResponse,
+    response_model=AttendanceResponse | OperationalAttendance,
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(require_permission("attendances.create"))],
 )
@@ -30,7 +32,7 @@ def create_first_attendance(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
     idempotency_key: Annotated[UUID, Header(alias="Idempotency-Key")],
-) -> AttendanceResponse:
+) -> AttendanceResponse | JSONResponse:
     response = AttendanceService().create_first(
         db,
         order_id,
@@ -40,12 +42,14 @@ def create_first_attendance(
         idempotency_key=idempotency_key,
     )
     db.commit()
+    if current_user.role == 'ATTENDANT':
+        return JSONResponse(OperationalAttendance.model_validate(response).model_dump(mode='json'), status_code=201)
     return response
 
 
 @router.post(
     "/vouchers/{voucher_id}/attendances",
-    response_model=AttendanceResponse,
+    response_model=AttendanceResponse | OperationalAttendance,
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(require_permission("attendances.create"))],
 )
@@ -55,7 +59,7 @@ def create_follow_up_attendance(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
     idempotency_key: Annotated[UUID, Header(alias="Idempotency-Key")],
-) -> AttendanceResponse:
+) -> AttendanceResponse | JSONResponse:
     response = AttendanceService().create_follow_up(
         db,
         voucher_id,
@@ -65,4 +69,6 @@ def create_follow_up_attendance(
         idempotency_key=idempotency_key,
     )
     db.commit()
+    if current_user.role == 'ATTENDANT':
+        return JSONResponse(OperationalAttendance.model_validate(response).model_dump(mode='json'), status_code=201)
     return response

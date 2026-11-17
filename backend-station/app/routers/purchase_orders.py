@@ -5,6 +5,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Response, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import require_permission
@@ -15,14 +16,16 @@ from app.schemas.purchase_order import (
     PurchaseOrderResponse,
     PurchaseOrderUpdate,
 )
+from app.schemas.operational import OperationalOrder, OperationalOrderList
 from app.services.purchase_order_service import PurchaseOrderService
+from app.tables import User
 
 router = APIRouter(prefix="/purchase-orders", tags=["Purchase Orders"])
 
 
-@router.get("", response_model=PurchaseOrderListResponse)
+@router.get("", response_model=PurchaseOrderListResponse | OperationalOrderList)
 def list_purchase_orders(
-    _: Annotated[object, Depends(require_permission("purchase_orders.read"))],
+    user: Annotated[User, Depends(require_permission("purchase_orders.read"))],
     db: Annotated[Session, Depends(get_db)],
     search: Annotated[str | None, Query(max_length=200)] = None,
     branch_id: Annotated[UUID | None, Query()] = None,
@@ -34,8 +37,8 @@ def list_purchase_orders(
         Literal["issue_date", "order_number", "institution_name"], Query()
     ] = "issue_date",
     sort_order: Annotated[Literal["asc", "desc"], Query()] = "desc",
-) -> PurchaseOrderListResponse:
-    return PurchaseOrderService().list(
+) -> PurchaseOrderListResponse | JSONResponse:
+    result = PurchaseOrderService().list(
         db,
         page=page,
         page_size=page_size,
@@ -46,6 +49,9 @@ def list_purchase_orders(
         sort_by=sort_by,
         sort_order=sort_order,
     )
+    if user.role == 'ATTENDANT':
+        return JSONResponse(OperationalOrderList.model_validate(result).model_dump(mode='json'))
+    return result
 
 
 @router.post(
@@ -63,13 +69,16 @@ def create_purchase_order(
     return order
 
 
-@router.get("/{order_id}", response_model=PurchaseOrderResponse)
+@router.get("/{order_id}", response_model=PurchaseOrderResponse | OperationalOrder)
 def get_purchase_order(
     order_id: UUID,
-    _: Annotated[object, Depends(require_permission("purchase_orders.read"))],
+    user: Annotated[User, Depends(require_permission("purchase_orders.read"))],
     db: Annotated[Session, Depends(get_db)],
-) -> PurchaseOrderResponse:
-    return PurchaseOrderService().get(db, order_id)
+) -> PurchaseOrderResponse | JSONResponse:
+    result = PurchaseOrderService().get(db, order_id)
+    if user.role == 'ATTENDANT':
+        return JSONResponse(OperationalOrder.model_validate(result).model_dump(mode='json'))
+    return result
 
 
 @router.patch(

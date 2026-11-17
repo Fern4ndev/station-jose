@@ -41,7 +41,10 @@ class VerificationService:
                 performed_by_user_id=item.performed_by_user_id,
                 branch_id=item.branch_id,
                 attended_at=item.attended_at,
-                verification_status="PENDING_VERIFICATION",
+                verification_status=(
+                    "OBSERVED" if self._latest_decision(item) == VerificationDecision.OBSERVED
+                    else "PENDING_VERIFICATION"
+                ),
             )
             for item in pending
         ]

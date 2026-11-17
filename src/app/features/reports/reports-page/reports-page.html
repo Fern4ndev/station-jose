@@ -1,7 +1,10 @@
 <section aria-labelledby="page-title">
   <app-page-header title="Reportes" description="Elige el conjunto de datos que deseas consultar." />
-  <div class="grid gap-4 sm:grid-cols-2">
-    <app-section-panel title="Órdenes de compra" description="Autorizado, despachado y saldo por combustible."><div class="p-4"><a class="font-semibold text-primary-700 underline" routerLink="/app/reports/purchase-orders">Abrir reporte de órdenes</a></div></app-section-panel>
-    <app-section-panel title="Atenciones" description="Despachos reales por usuario, sede y período."><div class="p-4"><a class="font-semibold text-primary-700 underline" routerLink="/app/reports/attendances">Abrir reporte de atenciones</a></div></app-section-panel>
-  </div>
+  <section aria-labelledby="reports-heading">
+    <h2 id="reports-heading" class="mb-3 text-base font-semibold text-slate-900">Reportes disponibles</h2>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <app-dashboard-shortcut title="Órdenes de compra" description="Consulta autorizaciones, despachos y saldos por combustible." route="/app/reports/purchase-orders" symbol="OC" />
+      <app-dashboard-shortcut title="Atenciones" description="Consulta los despachos por usuario, sede y período." route="/app/reports/attendances" symbol="AT" />
+    </div>
+  </section>
 </section>
