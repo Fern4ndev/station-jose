@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { homePathForRole } from '../../core/models/auth.models';
+import { homePathForPermissions } from '../../core/models/auth.models';
 import { AuthStore } from '../../core/services/auth/auth';
 
 @Component({
@@ -15,7 +15,7 @@ export class AppHomeRedirect implements OnInit {
   ngOnInit(): void {
     const user = this.authStore.user();
     if (user) {
-      void this.router.navigateByUrl(homePathForRole(user.role), { replaceUrl: true });
+      void this.router.navigateByUrl(homePathForPermissions(this.authStore.permissions()), { replaceUrl: true });
     }
   }
 }

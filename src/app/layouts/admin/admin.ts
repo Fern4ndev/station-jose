@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { catchError, finalize, of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { AuthSessionService, AuthStore } from '../../core/services/auth/auth';
 import { Header } from './components/header/header';
 import { Sidebar } from './components/sidebar/sidebar';
@@ -28,11 +28,10 @@ export class AdminLayout {
 
   protected logout(): void {
     this.session.logout().pipe(
-      catchError(() => of(void 0)),
-      finalize(() => {
-        this.auth.clearSession();
-        void this.router.navigate(['/auth/login']);
-      }),
-    ).subscribe();
+      catchError(() => of(false)),
+    ).subscribe((result) => {
+      this.auth.clearSession();
+      void this.router.navigate(['/auth/login'], { queryParams: { signedOut: result === false ? 'local' : 'true' } });
+    });
   }
 }

@@ -1,25 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../../../core/services/auth/auth';
 import { ROLE_LABELS } from '../../../../core/models/auth.models';
-
-interface NavigationItem {
-  readonly label: string;
-  readonly path: string;
-  readonly permission: string;
-}
-
-const NAVIGATION_ITEMS: readonly NavigationItem[] = [
-  { label: 'Panel principal', path: '/app/dashboard', permission: 'reports.read' },
-  { label: 'Órdenes de compra', path: '/app/purchase-orders', permission: 'purchase_orders.read' },
-  { label: 'Vales', path: '/app/vouchers', permission: 'vouchers.read' },
-  { label: 'Atenciones', path: '/app/attendances', permission: 'attendances.create' },
-  { label: 'Mis atenciones', path: '/app/attendant/attendances', permission: 'attendances.read_own' },
-  { label: 'Saldos', path: '/app/balances', permission: 'balances.read' },
-  { label: 'Verificación', path: '/app/attendances/pending-verification', permission: 'vouchers.verify' },
-  { label: 'Reportes', path: '/app/reports', permission: 'reports.read' },
-  { label: 'Usuarios', path: '/app/users', permission: 'users.manage' },
-];
+import { NAVIGATION } from '../../../../core/constants/navigation';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,19 +13,23 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
 })
 export class Sidebar {
   private readonly auth = inject(AuthStore);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly mobileQuery = window.matchMedia('(max-width: 760px)');
 
   readonly open = input(false);
   readonly closeMenu = output<void>();
+  protected readonly isMobile = signal(this.mobileQuery.matches);
+
+  constructor() {
+    const onChange = (event: MediaQueryListEvent): void => this.isMobile.set(event.matches);
+    this.mobileQuery.addEventListener('change', onChange);
+    this.destroyRef.onDestroy(() => this.mobileQuery.removeEventListener('change', onChange));
+  }
 
   protected readonly user = this.auth.user;
-  protected readonly navigation = computed(() => {
-    const role = this.user()?.role;
-    return NAVIGATION_ITEMS.filter((item) => this.auth.hasPermission(item.permission)).map((item) =>
-      item.permission === 'attendances.create' && role === 'ATTENDANT'
-        ? { ...item, label: 'Espacio de atención', path: '/app/attendant/workspace' }
-        : item,
-    );
-  });
+  protected readonly navigation = computed(() => NAVIGATION
+    .map((group) => ({ ...group, items: group.items.filter((item) => this.auth.hasPermission(item.permission)) }))
+    .filter((group) => group.items.length > 0));
   protected readonly roleLabel = computed(() => {
     const role = this.user()?.role;
     return role ? ROLE_LABELS[role] : '';

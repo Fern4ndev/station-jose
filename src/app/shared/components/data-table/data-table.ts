@@ -20,7 +20,7 @@ export class DataTable {
   readonly rows = input<readonly Readonly<Record<string, unknown>>[]>([]);
   readonly tableRows = computed(() => [...this.rows()]);
   readonly emptyTitle = input('Sin registros para mostrar');
-  readonly emptyDescription = input('La integración de datos de esta pantalla está pendiente; todavía no hay registros reales para consultar.');
+  readonly emptyDescription = input('No se encontraron resultados.');
   readonly errorMessage = input('No se pudo cargar la información.');
   readonly page = input(1);
   readonly pages = input(1);

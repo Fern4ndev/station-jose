@@ -14,7 +14,7 @@
 .branch-label { display: grid; gap: 4px; margin: 0 2px 24px; padding: 11px; border: 1px solid rgb(218 243 237 / 13%); border-radius: 13px; background: rgb(235 250 246 / 7.5%); }
 .branch-label span { color: #a7c0c0; font-size: 10px; }
 .branch-label strong { color: #e7f2ef; font-size: 11px; font-weight: 600; }
-.nav-heading { margin: 0; padding: 0 11px 9px; color: #88a6aa; font-size: 10px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; }
+.nav-heading { margin: 0; padding: 10px 11px; color: #b3c9cb; font-size: 10px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
 .nav-menu { display: grid; gap: 4px; }
 .nav-menu a { display: flex; min-height: 43px; align-items: center; padding: 0 11px; border: 1px solid transparent; border-radius: 13px; color: #b7c9c9; font-size: 12px; text-decoration: none; transition: background 160ms ease, color 160ms ease; }
 .nav-menu a:hover { background: rgb(237 249 246 / 8%); color: white; }

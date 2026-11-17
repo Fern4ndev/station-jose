@@ -1,66 +1,62 @@
-# Integración manual con la API
+# Contrato de integración frontend / backend
 
-Este catálogo se mantiene manualmente junto con el backend. Antes de cambiar una ruta o un DTO, revisar el router, el schema Pydantic, los permisos y los errores que produce el servicio correspondiente.
+Revisión 1.0 — 17/11/2026. Inventario estático de `backend-station/app/routers`,
+`schemas` y `core/permissions.py`; no sustituye una prueba con API y PostgreSQL.
+Ante un cambio, actualizar este documento junto con los esquemas y consumidores.
 
-## Configuración de conexión
+## Entorno y sesión
 
-- Prefijo actual: `/api/v1`.
-- Desarrollo local: Angular envía a `/api/v1`; `proxy.conf.json` reenvía `/api` a `http://127.0.0.1:8000`.
-- Producción: el host web debe reenviar `/api` al backend. La URL base se lee desde `src/environments/` mediante `API_BASE_URL`.
-- Las llamadas autenticadas usan `Authorization: Bearer <access_token>`.
+Angular usa `/api/v1` (`src/environments/environment.ts`); en desarrollo el proxy
+de `proxy.conf.json` redirige `/api` a `http://127.0.0.1:8000`. Configurar backend
+y PostgreSQL siguiendo `backend-station/README.md`, sus scripts SQL y `.env.example`;
+crear cuentas de desarrollo por los mecanismos del backend, sin guardar credenciales
+en el repositorio. Comprobar `/api/v1/health/live` y `/health/ready` antes de integrar.
 
-## Formato de error común
+Login recibe `{email,password}` y responde `access_token`, `token_type`, `expires_in`,
+`user` y `permissions`. `GET /auth/me` devuelve usuario y permisos; logout devuelve
+204. El frontend conserva token y permisos solo en memoria: al recargar se pierde la
+sesión y se solicita login; no hay refresh ni persistencia. Al vencer o recibir 401
+de la API, limpia la sesión y vuelve al login. 403 lleva a acceso denegado; un error
+de logout cierra la sesión local e informa que no pudo confirmar la revocación.
+Solo se adjunta el bearer a rutas bajo la URL base configurada. El servidor sigue
+siendo la autoridad para revocación, permisos y alcance.
 
-```ts
-interface ApiErrorEnvelope {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-    details: Record<string, unknown>;
-  };
-}
-```
+## Catálogo contrastado con código
 
-El frontend muestra mensajes de recuperación entendibles y no presenta `details` internos directamente al usuario.
+Las rutas omiten `/api/v1`. Los permisos se leen de los routers y
+`core/permissions.py`; los campos completos y sus validaciones están en los schemas.
+La presencia de un router no acredita integración con datos reales.
 
-## Autenticación
+| Operación | Permiso | Contrato principal |
+|---|---|---|
+| `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` | Público / autenticado | `schemas/auth.py`; logout 204. |
+| `GET/POST /users`, `GET/PATCH /users/{id}`, `PATCH /users/{id}/role`, `PATCH /users/{id}/status` | `users.manage` | `schemas/user.py`, `schemas/common.py`; lista `page`, `page_size`. |
+| `GET /branches`, `GET /fuel-types` | Autenticado | Listas `schemas/catalog.py`. |
+| `GET/POST /purchase-orders`, `GET/PATCH/DELETE /purchase-orders/{id}` | `purchase_orders.read/create/update/delete` | `schemas/purchase_order.py`; lista acepta `search`, `branch_id`, `issue_date_from/to`, paginación, `sort_by` y `sort_order`. |
+| `GET /vouchers`, `GET /vouchers/{id}` | `vouchers.read` | `schemas/voucher.py`, `schemas/attendance.py`; lista acepta paginación, `purchase_order_id`, `voucher_number`, `issuer_name`, `created_from/to`. |
+| `PATCH /vouchers/{id}/descriptive-data`, `DELETE /vouchers/{id}` | `vouchers.correct_descriptive`, `vouchers.delete` | `schemas/voucher.py`; delete 204 sujeto a reglas de negocio. |
+| `POST /purchase-orders/{id}/attendances`, `POST /vouchers/{id}/attendances` | `attendances.create` | `schemas/attendance.py`, cabecera UUID `Idempotency-Key`, 201; primera atención requiere emisor y número de vale. |
+| `GET /verifications/pending`, `POST /attendances/{id}/verifications` | `vouchers.verify` | `schemas/verification.py`; POST 201. |
+| `GET /reports/dashboard`, `/reports/purchase-orders`, `/reports/attendances` | `reports.read` | `schemas/report.py`; filtros específicos en `routers/reports.py`. |
+| `GET /reports/purchase-orders/export`, `/reports/attendances/export` | `reports.export` | `format=pdf|xlsx`; los filtros de exportación son un subconjunto de los de consulta. |
+| `POST /ocr/purchase-order-previews` | `ocr.purchase_orders.process` | Multipart `file` PDF; respuesta en `schemas/ocr.py`. |
+| `GET /health/live`, `GET /health/ready` | Público | Estado de proceso y base de datos. |
 
-### `POST /api/v1/auth/login`
+Las listas de usuarios, órdenes y vales usan `items` y `pagination` con `page`,
+`page_size`, `total` y `pages`; `page_size` máximo 100. Fechas y UUID siguen los
+tipos de los schemas; importes y cantidades son decimales, sin convertirlos a
+flotantes para cálculos oficiales. Errores de dominio y validación usan
+`{success:false,error:{code,message,details}}`: 401 sesión/credenciales, 403
+permisos, 404 recurso, 409 conflicto, 422 validación y 500 error inesperado;
+consultar `core/exceptions.py` para códigos específicos.
 
-- Público.
-- Request: `{ email: string, password: string }`.
-- Email validado como dirección de correo; contraseña entre 8 y 128 caracteres.
-- Response `200`: `access_token`, `token_type` (`bearer`), `expires_in` (segundos), `user` y `permissions`.
-- `user`: `id`, `first_name`, `last_name`, `dni`, `email`, `role`, `branch` (`id`, `code`, `name` o `null`) e `is_active`.
-- Roles conocidos: `ADMIN`, `OFFICE`, `ATTENDANT`.
-- Errores `401`: `INVALID_CREDENTIALS` y `INACTIVE_USER`.
+## Brechas y responsables
 
-El DTO de transporte se mapea a un modelo de sesión camelCase en `AuthApiService`; los componentes no consumen directamente los nombres snake_case de la respuesta.
+| Brecha | Responsable propuesto | Bloque afectado / salida requerida |
+|---|---|---|
+| Las respuestas de órdenes exponen precios al grifero; `AttendanceResponse` incluye precios e importes y está anidado en `VoucherResponse`. | Backend | F3–F4: separar DTOs y comprobar respuestas reales por rol antes de liberar. Ocultar controles no resuelve la exposición. |
+| No aparecen routers dedicados de consulta de atenciones, historial de verificación ni `/balances/*` descritos en el plan V2. | Backend + responsable funcional | F4–F5: acordar endpoints/DTO y alcance o documentar fuente alternativa. |
+| Alcance por sede y acceso propio, y decisiones PD aún abiertas. | Responsable funcional + backend | F0/F4: decisión aprobada y controles del servidor verificados. |
+| Catálogo y permisos del plan histórico difieren del código (`/reports/dashboard`, `/verifications/pending`, `vouchers.verify`, `users.manage`). | Backend + frontend | Mantener catálogo sincronizado y pruebas de contrato antes de integrar cada flujo. |
 
-### `GET /api/v1/auth/me`
-
-- Requiere Bearer token.
-- Response `200`: los campos de `user` más `permissions`.
-- Errores de autenticación: `401`; el backend comprueba cuenta habilitada, expiración y sesión activa.
-
-### `POST /api/v1/auth/logout`
-
-- Requiere Bearer token.
-- Sin body.
-- Response `204`; revoca la sesión identificada por el token.
-- Ante un fallo de red, el frontend limpia igualmente la sesión local e informa que no pudo confirmar la revocación remota.
-
-## Sesión frontend
-
-- El token permanece solo en memoria; se toma la duración de `expires_in` y no se crean renovaciones que la API no soporta.
-- Al recargar la página se solicita iniciar sesión nuevamente.
-- Los permisos recibidos controlan navegación y acceso en frontend; cada endpoint mantiene la autorización definitiva en backend.
-- `AuthStore` conserva token, usuario, sede, permisos y vencimiento; nunca se guardan credenciales ni tokens en Web Storage.
-
-## Cambios de contrato
-
-1. Revisar la implementación y acordar el cambio con backend.
-2. Actualizar esta ficha, los DTOs de transporte, el mapper y el servicio Angular en el mismo cambio.
-3. Actualizar guards o presentación solo si cambian permisos o errores.
-4. Mantener tipos específicos por rol cuando los campos disponibles sean distintos.
+Estos responsables son propuestas de coordinación, no asignaciones confirmadas.

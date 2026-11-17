@@ -107,3 +107,9 @@ export const ROLE_LABELS: Readonly<Record<UserRole, string>> = {
 export function homePathForRole(role: UserRole): string {
   return role === 'ATTENDANT' ? '/app/attendant/workspace' : '/app/dashboard';
 }
+
+export function homePathForPermissions(permissions: readonly string[]): string {
+  if (permissions.includes('reports.read')) return '/app/dashboard';
+  if (permissions.includes('attendances.create')) return '/app/attendant/workspace';
+  return '/access-denied';
+}

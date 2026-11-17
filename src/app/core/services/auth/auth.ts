@@ -67,8 +67,9 @@ export class AuthStore {
     });
 
     this.expiryTimer = setTimeout(() => {
+      const returnUrl = this.router.url;
       this.clearSession();
-      void this.router.navigate(['/auth/login'], { queryParams: { expired: 'true' } });
+      void this.router.navigate(['/auth/login'], { queryParams: { expired: 'true', returnUrl } });
     }, expiresInSeconds * 1_000);
   }
 

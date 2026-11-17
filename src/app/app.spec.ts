@@ -15,10 +15,12 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('provides a skip link and a routed content region', async () => {
     const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, station');
+    expect(compiled.querySelector('a[href="#app-content"]')?.textContent).toContain('Ir al contenido principal');
+    expect(compiled.querySelector('#app-content router-outlet')).toBeTruthy();
   });
 });

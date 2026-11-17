@@ -1,16 +1,20 @@
-<aside class="sidebar" [class.open]="open()" aria-label="Navegación principal">
+<aside class="sidebar" [class.open]="open()" [inert]="isMobile() && !open()" aria-label="Navegación principal">
   <a class="brand-lockup" routerLink="/app" (click)="onNavigate()" aria-label="San José, ir al inicio">
     <span class="brand-symbol" aria-hidden="true">SJ</span>
     <span class="brand-copy"><strong>San José</strong><small>Control de combustible</small></span>
   </a>
 
   <div class="branch-label"><span>Sede asignada</span><strong>{{ branchName() }}</strong></div>
-  <p class="nav-heading">Espacio de trabajo</p>
-  <nav class="nav-menu">
-    @for (item of navigation(); track item.path) {
-      <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path === '/app/dashboard' }" (click)="onNavigate()">
-        <span>{{ item.label }}</span>
-      </a>
+  <nav class="nav-menu" aria-label="Menú principal">
+    @for (group of navigation(); track group.label) {
+      <details open>
+        <summary class="nav-heading">{{ group.label }}</summary>
+        @for (item of group.items; track item.path) {
+          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: item.path === '/app/dashboard' || item.path === '/app/attendances' }" (click)="onNavigate()">
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </details>
     }
   </nav>
 

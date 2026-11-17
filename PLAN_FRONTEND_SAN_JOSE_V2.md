@@ -316,7 +316,6 @@ Las dependencias frontend están fijadas mediante `package.json` y `package-lock
 ## 6.2. Criterios de selección
 
 - PrimeNG será la biblioteca UI principal; no se mezclará con Angular Material.
-- SCSS se utilizará para tema y estilos específicos.
 - Chart.js se limitará a los gráficos requeridos.
 - No se incorporará NgRx inicialmente; Signals y facades por feature son suficientes.
 - No se agregará una biblioteca frontend para generar PDF o Excel; los archivos los genera el backend.

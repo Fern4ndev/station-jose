@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { homePathForRole } from '../models/auth.models';
+import { homePathForPermissions } from '../models/auth.models';
 import { AuthStore } from '../services/auth/auth';
 
 export const authGuard: CanActivateFn = (_route, state) => {
@@ -26,7 +26,7 @@ export const guestGuard: CanActivateFn = (route) => {
   }
 
   const returnUrl = route.queryParamMap.get('returnUrl');
-  const destination = returnUrl?.startsWith('/app/') ? returnUrl : homePathForRole(user.role);
+  const destination = returnUrl?.startsWith('/app/') ? returnUrl : homePathForPermissions(authStore.permissions());
   return router.parseUrl(destination);
 };
 
@@ -35,7 +35,7 @@ export const permissionGuard: CanActivateFn = (route) => {
   const router = inject(Router);
   const permission: unknown = route.data['permission'];
 
-  if (typeof permission !== 'string' || authStore.hasPermission(permission)) {
+  if (typeof permission === 'string' && authStore.hasPermission(permission)) {
     return true;
   }
 
