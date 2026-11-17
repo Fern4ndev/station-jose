@@ -289,7 +289,6 @@ frontend/
 │   │   │   └── app-shell-layout/
 │   │   ├── shared/
 │   │   │   ├── components/
-│   │   │   ├── directives/
 │   │   │   ├── pipes/
 │   │   │   ├── validators/
 │   │   │   └── models/
@@ -309,7 +308,6 @@ frontend/
 │   ├── styles/
 │   ├── index.html
 │   └── styles.css
-├── e2e/
 ├── angular.json
 ├── package.json
 ├── package-lock.json
