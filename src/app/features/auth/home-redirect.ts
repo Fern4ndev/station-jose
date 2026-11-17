@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { homePathForRole } from '../core/models/auth.models';
-import { AuthStore } from '../core/services/auth/auth';
+import { homePathForRole } from '../../core/models/auth.models';
+import { AuthStore } from '../../core/services/auth/auth';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -262,83 +262,87 @@ flowchart TD
 | `core` | Configuración, sesión, guards, interceptors y utilidades globales. | Contener lógica de órdenes/vales. |
 | `shared` | Componentes visuales y utilidades reutilizables. | Depender de features específicas. |
 
-## 5.4. Estructura de carpetas propuesta
+## 5.4. Estructura actual del proyecto frontend
 
 ```text
-frontend/
+frontend-project/
 ├── public/
+│   └── favicon.ico
 ├── src/
 │   ├── app/
 │   │   ├── core/
-│   │   │   ├── api/
-│   │   │   │   ├── generated/
-│   │   │   │   ├── api-config.ts
-│   │   │   │   └── api-error.mapper.ts
-│   │   │   ├── auth/
-│   │   │   │   ├── auth.service.ts
-│   │   │   │   ├── auth.store.ts
-│   │   │   │   ├── auth.models.ts
-│   │   │   │   └── current-user.service.ts
-│   │   │   ├── guards/
+│   │   │   ├── api/api-url.ts
+│   │   │   ├── guards/auth.guards.ts
 │   │   │   ├── interceptors/
-│   │   │   ├── config/
-│   │   │   ├── constants/
-│   │   │   └── utils/
-│   │   ├── layouts/
-│   │   │   ├── auth-layout/
-│   │   │   └── app-shell-layout/
-│   │   ├── shared/
-│   │   │   ├── components/
-│   │   │   ├── pipes/
-│   │   │   ├── validators/
-│   │   │   └── models/
+│   │   │   │   ├── api-error.interceptor.ts
+│   │   │   │   └── auth.interceptor.ts
+│   │   │   ├── models/
+│   │   │   │   ├── api-error.models.ts
+│   │   │   │   └── auth.models.ts
+│   │   │   └── services/auth/
+│   │   │       ├── auth.ts
+│   │   │       └── auth.spec.ts
 │   │   ├── features/
-│   │   │   ├── dashboard/
-│   │   │   ├── users/
-│   │   │   ├── purchase-orders/
-│   │   │   ├── vouchers/
-│   │   │   ├── attendances/
-│   │   │   ├── verifications/
-│   │   │   ├── balances/
-│   │   │   ├── reports/
-│   │   │   └── ocr/
+│   │   │   ├── auth/
+│   │   │   │   ├── home-redirect.ts
+│   │   │   │   ├── login-page.css
+│   │   │   │   ├── login-page.html
+│   │   │   │   └── login-page.ts
+│   │   │   └── system/
+│   │   │       ├── access-denied.ts
+│   │   │       └── not-found.ts
+│   │   ├── layouts/
+│   │   │   ├── admin/
+│   │   │   │   ├── admin.html (vacío)
+│   │   │   │   ├── admin.ts (vacío)
+│   │   │   │   ├── app-navigation.ts
+│   │   │   │   ├── app-shell.css
+│   │   │   │   ├── app-shell.html
+│   │   │   │   ├── app-shell.ts
+│   │   │   │   └── components/
+│   │   │   │       ├── header/ (vacía)
+│   │   │   │       ├── notifications-bell/ (vacía)
+│   │   │   │       └── sidebar/ (vacía)
+│   │   │   └── auth/ (vacía)
+│   │   ├── shared/
+│   │   │   └── components/feature-placeholder/
+│   │   │       ├── feature-placeholder.html
+│   │   │       └── feature-placeholder.ts
 │   │   ├── app.config.ts
-│   │   └── app.routes.ts
+│   │   ├── app.css
+│   │   ├── app.html
+│   │   ├── app.routes.ts
+│   │   ├── app.spec.ts
+│   │   └── app.ts
+│   ├── assets/img/
+│   │   ├── android-chrome-192x192.png
+│   │   ├── android-chrome-512x512.png
+│   │   ├── apple-touch-icon.png
+│   │   ├── favicon-16x16.png
+│   │   ├── favicon-32x32.png
+│   │   ├── favicon.ico
+│   │   └── san-jose-icon.png
 │   ├── environments/
-│   ├── styles/
+│   │   ├── environment.development.ts
+│   │   ├── environment.production.ts
+│   │   └── environment.ts
 │   ├── index.html
+│   ├── main.ts
 │   └── styles.css
+├── docs/API_INTEGRATION.md
+├── mockup.html
+├── mockup.tailwind-preview.html
 ├── angular.json
 ├── package.json
 ├── package-lock.json
+├── proxy.conf.json
+├── skills-lock.json
+├── tsconfig.app.json
 ├── tsconfig.json
-└── README.md
+└── tsconfig.spec.json
 ```
 
-Estructura interna de ejemplo para órdenes:
-
-```text
-features/purchase-orders/
-├── data-access/
-│   └── purchase-orders-api.service.ts
-├── models/
-│   └── purchase-order.models.ts
-├── pages/
-│   ├── purchase-order-list.page.ts
-│   ├── purchase-order-create.page.ts
-│   ├── purchase-order-detail.page.ts
-│   └── purchase-order-edit.page.ts
-├── components/
-│   ├── purchase-order-form.component.ts
-│   ├── purchase-order-table.component.ts
-│   ├── purchase-order-items-editor.component.ts
-│   └── purchase-order-balance.component.ts
-├── state/
-│   └── purchase-orders.facade.ts
-└── purchase-orders.routes.ts
-```
-
-No será obligatorio crear todos los archivos si la feature es pequeña. No se mantendrán carpetas ni clases vacías para completar artificialmente la estructura.
+Este árbol describe únicamente el frontend existente en el repositorio. No incluye `backend-station/`. Las carpetas marcadas como vacías están creadas en el espacio de trabajo, pero todavía no contienen archivos.
 
 ---
 

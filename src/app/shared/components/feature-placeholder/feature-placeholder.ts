@@ -3,10 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-feature-page',
-  templateUrl: './feature-page.html',
+  selector: 'app-feature-placeholder',
+  templateUrl: './feature-placeholder.html',
 })
-export class FeaturePage {
+export class FeaturePlaceholder {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly title = String(this.route.snapshot.data['title'] ?? 'Módulo');
