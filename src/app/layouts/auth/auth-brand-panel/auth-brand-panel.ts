@@ -5,4 +5,4 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'app-auth-brand-panel',
   templateUrl: './auth-brand-panel.html',
 })
-export class AuthBrandPanel {}
+export class AuthBrandPanel { }

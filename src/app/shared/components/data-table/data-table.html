@@ -1,13 +1,31 @@
 <div class="table-wrap" role="region" aria-label="Listado" tabindex="0">
-  <table>
-    <thead>
-      <tr>@for (column of columns(); track column) { <th scope="col">{{ column }}</th> }</tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td [attr.colspan]="columns().length"><app-empty-state [title]="emptyTitle()"
-            [description]="emptyDescription()" /></td>
-      </tr>
-    </tbody>
-  </table>
+  @switch (state()) {
+    @case ('loading') { <app-loading-skeleton /> }
+    @case ('error') { <app-api-error [message]="errorMessage()" (retry)="retry.emit()" /> }
+    @case ('empty') { <app-empty-state [title]="emptyTitle()" [description]="emptyDescription()" /> }
+    @case ('success') {
+      <p-table [value]="tableRows()" [tableStyle]="{ 'min-width': '40rem' }">
+        <ng-template #header>
+          <tr>@for (column of columns(); track column) { <th scope="col">{{ column }}</th> }</tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            @for (column of columns(); track column) {
+              <td>
+                @if (cellTemplateMap().get(column); as cellTemplate) {
+                  <ng-container [ngTemplateOutlet]="cellTemplate" [ngTemplateOutletContext]="cellContext(row, column)" />
+                } @else {
+                  {{ row[column] ?? '—' }}
+                }
+              </td>
+            }
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr><td [attr.colspan]="columns().length"><app-empty-state [title]="emptyTitle()" [description]="emptyDescription()" /></td></tr>
+        </ng-template>
+      </p-table>
+    }
+  }
 </div>
+@if (state() === 'success' && pages() > 1) { <app-server-pagination [page]="page()" [pages]="pages()" (pageChange)="pageChange.emit($event)" /> }

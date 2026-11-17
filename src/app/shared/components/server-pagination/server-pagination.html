@@ -1,0 +1,5 @@
+<nav class="flex items-center justify-between gap-3 p-3" aria-label="Paginación">
+  <button type="button" class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50" [disabled]="page() <= 1" (click)="previous()">Anterior</button>
+  <p class="text-sm text-slate-600" aria-live="polite">Página {{ page() }} de {{ pages() }}</p>
+  <button type="button" class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50" [disabled]="page() >= pages()" (click)="next()">Siguiente</button>
+</nav>

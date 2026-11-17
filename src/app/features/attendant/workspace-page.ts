@@ -3,10 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { PageHeader } from '../../shared/components/page-header/page-header';
 import { SectionPanel } from '../../shared/components/section-panel/section-panel';
+import { OrderSearch } from './order-search/order-search';
+import { VoucherSearch } from './voucher-search/voucher-search';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [EmptyState, PageHeader, SectionPanel],
+  imports: [EmptyState, OrderSearch, PageHeader, SectionPanel, VoucherSearch],
   selector: 'app-attendant-workspace-page',
   styleUrl: './workspace-page.css',
   templateUrl: './workspace-page.html',

@@ -1,0 +1,17 @@
+<form class="grid gap-6" [formGroup]="form()" (ngSubmit)="save.emit()" [attr.aria-busy]="submitting()">
+  <fieldset class="grid gap-4 rounded-xl border p-4 sm:grid-cols-2">
+    <legend class="px-1 text-sm font-semibold">Datos de la orden</legend>
+    <label class="grid gap-1.5 text-sm">Número de orden<input class="min-h-11 rounded-lg border px-3" formControlName="orderNumber" /></label>
+    <label class="grid gap-1.5 text-sm">Expediente SIAF<input class="min-h-11 rounded-lg border px-3" formControlName="siafNumber" /></label>
+    <label class="grid gap-1.5 text-sm">Fecha de emisión<input class="min-h-11 rounded-lg border px-3" type="date" formControlName="issueDate" /></label>
+    <label class="grid gap-1.5 text-sm">Institución<input class="min-h-11 rounded-lg border px-3" formControlName="institutionName" /></label>
+    <label class="grid gap-1.5 text-sm">Proveedor<input class="min-h-11 rounded-lg border px-3" formControlName="supplierName" /></label>
+    <label class="grid gap-1.5 text-sm">RUC de unidad ejecutora<input class="min-h-11 rounded-lg border px-3" formControlName="executingUnitRuc" inputmode="numeric" /></label>
+    <label class="grid gap-1.5 text-sm">Unidad ejecutora<input class="min-h-11 rounded-lg border px-3" formControlName="executingUnit" /></label>
+    <label class="grid gap-1.5 text-sm">Sede de registro<select class="min-h-11 rounded-lg border px-3" formControlName="branchId"><option value="">Selecciona una sede</option>@for (branch of branches(); track branch.id) { <option [value]="branch.id">{{ branch.name }}</option> }</select></label>
+    <label class="grid gap-1.5 text-sm sm:col-span-2">Detalles del proveedor<textarea class="rounded-lg border px-3 py-2" rows="3" formControlName="supplierDetails"></textarea></label>
+  </fieldset>
+  <section class="grid gap-3"><h2 class="text-sm font-semibold">Combustibles autorizados</h2><app-fuel-line-editor [lines]="lines()" [fuelTypes]="fuelTypes()" (lineChange)="lineChange.emit($event)" (lineAdd)="lineAdd.emit()" (lineRemove)="lineRemove.emit($event)" /></section>
+  <app-pdf-upload (fileSelected)="pdfSelected.emit($event)" />
+  <div class="flex justify-end gap-3"><button class="rounded-lg border px-4 py-2 text-sm" type="button" (click)="cancel.emit()">Cancelar</button><button class="rounded-lg bg-primary-700 px-4 py-2 text-sm font-semibold text-white" type="submit" [disabled]="submitting() || form().invalid || lines().length === 0">Guardar orden</button></div>
+</form>

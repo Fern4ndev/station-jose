@@ -1,6 +1,12 @@
 <section aria-labelledby="page-title">
   <app-page-header title="Panel principal" description="Resumen operativo de órdenes, saldos y atenciones." />
   <div class="dashboard-grid">
+    <app-section-panel title="Despachos por período" description="Agrupación recibida del backend">
+      <div class="p-4">
+        @if (periodLabels.length) { <app-dashboard-chart title="Galones atendidos" [labels]="periodLabels" [values]="gallonsByPeriod" /> }
+        @else { <app-empty-state title="Sin series para graficar" description="El gráfico se dibujará con los datos y la agrupación que entregue el dashboard." /> }
+      </div>
+    </app-section-panel>
     <app-section-panel title="Actividad reciente" description="Atenciones registradas según tu acceso">
       <app-empty-state title="Sin actividad para mostrar" description="La actividad aparecerá cuando el dashboard se conecte al servicio de reportes del backend." />
     </app-section-panel>

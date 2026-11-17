@@ -1,0 +1,7 @@
+<section aria-labelledby="page-title">
+  <app-page-header title="Detalle de orden" description="Líneas autorizadas, vales asociados y saldos por combustible.">
+    <a page-actions class="rounded-lg border px-4 py-2 text-sm" routerLink="/app/purchase-orders">Volver a órdenes</a>
+  </app-page-header>
+  <div class="grid gap-4"><app-section-panel title="Orden y saldo"><div class="p-4"><app-empty-state title="Detalle disponible al cargar la orden" description="Las cantidades y estados se mostrarán tal como los entrega el servidor." /></div></app-section-panel><app-section-panel title="Vales y atenciones"><div class="p-4"><app-empty-state title="Sin datos cargados" description="El historial no se inventa ni se modifica desde esta pantalla." /></div></app-section-panel></div>
+  <p class="mt-3 break-all text-xs text-slate-500">Identificador: {{ orderId }}</p>
+</section>

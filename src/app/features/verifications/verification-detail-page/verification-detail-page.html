@@ -1,0 +1,5 @@
+<section aria-labelledby="page-title">
+  <app-page-header title="Revisar atención" description="Contrasta la información registrada con el vale físico." />
+  <div class="grid gap-4"><app-section-panel title="Datos registrados"><div class="p-4"><app-empty-state title="Atención seleccionada" description="El detalle se cargará desde el servidor antes de permitir la verificación." /></div></app-section-panel><app-section-panel title="Registrar revisión"><div class="p-5"><app-verification-form [form]="form" [enabled]="false" /></div></app-section-panel></div>
+  <p class="mt-3 break-all text-xs text-slate-500">Identificador: {{ attendanceId }}</p>
+</section>

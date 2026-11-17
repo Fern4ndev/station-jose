@@ -1,0 +1,10 @@
+<form class="grid gap-5" [formGroup]="form()" (ngSubmit)="submitAttendance.emit()" [attr.aria-busy]="submitting()">
+  <fieldset class="grid gap-4 sm:grid-cols-2"><legend class="mb-3 text-sm font-semibold">Datos del vale y primer despacho</legend>
+    <label class="grid gap-1.5 text-sm">Tipo de emisor<select class="min-h-11 rounded-lg border px-3" formControlName="issuerType"><option value="INSTITUTION">Institución</option><option value="STATION">Estación</option></select></label>
+    <label class="grid gap-1.5 text-sm">Número del vale<input class="min-h-11 rounded-lg border px-3" formControlName="voucherNumber" /></label>
+    <label class="grid gap-1.5 text-sm sm:col-span-2">Emisor<input class="min-h-11 rounded-lg border px-3" formControlName="issuerName" /></label>
+  </fieldset>
+  <section class="grid gap-3"><h2 class="text-sm font-semibold">Combustibles de la orden</h2><app-attendance-line-editor [lines]="lines()" [firstAttendance]="true" (lineChange)="lineChange.emit($event)" /></section>
+  <p class="text-xs text-slate-500">El vale y su primera atención se confirman en una sola operación. Usuario, sede y hora los asigna el servidor.</p>
+  <button class="rounded-lg bg-primary-700 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50" type="submit" [disabled]="form().invalid || submitting()">Revisar y confirmar despacho</button>
+</form>

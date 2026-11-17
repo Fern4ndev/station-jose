@@ -1,0 +1,11 @@
+<section aria-labelledby="page-title">
+  <app-page-header [title]="title()" [description]="description()">
+    <ng-content select="[page-actions]" />
+  </app-page-header>
+  <app-section-panel title="Registros" [description]="listDescription()">
+    @if (searchLabel()) {
+      <div class="border-b p-4"><app-search-field (queryChange)="queryChange.emit($event)">{{ searchLabel() }}</app-search-field></div>
+    }
+    <app-data-table [columns]="columns()" [emptyDescription]="emptyDescription()" />
+  </app-section-panel>
+</section>

@@ -1,0 +1,4 @@
+<section aria-labelledby="page-title">
+  <app-page-header title="Nueva orden de compra" description="Registra la cabecera y una o más líneas de combustible." />
+  <app-section-panel title="Datos y líneas de la orden"><div class="p-5"><app-purchase-order-form [form]="form" [lines]="lines()" (lineChange)="updateLine($event)" (lineAdd)="addLine()" (lineRemove)="removeLine($event)" (cancel)="cancel()" /></div></app-section-panel>
+</section>

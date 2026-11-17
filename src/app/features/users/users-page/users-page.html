@@ -1,0 +1,10 @@
+<app-record-list-page
+  title="Usuarios"
+  description="Administra cuentas y roles predefinidos."
+  listDescription="Acceso y estado de las cuentas del sistema."
+  searchLabel="Buscar por nombre, DNI o correo"
+  [columns]="columns"
+  emptyDescription="No hay usuarios que coincidan con esta búsqueda."
+>
+  <a page-actions class="inline-flex min-h-10 items-center rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" routerLink="/app/users/new">Nuevo usuario</a>
+</app-record-list-page>

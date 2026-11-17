@@ -1,0 +1,7 @@
+<form class="grid gap-4" [formGroup]="form()" (ngSubmit)="save.emit()" [attr.aria-busy]="submitting()">
+  <label class="grid gap-1.5 text-sm">Tipo de emisor<select class="min-h-11 rounded-lg border px-3" formControlName="issuerType"><option value="INSTITUTION">Institución</option><option value="STATION">Estación</option></select></label>
+  <label class="grid gap-1.5 text-sm">Nombre del emisor<input class="min-h-11 rounded-lg border px-3" formControlName="issuerName" /></label>
+  <label class="grid gap-1.5 text-sm">Número de vale<input class="min-h-11 rounded-lg border px-3" formControlName="voucherNumber" /></label>
+  <p class="text-xs text-slate-500">Esta corrección es descriptiva; no modifica cantidades ni atenciones.</p>
+  <div class="flex justify-end gap-3"><button type="button" class="rounded-lg border px-4 py-2 text-sm" (click)="cancel.emit()">Cancelar</button><button type="submit" class="rounded-lg bg-primary-700 px-4 py-2 text-sm font-semibold text-white" [disabled]="form().invalid || submitting()">Guardar corrección</button></div>
+</form>

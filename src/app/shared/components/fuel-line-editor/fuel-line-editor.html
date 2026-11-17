@@ -1,0 +1,17 @@
+<section class="grid gap-3" aria-label="Líneas de combustible">
+  @for (line of lines(); track line.id) {
+    <fieldset class="grid gap-3 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <legend class="px-1 text-sm font-medium">Combustible</legend>
+      <label class="grid gap-1 text-xs text-slate-600">Tipo de combustible
+        <select class="min-h-10 rounded-lg border px-3 text-sm" [disabled]="!editable()" [value]="line.fuelTypeId" (change)="update(line, 'fuelTypeId', $event)">
+          @for (fuel of fuelTypes(); track fuel.id) { <option [value]="fuel.id">{{ fuel.name }}</option> }
+        </select>
+      </label>
+      <label class="grid gap-1 text-xs text-slate-600">Galones autorizados<input class="min-h-10 rounded-lg border px-3 text-sm" inputmode="decimal" [disabled]="!editable()" [value]="line.authorizedGallons" (input)="update(line, 'authorizedGallons', $event)" /></label>
+      <label class="grid gap-1 text-xs text-slate-600">Precio unitario<input class="min-h-10 rounded-lg border px-3 text-sm" inputmode="decimal" [disabled]="!editable()" [value]="line.unitPrice" (input)="update(line, 'unitPrice', $event)" /></label>
+      <label class="grid gap-1 text-xs text-slate-600">Importe total<input class="min-h-10 rounded-lg border px-3 text-sm" inputmode="decimal" [disabled]="!editable()" [value]="line.totalAmount" (input)="update(line, 'totalAmount', $event)" /></label>
+      @if (editable()) { <button class="justify-self-start text-sm text-red-700 underline" type="button" (click)="lineRemove.emit(line.id)">Quitar línea</button> }
+    </fieldset>
+  }
+  @if (editable()) { <button class="justify-self-start rounded-lg border px-3 py-2 text-sm" type="button" (click)="lineAdd.emit()">Agregar combustible</button> }
+</section>

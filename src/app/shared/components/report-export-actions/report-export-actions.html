@@ -1,0 +1,4 @@
+<div class="flex flex-wrap gap-2" aria-label="Exportar reporte">
+  <button type="button" class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50" [disabled]="disabled() || exporting()" (click)="export.emit('pdf')">Exportar PDF</button>
+  <button type="button" class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50" [disabled]="disabled() || exporting()" (click)="export.emit('xlsx')">Exportar Excel</button>
+</div>

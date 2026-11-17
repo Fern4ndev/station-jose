@@ -1,0 +1,18 @@
+<div class="flex flex-col gap-1.5">
+  <label [for]="id()">{{ label() }}@if (required()) { <span aria-hidden="true">*</span> }</label>
+  <input
+    pInputText
+    [id]="id()"
+    [type]="type()"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    [required]="required()"
+    [attr.aria-describedby]="error() ? id() + '-error' : hint() ? id() + '-hint' : null"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    (input)="updateValue($event)"
+    (blur)="markTouched()"
+  />
+  @if (error(); as message) { <small class="text-red-700" [id]="id() + '-error'">{{ message }}</small> }
+  @else if (hint(); as message) { <small [id]="id() + '-hint'">{{ message }}</small> }
+</div>

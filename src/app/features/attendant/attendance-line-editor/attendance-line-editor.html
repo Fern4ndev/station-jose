@@ -1,0 +1,10 @@
+<div class="grid gap-3">
+  @for (line of lines(); track line.id) {
+    <fieldset class="grid gap-3 rounded-xl border p-4 sm:grid-cols-2">
+      <legend class="px-1 text-sm font-semibold">{{ line.fuelTypeName }}</legend>
+      @if (firstAttendance()) { <label class="grid gap-1 text-xs">Galones autorizados<input class="min-h-10 rounded-lg border px-3 text-sm" inputmode="decimal" [value]="line.authorizedGallons" (input)="update(line, 'authorizedGallons', $event)" /></label> }
+      <label class="grid gap-1 text-xs">Galones de esta atención<input class="min-h-10 rounded-lg border px-3 text-sm" inputmode="decimal" [value]="line.attendedGallons" (input)="update(line, 'attendedGallons', $event)" /></label>
+      <p class="text-xs text-slate-600">Saldo consultado: {{ line.availableGallons }} gal</p>
+    </fieldset>
+  }
+</div>

@@ -1,6 +1,34 @@
-:host { display: block; min-width: 0; }
-.table-wrap { width: 100%; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; text-align: left; }
-th { padding: 10px 13px; border-top: 1px solid #edf0f0; border-bottom: 1px solid #edf0f0; background: rgb(244 247 246 / 65%); color: #839095; font-size: 10px; font-weight: 620; white-space: nowrap; }
-td { padding: 14px; }
-td app-empty-state { min-width: 280px; }
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th {
+  padding: 10px 13px;
+  border-top: 1px solid #edf0f0;
+  border-bottom: 1px solid #edf0f0;
+  background: rgb(244 247 246 / 65%);
+  color: #839095;
+  font-size: 10px;
+  font-weight: 620;
+  white-space: nowrap;
+}
+
+td {
+  padding: 14px;
+}
+
+td app-empty-state {
+  min-width: 280px;
+}

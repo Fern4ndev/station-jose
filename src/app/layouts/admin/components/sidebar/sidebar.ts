@@ -14,9 +14,11 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { label: 'Órdenes de compra', path: '/app/purchase-orders', permission: 'purchase_orders.read' },
   { label: 'Vales', path: '/app/vouchers', permission: 'vouchers.read' },
   { label: 'Atenciones', path: '/app/attendances', permission: 'attendances.create' },
-  { label: 'Verificación', path: '/app/attendances/pending-verification', permission: 'attendances.verify' },
-  { label: 'Reportes', path: '/app/reports/attendances', permission: 'reports.read' },
-  { label: 'Usuarios', path: '/app/users', permission: 'users.read' },
+  { label: 'Mis atenciones', path: '/app/attendant/attendances', permission: 'attendances.read_own' },
+  { label: 'Saldos', path: '/app/balances', permission: 'balances.read' },
+  { label: 'Verificación', path: '/app/attendances/pending-verification', permission: 'vouchers.verify' },
+  { label: 'Reportes', path: '/app/reports', permission: 'reports.read' },
+  { label: 'Usuarios', path: '/app/users', permission: 'users.manage' },
 ];
 
 @Component({

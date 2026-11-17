@@ -1,0 +1,12 @@
+<section class="grid gap-4 rounded-xl border border-amber-200 bg-amber-50 p-4" aria-labelledby="ocr-review-title">
+  <header><h2 id="ocr-review-title" class="font-semibold">Revisa los datos reconocidos</h2><p class="mt-1 text-sm">El OCR solo propone valores. Confirma y corrige antes de guardar.</p></header>
+  @if (preview().warnings.length) { <ul class="list-disc pl-5 text-sm text-amber-900">@for (warning of preview().warnings; track warning) { <li>{{ warning }}</li> }</ul> }
+  @if (preview().unrecognizedFields.length) { <p class="text-sm">Campos no reconocidos: {{ preview().unrecognizedFields.join(', ') }}</p> }
+  <dl class="grid gap-2 text-sm sm:grid-cols-2">
+    <div><dt class="text-slate-500">Orden</dt><dd>{{ preview().fields.orderNumber || 'Sin reconocer' }}</dd></div>
+    <div><dt class="text-slate-500">SIAF</dt><dd>{{ preview().fields.siafNumber || 'Sin reconocer' }}</dd></div>
+    <div><dt class="text-slate-500">Institución</dt><dd>{{ preview().fields.institutionName || 'Sin reconocer' }}</dd></div>
+    <div><dt class="text-slate-500">Proveedor</dt><dd>{{ preview().fields.supplierName || 'Sin reconocer' }}</dd></div>
+  </dl>
+  <div class="flex justify-end gap-3"><button type="button" class="rounded-lg border px-4 py-2 text-sm" (click)="dismiss.emit()">Descartar resultado</button><button type="button" class="rounded-lg bg-primary-700 px-4 py-2 text-sm font-semibold text-white" (click)="applyCandidates.emit(preview().fields)">Revisar en el formulario</button></div>
+</section>

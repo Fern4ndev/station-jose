@@ -1,0 +1,12 @@
+<section aria-labelledby="page-title">
+  <app-page-header title="Detalle de atención"
+    description="Consulta los datos confirmados del despacho y su revisión." />
+  <div class="grid gap-4"><app-section-panel title="Despacho">
+      <div class="p-4"><app-empty-state title="Datos del servidor"
+          description="Usuario, sede, fecha, combustible y galones se consultan del registro confirmado." /></div>
+    </app-section-panel><app-section-panel title="Verificaciones">
+      <div class="p-4"><app-empty-state title="Historial de revisión"
+          description="Las verificaciones no alteran las cantidades despachadas ni los saldos." /></div>
+    </app-section-panel></div>
+  <p class="mt-3 break-all text-xs text-slate-500">Identificador: {{ attendanceId }}</p>
+</section>

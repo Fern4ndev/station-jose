@@ -10,5 +10,5 @@ import { AuthStore } from '../../../../core/services/auth/auth';
 })
 export class NotificationsBell {
   private readonly auth = inject(AuthStore);
-  protected readonly canReview = computed(() => this.auth.hasPermission('attendances.verify'));
+  protected readonly canReview = computed(() => this.auth.hasPermission('vouchers.verify'));
 }

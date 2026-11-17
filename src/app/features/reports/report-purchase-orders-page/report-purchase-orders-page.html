@@ -1,0 +1,7 @@
+<section aria-labelledby="page-title">
+  <app-page-header title="Reporte de órdenes" description="Consulta autorizaciones y saldos por línea de combustible.">
+    <app-report-export-actions page-actions [disabled]="true" />
+  </app-page-header>
+  <app-report-filter-bar [filters]="filters()" (filtersChange)="filters.set($event)" />
+  <app-section-panel title="Órdenes de compra" description="El archivo exportado debe conservar los filtros aplicados."><app-data-table [columns]="columns" emptyDescription="El reporte aparecerá cuando los filtros se consulten." /></app-section-panel>
+</section>
