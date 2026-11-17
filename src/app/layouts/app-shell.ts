@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { finalize, of, catchError } from 'rxjs';
-import { AuthSessionService } from '../core/auth/auth-session.service';
-import { AuthStore } from '../core/auth/auth.store';
-import { ROLE_LABELS } from '../core/auth/auth.models';
+import { ROLE_LABELS } from '../core/models/auth.models';
+import { AuthSessionService, AuthStore } from '../core/services/auth/auth';
 import { APP_NAVIGATION } from './app-navigation';
 
 @Component({

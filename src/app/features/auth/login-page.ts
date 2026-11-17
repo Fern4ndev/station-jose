@@ -4,9 +4,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
-import { ApiErrorEnvelope } from '../../core/api/api-error.models';
-import { AuthSessionService } from '../../core/auth/auth-session.service';
-import { homePathForRole } from '../../core/auth/auth.models';
+import { ApiErrorEnvelope } from '../../core/models/api-error.models';
+import { homePathForRole } from '../../core/models/auth.models';
+import { AuthSessionService } from '../../core/services/auth/auth';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

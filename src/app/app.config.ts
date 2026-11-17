@@ -5,8 +5,8 @@ import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
-import { authInterceptor } from './core/auth/auth.interceptor';
-import { apiErrorInterceptor } from './core/auth/api-error.interceptor';
+import { apiErrorInterceptor } from './core/interceptors/api-error.interceptor';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 const SanJoseTheme = definePreset(Aura, {
   semantic: {
