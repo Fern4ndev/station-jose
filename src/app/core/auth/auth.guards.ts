@@ -1,0 +1,43 @@
+import { CanActivateFn, Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { AuthStore } from './auth.store';
+import { homePathForRole } from './auth.models';
+
+export const authGuard: CanActivateFn = (_route, state) => {
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
+
+  if (authStore.isAuthenticated()) {
+    return true;
+  }
+
+  return router.createUrlTree(['/auth/login'], {
+    queryParams: { returnUrl: state.url },
+  });
+};
+
+export const guestGuard: CanActivateFn = (route) => {
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
+  const user = authStore.user();
+
+  if (!user) {
+    return true;
+  }
+
+  const returnUrl = route.queryParamMap.get('returnUrl');
+  const destination = returnUrl?.startsWith('/app/') ? returnUrl : homePathForRole(user.role);
+  return router.parseUrl(destination);
+};
+
+export const permissionGuard: CanActivateFn = (route) => {
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
+  const permission: unknown = route.data['permission'];
+
+  if (typeof permission !== 'string' || authStore.hasPermission(permission)) {
+    return true;
+  }
+
+  return router.parseUrl('/access-denied');
+};

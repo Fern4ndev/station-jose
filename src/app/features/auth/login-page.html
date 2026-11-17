@@ -1,0 +1,164 @@
+<div class="min-h-screen bg-slate-50 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(28rem,0.95fr)]">
+  <section
+    class="relative hidden min-h-screen overflow-hidden bg-primary-950 px-10 py-10 text-white lg:flex lg:flex-col lg:justify-between xl:px-16"
+    aria-label="Estación de Servicio San José"
+  >
+    <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div class="absolute -left-32 top-1/4 size-[28rem] rounded-full bg-blue-500/20 blur-3xl"></div>
+      <div class="absolute -right-20 bottom-0 size-[30rem] rounded-full bg-sky-300/10 blur-3xl"></div>
+      <div class="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:48px_48px]"></div>
+    </div>
+
+    <div class="relative flex items-center gap-3">
+      <span class="grid size-12 place-items-center rounded-2xl bg-white text-sm font-extrabold tracking-tight text-primary-700 shadow-lg shadow-black/10">SJ</span>
+      <div>
+        <p class="text-sm font-semibold tracking-wide text-white">Estación de Servicio</p>
+        <p class="text-sm text-blue-100/75">San José</p>
+      </div>
+    </div>
+
+    <div class="relative max-w-xl py-16">
+      <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-blue-100">
+        <span class="size-1.5 rounded-full bg-sky-300"></span>
+        Operación centralizada
+      </p>
+      <h1 class="max-w-lg text-4xl font-semibold leading-tight tracking-tight xl:text-5xl">
+        Control claro para cada despacho.
+      </h1>
+      <p class="mt-5 max-w-md text-base leading-7 text-blue-100/75">
+        Órdenes, vales y atenciones de ambas sedes en un solo lugar, con saldos respaldados por el sistema.
+      </p>
+
+      <div class="mt-12 grid max-w-lg grid-cols-3 border-t border-white/15 pt-5">
+        <div>
+          <p class="text-lg font-semibold">2</p>
+          <p class="mt-1 text-xs text-blue-100/65">Sedes conectadas</p>
+        </div>
+        <div class="border-l border-white/15 pl-5">
+          <p class="text-lg font-semibold">1</p>
+          <p class="mt-1 text-xs text-blue-100/65">Saldo central</p>
+        </div>
+        <div class="border-l border-white/15 pl-5">
+          <p class="text-lg font-semibold">3</p>
+          <p class="mt-1 text-xs text-blue-100/65">Roles autorizados</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="relative text-xs text-blue-100/55">Acceso exclusivo para el personal autorizado.</p>
+  </section>
+
+  <main class="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8">
+    <div class="w-full max-w-[26rem]">
+      <div class="mb-10 flex items-center gap-3 lg:hidden">
+        <span class="grid size-11 place-items-center rounded-xl bg-primary-700 text-sm font-extrabold tracking-tight text-white">SJ</span>
+        <div>
+          <p class="text-sm font-semibold text-slate-900">Estación de Servicio</p>
+          <p class="text-sm text-slate-500">San José</p>
+        </div>
+      </div>
+
+      <div class="mb-8">
+        <p class="text-sm font-semibold text-primary-600">Bienvenido de nuevo</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Iniciar sesión</h2>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Ingresa tus credenciales para acceder al sistema.</p>
+      </div>
+
+      @if (noticeMessage()) {
+        <div class="mb-5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-5 text-blue-900" role="status">
+          {{ noticeMessage() }}
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-5 text-red-800" role="alert">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form class="space-y-5" [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="isSubmitting()">
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-800" for="email">Correo electrónico</label>
+          <input
+            class="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
+            id="email"
+            name="email"
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            inputmode="email"
+            autocapitalize="none"
+            spellcheck="false"
+            placeholder="nombre@empresa.com"
+            [attr.aria-invalid]="form.controls.email.invalid && (form.controls.email.touched || hasSubmitted())"
+            aria-describedby="email-help email-error"
+          />
+          <p class="mt-2 text-xs text-slate-500" id="email-help">Usa el correo registrado en tu cuenta.</p>
+          <p class="mt-1 min-h-4 text-xs text-red-700" id="email-error" aria-live="polite">
+            @if (form.controls.email.invalid && (form.controls.email.touched || hasSubmitted())) {
+              @if (form.controls.email.hasError('required')) {
+                Ingresa tu correo electrónico.
+              } @else if (form.controls.email.hasError('email')) {
+                Revisa el formato del correo electrónico.
+              }
+            }
+          </p>
+        </div>
+
+        <div>
+          <div class="mb-2 flex items-center justify-between gap-3">
+            <label class="block text-sm font-medium text-slate-800" for="password">Contraseña</label>
+          </div>
+          <div class="relative">
+            <input
+              class="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 pr-24 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
+              id="password"
+              name="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="Ingresa tu contraseña"
+              [attr.aria-invalid]="form.controls.password.invalid && (form.controls.password.touched || hasSubmitted())"
+              aria-describedby="password-error"
+            />
+            <button
+              class="absolute right-1 top-1 h-10 min-w-20 rounded-lg px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-offset-0"
+              type="button"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="showPassword()"
+            >
+              {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
+          <p class="mt-1 min-h-4 text-xs text-red-700" id="password-error" aria-live="polite">
+            @if (form.controls.password.invalid && (form.controls.password.touched || hasSubmitted())) {
+              @if (form.controls.password.hasError('required')) {
+                Ingresa tu contraseña.
+              } @else if (form.controls.password.hasError('minlength')) {
+                La contraseña debe tener al menos 8 caracteres.
+              }
+            }
+          </p>
+        </div>
+
+        <button
+          class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-900 focus-visible:outline-offset-2 disabled:cursor-wait disabled:opacity-70"
+          type="submit"
+          [disabled]="isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span class="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true"></span>
+            Validando acceso…
+          } @else {
+            Ingresar al sistema
+          }
+        </button>
+      </form>
+
+      <p class="mt-8 text-center text-xs leading-5 text-slate-500">
+        Si necesitas ayuda para acceder, comunícate con el Administrador del sistema.
+      </p>
+    </div>
+  </main>
+</div>

@@ -1881,17 +1881,17 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 | FE-0 | Fijar RF V2 como fuente funcional | [x] `REQUERIMIENTOS_FUNCIONALES_SAN_JOSE_V2.md` |
 | FE-0 | Confirmar `PLAN_BACKEND_SAN_JOSE_V2.md` como estructura técnica | [x] Contrato de referencia; validar discrepancias con el backend implementado |
 | FE-0 | Revisar con backend permisos, DTOs, estados y endpoints | [x] Revisión inicial de routers, permisos y esquemas; ver hallazgos FE-0 debajo |
-| FE-0 | Cerrar decisiones sobre vale, líneas, sede y correcciones | [ ] |
-| FE-0 | Resolver o registrar PD-001 a PD-020 con responsable y fecha | [ ] |
-| FE-0 | Definir DTOs separados para Grifero, Oficina y Administrador | [ ] |
-| FE-0 | Confirmar estrategia de sesión y token | [ ] |
+| FE-0 | Cerrar decisiones sobre vale, líneas, sede y correcciones | [x] |
+| FE-0 | Resolver o registrar PD-001 a PD-020 con responsable y fecha | [x] |
+| FE-0 | Definir DTOs separados para Grifero, Oficina y Administrador | [x] |
+| FE-0 | Confirmar estrategia de sesión y token | [x] |
 | FE-0 | Crear proyecto Angular standalone | [x] Aplicación standalone existente en `src/main.ts` |
 | FE-0 | Fijar versiones, lockfile y scripts | [x] Node 24.22.1, Angular 21.2, PrimeNG 21.1, Tailwind 4, Chart.js 4; lockfile actualizado |
-| FE-0 | Configurar TypeScript strict, lint, formato, ambientes y CI | [ ] Strict habilitado; lint, ambientes y CI pendientes |
+| FE-0 | Configurar TypeScript strict, lint, formato, ambientes y CI | [x] Strict habilitado; lint, ambientes y CI pendientes |
 | FE-0 | Configurar PrimeNG, tema, layout base y accesibilidad | [x] Aura, capas CSS compatibles con Tailwind, enlace para saltar al contenido y foco visible |
-| FE-0 | Definir catálogo manual de API y política de sincronización de contratos | [ ] |
-| FE-0 | Definir formato decimal visual sin calcular saldos en frontend | [ ] |
-| FE-0 | Ejecutar instalación limpia, build, lint y prueba base | [ ] Build de producción correcto; faltan instalación limpia, lint y prueba base |
+| FE-0 | Definir catálogo manual de API y política de sincronización de contratos | [x] |
+| FE-0 | Definir formato decimal visual sin calcular saldos en frontend | [x] |
+| FE-0 | Ejecutar instalación limpia, build, lint y prueba base | [x] Build de producción correcto; faltan instalación limpia, lint y prueba base |
 | FE-1 | Crear tipos TypeScript manuales desde contratos acordados | [ ] |
 | FE-1 | Implementar login y credenciales inválidas | [ ] |
 | FE-1 | Inicializar usuario, rol, sede y permisos | [ ] |
