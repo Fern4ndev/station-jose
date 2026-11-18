@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.tables import (
     Attendance,
     AttendanceItem,
+    PurchaseOrder,
     PurchaseOrderItem,
     Voucher,
     VoucherItem,
@@ -17,16 +18,25 @@ from app.tables import (
 
 
 class VoucherRepository:
-    def get_by_id(self, db: Session, voucher_id: UUID) -> Voucher | None:
+    def get_by_id(
+        self,
+        db: Session,
+        voucher_id: UUID,
+        *,
+        branch_id: UUID | None = None,
+    ) -> Voucher | None:
         statement = (
             select(Voucher)
             .options(
                 selectinload(Voucher.items).selectinload(VoucherItem.purchase_order_item),
                 selectinload(Voucher.attendances).selectinload(Attendance.items),
-                selectinload(Voucher.attendances).selectinload(Attendance.verifications),
             )
             .where(Voucher.id == voucher_id)
         )
+        if branch_id is not None:
+            statement = statement.join(PurchaseOrder).where(
+                PurchaseOrder.branch_id == branch_id
+            )
         return db.scalar(statement)
 
     def get_duplicate(
@@ -144,10 +154,15 @@ class VoucherRepository:
         created_to: datetime | None,
         offset: int,
         limit: int,
+        attended_by_user_id: UUID | None = None,
+        branch_id: UUID | None = None,
     ) -> tuple[list[Voucher], int]:
         filters = []
         if purchase_order_id is not None:
             filters.append(Voucher.purchase_order_id == purchase_order_id)
+        if branch_id is not None:
+            order_ids = select(PurchaseOrder.id).where(PurchaseOrder.branch_id == branch_id)
+            filters.append(Voucher.purchase_order_id.in_(order_ids))
         if voucher_number:
             filters.append(
                 Voucher.voucher_number_normalized.ilike(f"%{voucher_number.strip().upper()}%")
@@ -158,15 +173,32 @@ class VoucherRepository:
             filters.append(Voucher.created_at >= created_from)
         if created_to is not None:
             filters.append(Voucher.created_at <= created_to)
+        if attended_by_user_id is not None:
+            attended_voucher_ids = select(Attendance.voucher_id).where(
+                Attendance.performed_by_user_id == attended_by_user_id
+            )
+            filters.append(Voucher.id.in_(attended_voucher_ids))
         base = select(Voucher).where(*filters)
         total = int(db.scalar(select(func.count()).select_from(base.subquery())) or 0)
+        if attended_by_user_id is not None:
+            last_attended_at = (
+                select(func.max(Attendance.attended_at))
+                .where(
+                    Attendance.voucher_id == Voucher.id,
+                    Attendance.performed_by_user_id == attended_by_user_id,
+                )
+                .correlate(Voucher)
+                .scalar_subquery()
+            )
+            ordering = (last_attended_at.desc(), Voucher.created_at.desc())
+        else:
+            ordering = (Voucher.created_at.desc(),)
         statement = (
             base.options(
                 selectinload(Voucher.items).selectinload(VoucherItem.purchase_order_item),
                 selectinload(Voucher.attendances).selectinload(Attendance.items),
-                selectinload(Voucher.attendances).selectinload(Attendance.verifications),
             )
-            .order_by(Voucher.created_at.desc())
+            .order_by(*ordering)
             .offset(offset)
             .limit(limit)
         )

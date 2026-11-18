@@ -3,5 +3,5 @@ import { RecordListPage } from '../../../shared/components/record-list-page/reco
 
 @Component({ changeDetection: ChangeDetectionStrategy.OnPush, imports: [RecordListPage], selector: 'app-attendances-page', templateUrl: './attendances-page.html' })
 export class AttendancesPage {
-  protected readonly columns = ['Vale / orden', 'Grifero', 'Sede', 'Fecha y hora', 'Combustible', 'Galones', 'Verificación'];
+  protected readonly columns = ['Vale / orden', 'Grifero', 'Sede', 'Fecha y hora', 'Combustible', 'Galones'];
 }

@@ -21,7 +21,6 @@ from app.schemas.report import (
     PurchaseOrderReportRow,
     ReportFilters,
 )
-from app.tables import Attendance
 
 
 class ReportExportUnavailableError(AppError):
@@ -91,9 +90,6 @@ class ReportService:
         )
         rows: list[AttendanceReportRow] = []
         for attendance in attendances:
-            verification_status = _verification_status(attendance)
-            if filters.status and filters.status != verification_status:
-                continue
             for item in attendance.items:
                 order_item = item.voucher_item.purchase_order_item
                 if order_item is None:
@@ -117,7 +113,6 @@ class ReportService:
                         attended_gallons=item.attended_gallons,
                         unit_price=item.unit_price_snapshot,
                         attended_amount=item.attended_amount,
-                        verification_status=verification_status,
                     )
                 )
         return AttendanceReportResponse(
@@ -217,13 +212,6 @@ class ReportService:
                 "El reporte supera el máximo de filas exportables.",
                 details={"max_rows": self.settings.REPORT_MAX_EXPORT_ROWS},
             )
-
-
-def _verification_status(attendance: Attendance) -> str:
-    if not attendance.verifications:
-        return "PENDING_VERIFICATION"
-    latest = max(attendance.verifications, key=lambda item: item.reviewed_at)
-    return "VERIFIED" if latest.decision == "VERIFIED" else "PENDING_VERIFICATION"
 
 
 def _period_key(value: datetime, grouping: str) -> str:

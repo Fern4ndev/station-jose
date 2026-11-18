@@ -8,7 +8,6 @@ from pydantic import BaseModel, ConfigDict
 
 from app.schemas.catalog import BranchResponse, FuelTypeResponse
 from app.schemas.purchase_order import PaginationResponse
-from app.schemas.verification import VerificationResponse
 
 
 class OperationalModel(BaseModel):
@@ -59,7 +58,6 @@ class OperationalAttendance(OperationalModel):
     attended_at: datetime
     idempotency_key: UUID
     items: list[OperationalAttendanceItem]
-    verifications: list[VerificationResponse]
 
 
 class OperationalVoucherItem(OperationalModel):
@@ -79,7 +77,6 @@ class OperationalVoucher(OperationalModel):
     voucher_number: str
     created_at: datetime
     status: str
-    verification_status: str
     items: list[OperationalVoucherItem]
     attendances: list[OperationalAttendance]
 

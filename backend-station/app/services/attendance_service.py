@@ -32,7 +32,6 @@ from app.schemas.attendance import (
 )
 from app.schemas.balance import BalanceStatus
 from app.schemas.purchase_order import PaginationResponse
-from app.schemas.verification import VerificationDecision, VerificationResponse
 from app.schemas.voucher import VoucherListResponse
 from app.tables import Attendance, AttendanceItem, PurchaseOrderItem, Voucher, VoucherItem
 
@@ -69,6 +68,10 @@ class AttendanceService:
             raise InvalidFuelLineError("Todas las líneas deben pertenecer a la orden indicada.")
         if any(item.purchase_order.deleted_at is not None for item in order_items):
             raise ResourceNotFoundError("La orden no está disponible.")
+        if branch_id is not None and any(
+            item.purchase_order.branch_id != branch_id for item in order_items
+        ):
+            raise ResourceNotFoundError("Orden de compra no encontrada.")
 
         normalized_issuer = normalize_identity(data.issuer_name)
         normalized_number = normalize_identity(data.voucher_number)
@@ -144,6 +147,10 @@ class AttendanceService:
         voucher = self.vouchers.lock_voucher(db, voucher_id)
         if voucher is None:
             raise ResourceNotFoundError("Vale no encontrado.")
+        if not locked_order_items:
+            raise ResourceNotFoundError("Vale no encontrado.")
+        if branch_id is not None and self._order_branch_id(locked_order_items) != branch_id:
+            raise ResourceNotFoundError("Vale no encontrado.")
         voucher_items = self.vouchers.lock_voucher_items(
             db, [item_id for item_id in item_ids if item_id]
         )
@@ -173,8 +180,14 @@ class AttendanceService:
         db.flush()
         return self._attendance_response(attendance)
 
-    def get_voucher(self, db: Session, voucher_id: UUID) -> VoucherResponse:
-        voucher = self.vouchers.get_by_id(db, voucher_id)
+    def get_voucher(
+        self,
+        db: Session,
+        voucher_id: UUID,
+        *,
+        branch_id: UUID | None = None,
+    ) -> VoucherResponse:
+        voucher = self.vouchers.get_by_id(db, voucher_id, branch_id=branch_id)
         if voucher is None:
             raise ResourceNotFoundError("Vale no encontrado.")
         return self._voucher_response(db, voucher)
@@ -190,6 +203,8 @@ class AttendanceService:
         issuer_name: str | None,
         created_from: datetime | None,
         created_to: datetime | None,
+        attended_by_user_id: UUID | None = None,
+        branch_id: UUID | None = None,
     ) -> VoucherListResponse:
         vouchers, total = self.vouchers.list(
             db,
@@ -200,6 +215,8 @@ class AttendanceService:
             created_to=created_to,
             offset=(page - 1) * page_size,
             limit=page_size,
+            attended_by_user_id=attended_by_user_id,
+            branch_id=branch_id,
         )
         return VoucherListResponse(
             items=[self._voucher_response(db, voucher) for voucher in vouchers],
@@ -351,12 +368,7 @@ class AttendanceService:
         return attendance
 
     def _attendance_response(self, attendance: Attendance) -> AttendanceResponse:
-        response = AttendanceResponse.model_validate(attendance, from_attributes=True)
-        response.verifications = [
-            VerificationResponse.model_validate(item, from_attributes=True)
-            for item in attendance.verifications
-        ]
-        return response
+        return AttendanceResponse.model_validate(attendance, from_attributes=True)
 
     def _voucher_response(self, db: Session, voucher: Voucher) -> VoucherResponse:
         item_ids = [item.id for item in voucher.items]
@@ -405,7 +417,6 @@ class AttendanceService:
             voucher_number=voucher.voucher_number,
             created_at=voucher.created_at,
             status=status,
-            verification_status=_voucher_verification_status(voucher),
             items=detail_items,
             attendances=[
                 self._attendance_response(attendance) for attendance in voucher.attendances
@@ -429,18 +440,6 @@ def fingerprint(data: AttendanceCreate) -> str:
         payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
     ).encode()
     return hashlib.sha256(encoded).hexdigest()
-
-
-def _voucher_verification_status(voucher: Voucher) -> str:
-    if not voucher.attendances:
-        return "PENDING_VERIFICATION"
-    for attendance in voucher.attendances:
-        if not attendance.verifications:
-            return "PENDING_VERIFICATION"
-        latest = max(attendance.verifications, key=lambda item: item.reviewed_at)
-        if latest.decision != VerificationDecision.VERIFIED.value:
-            return "PENDING_VERIFICATION"
-    return "VERIFIED"
 
 
 def _item_status(authorized: Decimal, attended: Decimal, order_available: Decimal | None) -> str:

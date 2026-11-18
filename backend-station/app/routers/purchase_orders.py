@@ -43,7 +43,7 @@ def list_purchase_orders(
         page=page,
         page_size=page_size,
         search=search,
-        branch_id=branch_id,
+        branch_id=user.branch_id if user.role == "ATTENDANT" else branch_id,
         issue_date_from=issue_date_from,
         issue_date_to=issue_date_to,
         sort_by=sort_by,
@@ -75,7 +75,11 @@ def get_purchase_order(
     user: Annotated[User, Depends(require_permission("purchase_orders.read"))],
     db: Annotated[Session, Depends(get_db)],
 ) -> PurchaseOrderResponse | JSONResponse:
-    result = PurchaseOrderService().get(db, order_id)
+    result = PurchaseOrderService().get(
+        db,
+        order_id,
+        branch_id=user.branch_id if user.role == "ATTENDANT" else None,
+    )
     if user.role == "ATTENDANT":
         return JSONResponse(OperationalOrder.model_validate(result).model_dump(mode="json"))
     return result

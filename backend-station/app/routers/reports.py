@@ -71,11 +71,10 @@ def attendance_report(
     date_to: Annotated[date | None, Query()] = None,
     user_id: Annotated[UUID | None, Query()] = None,
     branch_id: Annotated[UUID | None, Query()] = None,
-    status: Annotated[str | None, Query(max_length=30)] = None,
 ) -> AttendanceReportResponse:
     return ReportService().attendances(
         db,
-        _filters(date_from, date_to, user_id, branch_id, status, ReportGrouping.DAY),
+        _filters(date_from, date_to, user_id, branch_id, None, ReportGrouping.DAY),
     )
 
 

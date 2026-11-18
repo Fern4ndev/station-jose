@@ -14,7 +14,7 @@ from app.schemas.attendance import VoucherResponse
 from app.schemas.operational import OperationalVoucher, OperationalVoucherList, operational_voucher
 from app.schemas.voucher import VoucherDescriptiveUpdate, VoucherListResponse
 from app.services.attendance_service import AttendanceService
-from app.services.verification_service import VerificationService
+from app.services.voucher_maintenance_service import VoucherMaintenanceService
 from app.tables import User
 
 router = APIRouter(prefix="/vouchers", tags=["Vouchers"])
@@ -41,6 +41,7 @@ def list_vouchers(
         issuer_name=issuer_name,
         created_from=created_from,
         created_to=created_to,
+        branch_id=user.branch_id if user.role == "ATTENDANT" else None,
     )
     if user.role == "ATTENDANT":
         safe = OperationalVoucherList(
@@ -51,13 +52,46 @@ def list_vouchers(
     return result
 
 
+@router.get(
+    "/attended",
+    response_model=OperationalVoucherList,
+)
+def list_attended_vouchers(
+    user: Annotated[User, Depends(require_permission("attendances.read_own"))],
+    db: Annotated[Session, Depends(get_db)],
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+    voucher_number: Annotated[str | None, Query(max_length=60)] = None,
+) -> OperationalVoucherList:
+    result = AttendanceService().list_vouchers(
+        db,
+        page=page,
+        page_size=page_size,
+        purchase_order_id=None,
+        voucher_number=voucher_number,
+        issuer_name=None,
+        created_from=None,
+        created_to=None,
+        attended_by_user_id=user.id,
+        branch_id=user.branch_id,
+    )
+    return OperationalVoucherList(
+        items=[operational_voucher(item, user.id) for item in result.items],
+        pagination=result.pagination,
+    )
+
+
 @router.get("/{voucher_id}", response_model=VoucherResponse | OperationalVoucher)
 def get_voucher(
     voucher_id: UUID,
     user: Annotated[User, Depends(require_permission("vouchers.read"))],
     db: Annotated[Session, Depends(get_db)],
 ) -> VoucherResponse | JSONResponse:
-    result = AttendanceService().get_voucher(db, voucher_id)
+    result = AttendanceService().get_voucher(
+        db,
+        voucher_id,
+        branch_id=user.branch_id if user.role == "ATTENDANT" else None,
+    )
     if user.role == "ATTENDANT":
         return JSONResponse(operational_voucher(result, user.id).model_dump(mode="json"))
     return result
@@ -73,7 +107,7 @@ def correct_voucher(
     data: VoucherDescriptiveUpdate,
     db: Annotated[Session, Depends(get_db)],
 ) -> VoucherResponse:
-    response = VerificationService().correct_voucher(db, voucher_id, data)
+    response = VoucherMaintenanceService().correct_voucher(db, voucher_id, data)
     db.commit()
     return response
 
@@ -87,6 +121,6 @@ def delete_voucher(
     voucher_id: UUID,
     db: Annotated[Session, Depends(get_db)],
 ) -> Response:
-    VerificationService().delete_voucher(db, voucher_id)
+    VoucherMaintenanceService().delete_voucher(db, voucher_id)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

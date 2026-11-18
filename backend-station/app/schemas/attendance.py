@@ -6,8 +6,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from app.schemas.verification import VerificationResponse
-
 
 class AttendanceItemCreate(BaseModel):
     purchase_order_item_id: UUID | None = None
@@ -97,7 +95,6 @@ class AttendanceResponse(BaseModel):
     attended_at: datetime
     idempotency_key: UUID
     items: list[AttendanceItemResponse]
-    verifications: list[VerificationResponse] = Field(default_factory=list)
 
 
 class VoucherResponse(BaseModel):
@@ -108,7 +105,6 @@ class VoucherResponse(BaseModel):
     voucher_number: str
     created_at: datetime
     status: str
-    verification_status: str
     items: list["VoucherItemDetailResponse"]
     attendances: list[AttendanceResponse]
 

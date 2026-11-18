@@ -60,19 +60,9 @@ class InvalidFuelLineError(AppError):
     code = "INVALID_FUEL_LINE"
 
 
-class AttendanceAlreadyVerifiedError(AppError):
-    status_code = 409
-    code = "ATTENDANCE_ALREADY_VERIFIED"
-
-
 class VoucherHasAttendancesError(AppError):
     status_code = 409
     code = "VOUCHER_HAS_ATTENDANCES"
-
-
-class InvalidVerificationError(AppError):
-    status_code = 422
-    code = "INVALID_VERIFICATION"
 
 
 class InvalidReportFilterError(AppError):

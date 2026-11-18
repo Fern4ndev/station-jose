@@ -287,7 +287,7 @@ def test_review_and_correction_preserve_balances(
         },
     )
     assert first.status_code == 201, first.text
-    attendance_id, voucher_id = first.json()["id"], first.json()["voucher_id"]
+    voucher_id = first.json()["voucher_id"]
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
         role="OFFICE", id=reviewer_id, branch_id=None
     )
@@ -300,34 +300,6 @@ def test_review_and_correction_preserve_balances(
         ).status_code
         == 403
     )
-    assert (
-        client.post(
-            f"/api/v1/attendances/{attendance_id}/verifications", json={"decision": "OBSERVED"}
-        ).status_code
-        == 422
-    )
-    observed = client.post(
-        f"/api/v1/attendances/{attendance_id}/verifications",
-        json={"decision": "OBSERVED", "observation": "Firma ilegible"},
-    )
-    assert observed.status_code == 201
-    pending = client.get("/api/v1/verifications/pending").json()
-    assert (
-        next(item for item in pending if item["attendance_id"] == attendance_id)[
-            "verification_status"
-        ]
-        == "OBSERVED"
-    )
-    verified = client.post(
-        f"/api/v1/attendances/{attendance_id}/verifications", json={"decision": "VERIFIED"}
-    )
-    assert verified.status_code == 201
-    assert (
-        client.post(
-            f"/api/v1/attendances/{attendance_id}/verifications", json={"decision": "VERIFIED"}
-        ).status_code
-        == 409
-    )
     assert client.delete(f"/api/v1/vouchers/{voucher_id}").status_code == 409
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
         role="ADMIN", id=reviewer_id, branch_id=None
@@ -337,7 +309,6 @@ def test_review_and_correction_preserve_balances(
     )
     assert corrected.status_code == 200
     assert corrected.json()["issuer_name"] == "Entidad corregida"
-    assert len(corrected.json()["attendances"][0]["verifications"]) == 2
     assert (
         client.get(f"/api/v1/purchase-orders/{order_id}").json()["items"][0]["available_gallons"]
         == before

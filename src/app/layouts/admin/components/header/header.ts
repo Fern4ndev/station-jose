@@ -2,11 +2,9 @@ import { ChangeDetectionStrategy, Component, inject, output } from '@angular/cor
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NotificationsBell } from '../notifications-bell/notifications-bell';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NotificationsBell],
   selector: 'app-header',
   styleUrl: './header.css',
   templateUrl: './header.html',

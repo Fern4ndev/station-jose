@@ -1,27 +1,119 @@
 <section aria-labelledby="page-title">
-  <app-page-header title="Detalle de usuario" description="Consulta su rol, sede y estado de acceso."><a page-actions routerLink="/users" class="rounded-lg border px-4 py-2 text-sm">Volver a usuarios</a></app-page-header>
+  <app-page-header
+    title="Detalle de usuario"
+    description="Consulta su rol, cobertura y estado de acceso."
+  >
+    <a page-actions routerLink="/users" class="rounded-lg border px-4 py-2 text-sm">Volver a usuarios</a>
+  </app-page-header>
+
   <app-section-panel title="Información de usuario">
     @switch (state()) {
-      @case ('loading') { <div class="p-5" role="status" aria-label="Cargando usuario"><app-loading-skeleton /></div> }
-      @case ('error') { <app-api-error message="No se pudo cargar el usuario." (retry)="load()" /> }
-      @case ('ready') { @if (user(); as account) { <dl class="grid gap-5 p-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
-        <div><dt class="text-slate-500">Nombre completo</dt><dd class="mt-1 font-semibold">{{ account.firstName }} {{ account.lastName }}</dd></div>
-        <div><dt class="text-slate-500">DNI</dt><dd class="mt-1 font-semibold">{{ account.dni }}</dd></div>
-        <div><dt class="text-slate-500">Correo electrónico</dt><dd class="mt-1 break-all font-semibold">{{ account.email }}</dd></div>
-        <div><dt class="text-slate-500">Rol</dt><dd class="mt-1 font-semibold">{{ roleLabels[account.role] }}</dd></div>
-        <div><dt class="text-slate-500">Sede</dt><dd class="mt-1 font-semibold">{{ account.branch?.name ?? 'Sin sede asignada' }}</dd></div>
-        <div><dt class="text-slate-500">Estado</dt><dd class="mt-1"><app-status-badge [status]="account.isActive ? 'ACTIVE' : 'INACTIVE'" /></dd></div>
-      </dl> } }
+      @case ('loading') {
+        <div class="p-5" role="status" aria-label="Cargando usuario"><app-loading-skeleton /></div>
+      }
+      @case ('error') {
+        <app-api-error message="No se pudo cargar el usuario." (retry)="load()" />
+      }
+      @case ('ready') {
+        @if (user(); as account) {
+          <dl class="grid gap-5 p-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <dt class="text-slate-500">Nombre completo</dt>
+              <dd class="mt-1 font-semibold">{{ account.firstName }} {{ account.lastName }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-500">DNI</dt>
+              <dd class="mt-1 font-semibold">{{ account.dni }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-500">Correo electrónico</dt>
+              <dd class="mt-1 break-all font-semibold">{{ account.email }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-500">Rol</dt>
+              <dd class="mt-1 font-semibold">{{ roleLabels[account.role] }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-500">Sede / cobertura</dt>
+              <dd class="mt-1 font-semibold">
+                {{ account.role === 'ATTENDANT' ? account.branch?.name ?? 'Sin sede asignada' : 'Todas las sedes' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-slate-500">Estado</dt>
+              <dd class="mt-1"><app-status-badge [status]="account.isActive ? 'ACTIVE' : 'INACTIVE'" /></dd>
+            </div>
+          </dl>
+        }
+      }
     }
   </app-section-panel>
-  @if (state() === 'ready') { @if (user(); as account) {
-    @if (message()) { <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-800" role="alert">{{ message() }} @if (!catalogReady()) { <button class="underline" type="button" (click)="loadBranches()">Reintentar sedes</button> }</p> }
-    @if (success()) { <p class="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900" role="status">{{ success() }}</p> }
-    <div class="mt-4 grid gap-4 lg:grid-cols-2">
-      <app-section-panel title="Editar datos"><form class="grid gap-4 p-5" [formGroup]="nameForm" (ngSubmit)="saveNames()"><label class="grid gap-1 text-sm">Nombres<input class="min-h-11 rounded-lg border px-3" formControlName="firstName" /></label><label class="grid gap-1 text-sm">Apellidos<input class="min-h-11 rounded-lg border px-3" formControlName="lastName" /></label><button type="submit" class="min-h-11 justify-self-start rounded-lg bg-primary-700 px-4 text-sm text-white disabled:opacity-50" [disabled]="saving() || nameForm.invalid">Guardar datos</button></form></app-section-panel>
-      <app-section-panel title="Rol y acceso"><form class="grid gap-4 p-5" [formGroup]="roleForm" (ngSubmit)="saveRole()"><label class="grid gap-1 text-sm">Rol<select class="min-h-11 rounded-lg border px-3" formControlName="role"><option value="ADMIN">Administrador</option><option value="OFFICE">Oficina</option><option value="ATTENDANT">Grifero</option></select></label>@if (roleForm.controls.role.value === 'ATTENDANT') { <label class="grid gap-1 text-sm">Sede<select class="min-h-11 rounded-lg border px-3" formControlName="branchId"><option value="">Selecciona una sede</option>@for (branch of branches(); track branch.id) { <option [value]="branch.id">{{ branch.name }}</option> }</select></label> }<button type="submit" class="min-h-11 justify-self-start rounded-lg border px-4 text-sm disabled:opacity-50" [disabled]="saving() || !catalogReady()">Guardar rol</button></form>
-        <div class="border-t p-5">@if (confirmStatus()) { <p class="mb-3 text-sm">¿Confirmas que deseas {{ account.isActive ? 'deshabilitar' : 'habilitar' }} esta cuenta?</p><div class="flex gap-3"><button type="button" class="rounded-lg border px-3 py-2 text-sm" (click)="confirmStatus.set(false)">Cancelar</button><button type="button" class="rounded-lg bg-primary-700 px-3 py-2 text-sm text-white" (click)="updateStatus()" [disabled]="saving()">Confirmar</button></div> } @else { <button type="button" class="rounded-lg border px-3 py-2 text-sm" (click)="confirmStatus.set(true)" [disabled]="saving()">{{ account.isActive ? 'Deshabilitar cuenta' : 'Habilitar cuenta' }}</button> }</div>
-      </app-section-panel>
-    </div>
-  } }
+
+  @if (state() === 'ready') {
+    @if (user(); as account) {
+      @if (account.role === 'ADMIN') {
+        <p class="mt-4 rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-700" role="status">
+          Esta es la cuenta administradora global. Su acceso y sus datos no se pueden modificar desde el panel de usuarios.
+        </p>
+      } @else {
+        @if (message()) {
+          <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-800" role="alert">
+            {{ message() }}
+            @if (!catalogReady()) {
+              <button class="underline" type="button" (click)="loadBranches()">Reintentar carga de sedes</button>
+            }
+          </p>
+        }
+        @if (success()) {
+          <p class="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900" role="status">{{ success() }}</p>
+        }
+
+        <div class="mt-4 grid gap-4 lg:grid-cols-2">
+          <app-section-panel title="Editar datos">
+            <form class="grid gap-4 p-5" [formGroup]="nameForm" (ngSubmit)="saveNames()">
+              <label class="grid gap-1 text-sm">Nombres<input class="min-h-11 rounded-lg border px-3" formControlName="firstName" /></label>
+              <label class="grid gap-1 text-sm">Apellidos<input class="min-h-11 rounded-lg border px-3" formControlName="lastName" /></label>
+              <button type="submit" class="min-h-11 justify-self-start rounded-lg bg-primary-700 px-4 text-sm text-white disabled:opacity-50" [disabled]="saving() || nameForm.invalid">Guardar datos</button>
+            </form>
+          </app-section-panel>
+
+          <app-section-panel title="Rol y acceso">
+            <form class="grid gap-4 p-5" [formGroup]="roleForm" (ngSubmit)="saveRole()">
+              <label class="grid gap-1 text-sm">Rol
+                <select class="min-h-11 rounded-lg border px-3" formControlName="role">
+                  <option value="OFFICE">Oficina</option>
+                  <option value="ATTENDANT">Grifero</option>
+                </select>
+              </label>
+              @if (roleForm.controls.role.value === 'ATTENDANT') {
+                <label class="grid gap-1 text-sm">Sede
+                  <select class="min-h-11 rounded-lg border px-3" formControlName="branchId">
+                    <option value="">Selecciona una sede</option>
+                    @for (branch of branches(); track branch.id) {
+                      <option [value]="branch.id">{{ branch.name }}</option>
+                    }
+                  </select>
+                </label>
+              }
+              <button type="submit" class="min-h-11 justify-self-start rounded-lg border px-4 text-sm disabled:opacity-50" [disabled]="saving() || !catalogReady()">Guardar rol</button>
+            </form>
+
+            <div class="border-t p-5">
+              @if (confirmStatus()) {
+                <p class="mb-3 text-sm">¿Confirmas que deseas {{ account.isActive ? 'deshabilitar' : 'habilitar' }} esta cuenta?</p>
+                <div class="flex gap-3">
+                  <button type="button" class="rounded-lg border px-3 py-2 text-sm" (click)="confirmStatus.set(false)">Cancelar</button>
+                  <button type="button" class="rounded-lg bg-primary-700 px-3 py-2 text-sm text-white" (click)="updateStatus()" [disabled]="saving()">Confirmar</button>
+                </div>
+              } @else {
+                <button type="button" class="rounded-lg border px-3 py-2 text-sm" (click)="confirmStatus.set(true)" [disabled]="saving()">
+                  {{ account.isActive ? 'Deshabilitar cuenta' : 'Habilitar cuenta' }}
+                </button>
+              }
+            </div>
+          </app-section-panel>
+        </div>
+      }
+    }
+  }
 </section>

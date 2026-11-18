@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import type { BranchSummary } from '../../../core/models/auth.models';
+import type { BranchSummary, UserManagementRole } from '../../../core/models/auth.models';
 
 export type UserFormGroup = FormGroup<{
   firstName: FormControl<string>;
@@ -8,7 +8,7 @@ export type UserFormGroup = FormGroup<{
   dni: FormControl<string>;
   email: FormControl<string>;
   password: FormControl<string>;
-  role: FormControl<'ADMIN' | 'OFFICE' | 'ATTENDANT'>;
+  role: FormControl<UserManagementRole>;
   branchId: FormControl<string>;
 }>;
 

@@ -236,9 +236,8 @@ Las rutas de la API tienen el prefijo `API_V1_PREFIX` (por defecto `/api/v1`).
 | `POST` | `/api/v1/purchase-orders/{order_id}/attendances` | Crea el vale y su primera atención atómica | Requiere `attendances.create` |
 | `POST` | `/api/v1/vouchers/{voucher_id}/attendances` | Registra una atención parcial posterior | Requiere `attendances.create` |
 | `GET` | `/api/v1/vouchers` | Lista y filtra vales paginados | Requiere `vouchers.read` |
+| `GET` | `/api/v1/vouchers/attended` | Lista los vales atendidos por el grifero actual | Requiere `attendances.read_own` |
 | `GET` | `/api/v1/vouchers/{voucher_id}` | Consulta el vale, sus saldos y atenciones | Requiere `vouchers.read` |
-| `GET` | `/api/v1/verifications/pending` | Lista atenciones pendientes de verificación | Requiere `vouchers.verify` |
-| `POST` | `/api/v1/attendances/{attendance_id}/verifications` | Verifica u observa una atención | Requiere `vouchers.verify` |
 | `PATCH` | `/api/v1/vouchers/{voucher_id}/descriptive-data` | Corrige datos descriptivos del vale | Requiere `vouchers.correct_descriptive` |
 | `DELETE` | `/api/v1/vouchers/{voucher_id}` | Rechaza el borrado de vales con historial | Requiere `vouchers.delete` |
 | `POST` | `/api/v1/ocr/purchase-order-previews` | Extrae campos candidatos de un PDF sin guardar la orden | Requiere `ocr.purchase_orders.process` |
@@ -258,7 +257,7 @@ curl http://localhost:8000/api/v1/health/live
 
 Para crear una atención se requiere el encabezado `Idempotency-Key` con un UUID. La primera atención recibe los datos descriptivos del vale y líneas referenciadas a la orden; las siguientes reciben `voucher_item_id`. Los saldos y estados se derivan de los despachos persistidos y no se aceptan desde el cliente.
 
-Una verificación `VERIFIED` cierra la revisión de la atención. Una verificación `OBSERVED` exige una observación y mantiene el registro pendiente; ninguna verificación modifica galones, importes, grifero o fechas históricas.
+El grifero consulta y atiende órdenes y vales de su sede. La primera atención guarda los datos del vale y el despacho en una sola operación; el listado de vales atendidos muestra sus registros y permite consultar el detalle y el historial.
 
 Los reportes y exportaciones están restringidos a `ADMIN` y `OFFICE`; el rol `ATTENDANT` no recibe acceso a reportes ni importes. Para habilitar exportaciones instala las dependencias declaradas en `requirements.txt` (`openpyxl` y `reportlab`).
 

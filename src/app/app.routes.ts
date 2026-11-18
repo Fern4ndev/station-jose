@@ -104,20 +104,8 @@ export const routes: Routes = [
       {
         path: 'attendant/attendances',
         canActivate: [permissionGuard],
-        data: { permission: 'attendances.read_own', title: 'Mis atenciones' },
-        loadComponent: () => import('./features/attendances/attendances-page/attendances-page').then((module) => module.AttendancesPage),
-      },
-      {
-        path: 'attendances/pending-verification',
-        canActivate: [permissionGuard],
-        data: { permission: 'vouchers.verify', title: 'Verificación' },
-        loadComponent: () => import('./features/verifications/verifications-page/verifications-page').then((module) => module.VerificationsPage),
-      },
-      {
-        path: 'attendances/:attendanceId',
-        canActivate: [permissionGuard],
-        data: { permission: 'vouchers.verify', title: 'Detalle de verificación' },
-        loadComponent: () => import('./features/verifications/verification-detail-page/verification-detail-page').then((module) => module.VerificationDetailPage),
+        data: { permission: 'attendances.read_own', title: 'Vales atendidos' },
+        loadComponent: () => import('./features/vouchers/attended-vouchers-page/attended-vouchers-page').then((module) => module.AttendedVouchersPage),
       },
       {
         path: 'attendances',

@@ -22,7 +22,11 @@ from app.tables import (
 
 class PurchaseOrderRepository:
     def get_by_id(
-        self, db: Session, order_id: UUID, *, include_deleted: bool = False
+        self,
+        db: Session,
+        order_id: UUID,
+        *,
+        include_deleted: bool = False,
     ) -> PurchaseOrder | None:
         statement = (
             select(PurchaseOrder)

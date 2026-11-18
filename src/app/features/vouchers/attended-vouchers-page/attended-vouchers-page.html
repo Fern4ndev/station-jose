@@ -1,0 +1,60 @@
+<section aria-labelledby="page-title">
+  <app-page-header
+    title="Vales atendidos"
+    description="Consulta los vales en los que registraste un despacho."
+  />
+
+  @if (notice) {
+    <p class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900" role="status">
+      El despacho se registró y el vale ya aparece en esta lista.
+    </p>
+  }
+
+  <app-section-panel title="Mis vales atendidos" description="Abre el detalle para consultar el saldo y el historial del vale.">
+    <div class="border-b border-slate-100 p-4">
+      <app-search-field (queryChange)="search($event)">Número de vale</app-search-field>
+    </div>
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="p-4" role="status" aria-label="Cargando vales atendidos"><app-loading-skeleton /></div>
+      }
+      @case ('error') {
+        <app-api-error message="No se pudieron cargar tus vales atendidos." (retry)="load(query(), page())" />
+      }
+      @case ('ready') {
+        <div class="responsive-table">
+          <p-table [value]="rows()">
+            <ng-template #header>
+              <tr>
+                <th scope="col">Vale</th>
+                <th scope="col">Emisor</th>
+                <th scope="col">Último despacho</th>
+                <th scope="col">Acción</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-voucher>
+              <tr>
+                <td data-label="Vale">{{ voucher.voucher_number }}</td>
+                <td data-label="Emisor">{{ voucher.issuer_name }}</td>
+                <td data-label="Último despacho">{{ voucher.lastAttendedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td data-label="Acción">
+                  <a class="font-semibold text-primary-700 underline" [routerLink]="['/vouchers', voucher.id]">
+                    Ver detalle<span class="sr-only"> del vale {{ voucher.voucher_number }}</span>
+                  </a>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr><td colspan="4"><app-empty-state title="Aún no hay vales atendidos" description="Los vales aparecerán aquí después de registrar un despacho." /></td></tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        @if (pages() > 1) {
+          <app-server-pagination [page]="page()" [pages]="pages()" (pageChange)="changePage($event)" />
+        }
+      }
+    }
+  </app-section-panel>
+</section>

@@ -73,8 +73,16 @@ class PurchaseOrderService:
         db.flush()
         return self._to_response(db, order)
 
-    def get(self, db: Session, order_id: UUID) -> PurchaseOrderResponse:
+    def get(
+        self,
+        db: Session,
+        order_id: UUID,
+        *,
+        branch_id: UUID | None = None,
+    ) -> PurchaseOrderResponse:
         order = self._get_order(db, order_id)
+        if branch_id is not None and order.branch_id != branch_id:
+            raise ResourceNotFoundError("Orden de compra no encontrada.")
         return self._to_response(db, order)
 
     def list(

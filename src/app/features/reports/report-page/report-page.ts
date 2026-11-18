@@ -40,7 +40,7 @@ export class ReportPage {
       if (!response) { this.state.set('error'); return; }
       const mapping = this.kind() === 'purchase-orders'
         ? { Orden: 'order_number', Entidad: 'institution_name', Sede: 'branch_name', Fecha: 'issue_date', Combustible: 'fuel_type_name', Autorizado: 'authorized_gallons', Atendido: 'attended_gallons', Disponible: 'available_gallons' }
-        : { Vale: 'voucher_number', Orden: 'order_number', Fecha: 'attended_at', Grifero: 'performer_name', Sede: 'branch_name', Combustible: 'fuel_type_name', Galones: 'attended_gallons', Verificación: 'verification_status' };
+        : { Vale: 'voucher_number', Orden: 'order_number', Fecha: 'attended_at', Grifero: 'performer_name', Sede: 'branch_name', Combustible: 'fuel_type_name', Galones: 'attended_gallons' };
       const entries = Object.entries(mapping);
       this.columns.set(entries.map(([label]) => label));
       this.rows.set(response.items.map((item) => Object.fromEntries(entries.map(([label, key]) => [label, item[key] ?? null]))));

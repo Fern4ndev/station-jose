@@ -1,13 +1,13 @@
 :host { display: block; }
-.topbar { display: flex; min-height: 73px; align-items: center; justify-content: space-between; gap: 16px; }
+.topbar { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 16px; }
 .topbar-left { display: flex; min-width: 0; align-items: center; gap: 10px; }
 .top-actions { display: flex; align-items: center; gap: 9px; }
-.crumbs { color: #53656d; font-size: 13px; }
-.crumbs strong { color: #263b43; font-weight: 620; }
+.crumbs { color: #607376; font-size: 12px; }
+.crumbs strong { color: #263b43; font-weight: 650; }
 .crumbs span { padding: 0 6px; }
-.menu-button { display: none; width: 39px; height: 39px; place-items: center; border: 1px solid #dfe6e7; border-radius: 12px; background: rgb(255 255 255 / 73%); color: #51646a; cursor: pointer; }
+.menu-button { display: none; width: 39px; height: 39px; place-items: center; border: 1px solid #dfe6e7; border-radius: 11px; background: rgb(255 255 255 / 73%); color: #51646a; cursor: pointer; }
 .menu-button:focus-visible { outline: 3px solid rgb(57 198 174 / 72%); outline-offset: 3px; }
-.logout-button { min-height: 36px; padding: 0 12px; border: 1px solid #dce5e6; border-radius: 10px; background: rgb(255 255 255 / 72%); color: #53656a; font-size: 11px; font-weight: 620; cursor: pointer; }
+.logout-button { min-height: 34px; padding: 0 11px; border: 1px solid #dce5e6; border-radius: 9px; background: rgb(255 255 255 / 72%); color: #53656a; font-size: 11px; font-weight: 620; cursor: pointer; }
 .logout-button:hover { background: white; }
 .logout-button:focus-visible { outline: 3px solid rgb(57 198 174 / 72%); outline-offset: 3px; }
-@media (max-width: 760px) { .topbar { min-height: 59px; } .menu-button { display: grid; width: 44px; height: 44px; flex: none; } }
+@media (max-width: 760px) { .topbar { min-height: 56px; } .menu-button { display: grid; width: 44px; height: 44px; flex: none; } }

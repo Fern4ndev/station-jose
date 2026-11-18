@@ -31,6 +31,8 @@ CREATE TABLE users (
         CHECK (role <> 'ATTENDANT' OR branch_id IS NOT NULL),
     CONSTRAINT users_office_branch_check
         CHECK (role <> 'OFFICE' OR branch_id IS NULL),
+    CONSTRAINT users_admin_branch_check
+        CHECK (role <> 'ADMIN' OR branch_id IS NULL),
     CONSTRAINT users_first_name_not_blank CHECK (btrim(first_name) <> ''),
     CONSTRAINT users_last_name_not_blank CHECK (btrim(last_name) <> ''),
     CONSTRAINT users_dni_not_blank CHECK (btrim(dni) <> ''),
@@ -39,6 +41,10 @@ CREATE TABLE users (
     CONSTRAINT users_branch_fk
         FOREIGN KEY (branch_id) REFERENCES branches (id) ON DELETE RESTRICT
 );
+
+CREATE UNIQUE INDEX users_single_admin_idx
+    ON users (role)
+    WHERE role = 'ADMIN';
 
 CREATE TABLE auth_sessions (
     id UUID PRIMARY KEY,

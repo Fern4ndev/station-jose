@@ -17,6 +17,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -58,6 +59,14 @@ class User(Base):
             name="ck_users_attendant_branch",
         ),
         CheckConstraint("role <> 'OFFICE' OR branch_id IS NULL", name="ck_users_office_branch"),
+        CheckConstraint("role <> 'ADMIN' OR branch_id IS NULL", name="ck_users_admin_branch"),
+        Index(
+            "users_single_admin_idx",
+            "role",
+            unique=True,
+            postgresql_where=text("role = 'ADMIN'"),
+            sqlite_where=text("role = 'ADMIN'"),
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(UUIDType, primary_key=True, default=uuid4)

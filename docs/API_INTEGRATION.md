@@ -1,6 +1,6 @@
 # Contrato de integración frontend / backend
 
-Revisión 1.1 — 17/11/2026. Inventario de `backend-station/app/routers`,
+Revisión 1.2 — 18/11/2026. Inventario de `backend-station/app/routers`,
 `schemas` y `core/permissions.py`, contrastado parcialmente con pruebas HTTP y PostgreSQL.
 Ante un cambio, actualizar este documento junto con los esquemas y consumidores.
 
@@ -49,9 +49,9 @@ La presencia de un router no acredita integración con datos reales.
 | `GET /branches`, `GET /fuel-types` | Autenticado | Listas `schemas/catalog.py`. |
 | `GET/POST /purchase-orders`, `GET/PATCH/DELETE /purchase-orders/{id}` | `purchase_orders.read/create/update/delete` | `schemas/purchase_order.py`; lista acepta `search`, `branch_id`, `issue_date_from/to`, paginación, `sort_by` y `sort_order`. |
 | `GET /vouchers`, `GET /vouchers/{id}` | `vouchers.read` | `schemas/voucher.py`, `schemas/attendance.py`; lista acepta paginación, `purchase_order_id`, `voucher_number`, `issuer_name`, `created_from/to`. |
+| `GET /vouchers/attended` | `attendances.read_own` | Vales con al menos un despacho del usuario actual; admite paginación y `voucher_number`. |
 | `PATCH /vouchers/{id}/descriptive-data`, `DELETE /vouchers/{id}` | `vouchers.correct_descriptive`, `vouchers.delete` | `schemas/voucher.py`; delete 204 sujeto a reglas de negocio. |
 | `POST /purchase-orders/{id}/attendances`, `POST /vouchers/{id}/attendances` | `attendances.create` | `schemas/attendance.py`, cabecera UUID `Idempotency-Key`, 201; primera atención requiere emisor y número de vale. |
-| `GET /verifications/pending`, `POST /attendances/{id}/verifications` | `vouchers.verify` | `schemas/verification.py`; POST 201. |
 | `GET /reports/dashboard`, `/reports/purchase-orders`, `/reports/attendances` | `reports.read` | `schemas/report.py`; filtros específicos en `routers/reports.py`. |
 | `GET /reports/purchase-orders/export`, `/reports/attendances/export` | `reports.export` | `format=pdf|xlsx`; los filtros de exportación son un subconjunto de los de consulta. |
 | `POST /ocr/purchase-order-previews` | `ocr.purchase_orders.process` | Multipart `file` PDF; respuesta en `schemas/ocr.py`. |
@@ -70,27 +70,21 @@ consultar `core/exceptions.py` para códigos específicos.
 | Brecha | Responsable propuesto | Bloque afectado / salida requerida |
 |---|---|---|
 | Las respuestas operativas de órdenes, vales y creación de atenciones excluyen los campos financieros para el grifero. El historial de un vale incluye solo sus propias atenciones para ese rol. | Backend + frontend | Las listas y detalles se contrastaron con API real; una prueba HTTP transaccional con PostgreSQL comprueba la creación y una prueba unitaria el filtrado de historial. Falta verificar el historial con varios usuarios mediante HTTP y autenticación real. |
-| No aparecen routers dedicados de consulta de atenciones, historial de verificación ni `/balances/*` descritos en el plan V2. | Backend + responsable funcional | F4–F5: acordar endpoints/DTO y alcance o documentar fuente alternativa. |
-| Alcance de operación por sede y decisiones PD aún abiertas. | Responsable funcional + backend | F0/F4: decidir qué órdenes y vales puede consultar y atender cada sede, y verificar los controles necesarios del servidor. Los saldos se comparten entre sedes según el plan. |
-| Catálogo y permisos del plan histórico difieren del código (`/reports/dashboard`, `/verifications/pending`, `vouchers.verify`, `users.manage`). | Backend + frontend | Mantener catálogo sincronizado y pruebas de contrato antes de integrar cada flujo. |
+| Los routers `GET /attendances` y `/balances/*` descritos en planes históricos no están implementados como endpoints dedicados. | Responsable funcional + backend | Consultar el listado de vales atendidos y los saldos derivados desde órdenes y vales. |
 
 Estos responsables son propuestas de coordinación, no asignaciones confirmadas.
 
 La pantalla de saldos consulta las líneas de órdenes, hasta 20 resultados por
-búsqueda. Las respuestas operativas del grifero omiten precios e importes. Los
-endpoints de lista y detalle de vales devuelven para ese rol un historial filtrado
-por usuario; esto no equivale a un endpoint completo de historial de atenciones.
-La bandeja de verificación distingue ahora `OBSERVED` de `PENDING_VERIFICATION`.
+búsqueda. Las respuestas operativas del grifero omiten precios e importes. El
+listado y detalle de vales del grifero muestran registros de su sede; la página
+de vales atendidos limita además el historial al usuario actual.
 
 ### Alcance actualmente implementado
 
-Las consultas de órdenes aceptan un filtro opcional `branch_id`; el router no lo
-impone según la sede del usuario. Las consultas de vales tampoco filtran por sede.
-En la creación de atenciones el servidor registra la sede del usuario y, si no
-tiene una, usa la de la orden; el servicio no exige que ambas coincidan. Estas
-observaciones describen el comportamiento actual, no una aprobación de la política
-de acceso. Antes de depender de él hay que acordar la regla funcional y verificarla
-con datos de distintas sedes. El frontend no puede sustituir esa validación.
+Las consultas y detalles de órdenes y vales se limitan en el servidor a la sede del
+grifero. La creación de atenciones comprueba que la orden o el vale pertenezcan a
+esa misma sede; la página de vales atendidos limita además el resultado al usuario
+actual. Oficina y Administración conservan su acceso global según sus permisos.
 
 La primera atención ahora exige `voucher_items` con `purchase_order_item_id` y
 `authorized_gallons`, además de `items` con las líneas y `attended_gallons` de la

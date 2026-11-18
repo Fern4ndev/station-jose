@@ -13,7 +13,6 @@ def test_attendance_excludes_financial_values() -> None:
         "branch_id": uuid4(),
         "attended_at": datetime.now(UTC),
         "idempotency_key": uuid4(),
-        "verifications": [],
         "items": [
             {
                 "id": item_id,
@@ -59,7 +58,6 @@ def test_operational_voucher_exposes_only_the_attendants_own_history() -> None:
             "attended_at": datetime.now(UTC),
             "idempotency_key": uuid4(),
             "items": [],
-            "verifications": [],
         }
 
     payload = {
@@ -70,7 +68,6 @@ def test_operational_voucher_exposes_only_the_attendants_own_history() -> None:
         "voucher_number": "V1",
         "created_at": datetime.now(UTC),
         "status": "PENDING",
-        "verification_status": "PENDING",
         "items": [],
         "attendances": [attendance(user_id), attendance(other_id)],
     }

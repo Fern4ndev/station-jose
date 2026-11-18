@@ -1,29 +1,109 @@
 <section aria-labelledby="page-title">
-  <app-page-header [title]="title" [description]="description" />
-  <section class="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 sm:p-5" aria-labelledby="workspace-guide">
-    <h2 id="workspace-guide" class="text-sm font-semibold text-emerald-950">Consulta de órdenes y vales</h2>
-    <p class="mt-3 text-sm text-emerald-900" role="status">Puedes consultar saldos por orden o vale. El registro de atenciones aún no está disponible en esta pantalla.</p>
-  </section>
-  <div class="workspace-grid">
-    <app-section-panel title="Buscar una orden" description="Consulta saldos por línea de combustible">
-      <div class="grid gap-4 p-4"><app-order-search (orderQuery)="searchOrders($event)" />
-        @switch (orderState()) {
-          @case ('initial') { <app-empty-state title="Busca una orden" description="Escribe al menos dos caracteres del número o entidad." /> }
-          @case ('loading') { <p role="status" class="text-sm">Consultando órdenes…</p> }
-          @case ('error') { <p role="alert" class="text-sm text-red-800">No se pudieron consultar las órdenes. Vuelve a intentar.</p> }
-          @case ('ready') { @for (order of orders(); track order.id) { <article class="rounded-xl border border-slate-200 p-4"><h3 class="font-semibold">{{ order.order_number }}</h3><p class="text-sm text-slate-600">{{ order.institution_name }} · {{ order.branch.name }}</p>@for (line of order.items; track line.id) { <p class="mt-2 text-sm">{{ line.fuel_type.name }}: <strong>{{ line.available_gallons }} gal disponibles</strong></p> }</article> } @empty { <app-empty-state title="Sin resultados" description="No se encontraron órdenes para la búsqueda." /> } }
+  <app-page-header [title]="title" [description]="description">
+    @if (hasOrder || hasVoucher) {
+      <a page-actions routerLink="/attendant/workspace" class="rounded-lg border px-4 py-2 text-sm">Volver a búsqueda</a>
+    }
+  </app-page-header>
+
+  @if (hasOrder || hasVoucher) {
+    @switch (selectionState()) {
+      @case ('loading') {
+        <div role="status" aria-label="Cargando datos de despacho"><p class="rounded-xl border border-slate-200 bg-white p-5 text-sm">Cargando el vale y los saldos…</p></div>
+      }
+      @case ('error') {
+        <app-empty-state title="No se pudo abrir el registro" description="Vuelve al espacio de atención y busca nuevamente la orden o el vale." />
+        <a class="mt-4 inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-semibold" routerLink="/attendant/workspace">Volver al espacio de atención</a>
+      }
+      @case ('ready') {
+        @if (selectedOrder(); as order) {
+          <app-section-panel title="Registrar el vale y el primer despacho" [description]="'Orden ' + order.order_number + ' · ' + order.institution_name">
+            <div class="grid gap-4 p-4 sm:p-5">
+              @if (submitError()) { <p class="rounded-lg bg-red-50 p-3 text-sm text-red-800" role="alert">{{ submitError() }}</p> }
+              <app-first-attendance-form
+                [form]="firstForm"
+                [lines]="firstLines()"
+                [submitting]="saving()"
+                (lineChange)="updateFirstLine($event)"
+                (submitAttendance)="registerFirstAttendance()"
+              />
+            </div>
+          </app-section-panel>
         }
-      </div>
-    </app-section-panel>
-    <app-section-panel title="Consulta de vales" description="Busca un vale existente">
-      <div class="grid gap-4 p-4"><app-voucher-search (voucherQuery)="searchVouchers($event)" />
-        @switch (voucherState()) {
-          @case ('initial') { <app-empty-state title="Busca un vale" description="Escribe al menos dos caracteres del número de vale." /> }
-          @case ('loading') { <p role="status" class="text-sm">Consultando vales…</p> }
-          @case ('error') { <p role="alert" class="text-sm text-red-800">No se pudieron consultar los vales. Vuelve a intentar.</p> }
-          @case ('ready') { @for (voucher of vouchers(); track voucher.id) { <article class="rounded-xl border border-slate-200 p-4"><h3 class="font-semibold">Vale {{ voucher.voucher_number }}</h3><p class="text-sm text-slate-600">{{ voucher.issuer_name }}</p>@for (line of voucher.items; track line.id; let index = $index) { <p class="mt-2 text-sm">Línea {{ index + 1 }}: <strong>{{ line.available_gallons }} gal disponibles</strong></p> }</article> } @empty { <app-empty-state title="Sin resultados" description="No se encontraron vales para la búsqueda." /> } }
+
+        @if (selectedVoucher(); as voucher) {
+          <app-section-panel title="Registrar despacho" [description]="'Vale ' + voucher.voucher_number + ' · ' + voucher.issuer_name">
+            <div class="grid gap-4 p-4 sm:p-5">
+              @if (submitError()) { <p class="rounded-lg bg-red-50 p-3 text-sm text-red-800" role="alert">{{ submitError() }}</p> }
+              <app-follow-up-attendance-form
+                [voucherNumber]="voucher.voucher_number"
+                [lines]="followUpLines()"
+                [submitting]="saving()"
+                (lineChange)="updateFollowUpLine($event)"
+                (submitAttendance)="registerFollowUpAttendance()"
+              />
+            </div>
+          </app-section-panel>
         }
-      </div>
-    </app-section-panel>
-  </div>
+      }
+    }
+  } @else {
+    <section class="mb-5 rounded-xl border border-emerald-100 bg-emerald-50 p-4 sm:p-5" aria-labelledby="workspace-guide">
+      <h2 id="workspace-guide" class="text-sm font-semibold text-emerald-950">Atiende el vale del cliente</h2>
+      <p class="mt-2 text-sm text-emerald-900">Busca la orden para registrar un vale nuevo, o busca un vale existente para registrar otro despacho.</p>
+    </section>
+
+    <div class="workspace-grid">
+      <app-section-panel title="Registrar un vale nuevo" description="Busca la orden y registra el primer despacho.">
+        <div class="grid gap-4 p-4">
+          <app-order-search (orderQuery)="searchOrders($event)" />
+          @switch (orderState()) {
+            @case ('initial') { <app-empty-state title="Busca una orden" description="Escribe al menos dos caracteres del número o entidad." /> }
+            @case ('loading') { <p role="status" class="text-sm">Consultando órdenes…</p> }
+            @case ('error') { <p role="alert" class="text-sm text-red-800">No se pudieron consultar las órdenes. Vuelve a intentar.</p> }
+            @case ('ready') {
+              @for (order of orders(); track order.id) {
+                <article class="grid gap-3 rounded-xl border border-slate-200 p-4">
+                  <div><h3 class="font-semibold">{{ order.order_number }}</h3><p class="text-sm text-slate-600">{{ order.institution_name }} · {{ order.branch.name }}</p></div>
+                  <ul class="grid gap-1 text-sm">
+                    @for (line of order.items; track line.id) {
+                      <li>{{ line.fuel_type.name }}: <strong>{{ line.available_gallons }} gal disponibles</strong></li>
+                    }
+                  </ul>
+                  <a class="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" [routerLink]="['/purchase-orders', order.id, 'attendances', 'new']">Registrar vale y despacho</a>
+                </article>
+              } @empty {
+                <app-empty-state title="Sin resultados" description="No se encontraron órdenes para la búsqueda." />
+              }
+            }
+          }
+        </div>
+      </app-section-panel>
+
+      <app-section-panel title="Atender un vale existente" description="Busca el vale que trajo el cliente y registra el despacho.">
+        <div class="grid gap-4 p-4">
+          <app-voucher-search (voucherQuery)="searchVouchers($event)" />
+          @switch (voucherState()) {
+            @case ('initial') { <app-empty-state title="Busca un vale" description="Escribe al menos dos caracteres del número de vale." /> }
+            @case ('loading') { <p role="status" class="text-sm">Consultando vales…</p> }
+            @case ('error') { <p role="alert" class="text-sm text-red-800">No se pudieron consultar los vales. Vuelve a intentar.</p> }
+            @case ('ready') {
+              @for (voucher of vouchers(); track voucher.id) {
+                <article class="grid gap-3 rounded-xl border border-slate-200 p-4">
+                  <div><h3 class="font-semibold">Vale {{ voucher.voucher_number }}</h3><p class="text-sm text-slate-600">{{ voucher.issuer_name }}</p></div>
+                  <ul class="grid gap-1 text-sm">
+                    @for (line of voucher.items; track line.id) {
+                      <li>Línea {{ $index + 1 }}: <strong>{{ line.available_gallons }} gal disponibles</strong></li>
+                    }
+                  </ul>
+                  <a class="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" [routerLink]="['/vouchers', voucher.id, 'attendances', 'new']">Registrar despacho</a>
+                </article>
+              } @empty {
+                <app-empty-state title="Sin resultados" description="No se encontraron vales para la búsqueda." />
+              }
+            }
+          }
+        </div>
+      </app-section-panel>
+    </div>
+  }
 </section>

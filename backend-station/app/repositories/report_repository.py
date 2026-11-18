@@ -67,7 +67,6 @@ class ReportRepository:
                 selectinload(Attendance.voucher),
                 selectinload(Attendance.performed_by),
                 selectinload(Attendance.branch),
-                selectinload(Attendance.verifications),
                 selectinload(Attendance.items)
                 .selectinload(AttendanceItem.voucher_item)
                 .selectinload(VoucherItem.purchase_order_item)

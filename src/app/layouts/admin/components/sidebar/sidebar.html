@@ -4,21 +4,26 @@
     <span class="brand-copy"><strong>San José</strong><small>Control de combustible</small></span>
   </a>
 
-  <div class="branch-label"><span>Sede asignada</span><strong>{{ branchName() }}</strong></div>
+  <div class="branch-label"><span>{{ branchLabel() }}</span><strong>{{ branchName() }}</strong></div>
   <nav class="nav-menu" aria-label="Menú principal">
     @for (item of navigation(); track item.path) {
-          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' || item.path === '/attendances' }" (click)="onNavigate()">
-            <span class="material-symbols-outlined nav-icon" aria-hidden="true">{{ icons[item.path] }}</span>
-            <span>{{ item.label }}</span>
-          </a>
+    <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page"
+      [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' || item.path === '/attendances' }"
+      (click)="onNavigate()">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">{{ icons[item.path] }}</span>
+      <span>{{ item.label }}</span>
+    </a>
     }
   </nav>
 
   <div class="sidebar-spacer"></div>
-  <div class="side-status"><span class="live-dot" aria-hidden="true"></span><span><strong>Información compartida</strong><small>San José y Santa Marta</small></span></div>
-  <button class="profile-card" type="button" (click)="profileMenu.toggle($event)" aria-label="Abrir menú de perfil" aria-haspopup="dialog">
-    <app-avatar [label]="(user()?.firstName?.slice(0, 1) ?? '') + (user()?.lastName?.slice(0, 1) ?? '')" ariaLabel="Perfil" />
-    <span class="profile-copy"><strong>{{ user()?.firstName }} {{ user()?.lastName }}</strong><small>{{ roleLabel() }}</small></span>
+
+  <button class="profile-card" type="button" (click)="profileMenu.toggle($event)" aria-label="Abrir menú de perfil"
+    aria-haspopup="dialog">
+    <app-avatar [label]="(user()?.firstName?.slice(0, 1) ?? '') + (user()?.lastName?.slice(0, 1) ?? '')"
+      ariaLabel="Perfil" />
+    <span class="profile-copy"><strong>{{ user()?.firstName }} {{ user()?.lastName }}</strong><small>{{ roleLabel()
+        }}</small></span>
     <span class="material-symbols-outlined profile-more" aria-hidden="true">more_vert</span>
   </button>
   <p-popover #profileMenu>

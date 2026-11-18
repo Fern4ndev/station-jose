@@ -26,6 +26,10 @@ class LastActiveAdminError(AppError):
     code = "LAST_ACTIVE_ADMIN"
 
 
+class ProtectedAdminAccountError(LastActiveAdminError):
+    code = "PROTECTED_ADMIN_ACCOUNT"
+
+
 class UserService:
     def __init__(self) -> None:
         self.users = UserRepository()
@@ -33,6 +37,10 @@ class UserService:
         self.sessions = AuthSessionRepository()
 
     def create_user(self, db: Session, data: UserCreate) -> User:
+        if data.role == UserRole.ADMIN:
+            raise ProtectedAdminAccountError(
+                "El administrador inicial solo puede crearse mediante el proceso de provisión."
+            )
         if self.users.get_by_email(db, data.email.lower()) or self.users.get_by_dni(db, data.dni):
             raise DuplicateUserError("El correo o DNI ya está registrado.")
         self._validate_branch(db, data.role, data.branch_id)
@@ -57,6 +65,7 @@ class UserService:
 
     def update_user(self, db: Session, user_id: UUID, data: UserUpdate) -> User:
         user = self.get_user(db, user_id)
+        self._ensure_admin_is_not_editable(user)
         if data.first_name is not None:
             user.first_name = data.first_name.strip()
         if data.last_name is not None:
@@ -66,11 +75,7 @@ class UserService:
 
     def set_status(self, db: Session, user_id: UUID, data: UserStatusUpdate) -> User:
         user = self.get_user(db, user_id)
-        if user.is_active and not data.is_active and user.role == UserRole.ADMIN.value:
-            if self.users.count_active_admins(db) <= 1:
-                raise LastActiveAdminError(
-                    "No se puede deshabilitar el último administrador activo."
-                )
+        self._ensure_admin_is_not_editable(user)
         user.is_active = data.is_active
         if not data.is_active:
             self.sessions.revoke_all_for_user(db, user_id=user.id, now=datetime.now(UTC))
@@ -79,11 +84,11 @@ class UserService:
 
     def set_role(self, db: Session, user_id: UUID, data: UserRoleUpdate) -> User:
         user = self.get_user(db, user_id)
-        if user.role == UserRole.ADMIN.value and data.role != UserRole.ADMIN:
-            if user.is_active and self.users.count_active_admins(db) <= 1:
-                raise LastActiveAdminError(
-                    "No se puede retirar el rol del último administrador activo."
-                )
+        self._ensure_admin_is_not_editable(user)
+        if data.role == UserRole.ADMIN:
+            raise ProtectedAdminAccountError(
+                "No se puede asignar el rol de administrador desde el panel de usuarios."
+            )
         self._validate_branch(db, data.role, data.branch_id)
         user.role = data.role.value
         user.branch_id = data.branch_id
@@ -101,10 +106,17 @@ class UserService:
             raise AppError(
                 "La sede es obligatoria para un grifero.", details={"field": "branch_id"}
             )
-        if role == UserRole.OFFICE and branch_id is not None:
+        if role in (UserRole.ADMIN, UserRole.OFFICE) and branch_id is not None:
             raise AppError(
-                "Los usuarios de oficina no se asignan a una sede.",
+                "Las cuentas globales no se asignan a una sede.",
                 details={"field": "branch_id"},
             )
         if branch_id is not None and self.branches.get_by_id(db, branch_id) is None:
             raise ResourceNotFoundError("Sede no encontrada.")
+
+    @staticmethod
+    def _ensure_admin_is_not_editable(user: User) -> None:
+        if user.role == UserRole.ADMIN.value:
+            raise ProtectedAdminAccountError(
+                "La cuenta administradora es global y no se puede modificar desde el panel de usuarios."
+            )

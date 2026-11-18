@@ -15,6 +15,8 @@ Para una base que ya contiene datos, agrega además un ALTER numerado por cada c
 
 `003_office_users_without_branch.sql` es la migración de ese cambio: deja `branch_id` en `NULL` para usuarios `OFFICE` existentes y agrega la restricción que impide volver a asignarles una sede. `004_voucher_identity.sql` protege la identidad normalizada de los vales con un índice único.
 
+`005_single_global_admin.sql` deja la cuenta `ADMIN` sin sede y limita la tabla a una sola cuenta administradora. La migración se detiene sin modificar cuentas si detecta más de un `ADMIN`; resuelve esos registros manualmente antes de volver a ejecutarla. Después, los cambios deben aplicarse en este orden: `003`, `004` y `005`.
+
 Cuando todo el equipo haya aplicado el ALTER:
 
 1. Consolida sus cambios en `001_schema.sql` y, si aplica, `002_seed.sql`.

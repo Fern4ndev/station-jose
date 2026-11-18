@@ -10,10 +10,9 @@ export interface VoucherDetail {
   readonly issuer_name: string;
   readonly created_at: string;
   readonly status: string;
-  readonly verification_status: string;
   readonly items: readonly { readonly id: string; readonly purchase_order_item_id: string; readonly authorized_gallons: string; readonly attended_gallons: string; readonly available_gallons: string }[];
   readonly purchase_order_id: string;
-  readonly attendances: readonly { readonly id: string; readonly attended_at: string; readonly items: readonly { readonly id: string; readonly attended_gallons: string }[]; readonly verifications: readonly { readonly id: string; readonly decision: string; readonly observation: string | null; readonly reviewed_at: string }[] }[];
+  readonly attendances: readonly { readonly id: string; readonly attended_at: string; readonly items: readonly { readonly id: string; readonly attended_gallons: string }[] }[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,6 +26,11 @@ export class VoucherApi {
     return this.http.get<{ readonly items: readonly VoucherDetail[]; readonly pagination: { readonly page: number; readonly pages: number } }>(`${this.baseUrl}/vouchers`, {
       params: new HttpParams().set('voucher_number', number).set('page', page).set('page_size', 20),
     });
+  }
+  attended(number: string, page = 1): Observable<{ readonly items: readonly VoucherDetail[]; readonly pagination: { readonly page: number; readonly pages: number } }> {
+    let params = new HttpParams().set('page', page).set('page_size', 20);
+    if (number) params = params.set('voucher_number', number);
+    return this.http.get<{ readonly items: readonly VoucherDetail[]; readonly pagination: { readonly page: number; readonly pages: number } }>(`${this.baseUrl}/vouchers/attended`, { params });
   }
   correct(id: string, request: { issuer_type: 'INSTITUTION' | 'STATION'; issuer_name: string; voucher_number: string }): Observable<VoucherDetail> {
     return this.http.patch<VoucherDetail>(`${this.baseUrl}/vouchers/${encodeURIComponent(id)}/descriptive-data`, request);

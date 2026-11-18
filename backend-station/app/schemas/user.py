@@ -18,10 +18,12 @@ class UserCreate(BaseModel):
 
     @model_validator(mode="after")
     def validate_branch(self) -> "UserCreate":
+        if self.role == UserRole.ADMIN:
+            raise ValueError("ADMIN users can only be created through administrator provisioning")
         if self.role == UserRole.ATTENDANT and self.branch_id is None:
             raise ValueError("branch_id is required for ATTENDANT users")
-        if self.role == UserRole.OFFICE and self.branch_id is not None:
-            raise ValueError("branch_id must be omitted for OFFICE users")
+        if self.role in (UserRole.ADMIN, UserRole.OFFICE) and self.branch_id is not None:
+            raise ValueError("branch_id must be omitted for global users")
         return self
 
 
@@ -40,8 +42,10 @@ class UserRoleUpdate(BaseModel):
 
     @model_validator(mode="after")
     def validate_branch(self) -> "UserRoleUpdate":
+        if self.role == UserRole.ADMIN:
+            raise ValueError("The ADMIN role cannot be assigned from user management")
         if self.role == UserRole.ATTENDANT and self.branch_id is None:
             raise ValueError("branch_id is required for ATTENDANT users")
-        if self.role == UserRole.OFFICE and self.branch_id is not None:
-            raise ValueError("branch_id must be omitted for OFFICE users")
+        if self.role in (UserRole.ADMIN, UserRole.OFFICE) and self.branch_id is not None:
+            raise ValueError("branch_id must be omitted for global users")
         return self

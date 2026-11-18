@@ -1,4 +1,5 @@
 export type UserRole = 'ADMIN' | 'OFFICE' | 'ATTENDANT';
+export type UserManagementRole = Exclude<UserRole, 'ADMIN'>;
 
 export interface BranchSummaryDto {
   readonly id: string;

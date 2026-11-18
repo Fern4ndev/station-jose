@@ -5,7 +5,6 @@
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       @if (auth.hasPermission('purchase_orders.read')) { <app-dashboard-shortcut title="Órdenes de compra" description="Consulta autorizaciones y saldos por combustible." route="/purchase-orders" symbol="description" /> }
       @if (auth.hasPermission('vouchers.read')) { <app-dashboard-shortcut title="Vales" description="Consulta documentos y atenciones registradas." route="/vouchers" symbol="confirmation_number" /> }
-      @if (auth.hasPermission('vouchers.verify')) { <app-dashboard-shortcut title="Verificación" description="Revisa los despachos con el vale físico." route="/attendances/pending-verification" symbol="fact_check" /> }
       @if (auth.hasPermission('reports.read')) { <app-dashboard-shortcut title="Reportes" description="Consulta los reportes de la estación." route="/reports" symbol="bar_chart" /> }
     </div>
   </section>

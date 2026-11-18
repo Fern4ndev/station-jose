@@ -62,7 +62,6 @@ class AttendanceReportRow(BaseModel):
     attended_gallons: Decimal
     unit_price: Decimal
     attended_amount: Decimal
-    verification_status: str
 
 
 class AttendanceReportResponse(BaseModel):

@@ -4,8 +4,10 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize, Observable } from 'rxjs';
-import { AuthenticatedUser, ROLE_LABELS, UserRole } from '../../../core/models/auth.models';
-import { CatalogApi, CatalogItem } from '../../../core/services/catalog-api';
+import { ROLE_LABELS } from '../../../core/models/auth.models';
+import type { AuthenticatedUser, UserManagementRole } from '../../../core/models/auth.models';
+import { CatalogApi } from '../../../core/services/catalog-api';
+import type { CatalogItem } from '../../../core/services/catalog-api';
 import { ApiError } from '../../../shared/components/api-error/api-error';
 import { LoadingSkeleton } from '../../../shared/components/loading-skeleton/loading-skeleton';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
@@ -30,8 +32,8 @@ export class UserDetailPage {
   protected readonly branches = signal<CatalogItem[]>([]);
   protected readonly catalogReady = signal(false);
   protected readonly nameForm = this.fb.group({ firstName: ['', [Validators.required, Validators.maxLength(100)]], lastName: ['', [Validators.required, Validators.maxLength(150)]] });
-  protected readonly roleForm = this.fb.group({ role: ['OFFICE' as UserRole], branchId: [''] });
-  constructor() { this.load(); this.loadBranches(); }
+  protected readonly roleForm = this.fb.group({ role: ['OFFICE' as UserManagementRole], branchId: [''] });
+  constructor() { this.load(); }
   protected loadBranches(): void {
     this.catalog.branches().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (branches) => { this.branches.set(branches.filter((item) => item.is_active)); this.catalogReady.set(true); },
@@ -41,7 +43,11 @@ export class UserDetailPage {
   protected load(): void {
     this.state.set('loading');
     this.api.get(this.userId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (user) => { this.setUser(user); this.state.set('ready'); },
+      next: (user) => {
+        this.setUser(user);
+        this.state.set('ready');
+        if (user.role !== 'ADMIN') this.loadBranches();
+      },
       error: () => this.state.set('error'),
     });
   }
@@ -55,7 +61,7 @@ export class UserDetailPage {
     if (this.saving() || !this.catalogReady()) return;
     const { role, branchId } = this.roleForm.getRawValue();
     if (role === 'ATTENDANT' && !branchId) { this.message.set('Selecciona una sede para el grifero.'); return; }
-    const selectedBranch = role === 'ATTENDANT' ? branchId : role === 'ADMIN' ? this.user()?.branch?.id ?? null : null;
+    const selectedBranch = role === 'ATTENDANT' ? branchId : null;
     this.perform(this.api.setRole(this.userId, role, selectedBranch));
   }
   protected updateStatus(): void {
@@ -74,6 +80,6 @@ export class UserDetailPage {
   private setUser(user: AuthenticatedUser): void {
     this.user.set(user);
     this.nameForm.setValue({ firstName: user.firstName, lastName: user.lastName });
-    this.roleForm.setValue({ role: user.role, branchId: user.branch?.id ?? '' });
+    this.roleForm.setValue({ role: user.role === 'ADMIN' ? 'OFFICE' : user.role, branchId: user.branch?.id ?? '' });
   }
 }

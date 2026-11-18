@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
+import type { UserManagementRole } from '../../../core/models/auth.models';
 import { CatalogApi, CatalogItem } from '../../../core/services/catalog-api';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { SectionPanel } from '../../../shared/components/section-panel/section-panel';
@@ -27,7 +28,7 @@ export class UserFormPage {
     dni: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(20)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
-    role: ['OFFICE' as 'ADMIN' | 'OFFICE' | 'ATTENDANT', Validators.required],
+    role: ['OFFICE' as UserManagementRole, Validators.required],
     branchId: [''],
   });
   constructor() { this.loadBranches(); }

@@ -1,5 +1,5 @@
 <section class="grid gap-5" aria-labelledby="follow-up-title">
   <div><h2 id="follow-up-title" class="text-sm font-semibold">Atención posterior</h2><p class="mt-1 text-sm text-slate-600">Vale {{ voucherNumber() }} · el número y la autorización original no se modifican.</p></div>
   <app-attendance-line-editor [lines]="lines()" (lineChange)="lineChange.emit($event)" />
-  <button class="justify-self-start rounded-lg bg-primary-700 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50" type="button" [disabled]="submitting()" (click)="submitAttendance.emit()">Revisar y confirmar despacho</button>
+  <button class="justify-self-start rounded-lg bg-primary-700 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50" type="button" [disabled]="submitting()" (click)="submitAttendance.emit()">Registrar despacho</button>
 </section>

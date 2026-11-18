@@ -17,12 +17,9 @@ export const NAVIGATION: readonly NavigationGroup[] = [
     { label: 'Órdenes de compra', path: '/purchase-orders', permission: 'purchase_orders.read' },
     { label: 'Vales', path: '/vouchers', permission: 'vouchers.read' },
     { label: 'Espacio de atención', path: '/attendant/workspace', permission: 'attendances.create' },
-    { label: 'Mis atenciones', path: '/attendant/attendances', permission: 'attendances.read_own' },
+    { label: 'Vales atendidos', path: '/attendant/attendances', permission: 'attendances.read_own' },
     { label: 'Atenciones', path: '/attendances', permission: 'attendances.read_all' },
     { label: 'Saldos', path: '/balances', permission: 'balances.read' },
-  ] },
-  { label: 'Oficina', items: [
-    { label: 'Verificación', path: '/attendances/pending-verification', permission: 'vouchers.verify' },
   ] },
   { label: 'Herramientas', items: [
     { label: 'Reportes', path: '/reports', permission: 'reports.read' },

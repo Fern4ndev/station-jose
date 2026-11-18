@@ -36,13 +36,17 @@ export class Sidebar {
     '/dashboard': 'dashboard', '/purchase-orders': 'description', '/vouchers': 'confirmation_number',
     '/attendant/workspace': 'local_gas_station', '/attendant/attendances': 'history',
     '/attendances': 'receipt_long', '/balances': 'account_balance_wallet',
-    '/attendances/pending-verification': 'fact_check', '/reports': 'bar_chart', '/users': 'group',
+    '/reports': 'bar_chart', '/users': 'group',
   };
   protected readonly roleLabel = computed(() => {
     const role = this.user()?.role;
     return role ? ROLE_LABELS[role] : '';
   });
-  protected readonly branchName = computed(() => this.user()?.branch?.name ?? 'Sede no asignada');
+  protected readonly branchLabel = computed(() => this.user()?.role === 'ATTENDANT' ? 'Sede asignada' : 'Cobertura');
+  protected readonly branchName = computed(() => {
+    const user = this.user();
+    return user?.role === 'ATTENDANT' ? user.branch?.name ?? 'Sede no asignada' : 'Todas las sedes';
+  });
 
   protected onNavigate(): void {
     this.closeMenu.emit();
