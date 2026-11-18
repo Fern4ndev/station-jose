@@ -98,7 +98,7 @@ export const routes: Routes = [
       {
         path: 'attendant/workspace',
         canActivate: [permissionGuard],
-        data: { permission: 'attendances.create', title: 'Espacio de atención', description: 'Consulta órdenes y registra atenciones.' },
+        data: { permission: 'attendances.create', title: 'Espacio de atención', description: 'Consulta órdenes, vales y sus saldos.' },
         loadComponent: () => import('./features/attendant/workspace-page').then((module) => module.WorkspacePage),
       },
       {

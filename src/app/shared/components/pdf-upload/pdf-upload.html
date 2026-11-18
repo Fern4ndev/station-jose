@@ -1,6 +1,6 @@
 <div class="grid gap-2 rounded-xl border border-dashed p-4">
   <label class="text-sm font-medium" for="purchase-order-pdf">Documento PDF de la orden</label>
   <input id="purchase-order-pdf" type="file" accept="application/pdf,.pdf" [disabled]="disabled()" (change)="selectFile($event)" />
-  @if (filename()) { <div class="flex items-center justify-between gap-2 text-sm"><span>{{ filename() }}</span><button type="button" class="underline" (click)="clearFile()">Quitar archivo</button></div> }
+  @if (filename()) { <div class="flex items-center justify-between gap-2 text-sm"><span>{{ filename() }}</span><button type="button" class="underline disabled:opacity-50" [disabled]="disabled()" (click)="clearFile()">Quitar archivo</button></div> }
   <p class="text-xs text-slate-500">El texto reconocido requiere revisión antes de guardar la orden.</p>
 </div>

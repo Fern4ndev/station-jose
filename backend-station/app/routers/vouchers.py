@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import require_permission
 from app.database import get_db
 from app.schemas.attendance import VoucherResponse
+from app.schemas.operational import OperationalVoucher, OperationalVoucherList, operational_voucher
 from app.schemas.voucher import VoucherDescriptiveUpdate, VoucherListResponse
-from app.schemas.operational import OperationalVoucher, OperationalVoucherList
 from app.services.attendance_service import AttendanceService
 from app.services.verification_service import VerificationService
 from app.tables import User
@@ -42,8 +42,12 @@ def list_vouchers(
         created_from=created_from,
         created_to=created_to,
     )
-    if user.role == 'ATTENDANT':
-        return JSONResponse(OperationalVoucherList.model_validate(result).model_dump(mode='json'))
+    if user.role == "ATTENDANT":
+        safe = OperationalVoucherList(
+            items=[operational_voucher(item, user.id) for item in result.items],
+            pagination=result.pagination,
+        )
+        return JSONResponse(safe.model_dump(mode="json"))
     return result
 
 
@@ -54,8 +58,8 @@ def get_voucher(
     db: Annotated[Session, Depends(get_db)],
 ) -> VoucherResponse | JSONResponse:
     result = AttendanceService().get_voucher(db, voucher_id)
-    if user.role == 'ATTENDANT':
-        return JSONResponse(OperationalVoucher.model_validate(result).model_dump(mode='json'))
+    if user.role == "ATTENDANT":
+        return JSONResponse(operational_voucher(result, user.id).model_dump(mode="json"))
     return result
 
 

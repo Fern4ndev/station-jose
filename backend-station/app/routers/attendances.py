@@ -10,12 +10,12 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import CurrentUser, require_permission
 from app.database import get_db
 from app.schemas.attendance import (
-    AttendanceCreate,
     AttendanceResponse,
     FirstAttendanceCreate,
+    FollowUpAttendanceCreate,
 )
-from app.services.attendance_service import AttendanceService
 from app.schemas.operational import OperationalAttendance
+from app.services.attendance_service import AttendanceService
 
 router = APIRouter(tags=["Attendances"])
 
@@ -42,8 +42,10 @@ def create_first_attendance(
         idempotency_key=idempotency_key,
     )
     db.commit()
-    if current_user.role == 'ATTENDANT':
-        return JSONResponse(OperationalAttendance.model_validate(response).model_dump(mode='json'), status_code=201)
+    if current_user.role == "ATTENDANT":
+        return JSONResponse(
+            OperationalAttendance.model_validate(response).model_dump(mode="json"), status_code=201
+        )
     return response
 
 
@@ -55,7 +57,7 @@ def create_first_attendance(
 )
 def create_follow_up_attendance(
     voucher_id: UUID,
-    data: AttendanceCreate,
+    data: FollowUpAttendanceCreate,
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
     idempotency_key: Annotated[UUID, Header(alias="Idempotency-Key")],
@@ -69,6 +71,8 @@ def create_follow_up_attendance(
         idempotency_key=idempotency_key,
     )
     db.commit()
-    if current_user.role == 'ATTENDANT':
-        return JSONResponse(OperationalAttendance.model_validate(response).model_dump(mode='json'), status_code=201)
+    if current_user.role == "ATTENDANT":
+        return JSONResponse(
+            OperationalAttendance.model_validate(response).model_dump(mode="json"), status_code=201
+        )
     return response

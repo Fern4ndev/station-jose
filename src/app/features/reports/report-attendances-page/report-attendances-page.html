@@ -1,7 +1,1 @@
-<section aria-labelledby="page-title">
-  <app-page-header title="Reporte de atenciones" description="Consulta los galones realmente despachados por atención.">
-    <app-report-export-actions page-actions [disabled]="true" />
-  </app-page-header>
-  <app-report-filter-bar [filters]="filters()" (filtersChange)="filters.set($event)" />
-  <app-section-panel title="Atenciones" description="La verificación y el consumo se presentan como datos independientes."><app-data-table [columns]="columns" emptyDescription="El reporte aparecerá cuando los filtros se consulten." /></app-section-panel>
-</section>
+<app-report-page kind="attendances" title="Reporte de atenciones" description="Consulta los galones realmente despachados por atención." />

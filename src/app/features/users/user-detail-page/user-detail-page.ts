@@ -55,7 +55,8 @@ export class UserDetailPage {
     if (this.saving() || !this.catalogReady()) return;
     const { role, branchId } = this.roleForm.getRawValue();
     if (role === 'ATTENDANT' && !branchId) { this.message.set('Selecciona una sede para el grifero.'); return; }
-    this.perform(this.api.setRole(this.userId, role, role === 'ATTENDANT' ? branchId : null));
+    const selectedBranch = role === 'ATTENDANT' ? branchId : role === 'ADMIN' ? this.user()?.branch?.id ?? null : null;
+    this.perform(this.api.setRole(this.userId, role, selectedBranch));
   }
   protected updateStatus(): void {
     const user = this.user();

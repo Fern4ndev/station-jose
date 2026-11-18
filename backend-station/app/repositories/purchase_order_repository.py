@@ -15,6 +15,7 @@ from app.tables import (
     FuelType,
     PurchaseOrder,
     PurchaseOrderItem,
+    Voucher,
     VoucherItem,
 )
 
@@ -108,7 +109,7 @@ class PurchaseOrderRepository:
     def has_vouchers(self, db: Session, order_id: UUID) -> bool:
         return (
             db.scalar(
-                select(VoucherItem.id).where(VoucherItem.purchase_order_id == order_id).limit(1)
+                select(Voucher.id).where(Voucher.purchase_order_id == order_id).limit(1)
             )
             is not None
         )

@@ -1,12 +1,12 @@
 <div class="app-layout">
-  <app-sidebar [open]="menuOpen()" (closeMenu)="closeMenu()" />
+  <app-sidebar [open]="menuOpen()" (closeMenu)="closeMenu()" (logoutClick)="logout()" />
 
   @if (menuOpen()) {
     <button class="sidebar-scrim" type="button" aria-label="Cerrar menú" (click)="closeMenu()"></button>
   }
 
   <main class="main-area" id="main-content">
-    <app-header (menuClick)="openMenu()" (logoutClick)="logout()" />
+    <app-header (menuClick)="openMenu()" />
     <div class="page-content">
       <router-outlet />
     </div>

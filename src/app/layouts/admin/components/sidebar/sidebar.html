@@ -6,22 +6,24 @@
 
   <div class="branch-label"><span>Sede asignada</span><strong>{{ branchName() }}</strong></div>
   <nav class="nav-menu" aria-label="Menú principal">
-    @for (group of navigation(); track group.label) {
-      <details open>
-        <summary class="nav-heading">{{ group.label }}</summary>
-        @for (item of group.items; track item.path) {
+    @for (item of navigation(); track item.path) {
           <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: item.path === '/app/dashboard' || item.path === '/app/attendances' }" (click)="onNavigate()">
+            <span class="material-symbols-outlined nav-icon" aria-hidden="true">{{ icons[item.path] }}</span>
             <span>{{ item.label }}</span>
           </a>
-        }
-      </details>
     }
   </nav>
 
   <div class="sidebar-spacer"></div>
   <div class="side-status"><span class="live-dot" aria-hidden="true"></span><span><strong>Información compartida</strong><small>San José y Santa Marta</small></span></div>
-  <div class="profile-card">
-    <span class="avatar" aria-hidden="true">{{ user()?.firstName?.slice(0, 1) }}{{ user()?.lastName?.slice(0, 1) }}</span>
+  <button class="profile-card" type="button" (click)="profileMenu.toggle($event)" aria-label="Abrir menú de perfil" aria-haspopup="dialog">
+    <app-avatar [label]="(user()?.firstName?.slice(0, 1) ?? '') + (user()?.lastName?.slice(0, 1) ?? '')" ariaLabel="Perfil" />
     <span class="profile-copy"><strong>{{ user()?.firstName }} {{ user()?.lastName }}</strong><small>{{ roleLabel() }}</small></span>
-  </div>
+    <span class="material-symbols-outlined profile-more" aria-hidden="true">more_vert</span>
+  </button>
+  <p-popover #profileMenu>
+    <button class="profile-logout" type="button" (click)="profileMenu.hide(); logoutClick.emit()">
+      <span class="material-symbols-outlined" aria-hidden="true">logout</span> Cerrar sesión
+    </button>
+  </p-popover>
 </aside>

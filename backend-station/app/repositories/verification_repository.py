@@ -34,6 +34,7 @@ class VerificationRepository:
                 selectinload(Attendance.items),
             )
             .where(Attendance.id == attendance_id)
+            .with_for_update(of=Attendance)
         )
 
     def add(

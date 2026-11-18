@@ -22,17 +22,18 @@ export class UserFormPage {
   protected readonly saving = signal(false);
   protected readonly error = signal('');
   protected readonly form = this.fb.group({
-    firstName: ['', [Validators.required, Validators.maxLength(100)]],
-    lastName: ['', [Validators.required, Validators.maxLength(150)]],
-    dni: ['', [Validators.required, Validators.maxLength(20)]],
+    firstName: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)]],
+    lastName: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(150)]],
+    dni: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(20)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
     role: ['OFFICE' as 'ADMIN' | 'OFFICE' | 'ATTENDANT', Validators.required],
     branchId: [''],
   });
   constructor() { this.loadBranches(); }
   protected loadBranches(): void {
     this.catalogReady.set(false);
+    this.error.set('');
     this.catalog.branches().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (items) => { this.branches.set(items.filter((item) => item.is_active)); this.catalogReady.set(true); },
       error: () => this.error.set('No se pudieron cargar las sedes. Inténtalo de nuevo.'),
@@ -40,7 +41,7 @@ export class UserFormPage {
   }
   protected save(): void {
     const value = this.form.getRawValue();
-    if (this.saving() || this.form.invalid || (value.role === 'ATTENDANT' && !value.branchId)) { this.form.markAllAsTouched(); return; }
+    if (this.saving() || !this.catalogReady() || this.form.invalid || (value.role === 'ATTENDANT' && !value.branchId)) { this.form.markAllAsTouched(); return; }
     this.error.set('');
     this.saving.set(true);
     this.users.create({ first_name: value.firstName.trim(), last_name: value.lastName.trim(), dni: value.dni.trim(), email: value.email.trim(), password: value.password, role: value.role, branch_id: value.role === 'ATTENDANT' ? value.branchId : null }).pipe(

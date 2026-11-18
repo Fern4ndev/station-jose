@@ -11,9 +11,17 @@ def test_pending_list_distinguishes_observed_from_unreviewed() -> None:
 
     def attendance(decisions: list[str]) -> SimpleNamespace:
         return SimpleNamespace(
-            id=uuid4(), voucher_id=uuid4(), performed_by_user_id=uuid4(), branch_id=uuid4(),
-            attended_at=now, voucher=SimpleNamespace(purchase_order_id=uuid4(), voucher_number="V-1", issuer_name="Entidad"),
-            verifications=[SimpleNamespace(decision=decision, reviewed_at=now) for decision in decisions],
+            id=uuid4(),
+            voucher_id=uuid4(),
+            performed_by_user_id=uuid4(),
+            branch_id=uuid4(),
+            attended_at=now,
+            voucher=SimpleNamespace(
+                purchase_order_id=uuid4(), voucher_number="V-1", issuer_name="Entidad"
+            ),
+            verifications=[
+                SimpleNamespace(decision=decision, reviewed_at=now) for decision in decisions
+            ],
         )
 
     service = VerificationService()

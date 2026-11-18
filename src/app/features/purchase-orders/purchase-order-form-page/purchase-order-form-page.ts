@@ -82,7 +82,10 @@ export class PurchaseOrderFormPage {
     this.error.set(''); this.preview.set(null); this.processing.set(true);
     this.ocr.preview(file).pipe(takeUntilDestroyed(this.destroyRef), finalize(() => this.processing.set(false))).subscribe({
       next: (preview) => this.preview.set(preview),
-      error: () => this.error.set('No se pudo procesar el PDF. Comprueba el archivo e inténtalo nuevamente.'),
+      error: (error: unknown) => {
+        const message: unknown = error instanceof HttpErrorResponse ? error.error?.error?.message : null;
+        this.error.set(typeof message === 'string' && message ? message : 'No se pudo procesar el PDF. Comprueba el archivo e inténtalo nuevamente.');
+      },
     });
   }
   protected applyCandidates(fields: OcrPurchaseOrderCandidates): void {

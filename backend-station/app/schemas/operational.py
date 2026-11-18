@@ -87,3 +87,16 @@ class OperationalVoucher(OperationalModel):
 class OperationalVoucherList(OperationalModel):
     items: list[OperationalVoucher]
     pagination: PaginationResponse
+
+
+def operational_voucher(value: object, user_id: UUID) -> OperationalVoucher:
+    voucher = OperationalVoucher.model_validate(value)
+    return voucher.model_copy(
+        update={
+            "attendances": [
+                attendance
+                for attendance in voucher.attendances
+                if attendance.performed_by_user_id == user_id
+            ]
+        }
+    )

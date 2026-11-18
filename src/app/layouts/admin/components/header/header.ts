@@ -16,7 +16,6 @@ export class Header {
   private readonly activatedRoute = inject(ActivatedRoute);
 
   readonly menuClick = output<void>();
-  readonly logoutClick = output<void>();
 
   protected readonly pageTitle = toSignal(
     this.router.events.pipe(

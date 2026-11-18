@@ -41,6 +41,14 @@ export interface CreateOrderRequest {
   readonly items: readonly { readonly fuel_type_id: string; readonly authorized_gallons: string; readonly unit_price: string; readonly total_amount: string }[];
 }
 
+export interface OrderFilters {
+  readonly branchId: string;
+  readonly dateFrom: string;
+  readonly dateTo: string;
+  readonly sortBy: 'issue_date' | 'order_number' | 'institution_name';
+  readonly sortOrder: 'asc' | 'desc';
+}
+
 @Injectable({ providedIn: 'root' })
 export class PurchaseOrderApi {
   private readonly http = inject(HttpClient);
@@ -62,9 +70,16 @@ export class PurchaseOrderApi {
     return this.http.delete<void>(`${this.baseUrl}/purchase-orders/${encodeURIComponent(id)}`);
   }
 
-  search(query: string, page = 1): Observable<OrderPage> {
+  search(query: string, page = 1, filters?: OrderFilters): Observable<OrderPage> {
+    let params = new HttpParams().set('search', query).set('page', page).set('page_size', 20);
+    if (filters) {
+      if (filters.branchId) params = params.set('branch_id', filters.branchId);
+      if (filters.dateFrom) params = params.set('issue_date_from', filters.dateFrom);
+      if (filters.dateTo) params = params.set('issue_date_to', filters.dateTo);
+      params = params.set('sort_by', filters.sortBy).set('sort_order', filters.sortOrder);
+    }
     return this.http.get<OrderPage>(`${this.baseUrl}/purchase-orders`, {
-      params: new HttpParams().set('search', query).set('page', page).set('page_size', 20),
+      params,
     });
   }
 }

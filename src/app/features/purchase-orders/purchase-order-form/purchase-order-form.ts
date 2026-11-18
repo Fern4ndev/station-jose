@@ -30,6 +30,7 @@ export class PurchaseOrderForm {
   readonly lineAdd = output<void>();
   readonly lineRemove = output<string>();
   readonly pdfSelected = output<File>();
+  readonly pdfCleared = output<void>();
   readonly save = output<void>();
   readonly cancel = output<void>();
 }

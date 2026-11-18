@@ -14,6 +14,7 @@ export class PdfUpload {
     if (!file) return;
     this.filename.set(file.name);
     this.fileSelected.emit(file);
+    input.value = '';
   }
 
   protected clearFile(): void {

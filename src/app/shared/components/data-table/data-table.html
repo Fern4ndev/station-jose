@@ -3,14 +3,14 @@
     @case ('loading') { <app-loading-skeleton /> }
     @case ('error') { <app-api-error [message]="errorMessage()" (retry)="retry.emit()" /> }
     @default {
-      <p-table [value]="state() === 'success' ? tableRows() : []" [tableStyle]="{ 'min-width': '40rem' }">
+      <p-table [value]="state() === 'success' ? tableRows() : []">
         <ng-template #header>
           <tr>@for (column of columns(); track column) { <th scope="col">{{ column }}</th> }</tr>
         </ng-template>
         <ng-template #body let-row>
           <tr>
             @for (column of columns(); track column) {
-              <td>
+              <td [attr.data-label]="column">
                 @if (cellTemplateMap().get(column); as cellTemplate) {
                   <ng-container [ngTemplateOutlet]="cellTemplate" [ngTemplateOutletContext]="cellContext(row, column)" />
                 } @else {

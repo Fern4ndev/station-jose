@@ -85,11 +85,15 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 
 ### F0 — Contrato y preparación
 
-**Comprobación:** `/api/v1/health/ready` respondió HTTP 200 con base disponible; CORS permitió `http://localhost:4200` y `/auth/me` sin sesión respondió 401. Pendiente ejecutar los recorridos con cuentas reales de los tres roles y validar los contratos de negocio con datos reales.
+**Comprobación 17/11/2026:** `/api/v1/health/ready` respondió HTTP 200 con base disponible; CORS permitió `http://localhost:4200`, `/auth/me` sin sesión respondió 401 y las cuatro cuentas de desarrollo completaron login y logout. La consulta por rol devolvió 403 al grifero para usuarios, reportes y verificación, y a oficina para usuarios. El grifero recibió órdenes y vales sin campos financieros; su historial de vales quedó limitado a sus propias atenciones. Se corrigieron correos ficticios inválidos del seed que causaban HTTP 500 en usuarios.
+
+**Calidad:** suite frontend 17 pruebas aprobadas, suite backend 32 pruebas aprobadas y Ruff sin errores; build Angular exitoso con aviso de presupuesto inicial de 207 bytes. La creación de atenciones, los saldos y el alcance por sede aún requieren los contratos y pruebas indicados abajo.
+
+**Revisión adicional 17/11/2026:** suite backend 46 pruebas aprobadas con PostgreSQL. Una prueba HTTP transaccional comprueba creación parcial para grifero, respuesta operativa, saldos, reintento idempotente y atención posterior; usa una identidad autenticada simulada. El router no restringe automáticamente las consultas por sede y la creación registra la sede del actor sin exigir que coincida con la orden. Falta decidir y verificar la política de sede, además del historial multiusuario por HTTP y los contratos faltantes descritos en `docs/API_INTEGRATION.md`. F0 permanece abierta.
 
 - [x] Contrastar estáticamente routers, esquemas, permisos y errores; documentar contrato en `docs/API_INTEGRATION.md`.
 - [ ] Resolver con backend DTOs operativos sin precios, consultas e historial de atenciones, saldos y demás diferencias de §5. Comprobar permisos y alcance por sede/usuario con respuestas reales.
-- [ ] Preparar y verificar PostgreSQL, API, datos de desarrollo y cuentas de los tres roles sin registrar credenciales reales en el repositorio. Los pasos de preparación están documentados en `docs/API_INTEGRATION.md` y `backend-station/README.md`.
+- [x] Preparar y verificar PostgreSQL, API, datos de desarrollo y cuentas de los tres roles sin registrar credenciales reales en el repositorio. Los pasos de preparación están documentados en `docs/API_INTEGRATION.md` y `backend-station/README.md`.
 - **Entregable:** matriz de contrato con diferencias y responsables; cada bloqueo asignado al flujo afectado.
 - **Verificación:** contrastar catálogo contra routers y respuestas reales con API y base disponibles.
 
@@ -99,6 +103,8 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 
 **Avance adicional:** pruebas automatizadas de guards verifican redirección sin sesión y acceso por permisos para ADMIN, OFFICE y ATTENDANT. Las cuatro cuentas de desarrollo completaron login, `/auth/me`, logout y revocación HTTP real. Quedan pendientes los recorridos visuales en navegador, validación de componentes con datos reales y las brechas de contrato de F0; estas pruebas no constituyen una verificación completa de interfaz.
 
+**Pruebas adicionales 17/11/2026:** la suite Angular pasó con 20 pruebas, incluyendo reintento y carga de la tabla y sincronización del input con formularios; la suite backend pasó con 32 pruebas. La navegación visual, la expiración observada en navegador y la validación de los demás componentes con consumidores reales siguen pendientes.
+
 - [x] Implementar manejo de expiración, 401/403, logout y redirección por permiso; documentar sesión en memoria y recarga. Pendiente verificación con API real.
 - [x] Corregir permiso del menú de atenciones, agrupar navegación y proteger el menú móvil cerrado frente al foco. Pendiente recorrido manual de accesibilidad, responsive y rutas directas por rol.
 - [ ] Validar `data-table`, `page-header`, alertas, botones, formularios, modal y carga de archivos con consumidores reales; verificar carga, vacío, error, reintento y paginación. Se ajustó el mensaje vacío genérico de la tabla.
@@ -107,9 +113,9 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 
 ### F2 — Usuarios y catálogos
 
-**Avance:** lista, detalle, alta, edición de nombre, cambio de rol y estado conectados; el alta y la edición cargan sedes activas y muestran errores. Falta la verificación integral de las operaciones con la API y el historial de atenciones del grifero.
+**Avance 17/11/2026:** lista, detalle, alta, edición de nombre, cambio de rol y estado conectados; formularios muestran errores y sedes activas. Dos pruebas HTTP contra PostgreSQL, ejecutadas en transacción revertida, verificaron alta, duplicados, detalle, edición, rol, deshabilitación, reactivación y 403 a oficina. Dos pruebas unitarias comprueban la protección del último administrador. Suite Angular: 20 pruebas aprobadas. Falta el recorrido visual completo por rol, probar catálogos vacíos con consumidores y el historial del grifero cuando exista su contrato.
 
-- [ ] Integrar lista paginada, alta, detalle, edición permitida, cambio de rol y estado con `/users`; resolver errores de duplicidad y reglas del último administrador.
+- [x] Integrar lista paginada, alta, detalle, edición permitida, cambio de rol y estado con `/users`; manejar errores de duplicidad y reglas del último administrador.
 - [ ] Cargar sedes y combustibles desde `/branches` y `/fuel-types`; aplicar validaciones de formulario y permisos reales.
 - [ ] Enlace a historial de un grifero solo cuando exista contrato de lectura de atenciones.
 - **Entregable:** ADMIN administra cuentas y puede seleccionar catálogos reales en formularios.
@@ -117,7 +123,9 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 
 ### F3 — Órdenes y OCR
 
-**Avance:** lista con búsqueda y paginación, detalle, alta, edición, baja y previsualización OCR conectados. Los contratos operativos omiten datos financieros para el grifero. Quedan pendientes filtros adicionales, pruebas integrales de mutaciones y OCR con documentos reales, y alcance por sede y usuario.
+**Avance 17/11/2026:** lista con búsqueda, sede, fechas, ordenación y paginación; detalle, alta, edición, baja y previsualización OCR conectados. Pruebas HTTP con PostgreSQL en transacción revertida verificaron alta con dos combustibles, filtros, edición, baja y conflicto de orden con vale. Se corrigió la verificación de baja para comprobar la existencia del vale. Un PDF generado con texto verificó extracción y revisión manual; se probó el límite de tamaño. Los contratos operativos omiten datos financieros para el grifero. OCR de PDF escaneados sigue pendiente: el entorno Python 3.13 no pudo instalar `rapidocr_onnxruntime==1.4.4`; se requiere resolver la dependencia compatible y probar documentos escaneados reales. Falta recorrido integral de interfaz y alcance por sede/usuario.
+
+**Pruebas adicionales:** la validación de líneas duplicadas detectó un error de serialización en la respuesta 422; fue corregido y comprobado. Suite Angular: 22 pruebas aprobadas; suite backend con pruebas reversibles: 40 aprobadas; Ruff sin errores. Build correcto con advertencia de presupuesto inicial de 429 bytes.
 
 - [ ] Conectar listado, búsqueda, filtros y paginación soportados, detalle, alta, modificación y baja permitida de órdenes; editar líneas por combustible y reflejar conflictos del backend.
 - [ ] Procesar PDF mediante OCR, mostrar candidatos y permitir corrección antes de enviar el formulario normal; mostrar error y límites proporcionados por contrato.
@@ -126,6 +134,8 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 - **Verificación:** varias líneas, duplicados, límites de PDF, corrección OCR, fallo de API y conflicto de eliminación.
 
 ### F4 — Despacho y saldos
+
+**Avance:** búsqueda de órdenes y vales conectada al espacio operativo. El contrato de primera atención separa `voucher_items` autorizados de `items` despachados; una prueba PostgreSQL con rollback verificó entrega parcial, reintento, entrega posterior y exceso. El servidor serializa los reintentos por clave. Faltan el formulario conectado y recuperación tras recarga, pruebas concurrentes reales, historial y resolución del alcance por sede; F4 permanece abierta.
 
 - [ ] Integrar búsqueda operativa de orden/vale y saldos seguros; capturar vale y primer despacho, o registrar despacho posterior sobre el vale existente.
 - [ ] Mantener un `Idempotency-Key` UUID por intento lógico de envío y reutilizarlo al reintentar el mismo contenido; evitar dobles envíos y mostrar el resultado confirmado por servidor.
@@ -136,16 +146,20 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 
 ### F5 — Vales y verificación administrativa
 
-- [ ] Integrar búsqueda y detalle de vales con sus datos disponibles, corrección descriptiva autorizada y conflicto de eliminación; no permitir cambios de cantidades despachadas.
-- [ ] Conectar bandeja real `/verifications/pending` y decisión por atención; exigir observación cuando corresponda y recargar el estado confirmado.
-- [ ] Integrar historial de verificaciones cuando exista endpoint o se acuerde su fuente.
+**Avance 17/11/2026:** lista por número y paginación, detalle, corrección descriptiva, conflicto de eliminación y bandeja conectados. El historial de revisiones se presenta desde las atenciones incluidas en `GET /vouchers/{id}`. Una prueba HTTP contra PostgreSQL con rollback verificó permisos de oficina, observación obligatoria, observado, verificado, conflicto por revisión repetida y por eliminación, corrección por administrador e invariabilidad del saldo. Pendiente recorrido completo en navegador y pruebas adicionales de duplicidad y concurrencia de verificaciones; F5 permanece abierta.
+
+- [x] Integrar búsqueda y detalle de vales con sus datos disponibles, corrección descriptiva autorizada y conflicto de eliminación; no permitir cambios de cantidades despachadas.
+- [x] Conectar bandeja real `/verifications/pending` y decisión por atención; exigir observación cuando corresponda y recargar el estado confirmado.
+- [x] Integrar historial de verificaciones desde las atenciones del detalle del vale.
 - **Entregable:** ADMIN/OFFICE revisan una atención y ADMIN corrige los campos descriptivos permitidos.
 - **Verificación:** verificado, observado sin/con motivo, permisos, historial y saldos sin cambios por revisión.
 
 ### F6 — Dashboard, reportes y exportación
 
-- [ ] Consumir `/reports/dashboard` y reportes reales, con filtros compatibles y gráficos Chart.js basados en los datos devueltos.
-- [ ] Descargar PDF/XLSX con parámetros admitidos por cada exportación; conservar filtros comunes y comunicar aquellos que el endpoint no soporte.
+**Avance 17/11/2026:** dashboard con fechas, sede y agrupación; reportes de órdenes y atenciones con fechas y sede, carga, error, vacío y exportación PDF/XLSX usando la última consulta. La API no admite estado en los endpoints de exportación, por lo que la interfaz usa los filtros comunes. Una prueba PostgreSQL con rollback verificó filtros, intervalo inválido, firmas PDF/XLSX y 403 para ATTENDANT. Suite Angular: 24 pruebas. Falta verificar los archivos descargados y el recorrido en navegador con datos reales; F6 permanece abierta.
+
+- [x] Consumir `/reports/dashboard` y reportes reales, con filtros compatibles y gráficos Chart.js basados en los datos devueltos.
+- [x] Descargar PDF/XLSX con parámetros admitidos por cada exportación; conservar filtros comunes y comunicar aquellos que el endpoint no soporte.
 - **Entregable:** ADMIN/OFFICE consultan indicadores y descargan ambos reportes.
 - **Verificación:** rango inválido, sin resultados, filtros, archivos descargados y 403 para ATTENDANT.
 
@@ -156,6 +170,10 @@ Propuesta de una configuración compartida con etiqueta, ruta, icono, permiso y 
 - [ ] Documentar configuración de API, despliegue SPA y fallback de rutas conforme a la infraestructura acordada; no colocar secretos en Angular.
 - **Entregable:** recorrido completo de orden → despacho → verificación → reporte, con criterios de seguridad y contrato cumplidos.
 - **Verificación:** build de producción, pruebas pertinentes y aprobación funcional con evidencia.
+
+**Avance de verificación, 17/11/2026:** `npm test -- --watch=false`: 24 pruebas aprobadas; `npm run build`: compilación correcta con advertencia de presupuesto inicial (500,43 kB frente a 500 kB). Backend: 46 pruebas aprobadas con `SANJOSE_RUN_DB_TESTS=1` y `ruff check app tests` correcto. En navegador local se comprobó inicio y cierre de sesión para administrador, oficina y grifero, sus menús y el panel con datos reales para los dos primeros. La configuración y el fallback SPA están documentados en `docs/FRONTEND_OPERATIONS.md`.
+
+**Pendiente para cerrar F7:** implementar el registro de atenciones de F4 y verificar el recorrido orden → despacho → verificación → reporte; completar pruebas de autorización por ruta y acción, teclado, foco, móvil y estados de error, así como obtener aprobación funcional. Los accesos probados no sustituyen estas verificaciones.
 
 ## 5. Referencia rápida API ↔ frontend ↔ rol
 

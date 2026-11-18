@@ -12,7 +12,7 @@
     <label class="grid gap-1.5 text-sm sm:col-span-2">Detalles del proveedor<textarea class="rounded-lg border px-3 py-2" rows="3" formControlName="supplierDetails"></textarea></label>
   </fieldset>
   <section class="grid gap-3"><h2 class="text-sm font-semibold">Combustibles autorizados</h2><app-fuel-line-editor [lines]="lines()" [fuelTypes]="fuelTypes()" (lineChange)="lineChange.emit($event)" (lineAdd)="lineAdd.emit()" (lineRemove)="lineRemove.emit($event)" /></section>
-  @if (!isEdit()) { <app-pdf-upload [disabled]="!ocrEnabled()" (fileSelected)="pdfSelected.emit($event)" /> }
+  @if (!isEdit()) { <app-pdf-upload [disabled]="!ocrEnabled()" (fileSelected)="pdfSelected.emit($event)" (fileCleared)="pdfCleared.emit()" /> }
   @if (!enabled()) { <p class="rounded-lg bg-slate-50 p-3 text-sm text-slate-600" role="status">El registro de órdenes aún no está disponible.</p> }
   <div class="flex flex-wrap justify-end gap-3"><button class="min-h-11 rounded-lg border px-4 py-2 text-sm" type="button" (click)="cancel.emit()">Cancelar</button><button class="min-h-11 rounded-lg bg-primary-700 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60" type="submit" [disabled]="!enabled() || submitting() || form().invalid || lines().length === 0">Guardar orden</button></div>
 </form>

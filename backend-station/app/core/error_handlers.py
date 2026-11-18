@@ -4,6 +4,7 @@ import logging
 from typing import Any
 
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -29,7 +30,9 @@ def register_error_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=422,
             content=error_payload(
-                "VALIDATION_ERROR", "La solicitud no es válida.", {"errors": exc.errors()}
+                "VALIDATION_ERROR",
+                "La solicitud no es válida.",
+                {"errors": jsonable_encoder(exc.errors(), custom_encoder={Exception: str})},
             ),
         )
 

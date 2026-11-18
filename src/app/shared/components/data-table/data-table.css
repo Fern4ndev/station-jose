@@ -27,8 +27,20 @@ th {
 
 td {
   padding: 14px;
+  overflow-wrap: anywhere;
 }
 
 td app-empty-state {
   min-width: 280px;
+}
+
+@media (max-width: 760px) {
+  .table-wrap { overflow-x: visible; }
+  thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  tr { display: block; margin-bottom: 12px; border: 1px solid #e1e8ea; border-radius: 12px; background: #fff; }
+  td { display: grid; grid-template-columns: minmax(90px, 35%) minmax(0, 1fr); gap: 12px; padding: 10px 12px; border-bottom: 1px solid #edf0f0; }
+  td:last-child { border-bottom: 0; }
+  td[data-label]::before { content: attr(data-label); color: #52656d; font-size: 12px; font-weight: 600; }
+  td:not([data-label]) { display: block; }
+  td app-empty-state { min-width: 0; }
 }

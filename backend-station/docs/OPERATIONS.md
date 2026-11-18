@@ -31,10 +31,11 @@ Para una base nueva, aplica en este orden:
 
 ```powershell
 psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/001_schema.sql
-psql -U postgres -d sanjose -v ON_ERROR_STOP=1 -f db/002_seed.sql
 ```
 
-Para una base existente aplica únicamente los ALTER pendientes, en orden numérico. Cada ALTER debe probarse dos veces antes de producción. El esquema consolidado debe coincidir con una instalación nueva desde `001` + `002`.
+`db/002_seed.sql` contiene datos y cuentas de demostración: úsalo exclusivamente en desarrollo o pruebas, nunca en producción. Prepara los catálogos y la cuenta inicial de producción mediante un procedimiento autorizado.
+
+Para una base existente aplica únicamente los ALTER pendientes, en orden numérico. Cada ALTER debe probarse dos veces antes de producción. Verifica que el esquema consolidado coincida con una instalación nueva desde `001`.
 
 ## Arranque
 

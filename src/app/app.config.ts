@@ -35,6 +35,7 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: SanJoseTheme,
         options: {
+          darkModeSelector: 'none',
           cssLayer: {
             name: 'primeng',
             order: 'theme, base, primeng, components, utilities',

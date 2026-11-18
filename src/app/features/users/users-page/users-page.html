@@ -4,9 +4,9 @@
     @switch (state()) {
       @case ('loading') { <div class="p-4" role="status" aria-label="Cargando usuarios"><app-loading-skeleton /></div> }
       @case ('error') { <app-api-error message="No se pudieron cargar los usuarios." (retry)="load(page())" /> }
-      @case ('ready') { <div class="overflow-x-auto"><p-table [value]="rows()" [tableStyle]="{ 'min-width': '48rem' }">
+      @case ('ready') { <div class="responsive-table"><p-table [value]="rows()">
         <ng-template #header><tr><th scope="col">Usuario</th><th scope="col">DNI</th><th scope="col">Correo</th><th scope="col">Rol</th><th scope="col">Sede</th><th scope="col">Estado</th><th scope="col">Acción</th></tr></ng-template>
-        <ng-template #body let-user><tr><td>{{ user.firstName }} {{ user.lastName }}</td><td>{{ user.dni }}</td><td>{{ user.email }}</td><td>{{ roleLabel(user.role) }}</td><td>{{ user.branch?.name ?? '—' }}</td><td><app-status-badge [status]="user.isActive ? 'ACTIVE' : 'INACTIVE'" /></td><td><a class="font-semibold text-primary-700 underline" [routerLink]="['/app/users', user.id]">Ver detalle<span class="sr-only"> de {{ user.firstName }} {{ user.lastName }}</span></a></td></tr></ng-template>
+        <ng-template #body let-user><tr><td data-label="Usuario">{{ user.firstName }} {{ user.lastName }}</td><td data-label="DNI">{{ user.dni }}</td><td data-label="Correo">{{ user.email }}</td><td data-label="Rol">{{ roleLabel(user.role) }}</td><td data-label="Sede">{{ user.branch?.name ?? '—' }}</td><td data-label="Estado"><app-status-badge [status]="user.isActive ? 'ACTIVE' : 'INACTIVE'" /></td><td data-label="Acción"><a class="font-semibold text-primary-700 underline" [routerLink]="['/app/users', user.id]">Ver detalle<span class="sr-only"> de {{ user.firstName }} {{ user.lastName }}</span></a></td></tr></ng-template>
         <ng-template #emptymessage><tr><td colspan="7"><app-empty-state title="Sin usuarios" description="No hay cuentas disponibles." /></td></tr></ng-template>
       </p-table></div> @if (pages() > 1) { <app-server-pagination [page]="page()" [pages]="pages()" (pageChange)="load($event)" /> } }
     }

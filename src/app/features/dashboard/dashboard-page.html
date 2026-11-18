@@ -9,6 +9,15 @@
       @if (auth.hasPermission('reports.read')) { <app-dashboard-shortcut title="Reportes" description="Consulta los reportes de la estación." route="/app/reports" symbol="RE" /> }
     </div>
   </section>
+  <form class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4" [formGroup]="filters" (ngSubmit)="load()">
+    <label class="grid gap-1 text-sm">Desde<input class="min-h-10 rounded-lg border px-3" type="date" formControlName="dateFrom" /></label>
+    <label class="grid gap-1 text-sm">Hasta<input class="min-h-10 rounded-lg border px-3" type="date" formControlName="dateTo" /></label>
+    <label class="grid gap-1 text-sm">Sede<select class="min-h-10 rounded-lg border px-3" formControlName="branchId"><option value="">Todas</option>@for (branch of branches(); track branch.id) { <option [value]="branch.id">{{ branch.name }}</option> }</select></label>
+    <label class="grid gap-1 text-sm">Agrupar por<select class="min-h-10 rounded-lg border px-3" formControlName="groupBy"><option value="hour">Hora</option><option value="day">Día</option><option value="week">Semana</option><option value="month">Mes</option></select></label>
+    <button type="submit" class="min-h-10 rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" [disabled]="state() === 'loading'">Actualizar</button>
+    @if (filterError()) { <p class="w-full text-sm text-red-800" role="alert">{{ filterError() }}</p> }
+    @if (catalogError()) { <p class="w-full text-sm text-red-800" role="alert">No se pudieron cargar las sedes. <button type="button" class="underline" (click)="loadBranches()">Reintentar</button></p> }
+  </form>
   @switch (state()) {
     @case ('loading') { <div role="status" aria-label="Cargando panel"><app-loading-skeleton /></div> }
     @case ('error') { <app-api-error message="No se pudo cargar el panel. Comprueba tu conexión e inténtalo de nuevo." (retry)="load()" /> }
@@ -22,9 +31,9 @@
           <article class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-sm text-slate-600">Galones atendidos</p><p class="mt-2 text-2xl font-semibold text-slate-900">{{ dashboard.attended_gallons }} <span class="text-sm font-normal">gal</span></p></article>
         </div>
         <div class="dashboard-grid">
-          <app-section-panel title="Despachos por período" description="Galones atendidos por día">
+          <app-section-panel title="Despachos por período" description="Galones atendidos según la agrupación consultada">
             <div class="p-4">
-              @if (periodLabels().length) { <app-dashboard-chart title="Galones atendidos" [labels]="periodLabels()" [values]="gallonsByPeriod()" /> }
+              @if (periodLabels().length) { <app-dashboard-chart title="Galones atendidos" [labels]="periodLabels()" [values]="gallonsByPeriod()" /><table class="mt-4 w-full text-left text-sm"><caption class="sr-only">Galones atendidos por período</caption><thead><tr><th class="p-2" scope="col">Período</th><th class="p-2" scope="col">Galones</th></tr></thead><tbody>@for (period of dashboard.by_period; track period.period) { <tr class="border-t border-slate-100"><td class="p-2">{{ period.period }}</td><td class="p-2">{{ period.attended_gallons }}</td></tr> }</tbody></table> }
               @else { <app-empty-state title="Sin despachos registrados" description="Las atenciones aparecerán aquí cuando se registren." /> }
             </div>
           </app-section-panel>

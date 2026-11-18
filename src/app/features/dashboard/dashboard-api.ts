@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../core/api/api-url';
@@ -32,12 +32,21 @@ export interface DashboardResponse {
   readonly by_period: readonly DashboardPeriod[];
 }
 
+export interface DashboardQuery { readonly dateFrom: string; readonly dateTo: string; readonly branchId: string; readonly groupBy: 'hour' | 'day' | 'week' | 'month'; }
+
 @Injectable({ providedIn: 'root' })
 export class DashboardApi {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
 
-  getDashboard(): Observable<DashboardResponse> {
-    return this.http.get<DashboardResponse>(`${this.baseUrl}/reports/dashboard`);
+  getDashboard(query?: DashboardQuery): Observable<DashboardResponse> {
+    let params = new HttpParams();
+    if (query) {
+      if (query.dateFrom) params = params.set('date_from', query.dateFrom);
+      if (query.dateTo) params = params.set('date_to', query.dateTo);
+      if (query.branchId) params = params.set('branch_id', query.branchId);
+      params = params.set('group_by', query.groupBy);
+    }
+    return this.http.get<DashboardResponse>(`${this.baseUrl}/reports/dashboard`, { params });
   }
 }

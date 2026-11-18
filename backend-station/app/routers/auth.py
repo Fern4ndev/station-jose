@@ -40,4 +40,6 @@ def logout(
 @router.get("/me", response_model=CurrentUserResponse)
 def me(user: CurrentUser) -> CurrentUserResponse:
     user_data = UserResponse.model_validate(user, from_attributes=True)
-    return CurrentUserResponse(**user_data.model_dump(), permissions=sorted(permissions_for_role(user.role)))
+    return CurrentUserResponse(
+        **user_data.model_dump(), permissions=sorted(permissions_for_role(user.role))
+    )

@@ -10,13 +10,13 @@ from sqlalchemy.orm import Session
 
 from app.core.dependencies import require_permission
 from app.database import get_db
+from app.schemas.operational import OperationalOrder, OperationalOrderList
 from app.schemas.purchase_order import (
     PurchaseOrderCreate,
     PurchaseOrderListResponse,
     PurchaseOrderResponse,
     PurchaseOrderUpdate,
 )
-from app.schemas.operational import OperationalOrder, OperationalOrderList
 from app.services.purchase_order_service import PurchaseOrderService
 from app.tables import User
 
@@ -49,8 +49,8 @@ def list_purchase_orders(
         sort_by=sort_by,
         sort_order=sort_order,
     )
-    if user.role == 'ATTENDANT':
-        return JSONResponse(OperationalOrderList.model_validate(result).model_dump(mode='json'))
+    if user.role == "ATTENDANT":
+        return JSONResponse(OperationalOrderList.model_validate(result).model_dump(mode="json"))
     return result
 
 
@@ -76,8 +76,8 @@ def get_purchase_order(
     db: Annotated[Session, Depends(get_db)],
 ) -> PurchaseOrderResponse | JSONResponse:
     result = PurchaseOrderService().get(db, order_id)
-    if user.role == 'ATTENDANT':
-        return JSONResponse(OperationalOrder.model_validate(result).model_dump(mode='json'))
+    if user.role == "ATTENDANT":
+        return JSONResponse(OperationalOrder.model_validate(result).model_dump(mode="json"))
     return result
 
 

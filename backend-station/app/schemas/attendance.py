@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.schemas.verification import VerificationResponse
 
@@ -32,18 +32,48 @@ class AttendanceCreate(BaseModel):
         return self
 
 
+class VoucherAuthorizationItem(BaseModel):
+    purchase_order_item_id: UUID
+    authorized_gallons: Decimal = Field(gt=0, max_digits=14, decimal_places=3)
+
+
 class FirstAttendanceCreate(AttendanceCreate):
     issuer_type: str = Field(pattern="^(INSTITUTION|STATION)$")
     issuer_name: str = Field(min_length=1, max_length=200)
     voucher_number: str = Field(min_length=1, max_length=60)
+    voucher_items: list[VoucherAuthorizationItem] = Field(min_length=1)
+
+    @field_validator("issuer_name", "voucher_number")
+    @classmethod
+    def validate_nonblank(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("El campo no puede estar vacío.")
+        return value
 
     @model_validator(mode="after")
     def validate_order_items(self) -> "FirstAttendanceCreate":
-        order_ids = [item.purchase_order_item_id for item in self.items]
+        order_ids = [item.purchase_order_item_id for item in self.voucher_items]
         if len(order_ids) != len(set(order_ids)):
-            raise ValueError("Cada línea de combustible solo puede aparecer una vez.")
+            raise ValueError("Cada línea autorizada solo puede aparecer una vez.")
         if any(item.voucher_item_id is not None for item in self.items):
             raise ValueError("La primera atención debe referenciar líneas de la orden.")
+        authorized = {
+            item.purchase_order_item_id: item.authorized_gallons for item in self.voucher_items
+        }
+        for item in self.items:
+            if item.purchase_order_item_id not in authorized:
+                raise ValueError("Cada despacho debe corresponder a una línea autorizada del vale.")
+            if item.attended_gallons > authorized[item.purchase_order_item_id]:
+                raise ValueError("El despacho supera la cantidad autorizada en el vale.")
+        return self
+
+
+class FollowUpAttendanceCreate(AttendanceCreate):
+    @model_validator(mode="after")
+    def validate_voucher_items(self) -> "FollowUpAttendanceCreate":
+        if any(item.voucher_item_id is None for item in self.items):
+            raise ValueError("La atención posterior debe referenciar líneas del vale.")
         return self
 
 

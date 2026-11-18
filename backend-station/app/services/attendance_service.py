@@ -8,6 +8,7 @@ from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal
 from uuid import UUID, uuid4
 
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import (
@@ -52,17 +53,22 @@ class AttendanceService:
         branch_id: UUID | None,
         idempotency_key: UUID,
     ) -> AttendanceResponse:
-        existing = self._resolve_idempotency(db, idempotency_key, data, user_id=user_id, order_id=order_id)
+        self._lock_idempotency_key(db, idempotency_key)
+        existing = self._resolve_idempotency(
+            db, idempotency_key, data, user_id=user_id, order_id=order_id
+        )
         if existing is not None:
             return self._attendance_response(existing)
 
-        item_ids = [item.purchase_order_item_id for item in data.items]
+        item_ids = [item.purchase_order_item_id for item in data.voucher_items]
         order_items = self.vouchers.lock_items(db, [item_id for item_id in item_ids if item_id])
         by_id = {item.id: item for item in order_items}
         if len(by_id) != len(set(item_ids)):
             raise ResourceNotFoundError("Una o más líneas de la orden no existen.")
         if any(item.purchase_order_id != order_id for item in order_items):
             raise InvalidFuelLineError("Todas las líneas deben pertenecer a la orden indicada.")
+        if any(item.purchase_order.deleted_at is not None for item in order_items):
+            raise ResourceNotFoundError("La orden no está disponible.")
 
         normalized_issuer = normalize_identity(data.issuer_name)
         normalized_number = normalize_identity(data.voucher_number)
@@ -96,10 +102,9 @@ class AttendanceService:
                 voucher_id=voucher.id,
                 purchase_order_id=order_id,
                 purchase_order_item_id=item.purchase_order_item_id,
-                authorized_gallons=item.attended_gallons,
+                authorized_gallons=item.authorized_gallons,
             )
-            for item in data.items
-            if item.purchase_order_item_id is not None
+            for item in data.voucher_items
         ]
         voucher.items = voucher_items
         db.flush()
@@ -127,7 +132,10 @@ class AttendanceService:
         branch_id: UUID | None,
         idempotency_key: UUID,
     ) -> AttendanceResponse:
-        existing = self._resolve_idempotency(db, idempotency_key, data, user_id=user_id, voucher_id=voucher_id)
+        self._lock_idempotency_key(db, idempotency_key)
+        existing = self._resolve_idempotency(
+            db, idempotency_key, data, user_id=user_id, voucher_id=voucher_id
+        )
         if existing is not None:
             return self._attendance_response(existing)
         item_ids = [item.voucher_item_id for item in data.items]
@@ -204,8 +212,14 @@ class AttendanceService:
         )
 
     def _resolve_idempotency(
-        self, db: Session, key: UUID, data: AttendanceCreate, *, user_id: UUID,
-        order_id: UUID | None = None, voucher_id: UUID | None = None,
+        self,
+        db: Session,
+        key: UUID,
+        data: AttendanceCreate,
+        *,
+        user_id: UUID,
+        order_id: UUID | None = None,
+        voucher_id: UUID | None = None,
     ) -> Attendance | None:
         existing = self.vouchers.get_attendance_by_idempotency(db, key)
         if existing is None:
@@ -221,6 +235,11 @@ class AttendanceService:
                 details={"attendance_id": str(existing.id)},
             )
         return existing
+
+    @staticmethod
+    def _lock_idempotency_key(db: Session, key: UUID) -> None:
+        lock_key = int.from_bytes(key.bytes[:8], byteorder="big", signed=True)
+        db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": lock_key})
 
     def _validate_order_balance(
         self,
