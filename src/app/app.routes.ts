@@ -11,7 +11,7 @@ export const routes: Routes = [
   { path: 'access-denied', loadComponent: () => import('./features/system/access-denied').then((module) => module.AccessDeniedPage) },
   { path: 'not-found', loadComponent: () => import('./features/system/not-found').then((module) => module.NotFoundPage) },
   {
-    path: 'app',
+    path: '',
     canActivate: [authGuard],
     canActivateChild: [authGuard],
     loadComponent: () => import('./layouts/admin/admin').then((module) => module.AdminLayout),

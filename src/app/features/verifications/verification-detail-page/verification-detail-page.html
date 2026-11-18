@@ -1,5 +1,5 @@
 <section aria-labelledby="page-title">
-  <app-page-header title="Revisar atención" description="Contrasta la información registrada con el vale físico."><a page-actions routerLink="/app/attendances/pending-verification" class="rounded-lg border px-4 py-2 text-sm">Volver a la bandeja</a></app-page-header>
+  <app-page-header title="Revisar atención" description="Contrasta la información registrada con el vale físico."><a page-actions routerLink="/attendances/pending-verification" class="rounded-lg border px-4 py-2 text-sm">Volver a la bandeja</a></app-page-header>
   @switch (state()) {
     @case ('loading') { <div role="status" aria-label="Cargando atención"><app-loading-skeleton /></div> }
     @case ('error') { <app-api-error message="No se pudo cargar la atención." (retry)="load()" /> }

@@ -1,5 +1,5 @@
 <aside class="sidebar" [class.open]="open()" [inert]="isMobile() && !open()" aria-label="Navegación principal">
-  <a class="brand-lockup" routerLink="/app" (click)="onNavigate()" aria-label="San José, ir al inicio">
+  <a class="brand-lockup" routerLink="/" (click)="onNavigate()" aria-label="San José, ir al inicio">
     <span class="brand-symbol" aria-hidden="true">SJ</span>
     <span class="brand-copy"><strong>San José</strong><small>Control de combustible</small></span>
   </a>
@@ -7,7 +7,7 @@
   <div class="branch-label"><span>Sede asignada</span><strong>{{ branchName() }}</strong></div>
   <nav class="nav-menu" aria-label="Menú principal">
     @for (item of navigation(); track item.path) {
-          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: item.path === '/app/dashboard' || item.path === '/app/attendances' }" (click)="onNavigate()">
+          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' || item.path === '/attendances' }" (click)="onNavigate()">
             <span class="material-symbols-outlined nav-icon" aria-hidden="true">{{ icons[item.path] }}</span>
             <span>{{ item.label }}</span>
           </a>

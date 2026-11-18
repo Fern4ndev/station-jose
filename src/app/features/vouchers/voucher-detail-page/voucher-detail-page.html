@@ -1,5 +1,5 @@
 <section aria-labelledby="page-title">
-  <app-page-header title="Detalle del vale" description="Consulta sus líneas, saldo y atenciones registradas."><a page-actions routerLink="/app/vouchers" class="rounded-lg border px-4 py-2 text-sm">Volver a vales</a></app-page-header>
+  <app-page-header title="Detalle del vale" description="Consulta sus líneas, saldo y atenciones registradas."><a page-actions routerLink="/vouchers" class="rounded-lg border px-4 py-2 text-sm">Volver a vales</a></app-page-header>
   @switch (state()) {
     @case ('loading') { <div role="status" aria-label="Cargando vale"><app-loading-skeleton /></div> }
     @case ('error') { <app-api-error message="No se pudo cargar el vale." (retry)="load()" /> }

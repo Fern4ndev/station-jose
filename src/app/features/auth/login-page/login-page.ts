@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { ApiErrorEnvelope } from '../../../core/models/api-error.models';
-import { homePathForPermissions } from '../../../core/models/auth.models';
+import { homePathForPermissions, safeReturnUrl } from '../../../core/models/auth.models';
 import { AuthSessionService } from '../../../core/services/auth/auth';
 import { AuthLayout } from '../../../layouts/auth/auth';
 import { LoginForm } from '../login-form/login-form';
@@ -55,7 +55,7 @@ export class LoginPage {
     ).subscribe({
       next: ({ permissions }) => {
         const requestedUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        const destination = requestedUrl?.startsWith('/app/') ? requestedUrl : homePathForPermissions(permissions);
+        const destination = safeReturnUrl(requestedUrl) ?? homePathForPermissions(permissions);
         void this.router.navigateByUrl(destination);
       },
       error: (error: unknown) => this.errorMessage.set(this.loginErrorMessage(error)),

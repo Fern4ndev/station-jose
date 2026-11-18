@@ -105,11 +105,17 @@ export const ROLE_LABELS: Readonly<Record<UserRole, string>> = {
 };
 
 export function homePathForRole(role: UserRole): string {
-  return role === 'ATTENDANT' ? '/app/attendant/workspace' : '/app/dashboard';
+  return role === 'ATTENDANT' ? '/attendant/workspace' : '/dashboard';
 }
 
 export function homePathForPermissions(permissions: readonly string[]): string {
-  if (permissions.includes('reports.read')) return '/app/dashboard';
-  if (permissions.includes('attendances.create')) return '/app/attendant/workspace';
+  if (permissions.includes('reports.read')) return '/dashboard';
+  if (permissions.includes('attendances.create')) return '/attendant/workspace';
   return '/access-denied';
+}
+
+export function safeReturnUrl(value: string | null): string | null {
+  if (!value || !value.startsWith('/') || value.startsWith('//') || /[\\\u0000-\u001f]/.test(value)) return null;
+  if (/^\/auth(?:[/?#]|$)/.test(value)) return null;
+  return value;
 }

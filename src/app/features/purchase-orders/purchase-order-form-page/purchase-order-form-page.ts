@@ -73,7 +73,7 @@ export class PurchaseOrderFormPage {
     const { order_number, ...updateRequest } = request;
     const operation = this.orderId ? this.api.update(this.orderId, updateRequest) : this.api.create({ order_number, ...updateRequest });
     operation.pipe(takeUntilDestroyed(this.destroyRef), finalize(() => this.saving.set(false))).subscribe({
-      next: (order) => void this.router.navigate(['/app/purchase-orders', order.id]),
+      next: (order) => void this.router.navigate(['/purchase-orders', order.id]),
       error: (error: unknown) => this.error.set(error instanceof HttpErrorResponse && error.status === 409 ? 'La orden entra en conflicto con un registro existente.' : 'No se pudo guardar la orden. Revisa los datos e inténtalo de nuevo.'),
     });
   }
@@ -97,5 +97,5 @@ export class PurchaseOrderFormPage {
   protected addLine(): void { this.lines.update((lines) => [...lines, { id: crypto.randomUUID(), fuelTypeId: '', authorizedGallons: '', unitPrice: '', totalAmount: '' }]); }
   protected updateLine(updated: FuelLineDraft): void { this.lines.update((lines) => lines.map((line) => line.id === updated.id ? updated : line)); }
   protected removeLine(id: string): void { this.lines.update((lines) => lines.filter((line) => line.id !== id)); }
-  protected cancel(): void { void this.router.navigate(['/app/purchase-orders']); }
+  protected cancel(): void { void this.router.navigate(['/purchase-orders']); }
 }

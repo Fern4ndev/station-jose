@@ -8,7 +8,7 @@ describe('route access', () => {
   let store: AuthStore;
   let router: Router;
   const route = (permission?: string): ActivatedRouteSnapshot => ({ data: permission ? { permission } : {} }) as ActivatedRouteSnapshot;
-  const state = { url: '/app/users' } as RouterStateSnapshot;
+  const state = { url: '/users' } as RouterStateSnapshot;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
@@ -26,7 +26,7 @@ describe('route access', () => {
 
   it('redirects an unauthenticated visitor to login preserving the requested route', () => {
     const result = TestBed.runInInjectionContext(() => authGuard(route(), state)) as UrlTree;
-    expect(router.serializeUrl(result)).toBe('/auth/login?returnUrl=%2Fapp%2Fusers');
+    expect(router.serializeUrl(result)).toBe('/auth/login?returnUrl=%2Fusers');
   });
 
   it.each([

@@ -3,10 +3,10 @@
   <section class="mb-5" aria-labelledby="shortcuts-title">
     <div class="mb-3"><h2 id="shortcuts-title" class="text-base font-semibold text-slate-900">Accesos rápidos</h2><p class="mt-1 text-sm text-slate-600">Continúa con una operación o revisa la información disponible.</p></div>
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      @if (auth.hasPermission('purchase_orders.read')) { <app-dashboard-shortcut title="Órdenes de compra" description="Consulta autorizaciones y saldos por combustible." route="/app/purchase-orders" symbol="OC" /> }
-      @if (auth.hasPermission('vouchers.read')) { <app-dashboard-shortcut title="Vales" description="Consulta documentos y atenciones registradas." route="/app/vouchers" symbol="VA" /> }
-      @if (auth.hasPermission('vouchers.verify')) { <app-dashboard-shortcut title="Verificación" description="Revisa los despachos con el vale físico." route="/app/attendances/pending-verification" symbol="VE" /> }
-      @if (auth.hasPermission('reports.read')) { <app-dashboard-shortcut title="Reportes" description="Consulta los reportes de la estación." route="/app/reports" symbol="RE" /> }
+      @if (auth.hasPermission('purchase_orders.read')) { <app-dashboard-shortcut title="Órdenes de compra" description="Consulta autorizaciones y saldos por combustible." route="/purchase-orders" symbol="description" /> }
+      @if (auth.hasPermission('vouchers.read')) { <app-dashboard-shortcut title="Vales" description="Consulta documentos y atenciones registradas." route="/vouchers" symbol="confirmation_number" /> }
+      @if (auth.hasPermission('vouchers.verify')) { <app-dashboard-shortcut title="Verificación" description="Revisa los despachos con el vale físico." route="/attendances/pending-verification" symbol="fact_check" /> }
+      @if (auth.hasPermission('reports.read')) { <app-dashboard-shortcut title="Reportes" description="Consulta los reportes de la estación." route="/reports" symbol="bar_chart" /> }
     </div>
   </section>
   <form class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4" [formGroup]="filters" (ngSubmit)="load()">
@@ -14,7 +14,7 @@
     <label class="grid gap-1 text-sm">Hasta<input class="min-h-10 rounded-lg border px-3" type="date" formControlName="dateTo" /></label>
     <label class="grid gap-1 text-sm">Sede<select class="min-h-10 rounded-lg border px-3" formControlName="branchId"><option value="">Todas</option>@for (branch of branches(); track branch.id) { <option [value]="branch.id">{{ branch.name }}</option> }</select></label>
     <label class="grid gap-1 text-sm">Agrupar por<select class="min-h-10 rounded-lg border px-3" formControlName="groupBy"><option value="hour">Hora</option><option value="day">Día</option><option value="week">Semana</option><option value="month">Mes</option></select></label>
-    <button type="submit" class="min-h-10 rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" [disabled]="state() === 'loading'">Actualizar</button>
+    <button type="submit" class="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" [disabled]="state() === 'loading'"><span class="material-symbols-outlined" aria-hidden="true">refresh</span>Actualizar</button>
     @if (filterError()) { <p class="w-full text-sm text-red-800" role="alert">{{ filterError() }}</p> }
     @if (catalogError()) { <p class="w-full text-sm text-red-800" role="alert">No se pudieron cargar las sedes. <button type="button" class="underline" (click)="loadBranches()">Reintentar</button></p> }
   </form>

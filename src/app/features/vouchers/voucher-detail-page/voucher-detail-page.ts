@@ -70,7 +70,7 @@ export class VoucherDetailPage {
     if (!this.auth.hasPermission('vouchers.delete') || this.deleting()) return;
     this.deleting.set(true); this.message.set(''); this.success.set('');
     this.api.delete(this.voucherId).pipe(takeUntilDestroyed(this.destroyRef), finalize(() => this.deleting.set(false))).subscribe({
-      next: () => void this.router.navigate(['/app/vouchers']),
+      next: () => void this.router.navigate(['/vouchers']),
       error: (error: unknown) => this.message.set(error instanceof HttpErrorResponse && error.status === 409 ? 'No se puede eliminar un vale con atenciones registradas.' : 'No se pudo eliminar el vale. Inténtalo nuevamente.'),
     });
   }

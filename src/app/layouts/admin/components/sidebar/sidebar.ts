@@ -33,10 +33,10 @@ export class Sidebar {
   protected readonly navigation = computed(() => NAVIGATION.flatMap((group) => group.items)
     .filter((item) => this.auth.hasPermission(item.permission)));
   protected readonly icons: Readonly<Record<string, string>> = {
-    '/app/dashboard': 'dashboard', '/app/purchase-orders': 'description', '/app/vouchers': 'confirmation_number',
-    '/app/attendant/workspace': 'local_gas_station', '/app/attendant/attendances': 'history',
-    '/app/attendances': 'receipt_long', '/app/balances': 'account_balance_wallet',
-    '/app/attendances/pending-verification': 'fact_check', '/app/reports': 'bar_chart', '/app/users': 'group',
+    '/dashboard': 'dashboard', '/purchase-orders': 'description', '/vouchers': 'confirmation_number',
+    '/attendant/workspace': 'local_gas_station', '/attendant/attendances': 'history',
+    '/attendances': 'receipt_long', '/balances': 'account_balance_wallet',
+    '/attendances/pending-verification': 'fact_check', '/reports': 'bar_chart', '/users': 'group',
   };
   protected readonly roleLabel = computed(() => {
     const role = this.user()?.role;

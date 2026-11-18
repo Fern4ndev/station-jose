@@ -47,9 +47,9 @@ export class UserFormPage {
     this.users.create({ first_name: value.firstName.trim(), last_name: value.lastName.trim(), dni: value.dni.trim(), email: value.email.trim(), password: value.password, role: value.role, branch_id: value.role === 'ATTENDANT' ? value.branchId : null }).pipe(
       takeUntilDestroyed(this.destroyRef), finalize(() => this.saving.set(false)),
     ).subscribe({
-      next: (user) => { this.form.controls.password.reset(); void this.router.navigate(['/app/users', user.id]); },
+      next: (user) => { this.form.controls.password.reset(); void this.router.navigate(['/users', user.id]); },
       error: (error: unknown) => this.error.set(error instanceof HttpErrorResponse && error.status === 409 ? 'El DNI o correo ya está registrado.' : 'No se pudo crear el usuario. Revisa los datos e inténtalo nuevamente.'),
     });
   }
-  protected cancel(): void { void this.router.navigate(['/app/users']); }
+  protected cancel(): void { void this.router.navigate(['/users']); }
 }

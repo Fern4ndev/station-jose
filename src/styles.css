@@ -1,8 +1,4 @@
-@layer theme, base, primeng, components, utilities;
-
 @import "tailwindcss";
-@source not "../mockup.html";
-@source not "../mockup.tailwind-preview.html";
 
 @theme {
   --color-ink: #10202a;

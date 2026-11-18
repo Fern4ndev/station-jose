@@ -10,7 +10,7 @@ Los archivos `src/environments/environment.ts` y `src/environments/environment.d
 
 Ejecuta `npm test -- --watch=false` y `npm run build`. Publica los archivos estáticos generados en `dist/station/browser` en el servidor web acordado. Antes de compilar para producción, configura `apiUrl` en `environment.ts` con la dirección HTTPS accesible para los usuarios o con `/api/v1` si el servidor web envía ese prefijo a la API mediante un proxy inverso. Ajusta CORS en el backend cuando frontend y API tengan orígenes distintos. No incluyas contraseñas ni secretos en los archivos de Angular: su contenido se publica en el navegador.
 
-El servidor debe devolver `index.html` para las rutas de la aplicación que no correspondan a archivos estáticos, de modo que una recarga de `/app/...` funcione. Si se usa el proxy `/api/v1`, sus solicitudes deben dirigirse al backend antes de aplicar el fallback de la SPA; no deben recibir `index.html`. Configura HTTPS y comprueba recarga de rutas, acceso a la API y respuestas de error en el entorno de destino. La configuración concreta depende del servidor elegido y debe verificarse allí.
+El servidor debe devolver `index.html` para las rutas de la aplicación que no correspondan a archivos estáticos, de modo que una recarga de `/vouchers` u otra ruta funcione. Si se usa el proxy `/api/v1`, sus solicitudes deben dirigirse al backend antes de aplicar el fallback de la SPA; no deben recibir `index.html`. Configura HTTPS y comprueba recarga de rutas, acceso a la API y respuestas de error en el entorno de destino. La configuración concreta depende del servidor elegido y debe verificarse allí.
 
 ## Estado de entrega
 

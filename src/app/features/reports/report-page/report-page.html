@@ -6,7 +6,7 @@
     <label class="grid gap-1 text-sm">Desde<input class="min-h-10 rounded-lg border px-3" type="date" formControlName="dateFrom" /></label>
     <label class="grid gap-1 text-sm">Hasta<input class="min-h-10 rounded-lg border px-3" type="date" formControlName="dateTo" /></label>
     <label class="grid gap-1 text-sm">Sede<select class="min-h-10 rounded-lg border px-3" formControlName="branchId"><option value="">Todas</option>@for (branch of branches(); track branch.id) { <option [value]="branch.id">{{ branch.name }}</option> }</select></label>
-    <button type="submit" class="min-h-10 rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" [disabled]="state() === 'loading'">Consultar</button>
+    <button type="submit" class="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-700 px-4 text-sm font-semibold text-white" [disabled]="state() === 'loading'"><span class="material-symbols-outlined" aria-hidden="true">search</span>Consultar</button>
     @if (catalogError()) { <p class="w-full text-sm text-red-800" role="alert">No se pudieron cargar las sedes. <button type="button" class="underline" (click)="loadBranches()">Reintentar</button></p> }
     @if (error()) { <p class="w-full text-sm text-red-800" role="alert">{{ error() }}</p> }
   </form>

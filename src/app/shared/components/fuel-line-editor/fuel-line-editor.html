@@ -14,5 +14,5 @@
       @if (editable()) { <button class="justify-self-start text-sm text-red-700 underline" type="button" (click)="lineRemove.emit(line.id)">Quitar línea</button> }
     </fieldset>
   }
-  @if (editable()) { <button class="justify-self-start rounded-lg border px-3 py-2 text-sm" type="button" (click)="lineAdd.emit()">Agregar combustible</button> }
+  @if (editable()) { <button class="inline-flex min-h-11 items-center gap-2 justify-self-start rounded-lg border px-3 py-2 text-sm" type="button" (click)="lineAdd.emit()"><span class="material-symbols-outlined" aria-hidden="true">add</span>Agregar combustible</button> }
 </section>

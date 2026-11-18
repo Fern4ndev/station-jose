@@ -19,14 +19,16 @@ th {
   border-top: 1px solid #edf0f0;
   border-bottom: 1px solid #edf0f0;
   background: rgb(244 247 246 / 65%);
-  color: #839095;
-  font-size: 10px;
+  color: #52656d;
+  font-size: 0.75rem;
   font-weight: 620;
   white-space: nowrap;
 }
 
 td {
   padding: 14px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
@@ -38,7 +40,7 @@ td app-empty-state {
   .table-wrap { overflow-x: visible; }
   thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   tr { display: block; margin-bottom: 12px; border: 1px solid #e1e8ea; border-radius: 12px; background: #fff; }
-  td { display: grid; grid-template-columns: minmax(90px, 35%) minmax(0, 1fr); gap: 12px; padding: 10px 12px; border-bottom: 1px solid #edf0f0; }
+  td { display: grid; grid-template-columns: minmax(90px, 35%) minmax(0, 1fr); gap: 12px; padding: 10px 12px; border-bottom: 1px solid #edf0f0; font-size: 0.875rem; }
   td:last-child { border-bottom: 0; }
   td[data-label]::before { content: attr(data-label); color: #52656d; font-size: 12px; font-weight: 600; }
   td:not([data-label]) { display: block; }

@@ -36,7 +36,7 @@ export class PurchaseOrderDetailPage {
     if (this.deleting()) return;
     this.deleteError.set(''); this.deleting.set(true);
     this.api.delete(this.orderId).pipe(takeUntilDestroyed(this.destroyRef), finalize(() => this.deleting.set(false))).subscribe({
-      next: () => void this.router.navigate(['/app/purchase-orders']),
+      next: () => void this.router.navigate(['/purchase-orders']),
       error: (error: unknown) => this.deleteError.set(error instanceof HttpErrorResponse && error.status === 409 ? 'No se puede eliminar una orden con vales asociados.' : 'No se pudo eliminar la orden. Inténtalo de nuevo.'),
     });
   }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { homePathForPermissions, homePathForRole, mapLoginResponse, type LoginResponseDto } from '../../models/auth.models';
+import { homePathForPermissions, homePathForRole, mapLoginResponse, safeReturnUrl, type LoginResponseDto } from '../../models/auth.models';
 
 describe('authentication models', () => {
   it('maps the login response to the frontend model', () => {
@@ -38,13 +38,20 @@ describe('authentication models', () => {
   });
 
   it('returns the role-specific home route', () => {
-    expect(homePathForRole('ATTENDANT')).toBe('/app/attendant/workspace');
-    expect(homePathForRole('ADMIN')).toBe('/app/dashboard');
+    expect(homePathForRole('ATTENDANT')).toBe('/attendant/workspace');
+    expect(homePathForRole('ADMIN')).toBe('/dashboard');
   });
 
   it('selects a home that matches effective permissions', () => {
-    expect(homePathForPermissions(['reports.read', 'attendances.create'])).toBe('/app/dashboard');
-    expect(homePathForPermissions(['attendances.create'])).toBe('/app/attendant/workspace');
+    expect(homePathForPermissions(['reports.read', 'attendances.create'])).toBe('/dashboard');
+    expect(homePathForPermissions(['attendances.create'])).toBe('/attendant/workspace');
     expect(homePathForPermissions([])).toBe('/access-denied');
+  });
+
+  it('accepts internal return routes and rejects unsafe or recursive destinations', () => {
+    expect(safeReturnUrl('/vouchers?page=2')).toBe('/vouchers?page=2');
+    for (const value of [null, 'https://example.com', '//example.com', '/\\example.com', '/auth/login']) {
+      expect(safeReturnUrl(value)).toBeNull();
+    }
   });
 });

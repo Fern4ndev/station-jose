@@ -75,9 +75,9 @@ export class VerificationDetailPage {
       }),
       finalize(() => this.submitting.set(false)),
     ).subscribe((response) => {
-      if (response) void this.router.navigate(['/app/attendances/pending-verification'], { queryParams: { reviewed: '1' } });
+      if (response) void this.router.navigate(['/attendances/pending-verification'], { queryParams: { reviewed: '1' } });
     });
   }
 
-  protected cancel(): void { void this.router.navigate(['/app/attendances/pending-verification']); }
+  protected cancel(): void { void this.router.navigate(['/attendances/pending-verification']); }
 }

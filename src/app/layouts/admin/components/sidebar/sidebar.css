@@ -10,10 +10,10 @@
 .brand-symbol { display: grid; width: 40px; height: 40px; flex: none; place-items: center; border: 1px solid rgb(255 255 255 / 28%); border-radius: 14px; background: linear-gradient(145deg, rgb(75 204 180 / 31%), rgb(73 118 127 / 20%)); color: #8be4d2; font-weight: 750; font-size: 12px; }
 .brand-copy, .profile-copy { display: grid; gap: 3px; }
 .brand-copy strong { font-size: 15px; letter-spacing: -.035em; }
-.brand-copy small, .profile-copy small { color: #9db5b8; font-size: 10px; }
+.brand-copy small, .profile-copy small { color: #d5e1f7; font-size: 12px; }
 .branch-label { display: grid; gap: 4px; margin: 0 2px 24px; padding: 11px; border: 1px solid rgb(218 243 237 / 13%); border-radius: 13px; background: rgb(235 250 246 / 7.5%); }
-.branch-label span { color: #a7c0c0; font-size: 10px; }
-.branch-label strong { color: #e7f2ef; font-size: 11px; font-weight: 600; }
+.branch-label span { color: #d5e1f7; font-size: 12px; }
+.branch-label strong { color: #fff; font-size: 13px; font-weight: 600; }
 .nav-heading { margin: 0; padding: 10px 11px; color: #b3c9cb; font-size: 10px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
 .nav-menu { display: grid; gap: 4px; }
 .nav-menu a { display: flex; min-height: 44px; align-items: center; gap: 12px; padding: 0 11px; border: 1px solid transparent; border-radius: 13px; color: #e2e9f8; font-size: 13px; text-decoration: none; transition: background 160ms ease, color 160ms ease; }
@@ -24,8 +24,8 @@
 .sidebar-spacer { flex: 1; min-height: 25px; }
 .side-status { display: flex; align-items: flex-start; gap: 10px; margin: 0 3px 14px; padding: 13px 12px; border: 1px solid rgb(224 245 240 / 11%); border-radius: 14px; background: rgb(238 250 247 / 5.5%); }
 .side-status strong, .side-status small { display: block; }
-.side-status strong { font-size: 11px; font-weight: 600; }
-.side-status small { margin-top: 4px; color: #9cb2b5; font-size: 10px; }
+.side-status strong { font-size: 13px; font-weight: 600; }
+.side-status small { margin-top: 4px; color: #d5e1f7; font-size: 12px; }
 .live-dot { width: 7px; height: 7px; flex: none; margin-top: 4px; border-radius: 50%; background: #64d9ae; box-shadow: 0 0 0 4px rgb(100 217 174 / 13%); }
 .profile-card { display: flex; width: 100%; min-height: 60px; align-items: center; gap: 10px; padding: 12px 8px 4px; border: 0; border-top: 1px solid rgb(230 245 241 / 20%); background: transparent; text-align: left; }
 .profile-card:hover { background: rgb(255 255 255 / 9%); }
@@ -33,7 +33,7 @@
 .profile-logout { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 8px; background: transparent; color: #28384c; font-size: 14px; }
 .profile-logout:hover { background: #f2f5fc; }
 .avatar { display: grid; width: 34px; height: 34px; flex: none; place-items: center; border-radius: 12px; background: linear-gradient(135deg, #edd6b0, #9ac9bc); color: #16353a; font-size: 11px; font-weight: 750; }
-.profile-copy strong { color: #f4faf8; font-size: 11px; font-weight: 630; }
+.profile-copy strong { color: #f4faf8; font-size: 13px; font-weight: 630; }
 @media (max-width: 1050px) { .sidebar { top: 10px; height: calc(100dvh - 20px); } }
 @media (max-width: 760px) {
   .sidebar { position: fixed; top: 8px; bottom: 8px; left: 8px; width: min(285px, calc(100vw - 24px)); height: auto; min-height: 0; transform: translateX(calc(-100% - 14px)); transition: transform 180ms ease; }
