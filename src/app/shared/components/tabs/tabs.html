@@ -1,7 +1,0 @@
-<p-tabs [value]="value()" (valueChange)="valueChange.emit($event)">
-  <p-tablist aria-label="Secciones">
-    @for (item of items(); track item.value) {
-      <p-tab [value]="item.value" [disabled]="item.disabled ?? false">{{ item.label }}</p-tab>
-    }
-  </p-tablist>
-</p-tabs>

@@ -1,9 +1,0 @@
-<section aria-labelledby="page-title">
-  <app-page-header title="Nuevo usuario" description="Crea una cuenta con uno de los roles predefinidos." />
-  <app-section-panel title="Datos de la cuenta">
-    <div class="p-5">
-      @if (error()) { <div class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800" role="alert">{{ error() }} @if (!catalogReady()) { <button type="button" class="font-semibold underline" (click)="loadBranches()">Reintentar</button> }</div> }
-      <app-user-form [form]="form" [branches]="branches()" [enabled]="catalogReady()" [submitting]="saving()" (save)="save()" (cancel)="cancel()" />
-    </div>
-  </app-section-panel>
-</section>

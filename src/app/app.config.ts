@@ -5,8 +5,6 @@ import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
-import { apiErrorInterceptor } from './core/interceptors/api-error.interceptor';
-import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 const SanJoseTheme = definePreset(Aura, {
   semantic: {
@@ -30,7 +28,6 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor, apiErrorInterceptor])),
     providePrimeNG({
       theme: {
         preset: SanJoseTheme,
