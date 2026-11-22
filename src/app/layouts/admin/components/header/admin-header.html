@@ -1,0 +1,41 @@
+<header class="flex min-h-[73px] items-center justify-between gap-[16px] max-[760px]:min-h-[59px]">
+  <div class="max-[760px]:flex max-[760px]:items-center max-[760px]:gap-[10px]">
+    <button
+      type="button"
+      class="sanjose-icon-button hidden max-[760px]:grid"
+      aria-label="Abrir menú"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="sidebar"
+      (click)="menuToggle.emit()"
+    >
+      <app-ui-icon name="menu" [size]="17" [strokeWidth]="1.7" />
+    </button>
+    <div class="text-[11px] text-[#87949a] max-[760px]:text-[10px]">
+      Estación de Servicio <span aria-hidden="true">/</span>
+      <strong class="font-[620] text-[#263b43]">{{ pageLabel() }}</strong>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-[10px] max-[760px]:gap-[6px] max-[760px]:[&_app-notifications-bell]:hidden">
+    <label
+      class="flex h-[38px] w-[min(250px,_25vw)] items-center gap-[8px] rounded-[12px] border border-[rgba(210,221,222,0.95)] bg-[rgba(255,255,255,0.67)] p-[0_11px] text-[#829096] backdrop-blur-[18px] focus-within:max-[760px]:absolute focus-within:max-[760px]:left-[15px] focus-within:max-[760px]:right-[15px] focus-within:max-[760px]:top-[63px] focus-within:max-[760px]:z-[5] focus-within:max-[760px]:w-auto focus-within:max-[760px]:shadow-[0_8px_24px_rgba(20,47,49,0.14)] max-[760px]:w-[39px] max-[760px]:rounded-[12px] max-[760px]:p-[0_10px]"
+    >
+      <app-ui-icon name="search" [size]="15" [strokeWidth]="1.7" />
+      <input
+        id="globalSearch"
+        type="search"
+        class="w-full min-w-0 border-0 bg-transparent text-[11px] text-[#10202a] outline-none focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] max-[760px]:w-[0] max-[760px]:focus:w-full"
+        placeholder="Buscar orden, vale…"
+        aria-label="Buscar órdenes o vales"
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+      />
+    </label>
+
+    <app-notifications-bell />
+
+    <button type="button" class="sanjose-icon-button" aria-label="Perfil y sesión">
+      <app-ui-icon name="user" />
+    </button>
+  </div>
+</header>

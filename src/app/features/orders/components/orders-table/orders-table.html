@@ -1,0 +1,94 @@
+<div class="w-full overflow-x-auto">
+  <table class="sanjose-table">
+    <thead>
+      <tr>
+        <th class="sanjose-th">ORDEN / ENTIDAD</th>
+        <th class="sanjose-th">SEDE</th>
+        <th class="sanjose-th">EMITIDA</th>
+        <th class="sanjose-th">COMBUSTIBLE</th>
+        <th class="sanjose-th">AUTORIZADO</th>
+        <th class="sanjose-th">DISPONIBLE</th>
+        <th class="sanjose-th">ESTADO</th>
+        <th class="sanjose-th">ACCIONES</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (order of rows(); track order.id) {
+        <tr>
+          <td class="sanjose-td">
+            <span class="sanjose-cell-primary">{{ order.id }}</span>
+            <span class="sanjose-cell-secondary">{{ order.entity }}</span>
+          </td>
+          <td class="sanjose-td">{{ order.branch }}</td>
+          <td class="sanjose-td">{{ order.date }}</td>
+          <td class="sanjose-td">{{ order.fuel }}</td>
+          <td class="sanjose-td">{{ total(order) }}</td>
+          <td class="sanjose-td">
+            <span class="sanjose-cell-primary">{{ balance(order) }}</span>
+            <span class="sanjose-cell-secondary">{{ percent(order) }}</span>
+          </td>
+          <td class="sanjose-td">
+            @if (hasBalance(order)) {
+              <app-ui-status-badge label="Con saldo" tone="green" />
+            } @else {
+              <app-ui-status-badge label="Agotada" tone="amber" />
+            }
+          </td>
+          <td class="sanjose-td">
+            <div class="flex items-center gap-[6px]">
+              <button
+                type="button"
+                class="sanjose-icon-action"
+                title="Ver orden"
+                [attr.aria-label]="'Ver orden ' + order.id"
+                (click)="view.emit(order)"
+              >
+                <app-ui-icon name="eye" [size]="14" />
+              </button>
+              @if (canManage()) {
+                <button
+                  type="button"
+                  class="sanjose-icon-action"
+                  title="Editar orden"
+                  [attr.aria-label]="'Editar orden ' + order.id"
+                  (click)="edit.emit(order)"
+                >
+                  <app-ui-icon name="edit" [size]="14" />
+                </button>
+                @if (lockedOrderIds().includes(order.id)) {
+                  <button
+                    type="button"
+                    class="sanjose-icon-action"
+                    disabled
+                    title="No se puede eliminar porque tiene vales asociados"
+                    [attr.aria-label]="'No se puede eliminar la orden ' + order.id + ' porque tiene vales asociados'"
+                  >
+                    <app-ui-icon name="trash" [size]="14" />
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="sanjose-icon-action"
+                    title="Eliminar orden"
+                    [attr.aria-label]="'Eliminar orden ' + order.id"
+                    (click)="remove.emit(order)"
+                  >
+                    <app-ui-icon name="trash" [size]="14" />
+                  </button>
+                }
+              }
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="sanjose-td" colspan="8">
+            <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">
+              No hay órdenes que coincidan con la búsqueda.
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,108 @@
+<app-ui-dialog [(visible)]="visible" [title]="title()" [description]="description()">
+  <form id="orderForm" class="sanjose-form-grid" (submit)="onSubmit($event)" novalidate>
+    <div class="sanjose-field full">
+      <label class="sanjose-label" for="newOrderEntity">Entidad / institución</label>
+      <input
+        id="newOrderEntity"
+        class="sanjose-input"
+        placeholder="Nombre de la institución"
+        [value]="entity()"
+        (input)="setEntity($event)"
+      />
+    </div>
+
+    <div class="sanjose-field">
+      <label class="sanjose-label" for="newOrderNumber">Número de orden</label>
+      <input
+        id="newOrderNumber"
+        class="sanjose-input"
+        placeholder="OC-2026-0049"
+        [readonly]="isEditing()"
+        [value]="number()"
+        (input)="setNumber($event)"
+      />
+    </div>
+
+    <div class="sanjose-field">
+      <label class="sanjose-label" for="newOrderDate">Fecha de emisión</label>
+      @if (isEditing()) {
+        <input id="newOrderDate" class="sanjose-input" readonly [value]="order()?.date ?? ''" />
+      } @else {
+        <input
+          id="newOrderDate"
+          class="sanjose-input"
+          type="date"
+          [value]="date()"
+          (input)="setDate($event)"
+        />
+      }
+    </div>
+
+    <div class="sanjose-field">
+      <label class="sanjose-label" for="newOrderFuel">Combustible</label>
+      <select id="newOrderFuel" class="sanjose-select" [value]="fuel()" (change)="setFuel($event)">
+        @for (option of fuels; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="sanjose-field">
+      <label class="sanjose-label" for="newOrderGallons">Galones autorizados</label>
+      <input
+        id="newOrderGallons"
+        class="sanjose-input"
+        type="number"
+        min="0.001"
+        step="0.001"
+        placeholder="0.000"
+        [value]="total()"
+        (input)="setTotal($event)"
+      />
+      <span class="sanjose-hint">{{ usedHint() }}</span>
+    </div>
+
+    <div class="sanjose-field full">
+      <label class="sanjose-label" for="newOrderBranch">Sede proveedora</label>
+      <select id="newOrderBranch" class="sanjose-select" [value]="branch()" (change)="setBranch($event)">
+        @for (option of branches; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </div>
+
+    @if (!isEditing()) {
+      <div class="sanjose-field full">
+        <span class="sanjose-label">Documento de origen (opcional)</span>
+        <label
+          class="grid min-h-[85px] place-items-center gap-[5px] rounded-[12px] border border-dashed border-[#bbd5d0] bg-[#f7fbfa] p-[12px] text-center text-[11px] text-[#53746f]"
+          for="orderPdf"
+        >
+          <app-ui-icon name="orders" [size]="18" />
+          <span>{{ pdfLabel() }}</span>
+          <input
+            id="orderPdf"
+            class="sr-only"
+            type="file"
+            accept="application/pdf,.pdf"
+            (change)="onPdf($event)"
+          />
+          <span class="text-[9px] text-[#89999b]">El OCR propone datos; revísalos antes de guardar.</span>
+        </label>
+      </div>
+    }
+
+    @if (error()) {
+      <p class="sanjose-hint sanjose-hint--error m-0" role="alert">{{ error() }}</p>
+    }
+  </form>
+
+  <div dialogFooter class="flex justify-end gap-[8px]">
+    <button type="button" class="sanjose-button sanjose-button--secondary" (click)="visible.set(false)">
+      Cancelar
+    </button>
+    <button type="submit" form="orderForm" class="sanjose-button sanjose-button--primary">
+      {{ isEditing() ? 'Guardar cambios' : 'Guardar orden' }}
+    </button>
+  </div>
+</app-ui-dialog>

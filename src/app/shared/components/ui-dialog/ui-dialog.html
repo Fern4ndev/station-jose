@@ -1,0 +1,30 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event)"
+  [modal]="true"
+  [appendTo]="'body'"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(570px, calc(100vw - 28px))' }"
+  [pt]="{
+    root: { class: 'sanjose-dialog' },
+    mask: { class: 'sanjose-dialog-mask' },
+    pcCloseButton: { root: { class: 'sanjose-dialog-close' } }
+  }"
+>
+  <ng-template #header>
+    <div>
+      <h2 class="m-0 text-[17px] font-[650] tracking-[-0.04em] text-[#21383f]">{{ title() }}</h2>
+      @if (description()) {
+        <p class="mt-[6px] mb-0 text-[10px] leading-[1.5] text-[#839095]">{{ description() }}</p>
+      }
+    </div>
+  </ng-template>
+
+  <ng-content />
+
+  <ng-template #footer>
+    <ng-content select="[dialogFooter]" />
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,41 @@
+<div class="w-full overflow-x-auto">
+  <table class="sanjose-table">
+    <thead>
+      <tr>
+        <th class="sanjose-th">FECHA Y HORA</th>
+        <th class="sanjose-th">VALE / ORDEN</th>
+        <th class="sanjose-th">GRIFERO</th>
+        <th class="sanjose-th">SEDE</th>
+        <th class="sanjose-th">GALONES</th>
+        <th class="sanjose-th">ESTADO</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track row.id) {
+        <tr>
+          <td class="sanjose-td">
+            <span class="sanjose-cell-primary">{{ row.date }} · {{ row.time }}</span>
+          </td>
+          <td class="sanjose-td">
+            <span class="sanjose-cell-primary">{{ row.voucher }}</span>
+            <span class="sanjose-cell-secondary">{{ row.orderId }}</span>
+          </td>
+          <td class="sanjose-td">{{ row.attendant }}</td>
+          <td class="sanjose-td">{{ row.branch }}</td>
+          <td class="sanjose-td">{{ gallons(row) }}</td>
+          <td class="sanjose-td">
+            <app-ui-status-badge [label]="row.status" tone="green" />
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="sanjose-td" colspan="6">
+            <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">
+              No hay atenciones registradas para este perfil y sede.
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

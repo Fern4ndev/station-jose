@@ -1,0 +1,34 @@
+<app-ui-toast />
+
+<div class="animate-[fadeIn_230ms_ease_both]">
+  <app-ui-page-heading
+    title="Reportes"
+    subtitle="Consulta actividad y saldos por período, sede, usuario o estado."
+  >
+    <select
+      id="reportPeriod"
+      class="sanjose-select !w-auto"
+      aria-label="Período del reporte"
+      [value]="period()"
+      (change)="onPeriod($event)"
+    >
+      @for (option of periods; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+
+    <button type="button" class="sanjose-button sanjose-button--primary" (click)="exportCsv()">
+      <app-ui-icon name="download" [size]="14" />
+      Exportar
+    </button>
+  </app-ui-page-heading>
+
+  <app-report-metrics [metrics]="metrics()" />
+
+  <div
+    class="grid grid-cols-[minmax(0,1.45fr)_minmax(240px,0.75fr)] gap-[13px] max-[760px]:grid-cols-[1fr] max-[760px]:gap-[10px]"
+  >
+    <app-report-chart [buckets]="dataset().buckets" [badge]="dataset().badge" />
+    <app-report-summary [summary]="summary()" />
+  </div>
+</div>

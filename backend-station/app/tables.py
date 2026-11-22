@@ -90,9 +90,6 @@ class User(Base):
     branch: Mapped[Branch | None] = relationship(back_populates="users")
     sessions: Mapped[list["AuthSession"]] = relationship(back_populates="user")
     attendances: Mapped[list["Attendance"]] = relationship(back_populates="performed_by")
-    verifications: Mapped[list["AttendanceVerification"]] = relationship(
-        back_populates="reviewed_by"
-    )
 
 
 class AuthSession(Base):
@@ -293,9 +290,6 @@ class Attendance(Base):
     performed_by: Mapped[User] = relationship(back_populates="attendances")
     branch: Mapped[Branch] = relationship(back_populates="attendances")
     items: Mapped[list["AttendanceItem"]] = relationship(back_populates="attendance")
-    verifications: Mapped[list["AttendanceVerification"]] = relationship(
-        back_populates="attendance"
-    )
 
 
 class AttendanceItem(Base):
@@ -336,29 +330,6 @@ class AttendanceItem(Base):
 
     attendance: Mapped[Attendance] = relationship(back_populates="items")
     voucher_item: Mapped[VoucherItem] = relationship(back_populates="attendance_items")
-
-
-class AttendanceVerification(Base):
-    __tablename__ = "attendance_verifications"
-    __table_args__ = (
-        CheckConstraint("decision IN ('VERIFIED', 'OBSERVED')", name="ck_verification_decision"),
-    )
-
-    id: Mapped[UUID] = mapped_column(UUIDType, primary_key=True, default=uuid4)
-    attendance_id: Mapped[UUID] = mapped_column(
-        UUIDType, ForeignKey("attendances.id", ondelete="RESTRICT"), nullable=False
-    )
-    reviewed_by_user_id: Mapped[UUID] = mapped_column(
-        UUIDType, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
-    )
-    decision: Mapped[str] = mapped_column(String(20), nullable=False)
-    observation: Mapped[str | None] = mapped_column(Text)
-    reviewed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=utc_now, nullable=False
-    )
-
-    attendance: Mapped[Attendance] = relationship(back_populates="verifications")
-    reviewed_by: Mapped[User] = relationship(back_populates="verifications")
 
 
 class DocumentCounter(Base):

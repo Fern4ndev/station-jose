@@ -195,23 +195,6 @@ CREATE TABLE attendance_items (
         REFERENCES voucher_items (id, voucher_id) ON DELETE RESTRICT
 );
 
-CREATE TABLE attendance_verifications (
-    id UUID PRIMARY KEY,
-    attendance_id UUID NOT NULL,
-    reviewed_by_user_id UUID NOT NULL,
-    decision VARCHAR(20) NOT NULL,
-    observation TEXT,
-    reviewed_at TIMESTAMPTZ NOT NULL,
-    CONSTRAINT attendance_verifications_decision_check
-        CHECK (decision IN ('VERIFIED', 'OBSERVED')),
-    CONSTRAINT attendance_verifications_observation_check
-        CHECK (decision <> 'OBSERVED' OR NULLIF(btrim(observation), '') IS NOT NULL),
-    CONSTRAINT attendance_verifications_attendance_fk
-        FOREIGN KEY (attendance_id) REFERENCES attendances (id) ON DELETE RESTRICT,
-    CONSTRAINT attendance_verifications_reviewer_fk
-        FOREIGN KEY (reviewed_by_user_id) REFERENCES users (id) ON DELETE RESTRICT
-);
-
 CREATE TABLE document_counters (
     id UUID PRIMARY KEY,
     counter_code VARCHAR(40) NOT NULL UNIQUE,
@@ -242,9 +225,5 @@ CREATE INDEX attendances_user_attended_at_idx
 CREATE INDEX attendances_branch_attended_at_idx ON attendances (branch_id, attended_at);
 CREATE INDEX attendance_items_attendance_voucher_idx ON attendance_items (attendance_id, voucher_id);
 CREATE INDEX attendance_items_voucher_item_idx ON attendance_items (voucher_item_id, voucher_id);
-CREATE INDEX attendance_verifications_attendance_reviewed_idx
-    ON attendance_verifications (attendance_id, reviewed_at DESC);
-CREATE INDEX attendance_verifications_reviewer_id_idx
-    ON attendance_verifications (reviewed_by_user_id);
 
 COMMIT;

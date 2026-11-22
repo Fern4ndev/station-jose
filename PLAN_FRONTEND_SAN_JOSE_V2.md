@@ -1,4 +1,3 @@
-# PLAN_FRONTEND.md
 # Plan de implementación del frontend — Estación de Servicio San José
 
 **Proyecto:** Sistema de control de órdenes de compra y vales de combustible  
@@ -9,10 +8,12 @@
 **API:** REST, prefijo propuesto `/api/v1`  
 **Idioma de interfaz:** Español  
 **Idioma técnico:** Inglés  
-**Versión del documento:** 2.0  
+**Versión del documento:** 2.1  
 **Base funcional:** `REQUERIMIENTOS_FUNCIONALES_SAN_JOSE_V2.md`  
 **Contrato técnico de referencia:** `PLAN_BACKEND_SAN_JOSE_V2.md`  
 **Estado:** Plan técnico en implementación. El repositorio Angular y FastAPI están disponibles; los endpoints y DTOs deben contrastarse con el código backend antes de integrar cada flujo.
+
+> **Actualización 2.1 (22/11/2026):** se retira del alcance la verificación administrativa del vale físico (RF-013), en línea con el plan backend 2.3. Oficina y Administración solo consultan los registros; no hay bandeja, estado, permiso ni endpoint de verificación, y la tabla `attendance_verifications` se elimina del esquema.
 
 ---
 
@@ -20,9 +21,9 @@
 
 ## 1.1. Descripción del sistema
 
-El frontend permitirá al personal de la Estación de Servicio San José administrar órdenes de compra, capturar los vales físicos durante su primera atención, registrar los galones realmente despachados y realizar la verificación administrativa posterior de cada atención. El sistema opera con información centralizada para las sedes San José y Santa Marta.
+El frontend permitirá al personal de la Estación de Servicio San José administrar órdenes de compra, capturar los vales físicos durante su primera atención, registrar los galones realmente despachados. El sistema opera con información centralizada para las sedes San José y Santa Marta.
 
-El flujo comienza con el registro de una orden de compra por Administrador u Oficina. Cuando el cliente presenta un vale, el Grifero consulta la orden y el saldo del combustible solicitado. Si el vale todavía no existe, captura sus datos junto con el primer despacho en una única operación. Si ya existe, consulta su saldo y registra una nueva atención parcial. Posteriormente, Oficina compara la información capturada con el documento físico recibido y registra el resultado de la verificación.
+El flujo comienza con el registro de una orden de compra por Administrador u Oficina. Cuando el cliente presenta un vale, el Grifero consulta la orden y el saldo del combustible solicitado. Si el vale todavía no existe, captura sus datos junto con el primer despacho en una única operación. Si ya existe, consulta su saldo y registra una nueva atención parcial. Posteriormente, Oficina consulta los vales registrados y realiza la corrección descriptiva cuando corresponde.
 
 ## 1.2. Objetivo del frontend
 
@@ -32,13 +33,13 @@ El frontend no será la fuente de verdad de saldos, estados, permisos, identidad
 
 ## 1.3. Objetivos específicos
 
-- Implementar los 34 requerimientos funcionales RF-001 a RF-034.
+- Implementar los requerimientos funcionales RF V2 vigentes.
 - Respetar los tres roles predefinidos: Administrador, Oficina y Grifero.
 - Administrar órdenes con una o varias líneas independientes por tipo de combustible.
 - Capturar un vale nuevo únicamente durante su primera atención, junto con el despacho inicial.
 - Permitir atenciones parciales posteriores sobre el mismo vale.
 - Mostrar por separado cantidades autorizadas, cantidades realmente despachadas y saldos de orden y vale.
-- Permitir que Oficina verifique la atención contra el vale físico sin duplicar registros ni alterar cantidades.
+- Permitir que Oficina consulte vales y atenciones sin duplicar registros ni alterar cantidades.
 - Compartir la misma información entre las sedes.
 - Implementar dashboard, reportes, filtros, ordenación y exportación PDF/XLSX.
 - Incorporar OCR con RapidOCR exclusivamente para PDFs de órdenes de compra, con revisión humana obligatoria.
@@ -52,12 +53,12 @@ El frontend cubrirá los seis módulos definidos por RF V2:
 |---|---|---|
 | MOD-001. Administración de usuarios y acceso | Registro de usuarios, roles predefinidos, login/logout, habilitación y deshabilitación, consulta de atenciones de griferos por Administrador. | RF-001 a RF-006 |
 | MOD-002. Gestión de órdenes de compra | Registro manual/OCR, detalle, búsqueda, paginación, modificación y eliminación condicionada. | RF-007 a RF-012, RF-032, RF-034 |
-| MOD-003. Atención de vales y verificación administrativa | Captura de vale en primera atención, consultas, búsqueda, paginación, corrección descriptiva por Administrador, protección de vales atendidos y verificación de Oficina. | RF-013 a RF-019, RF-033 |
+| MOD-003. Atención y consulta de vales | Captura de vale en primera atención, consultas, búsqueda, paginación, corrección descriptiva por Administrador y protección de vales atendidos. | RF-014 a RF-019, RF-033 |
 | MOD-004. Control de saldos y estados | Consulta de saldos, validación previa, actualización transaccional, estados derivados y consulta compartida entre sedes. | RF-020 a RF-026 |
 | MOD-005. Reportes y panel principal | Reportes de órdenes y atenciones, filtros, gráficos interactivos y exportación PDF/XLSX. | RF-027 a RF-031 |
 | MOD-006. OCR para órdenes de compra | Carga temporal de PDF, procesamiento RapidOCR, prellenado del formulario y revisión manual. | RF-034 |
 
-Los 34 RF se cubrirán mediante pantallas, componentes, flujos y servicios. No todos requieren una pantalla independiente: por ejemplo, RF-020 a RF-026 se presentan en los detalles de órdenes, vales y workspace de atención.
+Los RF vigentes se cubrirán mediante pantallas, componentes, flujos y servicios. No todos requieren una pantalla independiente: por ejemplo, RF-020 a RF-026 se presentan en los detalles de órdenes, vales y workspace de atención.
 
 ## 1.5. Fuera del alcance de esta versión
 
@@ -66,6 +67,7 @@ No se implementarán:
 - Autorregistro de usuarios ni portales para clientes, proveedores o instituciones.
 - Permisos personalizados por usuario fuera de los tres roles predefinidos.
 - Registro anticipado o independiente de vales por Oficina.
+- Verificación administrativa del vale físico (RF-013), retirada del alcance el 20/11/2026.
 - Edición o eliminación directa de atenciones ya confirmadas.
 - Corrección de galones despachados hasta que exista un procedimiento de ajuste aprobado y un contrato backend específico.
 - Comparación de períodos en reportes.
@@ -132,13 +134,13 @@ Cuando un documento técnico proponga un detalle todavía no aprobado en RF V2, 
 | Servicios API | No existe cliente API ni catálogo contractual frontend. | Documentar endpoints y mantener manualmente tipos TypeScript y servicios tipados. |
 | Gráficos | Chart.js está instalado; aún no integrado. | Integrarlo solo en los reportes/dashboard definidos. |
 | Calidad | TypeScript strict activado y Prettier disponible; faltan lint, CI y configuración de ambientes. | Completar configuración de calidad y build de CI. |
-| Verificación | `npm run build` de producción completó sin advertencias tras excluir los mockups del escaneo; no se ejecutaron pruebas. | Mantener exclusiones y ejecutar la suite cuando se solicite. |
+| Build | `npm run build` de producción completó sin advertencias tras excluir los mockups del escaneo; no se ejecutaron pruebas. | Mantener exclusiones y ejecutar la suite cuando se solicite. |
 
 ## 3.3. Estado del backend de referencia
 
 El repositorio incluye una implementación FastAPI con routers, servicios, repositorios, esquemas Pydantic, SQL numerado y pruebas unitarias/API. Aún falta un catálogo frontend versionado que contraste cada ruta y DTO con el código actual. El plan backend es una referencia, no una prueba de que todas sus rutas propuestas coincidan con la implementación.
 
-**Hallazgos FE-0:** `/api/v1` contiene autenticación, órdenes, vales, atenciones, verificaciones, usuarios, catálogos, reportes y OCR. Sin embargo, los endpoints de órdenes usan `PurchaseOrderResponse` para todos los roles y `PurchaseOrderItemResponse` incluye `unit_price` y `total_amount`; como `ATTENDANT` tiene `purchase_orders.read`, la respuesta actual no cumple la regla de no exponer precios/importes al Grifero. La separación de DTOs/consultas por rol es un bloqueo de seguridad antes de integrar esas respuestas. También falta contrastar rutas, estados, códigos de error y comportamiento endpoint por endpoint. Ninguna integración frontend se declara lista.
+**Hallazgos FE-0:** `/api/v1` contiene autenticación, órdenes, vales, atenciones, usuarios, catálogos, reportes y OCR. Sin embargo, los endpoints de órdenes usan `PurchaseOrderResponse` para todos los roles y `PurchaseOrderItemResponse` incluye `unit_price` y `total_amount`; como `ATTENDANT` tiene `purchase_orders.read`, la respuesta actual no cumple la regla de no exponer precios/importes al Grifero. La separación de DTOs/consultas por rol es un bloqueo de seguridad antes de integrar esas respuestas. También falta contrastar rutas, estados, códigos de error y comportamiento endpoint por endpoint. Ninguna integración frontend se declara lista.
 
 ## 3.4. Correcciones realizadas respecto al frontend 1.0
 
@@ -148,10 +150,9 @@ El repositorio incluye una implementación FastAPI con routers, servicios, repos
 | Alta de vales | Formulario y endpoint de creación independiente. | El vale nace junto con el primer despacho del grifero. |
 | Atención parcial | Flujo condicionado a decisiones ya resueltas por RF V2. | Se diseña como flujo principal, con atenciones repetidas y saldo remanente. |
 | Líneas del vale | Modelo implícito de una sola línea de combustible. | Se contempla estructura de una o varias líneas; la habilitación de varias líneas queda asociada a PD-004. |
-| Verificación | No estaba suficientemente separada del despacho. | Bandeja de verificación por atención, con resultado independiente de los saldos. |
 | Corrección | Edición genérica del vale. | Solo datos descriptivos permitidos; nunca cantidad real, usuario o fecha/hora de una atención. |
 | Permisos | Oficina aparecía creando vales y ciertas consultas eran ambiguas. | Matriz corregida según RF V2. |
-| Estados | Estados antiguos y genéricos. | Se distinguen consumo de orden, consumo de vale y verificación física. |
+| Estados | Estados antiguos y genéricos. | Se distinguen consumo de orden y consumo de vale. |
 | Reportes | Comparación e impresión incluidas. | Se eliminan ambas funciones; se conservan gráficos y exportación. |
 | OCR | RF-036, imágenes y aprobación opcional. | RF-034, solo PDF de orden y revisión humana obligatoria. |
 | API | Rutas no alineadas al backend V2. | Se usa el catálogo del plan backend V2. |
@@ -186,8 +187,6 @@ El frontend usará las claves de permiso que devuelva el backend. Los roles sirv
 | Registrar atenciones posteriores | Sí, por acceso a todos los módulos | No | Sí, en sus propias atenciones |
 | Consultar todas las atenciones de griferos | Sí | Según permisos/alcance administrativo definido por backend; no se asumirá acceso global | No |
 | Consultar las propias atenciones | Sí | Según alcance definido por backend | Sí |
-| Verificar documento físico | Sí | Sí | No |
-| Marcar una verificación como observada | Sí | Sí | No |
 | Corregir datos descriptivos de un vale | Sí | No | No |
 | Editar o borrar una atención confirmada | No mediante edición directa | No | No |
 | Reportes, dashboard y gráficos | Sí | Sí | No |
@@ -202,10 +201,10 @@ El frontend usará las claves de permiso que devuelva el backend. Los roles sirv
 - Ocultar rutas y acciones sin permiso. Un guard frontend no reemplaza la comprobación de backend.
 - Ante `401`, invalidar el estado local de sesión y enviar a `/auth/login`.
 - Ante `403`, mostrar acceso denegado y no repetir automáticamente la operación.
-- El Grifero no verá administración de usuarios, formularios de órdenes, verificación administrativa, corrección descriptiva ni reportes.
-- Oficina podrá gestionar órdenes, revisar/verificar atenciones, consultar saldos y usar reportes/OCR. No capturará vales ni despachos.
+- El Grifero no verá administración de usuarios, formularios de órdenes, corrección descriptiva ni reportes.
+- Oficina podrá gestionar órdenes, consultar vales y atenciones, revisar saldos y usar reportes/OCR. No capturará vales ni despachos.
 - No mostrar precios unitarios, importes financieros ni campos administrativos al Grifero. El backend debe omitirlos del DTO; el frontend no debe confiar en ocultar visualmente datos que ya recibió.
-- La interfaz no permitirá cambiar manualmente estados de consumo o verificación.
+- La interfaz no permitirá cambiar manualmente estados de consumo.
 - No ofrecer acciones de edición de una atención confirmada.
 
 ---
@@ -386,7 +385,6 @@ Las rutas serán minúsculas, en inglés y `kebab-case`.
 
 /app/attendant/workspace
 /app/attendances
-/app/attendances/pending-verification
 /app/attendances/:attendanceId
 /app/balances
 
@@ -402,7 +400,6 @@ Reglas de navegación:
 - **No existe** `/app/purchase-orders/:orderId/vouchers/new`: el vale se captura dentro de la primera atención.
 - La ruta `.../attendances/new` de una orden inicia el formulario combinado de vale nuevo + primer despacho.
 - La ruta `.../vouchers/:voucherId/attendances/new` registra una atención posterior del vale existente.
-- Las rutas de verificación son administrativas y solo se habilitan a `OFFICE` y `ADMIN`.
 - No existe `/app/reports/comparison`.
 - No existe ruta ni acción para imprimir reportes.
 - Las rutas de listado, búsqueda, filtros, página y orden se podrán reflejar en query parameters para permitir recarga y compartir una consulta sin perder contexto.
@@ -448,8 +445,8 @@ La interfaz priorizará legibilidad, claridad de saldos y rapidez operacional.
 
 | Rol | Destino | Contenido |
 |---|---|---|
-| `ADMIN` | `/app/dashboard` | Dashboard, administración de usuarios, órdenes, atención, vales, verificación, reportes y catálogos de consulta. |
-| `OFFICE` | `/app/dashboard` | Dashboard, órdenes, bandeja de verificación, consulta de vales, saldos, reportes, exportación y OCR. |
+| `ADMIN` | `/app/dashboard` | Dashboard, administración de usuarios, órdenes, atención, vales, reportes y catálogos de consulta. |
+| `OFFICE` | `/app/dashboard` | Dashboard, órdenes, consulta de vales, saldos, reportes, exportación y OCR. |
 | `ATTENDANT` | `/app/attendant/workspace` | Búsqueda de órdenes, consulta de saldos, localización de vales existentes y registro de atenciones propias. |
 
 ## 8.4. Workspace del Grifero
@@ -499,19 +496,7 @@ El frontend enviará una sola solicitud para crear el vale y su primer despacho.
 - Enviar nueva atención contra el `voucher_id` existente.
 - No volver a capturar ni crear otro vale.
 
-## 8.6. Verificación de Oficina
-
-La verificación es una operación distinta del despacho:
-
-- La bandeja mostrará una fila por atención pendiente u observada, identificada por número de vale, orden, institución, combustible, galones de esa visita, fecha/hora y usuario que la ejecutó.
-- Oficina abre el detalle y compara los datos con el documento físico recibido.
-- Si coinciden, selecciona **Verificar**.
-- Si no coinciden, podrá registrar **Observar** con una descripción obligatoria, conforme al contrato backend propuesto.
-- Una observación no edita ni elimina el despacho, no cambia cantidades y no modifica saldos.
-- La UI distinguirá estado de consumo del vale y estado de verificación de cada atención.
-- La resolución posterior de observaciones permanece pendiente de PD-011; no se inventará un botón para corregir cantidades.
-
-## 8.7. Responsive
+## 8.6. Responsive
 
 | Dispositivo | Comportamiento |
 |---|---|
@@ -520,7 +505,7 @@ La verificación es una operación distinta del despacho:
 | Escritorio | Sidebar, tablas paginadas, filtros y paneles de detalle. |
 | Pantallas grandes | Ancho de lectura limitado, sin estirar formularios innecesariamente. |
 
-## 8.8. Estados de pantalla
+## 8.7. Estados de pantalla
 
 Toda pantalla que consulta o modifica datos deberá contemplar:
 
@@ -533,7 +518,7 @@ Toda pantalla que consulta o modifica datos deberá contemplar:
 - `conflict`: conflicto de saldo, duplicidad o estado (`409`).
 - `unknown-outcome`: la conexión se interrumpió y no se conoce el resultado de una escritura. No mostrar éxito ni generar una clave de idempotencia nueva hasta resolver el intento previo.
 
-## 8.9. Accesibilidad
+## 8.8. Accesibilidad
 
 - Labels asociados a todos los inputs.
 - Semántica correcta para botones, tablas, encabezados y diálogos.
@@ -597,7 +582,7 @@ Formato paginado propuesto:
 }
 ```
 
-Parámetros previstos por backend: `page`, `page_size`, `search`, `order_number`, `voucher_number`, `institution`, `date_from`, `date_to`, `status`, `verification_status`, `sort_by` y `sort_order`. En reportes también se contemplan `user_id`, `fuel_type_id` y `group_by` (`hour`, `day`, `week`, `month`). No todos aplican a todos los endpoints.
+Parámetros previstos por backend: `page`, `page_size`, `search`, `order_number`, `voucher_number`, `institution`, `date_from`, `date_to`, `status`, `sort_by` y `sort_order`. En reportes también se contemplan `user_id`, `fuel_type_id` y `group_by` (`hour`, `day`, `week`, `month`). No todos aplican a todos los endpoints.
 
 ## 9.4. Catálogo de endpoints planificados
 
@@ -653,22 +638,12 @@ No se crearán pantallas CRUD de sedes ni combustibles.
 | GET | `/api/v1/vouchers/{voucher_id}` | Consultar cabecera, líneas, atenciones y saldos. | RF-014/RF-015 | `vouchers.read` |
 | PATCH | `/api/v1/vouchers/{voucher_id}/descriptive-data` | Corregir campos descriptivos permitidos. | RF-017 | `vouchers.correct_descriptive_data` |
 | DELETE | `/api/v1/vouchers/{voucher_id}` | No se expone como acción normal; backend bloquea vales atendidos. | RF-018 | Según backend |
-| GET | `/api/v1/attendances` | Listar atenciones según rol y alcance. | RF-006/RF-013/RF-028 | `attendances.read` |
-| GET | `/api/v1/attendances/{attendance_id}` | Consultar detalle de un despacho. | RF-006/RF-013 | `attendances.read` |
+| GET | `/api/v1/attendances` | Listar atenciones según rol y alcance. | RF-006/RF-028 | `attendances.read` |
+| GET | `/api/v1/attendances/{attendance_id}` | Consultar detalle de un despacho. | RF-006 | `attendances.read` |
 | POST | `/api/v1/purchase-orders/{order_id}/attendances` | Crear vale nuevo y su primer despacho en una operación. | RF-019 | `attendances.create` |
 | POST | `/api/v1/vouchers/{voucher_id}/attendances` | Registrar atención parcial posterior. | RF-019 | `attendances.create` |
 
 **No existe alta normal independiente de vales.** No implementar `POST /vouchers` ni pantalla de pre-registro por Oficina. La creación del vale forma parte de la primera atención.
-
-### Verificación administrativa
-
-| Método | Endpoint | Uso frontend | RF | Permiso |
-|---|---|---|---|---|
-| GET | `/api/v1/attendances/pending-verification` | Bandeja de atenciones pendientes u observadas. | RF-013 | `attendances.verify` |
-| POST | `/api/v1/attendances/{attendance_id}/verifications` | Guardar decisión `VERIFIED` u `OBSERVED`. | RF-013 | `attendances.verify` |
-| GET | `/api/v1/attendances/{attendance_id}/verifications` | Consultar historial de verificaciones. | RF-013 | `attendances.verify` |
-
-La verificación se aplica al registro de atención y no modifica las cantidades del despacho ni los saldos.
 
 ### Saldos
 
@@ -806,7 +781,6 @@ No se elegirá `sessionStorage` o `localStorage` como solución automática para
 | Purchase orders | Listado, detalle, líneas, saldos devueltos | Crear/modificar/eliminar |
 | Vouchers | Listado, detalle, líneas, atenciones y estados | Crear primera atención, atención posterior o corrección descriptiva |
 | Attendances | Historial, detalle, filtros | Nueva atención; consulta siempre desde API |
-| Verifications | Bandeja, decisión, historial | Nueva verificación |
 | Balances | Saldos por línea de orden/vale | Después de atención o cambio autorizado de orden |
 | Reports | Filtros, tablas y series | Cambio de filtros; consulta al backend |
 | OCR | Archivo temporal, preview, candidatos y estado | Procesar, cancelar o limpiar formulario |
@@ -833,7 +807,7 @@ Ejemplo ilustrativo que debe poder mostrarse sin cálculos frontend:
 - Saldo de la orden: 95.
 - Un segundo vale autoriza 20 galones y todavía no despacha: el saldo de la orden sigue siendo 95.
 
-## 11.4. Estados de consumo y verificación
+## 11.4. Estados de consumo
 
 El frontend traducirá códigos de backend a etiquetas españolas mediante un mapper centralizado. No cambiará estados manualmente.
 
@@ -846,11 +820,8 @@ El frontend traducirá códigos de backend a etiquetas españolas mediante un ma
 | Línea de vale | `COMPLETED` | Atendido | Saldo propio igual a cero. |
 | Línea de vale | `BLOCKED_BY_ORDER_BALANCE` | Sin disponibilidad por saldo de orden | Conserva saldo propio, pero la orden no permite nuevos despachos. |
 | Vale agregado | `PARTIALLY_BLOCKED` | Parcialmente bloqueado | Alguna línea conserva saldo propio pero no puede continuar por el saldo de su orden. |
-| Verificación | `PENDING` | Pendiente de verificación | Oficina todavía no revisa esa atención. |
-| Verificación | `VERIFIED` | Verificado | Oficina confirmó coincidencia con el documento físico. |
-| Verificación | `OBSERVED` | Observado | Oficina registró una discrepancia. |
 
-El estado de consumo del vale y el estado de verificación de cada atención se presentan en controles separados. Un vale puede estar `PARTIALLY_ATTENDED` y su última atención `OBSERVED`; un estado no reemplaza al otro.
+El estado se presenta por línea de vale; un mismo vale puede combinar líneas atendidas y líneas con saldo pendiente, y la interfaz debe mostrarlo así.
 
 ## 11.5. Información compartida entre sedes
 
@@ -872,7 +843,7 @@ El estado de consumo del vale y el estado de verificación de cada atención se 
 - Reset de página al cambiar filtros.
 - Mantener filtros en query parameters cuando sea apropiado.
 - No descargar todos los datos para paginar/ordenar localmente.
-- Tamaño de página inicial configurable según contrato documentado; la propuesta backend sugiere 20 por defecto y un máximo de 100, pendiente de verificación.
+- Tamaño de página inicial configurable según contrato documentado; la propuesta backend sugiere 20 por defecto y un máximo de 100, pendiente de confirmación.
 
 ---
 
@@ -994,7 +965,6 @@ interface Attendance {
   branchName: string;
   occurredAt: string;
   items: AttendanceItem[];
-  verificationStatus: 'PENDING' | 'VERIFIED' | 'OBSERVED';
 }
 
 interface AttendanceItem {
@@ -1039,34 +1009,11 @@ interface SubsequentAttendanceRequest {
 
 La primera operación se envía a `POST /purchase-orders/{order_id}/attendances`; la siguiente, a `POST /vouchers/{voucher_id}/attendances`.
 
-## 12.5. Modelos de verificación
-
-```ts
-type VerificationDecision = 'VERIFIED' | 'OBSERVED';
-
-interface VerificationRequest {
-  decision: VerificationDecision;
-  observation?: string | null;
-}
-
-interface AttendanceVerification {
-  id: string;
-  attendanceId: string;
-  decision: VerificationDecision;
-  observation?: string | null;
-  reviewedByUserId: string;
-  reviewedByName: string;
-  reviewedAt: string;
-}
-```
-
-Si la decisión es `OBSERVED`, la interfaz requerirá una observación no vacía, de acuerdo con el contrato backend propuesto. Esta observación no es un ajuste del despacho.
-
-## 12.6. Modelos de saldos y reportes
+## 12.5. Modelos de saldos y reportes
 
 Los DTOs de saldo serán los devueltos por el endpoint que se acuerde con backend. Los DTOs de reportes/dashboard modelarán únicamente columnas, totales y series presentes en el contrato documentado. No crear campos calculados en cliente para completar datos que el backend no proporcione.
 
-## 12.7. Precisión decimal
+## 12.6. Precisión decimal
 
 - Tratar galones, precios e importes como strings decimales en los modelos y payloads frontend.
 - No usar `parseFloat` ni aritmética binaria `number` para validar saldos.
@@ -1173,7 +1120,6 @@ Los DTOs de saldo serán los devueltos por el endpoint que se acuerde con backen
 **Pantallas/componentes:**
 - Listado de vales con búsqueda, paginación y orden.
 - Detalle del vale con sus líneas, atenciones, cantidades y saldos.
-- Historial de verificaciones asociado a cada atención.
 - Formulario de corrección descriptiva exclusivo de Administrador.
 
 **Búsqueda:**
@@ -1252,32 +1198,9 @@ Los DTOs de saldo serán los devueltos por el endpoint que se acuerde con backen
 - Después de una atención confirmada, refrescar balance de orden y vale.
 - Las dos sedes consultan la misma fuente central.
 
-## 13.7. Módulo de verificación administrativa
+## 13.7. Módulo de atenciones e historial
 
-**RF:** RF-013, RF-017 y RF-018.  
-**Rutas:** `/app/attendances/pending-verification`, `/app/attendances/:attendanceId`.  
-**Permisos:** `attendances.verify`; corrección descriptiva adicional solo Administrador.  
-**Servicios:** `VerificationsApiService`, `VerificationsFacade`, `AttendancesApiService`.
-
-**Pantallas/componentes:**
-- Bandeja de atenciones pendientes/observadas.
-- Detalle de atención y datos del vale.
-- Formulario de decisión `VERIFIED`/`OBSERVED`.
-- Historial de verificaciones.
-
-**Reglas:**
-- Oficina revisa el vale físico recibido contra el registro de atención.
-- Si coincide, registra `VERIFIED`.
-- Si no coincide, registra `OBSERVED` con observación obligatoria según el contrato backend propuesto.
-- La verificación no cambia galones ni saldos.
-- No crea un segundo vale ni una segunda atención.
-- No se mostrarán botones de editar/eliminar cantidades de atención.
-- La corrección descriptiva RF-017 es exclusiva de Administrador y no equivale a corregir la cantidad despachada.
-- La resolución de observaciones después del registro queda pendiente PD-011.
-
-## 13.8. Módulo de atenciones e historial
-
-**RF:** RF-006, RF-013, RF-019 y RF-028.  
+**RF:** RF-006, RF-019 y RF-028.  
 **Rutas:** `/app/attendances`, `/app/attendances/:attendanceId`, `/app/users/:userId/attendances`.  
 **Servicios:** `AttendancesApiService`, `AttendancesFacade`.
 
@@ -1289,11 +1212,11 @@ Los DTOs de saldo serán los devueltos por el endpoint que se acuerde con backen
 
 **Reglas:**
 - La lista administrativa debe limitarse al alcance permitido por backend.
-- Oficina tendrá la bandeja de verificación; no se asumirá que puede consultar todas las atenciones de todos los usuarios si la política no lo autoriza.
+- No se asumirá que Oficina puede consultar todas las atenciones de todos los usuarios si la política no lo autoriza.
 - Cada atención mostrará usuario, fecha/hora, sede y líneas reales devueltas por el servidor.
 - No permitir editar ni eliminar una atención confirmada.
 
-## 13.9. Módulo de dashboard y reportes
+## 13.8. Módulo de dashboard y reportes
 
 **RF:** RF-027 a RF-031.  
 **Rutas:** `/app/dashboard`, `/app/reports/purchase-orders`, `/app/reports/attendances`.  
@@ -1322,7 +1245,7 @@ Los DTOs de saldo serán los devueltos por el endpoint que se acuerde con backen
 - Los filtros que se envían en consulta y exportación deben coincidir.
 - El Grifero no accede a dashboard ni reportes.
 
-## 13.10. Módulo OCR
+## 13.9. Módulo OCR
 
 **RF:** RF-034.  
 **Ruta:** Integrado en `/app/purchase-orders/new`; no requiere menú independiente.  
@@ -1363,7 +1286,7 @@ Los DTOs de saldo serán los devueltos por el endpoint que se acuerde con backen
 | `ServerPaginationComponent` | Navegación de páginas backend. | Listados. |
 | `SearchFieldComponent` | Búsqueda con debounce. | Órdenes y vales. |
 | `DateRangeFilterComponent` | Filtro de fecha desde/hasta. | Órdenes, vales y reportes. |
-| `StatusBadgeComponent` | Estado traducido. | Orden, vale y verificación. |
+| `StatusBadgeComponent` | Estado traducido. | Orden y vale. |
 | `GallonsDisplayComponent` | Cantidad y unidad. | Órdenes, vales, saldos y atenciones. |
 | `CurrencyDisplayComponent` | Presentar precios/importes autorizados. | Órdenes/reportes Admin-Office. |
 | `ConfirmDialogComponent` | Confirmar acciones sensibles. | Modificaciones, eliminaciones y despachos. |
@@ -1375,7 +1298,6 @@ Los DTOs de saldo serán los devueltos por el endpoint que se acuerde con backen
 | `ReportFilterBarComponent` | Filtros compartidos. | Dashboard/reportes. |
 | `FuelLineEditorComponent` | Editor de líneas por combustible. | Orden y, si se aprueba PD-004, vale nuevo. |
 | `BalanceSummaryComponent` | Diferenciar autorizado, despachado y saldo. | Orden, vale y workspace. |
-| `VerificationStatusComponent` | Estado físico por atención. | Bandeja e historial. |
 | `IdempotentSubmitDirective` | Evitar doble envío y conservar intento. | Captura de atenciones. |
 | `PdfUploadComponent` | Selección temporal de PDF. | OCR de órdenes. |
 
@@ -1455,17 +1377,7 @@ Validaciones UI:
 - Validar cantidad mayor que cero y no mayor que los saldos devueltos.
 - Enviar un nuevo `Idempotency-Key` para una nueva operación lógica; conservar la misma clave para reintentos exactos de esa operación.
 
-## 15.6. Formulario de verificación
-
-- Mostrar datos del vale y de la atención recibida.
-- Decisión `VERIFIED` o `OBSERVED`.
-- Para `OBSERVED`, requerir descripción de la diferencia.
-- Para `VERIFIED`, la observación puede omitirse o ser nula según el contrato confirmado con backend.
-- No incluir inputs de galones, usuario, sede o fecha/hora.
-- Confirmar antes de registrar.
-- Tras éxito, refrescar bandeja e historial; no modificar saldos.
-
-## 15.7. Formulario de corrección descriptiva del vale
+## 15.6. Formulario de corrección descriptiva del vale
 
 - Visible solo para Administrador.
 - Utilizar exclusivamente los campos permitidos por `PATCH /vouchers/{id}/descriptive-data`.
@@ -1474,7 +1386,7 @@ Validaciones UI:
 - Si se corrige un campo de identidad, manejar duplicidad o inconsistencia reportada por backend.
 - No confundir corrección descriptiva con ajuste cuantitativo.
 
-## 15.8. Confirmación de modificaciones y eliminaciones
+## 15.7. Confirmación de modificaciones y eliminaciones
 
 Aplicable a RF-004, RF-011, RF-012 y RF-017:
 
@@ -1485,7 +1397,7 @@ Aplicable a RF-004, RF-011, RF-012 y RF-017:
 - No mostrar acción de eliminación en vales atendidos.
 - Manejar `409` sin eliminar datos de pantalla ni aplicar actualización optimista.
 
-## 15.9. Precisión de entradas numéricas
+## 15.8. Precisión de entradas numéricas
 
 - Usar controles decimales, `inputmode="decimal"` y patrones compatibles con la localización.
 - Mantener el valor en string durante el ciclo de formulario.
@@ -1511,7 +1423,6 @@ Aplicable a RF-004, RF-011, RF-012 y RF-017:
 | RF-010 | Paginar órdenes | Purchase Orders / listado | Paginación en servidor | `GET /purchase-orders?page=` | FE-3 |
 | RF-011 | Modificar órdenes | Purchase Orders / edición | Formulario y confirmación | `PATCH /purchase-orders/{id}` | FE-3 |
 | RF-012 | Eliminar órdenes sin vales | Purchase Orders / listado-detalle | Confirmación y manejo de `409` | `DELETE /purchase-orders/{id}` | FE-3 |
-| RF-013 | Verificar datos de vales atendidos | Verifications / bandeja-detalle | Comparar documento físico y registrar resultado | `GET /attendances/pending-verification`, `POST /attendances/{id}/verifications` | FE-4 |
 | RF-014 | Consultar información de órdenes y vales para atención | Workspace / detalle | Consultar saldo y vale previo sin pre-registro | `GET /purchase-orders`, `GET /vouchers/{id}`, `/balances/*` | FE-5 |
 | RF-015 | Buscar órdenes y vales por número o entidad | Purchase Orders/Vouchers | Búsqueda combinada y por fechas | `GET /purchase-orders`, `GET /vouchers` | FE-3/FE-4 |
 | RF-016 | Paginar vales | Vouchers / listado | Paginación en servidor | `GET /vouchers?page=` | FE-4 |
@@ -1524,7 +1435,7 @@ Aplicable a RF-004, RF-011, RF-012 y RF-017:
 | RF-023 | Actualizar saldos atómicamente | Workspace / detalle | Esperar respuesta, refrescar balances | POST de atención | FE-5 |
 | RF-024 | Consultar órdenes y saldos | Workspace / balances | Consulta por número/entidad/vale | `GET /balances/overview` y endpoints de detalle | FE-5 |
 | RF-025 | Compartir saldos entre sedes | Workspace / balances | Consultar API central; mostrar sede real de atención | `GET /balances/overview` | FE-5 |
-| RF-026 | Actualizar estados automáticamente | Orden/vale/atención | Etiquetas derivadas y estado verificación separado | Respuestas de órdenes, vales y balances | FE-5 |
+| RF-026 | Actualizar estados automáticamente | Orden/vale/atención | Etiquetas derivadas del consumo | Respuestas de órdenes, vales y balances | FE-5 |
 | RF-027 | Reportes de órdenes | Reports / órdenes | Tabla y resumen | `GET /reports/purchase-orders` | FE-6 |
 | RF-028 | Reportes de vales atendidos | Reports / atenciones | Tabla por despacho y agrupación temporal | `GET /reports/attendances` | FE-6 |
 | RF-029 | Filtrar reportes | Dashboard/Reports | Fecha, usuario y estado | Query parameters permitidos | FE-6 |
@@ -1548,7 +1459,7 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 
 **Dependencias:** ninguna; coordinación con backend F0–F2.
 
-**RF:** todos; atención y saldo (RF-013 a RF-026) como camino crítico.
+**RF:** todos; atención y saldo (RF-014 a RF-026) como camino crítico.
 
 **Tareas:**
 1. Fijar RF V2 como fuente funcional.
@@ -1656,35 +1567,30 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 
 **Gate:** backend F4, catálogo de contratos actualizado y pruebas integradas aprobadas.
 
-## FE-4 — Consulta de vales y verificación administrativa
+## FE-4 — Consulta y administración de vales
 
-**Objetivo:** consultar los vales que ya nacieron en la primera atención y permitir su revisión física sin duplicar registros.
+**Objetivo:** consultar los vales que ya nacieron en la primera atención y corregir sus datos descriptivos sin duplicar registros ni alterar cantidades.
 
 **Dependencias:** FE-1, FE-3 y backend F5–F6.
 
-**RF:** RF-013, RF-014, RF-015, RF-016, RF-017, RF-018 y RF-033.
+**RF:** RF-014, RF-015, RF-016, RF-017, RF-018 y RF-033.
 
-**Rutas:** `/app/vouchers`, `/app/vouchers/:voucherId`, `/app/attendances/pending-verification`, `/app/attendances/:attendanceId`.
+**Rutas:** `/app/vouchers`, `/app/vouchers/:voucherId`, `/app/attendances/:attendanceId`.
 
-**Endpoints:** GET vouchers, GET voucher, PATCH descriptive-data, GET pending-verification, POST verifications, GET verification history.
+**Endpoints:** GET vouchers, GET voucher, PATCH descriptive-data y atenciones del vale.
 
 **Tareas:**
 1. Crear listado con búsqueda por vale, orden y entidad.
 2. Implementar paginación y ordenación del servidor.
 3. Crear detalle de vale con líneas, cantidades, saldos y atenciones.
-4. Mostrar por separado estado de consumo y estado de verificación.
+4. Mostrar el estado de consumo por línea devuelto por backend.
 5. Implementar formulario de corrección descriptiva solo para Admin.
 6. No construir alta independiente de vale.
 7. Omitir eliminación para vales atendidos.
-8. Crear bandeja Office/Admin de atenciones pendientes/observadas.
-9. Crear detalle de atención para comparación con documento físico.
-10. Implementar decisión `VERIFIED`/`OBSERVED` y observación obligatoria cuando corresponda.
-11. Mostrar historial de verificaciones.
-12. No modificar cantidad real ni saldo al verificar.
 
-**Pruebas:** búsqueda, paginación, ordenación, rol, corrección descriptiva, duplicados, atención inmutable, verificación exitosa, observación, historial y saldo sin cambios al verificar.
+**Pruebas:** búsqueda, paginación, ordenación, rol, corrección descriptiva, duplicados y atención inmutable.
 
-**Gate:** contratos F5/F6 integrados; PD-011 documentado; pruebas que demuestren que verificación no altera consumo.
+**Gate:** contratos F5/F6 integrados y pruebas de corrección descriptiva aprobadas.
 
 ## FE-5 — Saldos, workspace y atenciones
 
@@ -1800,7 +1706,7 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 **Tareas:**
 1. Ejecutar pruebas E2E de los tres roles.
 2. Validar permisos en UI y servidor.
-3. Ejecutar ciclo orden → primer vale/despacho → atención parcial siguiente → saldo → verificación → reporte.
+3. Ejecutar ciclo orden → primer vale/despacho → atención parcial siguiente → saldo → reporte.
 4. Probar dos sedes sobre la misma orden y vale.
 5. Probar errores 401/403/404/409/413/415/422/500/503.
 6. Revisar mobile, tablet y escritorio.
@@ -1875,16 +1781,10 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 | FE-4 | Crear listado de vales con búsqueda | [ ] |
 | FE-4 | Implementar paginación y ordenación del servidor | [ ] |
 | FE-4 | Crear detalle de vale con líneas, saldos y atenciones | [ ] |
-| FE-4 | Separar estado de consumo y verificación | [ ] |
 | FE-4 | Implementar corrección descriptiva solo para Admin | [ ] |
 | FE-4 | No construir alta independiente de vale | [ ] |
 | FE-4 | Omitir eliminación de vales atendidos | [ ] |
-| FE-4 | Crear bandeja de atenciones pendientes/observadas | [ ] |
-| FE-4 | Crear detalle para comparación con documento físico | [ ] |
-| FE-4 | Implementar `VERIFIED`/`OBSERVED` y observación obligatoria | [ ] |
-| FE-4 | Mostrar historial de verificaciones | [ ] |
-| FE-4 | Mantener saldo inalterado durante verificación | [ ] |
-| FE-4 | Probar búsqueda, roles, corrección, verificación e inmutabilidad | [ ] |
+| FE-4 | Probar búsqueda, roles, corrección e inmutabilidad | [ ] |
 | FE-5 | Crear búsqueda de órdenes por número/entidad | [ ] |
 | FE-5 | Mostrar saldos por combustible | [ ] |
 | FE-5 | Crear búsqueda de vales existentes | [ ] |
@@ -1960,7 +1860,7 @@ Las fases siguen el backend F0–F9. Se pueden construir estructuras visuales en
 | F3 | Login, sesiones, usuarios y RBAC | FE-1/FE-2 | Login, guards, shell y usuarios. |
 | F4 | Órdenes y líneas | FE-3 | Alta, consulta, edición y eliminación de órdenes. |
 | F5 | Vales y atenciones parciales | FE-4/FE-5 | Consulta de vales, primera atención y siguientes atenciones. |
-| F6 | Verificación administrativa y saldos | FE-4/FE-5 | Bandeja física, estados, balances e historial. |
+| F6 | Consulta, corrección descriptiva y cierre de vales | FE-4/FE-5 | Consulta de vales, corrección descriptiva y balances. |
 | F7 | Reportes, dashboard y exportación | FE-6 | Gráficos, filtros, PDF y XLSX. |
 | F8 | OCR temporal RapidOCR | FE-7 | PDF de orden, preview y revisión humana. |
 | F9 | Hardening, documentación y producción | FE-8 | E2E, QA, responsive y despliegue. |
@@ -2004,7 +1904,6 @@ Un módulo frontend no se considerará terminado si su fase backend dependiente 
 - Vale nuevo combinado con primer despacho.
 - Atención posterior del vale.
 - Presentación de saldo independiente por combustible.
-- Bandeja de verificación y observaciones.
 - Corrección descriptiva de vale por Admin.
 - Workspace móvil.
 - Dashboard y gráficos.
@@ -2017,7 +1916,7 @@ Un módulo frontend no se considerará terminado si su fase backend dependiente 
 login → dashboard → crear usuario → asignar rol → registrar orden → consultar atenciones → verificar acceso a todos los módulos → reportes → exportar → logout.
 
 **Oficina:**
-login → registrar orden con varias líneas → consultar orden/saldos → abrir bandeja de verificación → verificar una atención y observar otra → comprobar que la corrección descriptiva del vale no esté disponible para Oficina → consultar reportes → exportar → logout.
+login → registrar orden con varias líneas → consultar orden/saldos → consultar vales y sus atenciones → comprobar que la corrección descriptiva del vale no esté disponible para Oficina → consultar reportes → exportar → logout.
 
 **Grifero:**
 login móvil → buscar orden → consultar saldo por combustible → capturar vale nuevo junto con despacho parcial → volver a localizar el mismo vale → registrar despacho posterior → comprobar saldos → consultar sus atenciones → logout.
@@ -2035,16 +1934,14 @@ login → seleccionar orden → registrar primera atención → comprobar que la
 6. Impedir un despacho superior al saldo de la línea de orden.
 7. Si dos sedes intentan consumir simultáneamente el saldo remanente, backend decide una única operación válida; frontend gestiona el conflicto.
 8. Si el vale tiene saldo pero la orden se agotó, comunicar bloqueo sin marcarlo como atendido.
-9. La verificación no modifica galones ni balances.
-10. Una atención observada permanece como operación histórica; no se edita directamente.
-11. Deshabilitar usuario revoca acceso y mantiene las referencias históricas.
-12. Una orden con vales no se elimina.
-13. Un vale con atenciones no se elimina.
-14. Una modificación de orden no reduce cantidad por debajo del consumo ni elimina líneas usadas.
-15. Repetir un request con la misma clave y payload no duplica el despacho.
-16. Un resultado de OCR no crea una orden antes de revisión y confirmación.
-17. Precios e importes nunca se entregan al Grifero.
-18. La exportación usa los mismos filtros y permisos del reporte visible.
+9. Deshabilitar usuario revoca acceso y mantiene las referencias históricas.
+10. Una orden con vales no se elimina.
+11. Un vale con atenciones no se elimina.
+12. Una modificación de orden no reduce cantidad por debajo del consumo ni elimina líneas usadas.
+13. Repetir un request con la misma clave y payload no duplica el despacho.
+14. Un resultado de OCR no crea una orden antes de revisión y confirmación.
+15. Precios e importes nunca se entregan al Grifero.
+16. La exportación usa los mismos filtros y permisos del reporte visible.
 
 ## 19.6. Gate de calidad
 
@@ -2083,7 +1980,7 @@ No se declarará ningún resultado de ejecución mientras el repositorio no exis
 
 # 21. Riesgos, bloqueos y decisiones pendientes
 
-Los puntos PD-001 a PD-020 proceden de RF V2. El frontend aplicará una política segura por defecto y evitará convertir propuestas técnicas en reglas de negocio aprobadas.
+Los puntos PD-001 a PD-020 proceden de RF V2; PD-011 (verificación administrativa) quedó sin efecto al retirarse esa función del alcance. El frontend aplicará una política segura por defecto y evitará convertir propuestas técnicas en reglas de negocio aprobadas.
 
 | ID | Pendiente | Decisión/criterio frontend | Impacto / bloqueo |
 |---|---|---|---|
@@ -2097,7 +1994,6 @@ Los puntos PD-001 a PD-020 proceden de RF V2. El frontend aplicará una polític
 | PD-008 | Cierre remoto de sesiones | Solo logout propio y revocación al deshabilitar cuenta. No crear panel de sesiones remotas. | No bloquea FE-1/FE-2 base. |
 | PD-009 | Columnas/precios de reportes | Mostrar importes solo a Admin/Oficina y solo si API los devuelve; no inventar cálculo de precio por hora. | Bloquea cierre de reportes financieros. |
 | PD-010 | Gráficos exactos | Consumir series disponibles de backend; no inventar KPI. | Bloquea aprobación final del dashboard, no su estructura. |
-| PD-011 | Proceso de vale observado | Registrar `OBSERVED` con observación obligatoria; mantener despacho/saldo intactos. Quién resuelve/reabre observación queda pendiente. | Bloquea cierre del circuito de resolución, no la captura de observación. |
 | PD-012 | Límites del PDF | Usar límites publicados/configurados por backend; si no se conocen, no hardcodear máximos. | Bloquea aceptación de OCR en producción. |
 | PD-013 | Campos confidenciales | Aplicar mínimo privilegio; DTO Grifero sin precios/importes ni datos administrativos. | Bloquea aprobación de permisos/datasets. |
 | PD-014 | Sede del usuario y movilidad | Mostrar sede asignada; no ofrecer selector para cambiar sede sin contrato y autorización explícitos. | Afecta alta usuario/operación desde ambas sedes. |
@@ -2115,15 +2011,13 @@ Los puntos PD-001 a PD-020 proceden de RF V2. El frontend aplicará una polític
 3. No crear un vale independiente de su primer despacho.
 4. Distinguir autorización del vale de consumo real.
 5. Saldos oficiales exclusivamente desde backend.
-6. Diferenciar estado de consumo y estado de verificación.
-7. No permitir edición/eliminación de atenciones confirmadas.
-8. No permitir a Oficina registrar vales/despachos.
-9. Mostrar `OBSERVED` sin modificar el despacho.
-10. No ejecutar borrados optimistas.
-11. No incluir comparación ni impresión de reportes.
-12. OCR solo PDF de orden, siempre con revisión.
-13. No almacenar operaciones offline.
-14. No exponer precios/importes a Grifero.
+6. No permitir edición/eliminación de atenciones confirmadas.
+7. No permitir a Oficina registrar vales/despachos.
+8. No ejecutar borrados optimistas.
+9. No incluir comparación ni impresión de reportes.
+10. OCR solo PDF de orden, siempre con revisión.
+11. No almacenar operaciones offline.
+12. No exponer precios/importes a Grifero.
 
 ## 21.2. Bloqueos para liberar la atención
 
@@ -2143,7 +2037,7 @@ El procedimiento de corrección cuantitativa (PD-006) debe permanecer fuera de l
 
 ## Funcionalidad
 
-- Los 34 RF tienen correspondencia con una pantalla, componente, flujo o explicación.
+- Todos los RF vigentes tienen correspondencia con una pantalla, componente, flujo o explicación.
 - Los tres roles tienen navegación y acciones probadas.
 - La administración de usuarios conserva historial y usa habilitación/deshabilitación.
 - Las órdenes admiten líneas por tipo de combustible.
@@ -2151,8 +2045,6 @@ El procedimiento de corrección cuantitativa (PD-006) debe permanecer fuera de l
 - Atenciones posteriores se registran sobre el mismo vale.
 - Autorización y despacho real permanecen diferenciados.
 - Los saldos se muestran por línea/tipo y vienen del backend.
-- La verificación física no modifica cantidades ni saldos.
-- Estados de consumo y verificación se presentan de forma independiente.
 - Dashboard, reportes, filtros, ordenación y exportaciones respetan RF V2.
 - No existen comparación de períodos ni impresión directa.
 - OCR procesa PDF de orden y requiere revisión antes de guardar.
@@ -2183,7 +2075,6 @@ El procedimiento de corrección cuantitativa (PD-006) debe permanecer fuera de l
 - Pruebas unitarias, servicios y componentes aprobadas.
 - E2E para Administrador, Oficina y Grifero.
 - Pruebas de despacho parcial, repetición, concurrencia e idempotencia coordinadas con backend.
-- Pruebas de verificación/observación sin alteración de balances.
 - Responsive validado en PC y móvil.
 - Accesibilidad básica verificada.
 - Lint y build de producción sin errores.
@@ -2211,7 +2102,6 @@ Se mantendrán:
 - `docs/AUTHENTICATION.md`: login, token, logout y expiración.
 - `docs/FEATURES.md`: módulos, pantallas y flujos.
 - `docs/ATTENDANCE_FLOW.md`: primera atención, atenciones posteriores, idempotencia y manejo de conflictos.
-- `docs/VERIFICATION_FLOW.md`: revisión física, verificado y observado.
 - `docs/TESTING.md`: pruebas y comandos.
 - `docs/ENVIRONMENTS.md`: variables y ambientes.
 - Registro ADR para cambios de arquitectura o decisiones técnicas relevantes.
@@ -2228,7 +2118,7 @@ Cada fase actualizará la documentación correspondiente antes de cerrarse.
 | 2 | FE-1 | Login, sesión, permisos y shell. | F1–F3. |
 | 3 | FE-2 | Administración de usuarios. | F3. |
 | 4 | FE-3 | Órdenes de compra. | F2–F4. |
-| 5 | FE-4 | Consulta de vales y verificación administrativa. | F5–F6. |
+| 5 | FE-4 | Consulta y administración de vales. | F5–F6. |
 | 6 | FE-5 | Workspace, atenciones parciales y saldos compartidos. | F5–F6. |
 | 7 | FE-6 | Dashboard, reportes y exportación. | F7. |
 | 8 | FE-7 | OCR de órdenes PDF. | F8. |
@@ -2241,7 +2131,7 @@ flowchart TD
     A[FE-0: RF V2 y contrato] --> B[FE-1: autenticación y shell]
     B --> C[FE-2: usuarios]
     B --> D[FE-3: órdenes]
-    D --> E[FE-4: vales y verificación]
+    D --> E[FE-4: consulta de vales]
     D --> F[FE-5: primera atención y saldos]
     E --> F
     F --> G[FE-6: reportes y dashboard]
@@ -2255,7 +2145,7 @@ flowchart TD
 
 # 25. Cierre
 
-Este documento actualiza el plan frontend para que refleje los 34 requerimientos de `REQUERIMIENTOS_FUNCIONALES_SAN_JOSE_V2.md` y mantenga coherencia con el contrato técnico propuesto en `PLAN_BACKEND_SAN_JOSE_V2.md`.
+Este documento actualiza el plan frontend para que refleje los requerimientos funcionales vigentes de `REQUERIMIENTOS_FUNCIONALES_SAN_JOSE_V2.md` y mantenga coherencia con el contrato técnico propuesto en `PLAN_BACKEND_SAN_JOSE_V2.md` (versión 2.3).
 
 Decisiones centrales:
 
@@ -2268,7 +2158,6 @@ Decisiones centrales:
 - Vale creado en la primera atención, no por pre-registro.
 - Atenciones parciales repetidas y registro inmutable.
 - Saldos oficiales calculados por backend y desglosados por combustible.
-- Verificación administrativa independiente del consumo.
 - Operación compartida entre San José y Santa Marta.
 - Dashboard, reportes y exportación PDF/XLSX, sin comparación ni impresión.
 - OCR RapidOCR exclusivamente para PDFs de órdenes y con revisión humana.

@@ -1,0 +1,12 @@
+<app-ui-dialog [(visible)]="visible" [title]="title()">
+  <p class="m-0 text-[11px] leading-[1.6] text-[#54666c]">{{ message() }}</p>
+
+  <div dialogFooter class="flex justify-end gap-[8px]">
+    <button type="button" class="sanjose-button sanjose-button--secondary" (click)="visible.set(false)">
+      {{ cancelLabel() }}
+    </button>
+    <button type="button" class="sanjose-button sanjose-button--primary" (click)="confirmed.emit()">
+      {{ confirmLabel() }}
+    </button>
+  </div>
+</app-ui-dialog>

@@ -1,0 +1,40 @@
+<app-ui-dialog
+  [(visible)]="visible"
+  [title]="'Vale ' + (voucher()?.id ?? '')"
+  [description]="(voucher()?.issuer ?? '') + ' · ' + (voucher()?.orderId ?? '')"
+>
+  @if (voucher(); as detail) {
+    <div class="grid gap-[16px]">
+      <div class="flex items-center justify-between gap-[12px] text-[10px] text-[#77868b]">
+        <span>Combustible</span>
+        <strong class="text-[11px] font-[650] text-[#263d44]">{{ detail.fuel }}</strong>
+      </div>
+      <div class="flex items-center justify-between gap-[12px] text-[10px] text-[#77868b]">
+        <span>Autorizado en el vale</span>
+        <strong class="text-[11px] font-[650] text-[#263d44]">{{ gallons(detail.total) }}</strong>
+      </div>
+      <div class="flex items-center justify-between gap-[12px] text-[10px] text-[#77868b]">
+        <span>Atendido</span>
+        <strong class="text-[11px] font-[650] text-[#263d44]">{{ gallons(detail.used) }}</strong>
+      </div>
+
+      <div
+        class="flex items-center justify-between gap-[12px] rounded-[12px] border border-[#dceee8] bg-[#f2faf6] p-[13px_14px] text-[10px] text-[#386e61]"
+      >
+        <span>Saldo restante del vale</span>
+        <strong class="text-[14px] tracking-[-0.03em] text-[#225d50]">{{ balance() }}</strong>
+      </div>
+
+      <div class="flex items-center justify-between gap-[12px] text-[10px] text-[#77868b]">
+        <span>Estado del vale</span>
+        <strong class="text-[11px] font-[650] text-[#263d44]">{{ status() }}</strong>
+      </div>
+    </div>
+  }
+
+  <div dialogFooter class="flex justify-end gap-[8px]">
+    <button type="button" class="sanjose-button sanjose-button--primary" (click)="visible.set(false)">
+      Listo
+    </button>
+  </div>
+</app-ui-dialog>

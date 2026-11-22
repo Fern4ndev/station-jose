@@ -1,0 +1,19 @@
+<div
+  class="flex items-center justify-between gap-[12px] border-b border-[#edf0f0] p-[12px_15px] max-[760px]:flex-col max-[760px]:items-start"
+>
+  <span class="text-[11px] text-[#87949a] max-[760px]:text-[10px]">
+    <strong class="font-[620] text-[#263b43]">{{ total() }}</strong>
+    {{ total() === 1 ? 'cuenta' : 'cuentas' }} · {{ roleCount }}
+    {{ roleCount === 1 ? 'rol' : 'roles' }}
+  </span>
+
+  <input
+    id="userSearch"
+    class="sanjose-input max-w-[250px] max-[760px]:w-full max-[760px]:max-w-none"
+    type="search"
+    placeholder="Buscar por nombre o correo"
+    aria-label="Buscar usuarios"
+    [value]="query()"
+    (input)="onQuery($event)"
+  />
+</div>

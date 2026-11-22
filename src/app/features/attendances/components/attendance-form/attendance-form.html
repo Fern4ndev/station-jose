@@ -1,0 +1,123 @@
+<form class="sanjose-form-grid" (submit)="onSubmit($event)" novalidate>
+  <div class="sanjose-field full">
+    <label class="sanjose-label" for="attendanceOrder">Orden de compra</label>
+    <select id="attendanceOrder" class="sanjose-select" [value]="orderId()" (change)="setOrder($event)">
+      @for (order of orders(); track order.id) {
+        <option [value]="order.id">
+          {{ order.id }} · {{ order.entity }} ({{ balance(order) }} disponibles)
+        </option>
+      } @empty {
+        <option value="">Sin órdenes con saldo disponible</option>
+      }
+    </select>
+  </div>
+
+  <div class="sanjose-field">
+    <label class="sanjose-label" for="attendanceVoucher">Número de vale</label>
+    <input
+      id="attendanceVoucher"
+      class="sanjose-input"
+      placeholder="Ej. VM-2026-0142"
+      [value]="voucherId()"
+      (input)="setVoucher($event)"
+    />
+    <span class="sanjose-hint" id="attendanceVoucherHint">{{ hint() }}</span>
+  </div>
+
+  <div class="sanjose-field">
+    <label class="sanjose-label" for="attendanceIssuerType">Tipo de emisor</label>
+    <select
+      id="attendanceIssuerType"
+      class="sanjose-select"
+      [disabled]="locked()"
+      [value]="issuerType()"
+      (change)="setIssuerType($event)"
+    >
+      <option value="INSTITUTION">Institución</option>
+      <option value="STATION">Estación</option>
+    </select>
+  </div>
+
+  <div class="sanjose-field full">
+    <label class="sanjose-label" for="attendanceIssuer">Nombre del emisor</label>
+    <input
+      id="attendanceIssuer"
+      class="sanjose-input"
+      placeholder="Nombre según vale físico"
+      [readonly]="locked()"
+      [value]="issuer()"
+      (input)="setIssuer($event)"
+    />
+  </div>
+
+  <div class="sanjose-field">
+    <label class="sanjose-label" for="attendanceAuthorized">Galones autorizados en el vale</label>
+    <input
+      id="attendanceAuthorized"
+      class="sanjose-input"
+      type="number"
+      min="0.001"
+      step="0.001"
+      placeholder="0.000"
+      [readonly]="locked()"
+      [value]="authorized()"
+      (input)="setAuthorized($event)"
+    />
+  </div>
+
+  <div class="sanjose-field">
+    <label class="sanjose-label" for="attendanceGallons">Galones entregados hoy</label>
+    <input
+      id="attendanceGallons"
+      class="sanjose-input"
+      type="number"
+      min="0.001"
+      step="0.001"
+      placeholder="0.000"
+      [value]="gallons()"
+      (input)="setGallons($event)"
+    />
+  </div>
+
+  <div class="sanjose-field">
+    <label class="sanjose-label" for="attendanceBranch">Sede de despacho</label>
+    <select
+      id="attendanceBranch"
+      class="sanjose-select"
+      [disabled]="branchLocked()"
+      [value]="branchValue()"
+      (change)="setBranch($event)"
+    >
+      <option value="San José">San José</option>
+      <option value="Santa Marta">Santa Marta</option>
+    </select>
+  </div>
+
+  <div class="sanjose-field full">
+    <span class="sanjose-label">Saldo de la orden</span>
+    <div
+      class="flex items-center justify-between gap-[12px] rounded-[12px] border border-[#dceee8] bg-[#f2faf6] p-[13px_14px] text-[10px] text-[#386e61]"
+    >
+      <span>
+        Disponible antes del despacho
+        <span class="sanjose-hint">{{ selectedOrder()?.fuel ?? '' }}</span>
+      </span>
+      <strong class="text-[14px] tracking-[-0.03em] text-[#225d50]">{{ orderBalanceLabel() }}</strong>
+    </div>
+  </div>
+
+  <div class="sanjose-field full">
+    <p class="sanjose-hint m-0">
+      El sistema registra la atención con tu usuario y la hora del servidor. Si el vale ya existe, se conserva su
+      saldo y su historial.
+    </p>
+  </div>
+
+  @if (error()) {
+    <p class="sanjose-hint sanjose-hint--error m-0" role="alert">{{ error() }}</p>
+  }
+
+  <div class="sanjose-field full">
+    <button type="submit" class="sanjose-button sanjose-button--primary w-full">Confirmar despacho</button>
+  </div>
+</form>

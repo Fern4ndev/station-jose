@@ -1,0 +1,60 @@
+<div class="w-full overflow-x-auto">
+  <table class="sanjose-table">
+    <thead>
+      <tr>
+        <th class="sanjose-th">USUARIO</th>
+        <th class="sanjose-th">ROL</th>
+        <th class="sanjose-th">SEDE</th>
+        <th class="sanjose-th">ESTADO</th>
+        <th class="sanjose-th">ACCESO</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (user of rows(); track user.id) {
+        <tr>
+          <td class="sanjose-td">
+            <div class="flex items-center gap-[8px]">
+              <span
+                class="grid h-[27px] w-[27px] flex-none place-items-center rounded-[9px] bg-[#e8f1ec] text-[9px] font-[700] text-[#49796a]"
+                aria-hidden="true"
+              >
+                {{ initials(user.name) }}
+              </span>
+              <span class="min-w-0">
+                <span class="sanjose-cell-primary">{{ user.name }}</span>
+                <span class="sanjose-cell-secondary">{{ user.email }}</span>
+              </span>
+            </div>
+          </td>
+          <td class="sanjose-td">{{ user.role }}</td>
+          <td class="sanjose-td">{{ user.branch }}</td>
+          <td class="sanjose-td">
+            @if (user.active) {
+              <app-ui-status-badge label="Activo" tone="green" />
+            } @else {
+              <app-ui-status-badge label="Deshabilitado" tone="gray" />
+            }
+          </td>
+          <td class="sanjose-td">
+            <button
+              type="button"
+              class="user-toggle"
+              [class.on]="user.active"
+              [attr.aria-pressed]="user.active"
+              [attr.aria-label]="(user.active ? 'Deshabilitar a ' : 'Habilitar a ') + user.name"
+              (click)="toggle.emit(user)"
+            ></button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="sanjose-td" colspan="5">
+            <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">
+              No hay usuarios que coincidan con la búsqueda.
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

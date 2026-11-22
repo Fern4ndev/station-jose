@@ -1,0 +1,27 @@
+<div
+  class="flex items-center justify-between gap-[12px] border-b border-[#edf0f0] p-[12px_15px] max-[760px]:flex-col max-[760px]:items-start"
+>
+  <div class="flex flex-wrap items-center gap-[7px]" role="group" aria-label="Filtrar vales">
+    @for (option of filters; track option.value) {
+      <button
+        type="button"
+        class="sanjose-chip"
+        [class.selected]="option.value === filter()"
+        [attr.aria-pressed]="option.value === filter()"
+        (click)="filterChange.emit(option.value)"
+      >
+        {{ option.label }}
+      </button>
+    }
+  </div>
+
+  <input
+    id="voucherSearch"
+    class="sanjose-input max-w-[250px] max-[760px]:w-full max-[760px]:max-w-none"
+    type="search"
+    placeholder="Número, entidad u orden"
+    aria-label="Buscar vales"
+    [value]="query()"
+    (input)="onQuery($event)"
+  />
+</div>

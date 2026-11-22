@@ -1,0 +1,19 @@
+<section class="sanjose-panel max-[760px]:rounded-[15px]">
+  @if (title() || subtitle()) {
+    <div class="flex items-center justify-between gap-[12px] p-[17px_18px_13px] max-[760px]:p-[15px_14px_12px]">
+      <div>
+        @if (title()) {
+          <h3 class="m-0 text-[12px] font-[650] tracking-[-0.02em] text-[#22373e]">{{ title() }}</h3>
+        }
+        @if (subtitle()) {
+          <p class="mt-[5px] mb-0 text-[9px] text-[#8c999d]">{{ subtitle() }}</p>
+        }
+      </div>
+      <ng-content select="[panelAction]" />
+    </div>
+  }
+
+  <ng-content />
+
+  <ng-content select="[panelFooter]" />
+</section>

@@ -1,0 +1,42 @@
+<app-ui-panel title="Actividad reciente" [subtitle]="'Despachos registrados en ' + scope()">
+  <button panelAction type="button" class="sanjose-text-button" (click)="viewAll.emit()">
+    Ver actividad
+    <app-ui-icon name="arrow-right" [size]="13" />
+  </button>
+
+  <div class="w-full overflow-x-auto">
+    <table class="sanjose-table">
+      <thead>
+        <tr>
+          <th class="sanjose-th">VALE / ORDEN</th>
+          <th class="sanjose-th">GRIFERO</th>
+          <th class="sanjose-th">SEDE</th>
+          <th class="sanjose-th">DESPACHADO</th>
+          <th class="sanjose-th">ESTADO</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td class="sanjose-td">
+              <span class="sanjose-cell-primary">{{ row.voucher }}</span>
+              <span class="sanjose-cell-secondary">{{ row.orderId }}</span>
+            </td>
+            <td class="sanjose-td">{{ row.attendant.split(' ')[0] }}</td>
+            <td class="sanjose-td">{{ row.branch }}</td>
+            <td class="sanjose-td">{{ gallons(row.gallons) }}</td>
+            <td class="sanjose-td">
+              <app-ui-status-badge [label]="row.status" tone="green" />
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="sanjose-td" colspan="5">
+              <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">Sin despachos registrados hoy.</div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</app-ui-panel>

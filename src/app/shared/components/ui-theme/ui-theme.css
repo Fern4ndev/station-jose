@@ -1,0 +1,35 @@
+/*
+ * Tokens propios del mockup, fuera de styles.css.
+ * Se exponen como variables CSS y se consumen desde las clases globales y las
+ * utilidades arbitrarias de Tailwind (`[color:var(--sanjose-ink)]`, etc.).
+ */
+:root {
+  --sanjose-ink: #10202a;
+  --sanjose-ink-soft: #22373e;
+  --sanjose-mint: #39c6ae;
+  --sanjose-fuel: #e9a64a;
+  --sanjose-app-bg: #f3f6f5;
+  --sanjose-app-aura: radial-gradient(ellipse at 68% 0%, rgba(119, 205, 190, 0.13), transparent 32rem);
+  --sanjose-panel: rgba(255, 255, 255, 0.79);
+  --sanjose-panel-border: #e5ebeb;
+  --sanjose-panel-shadow: 0 7px 23px rgba(31, 58, 60, 0.035);
+  --sanjose-sidebar-bg:
+    radial-gradient(ellipse at 8% 0%, rgba(77, 157, 157, 0.21), transparent 48%),
+    linear-gradient(160deg, rgba(20, 54, 61, 0.96), rgba(11, 31, 39, 0.98));
+  --sanjose-sidebar-shadow: 0 22px 60px rgba(27, 55, 59, 0.16);
+  --sanjose-sidebar-text: #eef7f5;
+  --sanjose-accent: #3a8176;
+  --sanjose-primary-action: #173c42;
+  --sanjose-primary-action-hover: #20545a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell *,
+  .app-shell *::before,
+  .app-shell *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

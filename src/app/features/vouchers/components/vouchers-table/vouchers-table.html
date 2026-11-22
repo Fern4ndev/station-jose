@@ -1,0 +1,90 @@
+<div class="w-full overflow-x-auto">
+  <table class="sanjose-table">
+    <thead>
+      <tr>
+        <th class="sanjose-th">N.º DE VALE</th>
+        <th class="sanjose-th">ORDEN / EMISOR</th>
+        <th class="sanjose-th">COMBUSTIBLE</th>
+        <th class="sanjose-th">ATENDIDO</th>
+        <th class="sanjose-th">SALDO DEL VALE</th>
+        <th class="sanjose-th">ESTADO</th>
+        <th class="sanjose-th">ACCIONES</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (voucher of rows(); track voucher.id) {
+        <tr>
+          <td class="sanjose-td">
+            <span class="sanjose-cell-primary">{{ voucher.id }}</span>
+          </td>
+          <td class="sanjose-td">
+            <span class="sanjose-cell-primary">{{ voucher.orderId }}</span>
+            <span class="sanjose-cell-secondary">{{ voucher.issuer }}</span>
+          </td>
+          <td class="sanjose-td">{{ voucher.fuel }}</td>
+          <td class="sanjose-td">{{ served(voucher) }}</td>
+          <td class="sanjose-td">
+            <span class="sanjose-cell-primary">{{ balance(voucher) }}</span>
+            <span class="sanjose-cell-secondary">{{ remaining(voucher) }}</span>
+          </td>
+          <td class="sanjose-td">
+            <app-ui-status-badge [label]="status(voucher)" [tone]="tone(voucher)" />
+          </td>
+          <td class="sanjose-td">
+            <div class="flex items-center gap-[6px]">
+              <button
+                type="button"
+                class="sanjose-icon-action"
+                title="Ver saldo del vale"
+                [attr.aria-label]="'Ver saldo del vale ' + voucher.id"
+                (click)="detail.emit(voucher)"
+              >
+                <app-ui-icon name="eye" [size]="14" />
+              </button>
+              @if (canCorrect()) {
+                <button
+                  type="button"
+                  class="sanjose-icon-action"
+                  title="Corregir datos del vale"
+                  [attr.aria-label]="'Corregir datos del vale ' + voucher.id"
+                  (click)="edit.emit(voucher)"
+                >
+                  <app-ui-icon name="edit" [size]="14" />
+                </button>
+                @if (lockedVoucherIds().includes(voucher.id)) {
+                  <button
+                    type="button"
+                    class="sanjose-icon-action"
+                    disabled
+                    title="No se puede eliminar un vale con atenciones registradas"
+                    [attr.aria-label]="'No se puede eliminar el vale ' + voucher.id + ' porque tiene atenciones registradas'"
+                  >
+                    <app-ui-icon name="trash" [size]="14" />
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="sanjose-icon-action"
+                    title="Eliminar vale"
+                    [attr.aria-label]="'Eliminar vale ' + voucher.id"
+                    (click)="remove.emit(voucher)"
+                  >
+                    <app-ui-icon name="trash" [size]="14" />
+                  </button>
+                }
+              }
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="sanjose-td" colspan="7">
+            <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">
+              No hay vales que coincidan con la búsqueda.
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

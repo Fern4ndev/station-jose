@@ -1,0 +1,38 @@
+<div
+  class="grid min-h-screen w-full grid-cols-[252px_minmax(0,_1fr)] gap-[14px] p-[14px] max-[1050px]:grid-cols-[220px_minmax(0,_1fr)] max-[1050px]:gap-[10px] max-[1050px]:p-[10px] max-[760px]:block max-[760px]:p-[8px]"
+>
+  <app-admin-sidebar
+    [items]="state.navItems()"
+    [active]="page()"
+    [user]="state.user()"
+    [role]="state.role()"
+    [branch]="state.branch()"
+    [mobileOpen]="menuOpen()"
+    (pageChange)="onPageChange($event)"
+    (roleChange)="onRoleChange($event)"
+    (branchChange)="state.setBranch($event)"
+  />
+
+  @if (menuOpen()) {
+    <div
+      class="hidden max-[760px]:fixed max-[760px]:inset-0 max-[760px]:z-[19] max-[760px]:block max-[760px]:bg-[rgba(16,36,40,0.32)] max-[760px]:backdrop-blur-[3px]"
+      (click)="closeMenu()"
+      aria-hidden="true"
+    ></div>
+  }
+
+  <main class="min-w-0 p-[0_17px_38px] max-[1050px]:px-[8px] max-[760px]:p-[0_5px_28px]">
+    <app-admin-header
+      [pageLabel]="pageLabel()"
+      [menuOpen]="menuOpen()"
+      (menuToggle)="toggleMenu()"
+    />
+
+    <router-outlet />
+
+    <footer class="flex justify-between gap-[12px] p-[20px_2px_0] text-[9px] text-[#9aa5a7]">
+      <span>Estación de Servicio San José</span>
+      <span>Los datos mostrados son de demostración</span>
+    </footer>
+  </main>
+</div>

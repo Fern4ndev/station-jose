@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="scheme-light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,6 +16,8 @@
             fontFamily: {
               sans: ["Inter", "SF Pro Display", "Segoe UI", "sans-serif"],
             },
+            keyframes: { arrive: { from: { opacity: "0.7", transform: "translateY(4px)" }, to: { opacity: "1", transform: "translateY(0)" } }, },
+            animation: { arrive: "arrive 230ms ease both" },
             colors: {
               ink: "#10202A",
               mint: "#39C6AE",
@@ -25,1545 +27,13 @@
         },
       };
     </script>
-    <style>
-      :root {
-        color-scheme: light;
-        --ink: #10202a;
-        --muted: #78868d;
-        --line: #e7ecee;
-        --paper: #f3f6f5;
-        --mint: #39c6ae;
-        --deep: #102b32;
-        --amber: #e9a64a;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      [hidden] {
-        display: none !important;
-      }
-
-      body {
-        margin: 0;
-        min-width: 320px;
-        background:
-          radial-gradient(ellipse at 68% 0%, rgba(119, 205, 190, 0.13), transparent 32rem),
-          var(--paper);
-        color: var(--ink);
-        font-family: Inter, "SF Pro Display", "Segoe UI", sans-serif;
-        -webkit-font-smoothing: antialiased;
-      }
-
-      button,
-      input,
-      select,
-      textarea {
-        font: inherit;
-      }
-
-      button {
-        cursor: pointer;
-      }
-
-      button:focus-visible,
-      a:focus-visible,
-      input:focus-visible,
-      select:focus-visible,
-      textarea:focus-visible {
-        outline: 3px solid rgba(57, 198, 174, 0.72);
-        outline-offset: 3px;
-      }
-
-      .app-layout {
-        display: grid;
-        grid-template-columns: 252px minmax(0, 1fr);
-        min-height: 100vh;
-        padding: 14px;
-        gap: 14px;
-      }
-
-      .sidebar {
-        position: sticky;
-        top: 14px;
-        display: flex;
-        height: calc(100vh - 28px);
-        min-height: 670px;
-        flex-direction: column;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 24px;
-        background:
-          radial-gradient(ellipse at 8% 0%, rgba(77, 157, 157, 0.21), transparent 48%),
-          linear-gradient(160deg, rgba(20, 54, 61, 0.96), rgba(11, 31, 39, 0.98));
-        box-shadow: 0 22px 60px rgba(27, 55, 59, 0.16);
-        color: #eef7f5;
-        padding: 23px 15px 15px;
-        z-index: 20;
-      }
-
-      .sidebar-scrim {
-        display: none;
-      }
-
-      .brand-lockup {
-        display: flex;
-        align-items: center;
-        gap: 11px;
-        padding: 0 8px 20px;
-      }
-
-      .brand-symbol {
-        display: grid;
-        width: 40px;
-        height: 40px;
-        flex: 0 0 auto;
-        place-items: center;
-        border: 1px solid rgba(255, 255, 255, 0.28);
-        border-radius: 14px;
-        background: linear-gradient(145deg, rgba(75, 204, 180, 0.31), rgba(73, 118, 127, 0.2));
-        box-shadow: inset 0 1px rgba(255, 255, 255, 0.21);
-        color: #8be4d2;
-      }
-
-      .brand-name {
-        font-size: 15px;
-        font-weight: 680;
-        letter-spacing: -0.035em;
-      }
-
-      .brand-caption {
-        margin-top: 3px;
-        color: #9db5b8;
-        font-size: 10px;
-        letter-spacing: 0.02em;
-      }
-
-      .branch-switch {
-        display: flex;
-        min-height: 45px;
-        align-items: center;
-        justify-content: space-between;
-        margin: 0 2px 24px;
-        padding: 0 11px;
-        border: 1px solid rgba(218, 243, 237, 0.13);
-        border-radius: 13px;
-        background: rgba(235, 250, 246, 0.075);
-        color: #e7f2ef;
-      }
-
-      .branch-switch .branch-label {
-        color: #a7c0c0;
-        font-size: 11px;
-      }
-
-      .branch-switch select {
-        width: 111px;
-        border: 0;
-        background: transparent;
-        color: inherit;
-        font-size: 11px;
-        font-weight: 600;
-        outline: none;
-      }
-
-      .branch-switch option {
-        color: var(--ink);
-      }
-
-      .nav-heading {
-        padding: 0 11px 9px;
-        color: #88a6aa;
-        font-size: 10px;
-        font-weight: 650;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-      }
-
-      .nav-menu {
-        display: grid;
-        gap: 4px;
-      }
-
-      .nav-link {
-        display: flex;
-        width: 100%;
-        min-height: 43px;
-        align-items: center;
-        gap: 12px;
-        padding: 0 11px;
-        border: 1px solid transparent;
-        border-radius: 13px;
-        background: transparent;
-        color: #b7c9c9;
-        text-align: left;
-        transition:
-          background 180ms ease,
-          color 180ms ease,
-          border-color 180ms ease;
-      }
-
-      .nav-link:hover {
-        background: rgba(237, 249, 246, 0.08);
-        color: white;
-      }
-
-      .nav-link.active {
-        border-color: rgba(149, 231, 211, 0.13);
-        background: linear-gradient(100deg, rgba(61, 198, 174, 0.2), rgba(61, 198, 174, 0.07));
-        color: #9cf0dc;
-      }
-
-      .nav-link span {
-        font-size: 12px;
-        font-weight: 540;
-      }
-
-      .nav-link .nav-count {
-        min-width: 22px;
-        margin-left: auto;
-        padding: 3px 6px;
-        border-radius: 7px;
-        background: rgba(233, 166, 74, 0.16);
-        color: #f2c77f;
-        font-size: 10px;
-        text-align: center;
-      }
-
-      .sidebar-spacer {
-        flex: 1;
-      }
-
-      .side-status {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        margin: 0 3px 14px;
-        padding: 13px 12px;
-        border: 1px solid rgba(224, 245, 240, 0.11);
-        border-radius: 14px;
-        background: rgba(238, 250, 247, 0.055);
-      }
-
-      .live-dot {
-        width: 7px;
-        height: 7px;
-        flex: 0 0 auto;
-        margin-top: 4px;
-        border-radius: 50%;
-        background: #64d9ae;
-        box-shadow: 0 0 0 4px rgba(100, 217, 174, 0.13);
-      }
-
-      .side-status strong {
-        display: block;
-        font-size: 11px;
-        font-weight: 600;
-      }
-
-      .side-status small {
-        display: block;
-        margin-top: 4px;
-        color: #9cb2b5;
-        font-size: 10px;
-      }
-
-      .profile-card {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 8px 4px;
-        border-top: 1px solid rgba(230, 245, 241, 0.11);
-      }
-
-      .avatar {
-        display: grid;
-        width: 34px;
-        height: 34px;
-        flex: 0 0 auto;
-        place-items: center;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #edd6b0, #9ac9bc);
-        color: #16353a;
-        font-size: 11px;
-        font-weight: 750;
-      }
-
-      .profile-name {
-        color: #f4faf8;
-        font-size: 11px;
-        font-weight: 630;
-      }
-
-      .profile-role {
-        margin-top: 3px;
-        color: #a4b9ba;
-        font-size: 10px;
-      }
-
-      .role-demo {
-        width: 100%;
-        margin-top: 10px;
-        padding: 7px 9px;
-        border: 1px solid rgba(230, 245, 241, 0.13);
-        border-radius: 10px;
-        background: rgba(240, 248, 247, 0.07);
-        color: #c1d0d0;
-        font-size: 10px;
-      }
-
-      .main-area {
-        min-width: 0;
-        padding: 0 17px 38px;
-      }
-
-      .topbar {
-        display: flex;
-        min-height: 73px;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-      }
-
-      .crumbs {
-        color: #87949a;
-        font-size: 11px;
-      }
-
-      .crumbs strong {
-        color: #263b43;
-        font-weight: 620;
-      }
-
-      .top-actions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .search-box {
-        display: flex;
-        width: min(250px, 25vw);
-        height: 38px;
-        align-items: center;
-        gap: 8px;
-        padding: 0 11px;
-        border: 1px solid rgba(210, 221, 222, 0.95);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.67);
-        color: #829096;
-        backdrop-filter: blur(18px);
-      }
-
-      .search-box input {
-        width: 100%;
-        min-width: 0;
-        border: 0;
-        background: transparent;
-        color: var(--ink);
-        font-size: 11px;
-        outline: none;
-      }
-
-      .icon-button {
-        display: grid;
-        width: 39px;
-        height: 39px;
-        flex: 0 0 auto;
-        place-items: center;
-        border: 1px solid #dfe6e7;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.73);
-        color: #51646a;
-        transition: background 160ms ease;
-      }
-
-      .icon-button:hover {
-        background: white;
-      }
-
-      .notification-button {
-        position: relative;
-      }
-
-      .notification-button::after {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 6px;
-        height: 6px;
-        border: 1px solid white;
-        border-radius: 50%;
-        background: #ef9e4c;
-        content: "";
-      }
-
-      .mobile-menu {
-        display: none;
-      }
-
-      .page-view {
-        animation: arrive 230ms ease both;
-      }
-
-      .page-view[hidden] {
-        display: none;
-      }
-
-      @keyframes arrive {
-        from {
-          opacity: 0.7;
-          transform: translateY(4px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .page-heading {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 18px;
-        margin: 10px 0 22px;
-      }
-
-      .page-heading h1 {
-        margin: 0;
-        color: #13262e;
-        font-size: clamp(24px, 3vw, 31px);
-        font-weight: 650;
-        letter-spacing: -0.055em;
-        line-height: 1.08;
-      }
-
-      .page-heading p {
-        margin: 8px 0 0;
-        color: #77868b;
-        font-size: 12px;
-        line-height: 1.5;
-      }
-
-      .heading-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .button {
-        display: inline-flex;
-        min-height: 39px;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 0 13px;
-        border: 1px solid transparent;
-        border-radius: 11px;
-        font-size: 11px;
-        font-weight: 620;
-        transition:
-          background 160ms ease,
-          box-shadow 160ms ease;
-        white-space: nowrap;
-      }
-
-      .button-primary {
-        background: #173c42;
-        box-shadow: 0 5px 12px rgba(23, 60, 66, 0.13);
-        color: white;
-      }
-
-      .button-primary:hover {
-        background: #20545a;
-      }
-
-      .button-secondary {
-        border-color: #dce5e6;
-        background: rgba(255, 255, 255, 0.72);
-        color: #53656a;
-      }
-
-      .button-secondary:hover {
-        background: white;
-      }
-
-      .button-soft {
-        background: rgba(57, 198, 174, 0.11);
-        color: #247d70;
-      }
-
-      .button-small {
-        min-height: 31px;
-        padding: 0 9px;
-        border-radius: 9px;
-        font-size: 10px;
-      }
-
-      .glass-panel {
-        border: 1px solid rgba(255, 255, 255, 0.82);
-        background: rgba(255, 255, 255, 0.73);
-        box-shadow:
-          0 10px 32px rgba(34, 62, 65, 0.055),
-          inset 0 1px rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(22px);
-      }
-
-      .hero-panel {
-        position: relative;
-        display: grid;
-        grid-template-columns: minmax(0, 1.22fr) minmax(250px, 0.78fr);
-        min-height: 214px;
-        overflow: hidden;
-        border: 1px solid rgba(37, 75, 79, 0.58);
-        border-radius: 22px;
-        background:
-          radial-gradient(ellipse at 86% 22%, rgba(90, 202, 180, 0.26), transparent 27%),
-          radial-gradient(ellipse at 10% 110%, rgba(234, 166, 74, 0.1), transparent 36%),
-          linear-gradient(110deg, #14373e 0%, #102d35 59%, #153b3e 100%);
-        box-shadow: 0 18px 38px rgba(28, 68, 70, 0.16);
-        color: #f1f8f6;
-      }
-
-      .hero-copy {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 26px 30px;
-      }
-
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        color: #9bd9cb;
-        font-size: 10px;
-        font-weight: 650;
-        letter-spacing: 0.045em;
-      }
-
-      .eyebrow .live-dot {
-        width: 6px;
-        height: 6px;
-        margin: 0;
-        box-shadow: none;
-      }
-
-      .hero-copy h2 {
-        max-width: 490px;
-        margin: 14px 0 9px;
-        font-size: clamp(23px, 2.5vw, 30px);
-        font-weight: 560;
-        letter-spacing: -0.045em;
-        line-height: 1.15;
-      }
-
-      .hero-copy p {
-        max-width: 430px;
-        margin: 0;
-        color: #b1c9c8;
-        font-size: 11px;
-        line-height: 1.7;
-      }
-
-      .hero-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        align-self: flex-start;
-        margin-top: 19px;
-        padding: 8px 0;
-        border: 0;
-        background: transparent;
-        color: #a9ecdc;
-        font-size: 11px;
-        font-weight: 620;
-      }
-
-      .hero-link:hover {
-        color: white;
-      }
-
-      .branch-orbit {
-        position: relative;
-        display: grid;
-        align-content: center;
-        gap: 10px;
-        padding: 26px 26px 26px 4px;
-      }
-
-      .branch-orbit::before {
-        position: absolute;
-        top: 20%;
-        bottom: 20%;
-        left: -12px;
-        width: 1px;
-        background: linear-gradient(transparent, rgba(206, 244, 233, 0.28), transparent);
-        content: "";
-      }
-
-      .branch-glass {
-        display: grid;
-        grid-template-columns: 34px 1fr auto;
-        align-items: center;
-        gap: 10px;
-        min-height: 62px;
-        padding: 10px 12px;
-        border: 1px solid rgba(220, 246, 239, 0.16);
-        border-radius: 15px;
-        background: rgba(233, 250, 245, 0.075);
-        box-shadow: inset 0 1px rgba(255, 255, 255, 0.09);
-        backdrop-filter: blur(18px);
-      }
-
-      .branch-orb {
-        display: grid;
-        width: 31px;
-        height: 31px;
-        place-items: center;
-        border: 1px solid rgba(143, 226, 205, 0.22);
-        border-radius: 11px;
-        background: rgba(79, 194, 169, 0.15);
-        color: #a6ecda;
-      }
-
-      .branch-glass strong {
-        display: block;
-        color: #f2f8f6;
-        font-size: 11px;
-        font-weight: 600;
-      }
-
-      .branch-glass small {
-        display: block;
-        margin-top: 4px;
-        color: #a9c1c0;
-        font-size: 9px;
-      }
-
-      .branch-open {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        color: #9fe3c7;
-        font-size: 9px;
-        white-space: nowrap;
-      }
-
-      .branch-open::before {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: #70d7a7;
-        content: "";
-      }
-
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
-        margin: 14px 0;
-      }
-
-      .stat-card {
-        min-height: 115px;
-        padding: 15px 16px;
-        border: 1px solid #e6ebeb;
-        border-radius: 17px;
-        background: rgba(255, 255, 255, 0.78);
-        box-shadow: 0 6px 21px rgba(31, 58, 60, 0.035);
-      }
-
-      .stat-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        color: #77868b;
-        font-size: 10px;
-        font-weight: 540;
-      }
-
-      .stat-icon {
-        display: grid;
-        width: 29px;
-        height: 29px;
-        place-items: center;
-        border-radius: 10px;
-        background: #edf7f4;
-        color: #2e8b7b;
-      }
-
-      .stat-icon.amber {
-        background: #fcf3e7;
-        color: #b87825;
-      }
-
-      .stat-value {
-        margin-top: 11px;
-        color: #183039;
-        font-size: 23px;
-        font-weight: 650;
-        letter-spacing: -0.05em;
-      }
-
-      .stat-note {
-        margin-top: 4px;
-        color: #8b979b;
-        font-size: 9px;
-      }
-
-      .stat-note em {
-        color: #318b77;
-        font-style: normal;
-        font-weight: 650;
-      }
-
-      .dashboard-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
-        gap: 13px;
-      }
-
-      .panel {
-        min-width: 0;
-        border: 1px solid #e5ebeb;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.79);
-        box-shadow: 0 7px 23px rgba(31, 58, 60, 0.035);
-      }
-
-      .panel-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 17px 18px 13px;
-      }
-
-      .panel-header h3 {
-        margin: 0;
-        color: #22373e;
-        font-size: 12px;
-        font-weight: 650;
-        letter-spacing: -0.02em;
-      }
-
-      .panel-header p {
-        margin: 5px 0 0;
-        color: #8c999d;
-        font-size: 9px;
-      }
-
-      .text-button {
-        display: inline-flex;
-        min-height: 30px;
-        align-items: center;
-        gap: 5px;
-        padding: 0 4px;
-        border: 0;
-        background: transparent;
-        color: #3a8176;
-        font-size: 10px;
-        font-weight: 630;
-      }
-
-      .table-wrap {
-        width: 100%;
-        overflow-x: auto;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-      }
-
-      th {
-        padding: 10px 13px;
-        border-top: 1px solid #edf0f0;
-        border-bottom: 1px solid #edf0f0;
-        background: rgba(244, 247, 246, 0.65);
-        color: #839095;
-        font-size: 10px;
-        font-weight: 620;
-        white-space: nowrap;
-      }
-
-      td {
-        padding: 12px 13px;
-        border-bottom: 1px solid #eff2f2;
-        color: #52636a;
-        font-size: 11px;
-        white-space: nowrap;
-      }
-
-      tbody tr:last-child td {
-        border-bottom: 0;
-      }
-
-      tbody tr:hover {
-        background: rgba(238, 247, 244, 0.5);
-      }
-
-      .cell-primary {
-        display: block;
-        color: #243941;
-        font-size: 11px;
-        font-weight: 630;
-      }
-
-      .cell-secondary {
-        display: block;
-        margin-top: 4px;
-        color: #98a2a5;
-        font-size: 10px;
-      }
-
-      .status {
-        display: inline-flex;
-        min-height: 23px;
-        align-items: center;
-        gap: 5px;
-        padding: 0 8px;
-        border-radius: 8px;
-        font-size: 9px;
-        font-weight: 610;
-      }
-
-      .status::before {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: currentColor;
-        content: "";
-      }
-
-      .status-green {
-        background: #e9f6f0;
-        color: #397f67;
-      }
-
-      .status-amber {
-        background: #fbf1e2;
-        color: #a76e24;
-      }
-
-      .status-blue {
-        background: #eaf2f6;
-        color: #4a768d;
-      }
-
-      .status-gray {
-        background: #edf0f0;
-        color: #6f7a7d;
-      }
-
-      .queue-list {
-        display: grid;
-        gap: 0;
-        padding: 0 16px 6px;
-      }
-
-      .queue-item {
-        display: grid;
-        grid-template-columns: 33px minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 2px;
-        border-top: 1px solid #edf0f0;
-      }
-
-      .queue-icon {
-        display: grid;
-        width: 32px;
-        height: 32px;
-        place-items: center;
-        border-radius: 11px;
-        background: #fbf3e6;
-        color: #a8752e;
-      }
-
-      .queue-title {
-        color: #2c4148;
-        font-size: 10px;
-        font-weight: 620;
-      }
-
-      .queue-meta {
-        margin-top: 4px;
-        color: #929da0;
-        font-size: 9px;
-      }
-
-      .queue-action {
-        display: grid;
-        width: 30px;
-        height: 30px;
-        place-items: center;
-        border: 1px solid #e5eaea;
-        border-radius: 9px;
-        background: white;
-        color: #5d7477;
-      }
-
-      .queue-action:hover {
-        border-color: #a9d8cd;
-        color: #287e6e;
-      }
-
-      .section-toolbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 12px 15px;
-        border-bottom: 1px solid #edf0f0;
-      }
-
-      .filter-group {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 7px;
-      }
-
-      .filter-chip {
-        min-height: 30px;
-        padding: 0 10px;
-        border: 1px solid #e2e8e8;
-        border-radius: 9px;
-        background: white;
-        color: #607076;
-        font-size: 10px;
-      }
-
-      .filter-chip.selected {
-        border-color: #b8ddd3;
-        background: #ecf8f4;
-        color: #2c796d;
-      }
-
-      .select-control,
-      .input-control,
-      .textarea-control {
-        min-height: 39px;
-        width: 100%;
-        padding: 0 11px;
-        border: 1px solid #dce5e5;
-        border-radius: 10px;
-        background: white;
-        color: #30464d;
-        font-size: 11px;
-      }
-
-      .textarea-control {
-        min-height: 88px;
-        padding: 10px 11px;
-        resize: vertical;
-      }
-
-      .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 13px;
-      }
-
-      .field {
-        display: grid;
-        gap: 6px;
-      }
-
-      .field.full {
-        grid-column: 1 / -1;
-      }
-
-      .field label {
-        color: #52646a;
-        font-size: 10px;
-        font-weight: 620;
-      }
-
-      .field-hint {
-        color: #919da0;
-        font-size: 9px;
-        line-height: 1.5;
-      }
-
-      .balance-card {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 13px 14px;
-        border: 1px solid #dceee8;
-        border-radius: 12px;
-        background: #f2faf6;
-        color: #386e61;
-        font-size: 10px;
-      }
-
-      .balance-card strong {
-        color: #225d50;
-        font-size: 14px;
-        letter-spacing: -0.03em;
-      }
-
-      .progress-track {
-        height: 6px;
-        overflow: hidden;
-        border-radius: 99px;
-        background: #e7eeee;
-      }
-
-      .progress-bar {
-        height: 100%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, #59bea6, #a4dbc3);
-      }
-
-      .report-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.75fr);
-        gap: 13px;
-      }
-
-      .chart-wrap {
-        padding: 5px 18px 15px;
-      }
-
-      .chart {
-        display: flex;
-        height: 205px;
-        align-items: flex-end;
-        gap: 15px;
-        padding: 18px 4px 28px;
-        border-bottom: 1px solid #e8eded;
-        background:
-          linear-gradient(to bottom, transparent 24%, #edf1f0 24%, #edf1f0 24.7%, transparent 24.7%),
-          linear-gradient(to bottom, transparent 49%, #edf1f0 49%, #edf1f0 49.7%, transparent 49.7%),
-          linear-gradient(to bottom, transparent 74%, #edf1f0 74%, #edf1f0 74.7%, transparent 74.7%);
-      }
-
-      .bar-set {
-        display: flex;
-        height: 100%;
-        flex: 1;
-        align-items: flex-end;
-        justify-content: center;
-        gap: 4px;
-        position: relative;
-      }
-
-      .bar {
-        width: min(17px, 32%);
-        min-height: 4px;
-        border-radius: 6px 6px 2px 2px;
-        background: linear-gradient(180deg, #5fc7ae, #45a894);
-        transition: height 220ms ease;
-      }
-
-      .bar.secondary {
-        background: linear-gradient(180deg, #a8d7ce, #7ab8ad);
-      }
-
-      .bar-set span {
-        position: absolute;
-        bottom: -19px;
-        color: #89969a;
-        font-size: 9px;
-      }
-
-      .legend {
-        display: flex;
-        gap: 15px;
-        padding-top: 12px;
-        color: #78878b;
-        font-size: 9px;
-      }
-
-      .legend i {
-        display: inline-block;
-        width: 7px;
-        height: 7px;
-        margin-right: 5px;
-        border-radius: 2px;
-        background: #50b49f;
-      }
-
-      .legend .legend-second {
-        background: #9dcfc4;
-      }
-
-      .summary-list {
-        display: grid;
-        gap: 16px;
-        padding: 4px 18px 19px;
-      }
-
-      .summary-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        color: #77868b;
-        font-size: 10px;
-      }
-
-      .summary-row strong {
-        color: #263d44;
-        font-size: 11px;
-        font-weight: 650;
-      }
-
-      .user-cell {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .mini-avatar {
-        display: grid;
-        width: 27px;
-        height: 27px;
-        place-items: center;
-        border-radius: 9px;
-        background: #e8f1ec;
-        color: #49796a;
-        font-size: 9px;
-        font-weight: 700;
-      }
-
-      .toggle {
-        position: relative;
-        width: 34px;
-        height: 20px;
-        padding: 0;
-        border: 0;
-        border-radius: 99px;
-        background: #cbd4d4;
-        transition: background 160ms ease;
-      }
-
-      .toggle::after {
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-        content: "";
-        transition: transform 160ms ease;
-      }
-
-      .toggle.on {
-        background: #51b89e;
-      }
-
-      .toggle.on::after {
-        transform: translateX(14px);
-      }
-
-      .empty-state {
-        padding: 30px 16px;
-        color: #8b989c;
-        font-size: 11px;
-        text-align: center;
-      }
-
-      dialog {
-        max-width: min(570px, calc(100vw - 28px));
-        width: 100%;
-        max-height: min(90vh, 760px);
-        padding: 0;
-        overflow: auto;
-        border: 1px solid rgba(255, 255, 255, 0.9);
-        border-radius: 20px;
-        background: #fdfefe;
-        box-shadow: 0 28px 90px rgba(9, 32, 38, 0.28);
-        color: var(--ink);
-      }
-
-      dialog::backdrop {
-        background: rgba(13, 35, 40, 0.38);
-        backdrop-filter: blur(6px);
-      }
-
-      .dialog-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 20px 21px 16px;
-        border-bottom: 1px solid #edf0f0;
-      }
-
-      .dialog-head h2 {
-        margin: 0;
-        color: #21383f;
-        font-size: 17px;
-        font-weight: 650;
-        letter-spacing: -0.04em;
-      }
-
-      .dialog-head p {
-        margin: 6px 0 0;
-        color: #839095;
-        font-size: 10px;
-        line-height: 1.5;
-      }
-
-      .dialog-body {
-        padding: 18px 21px;
-      }
-
-      .dialog-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-        padding: 14px 21px 18px;
-        border-top: 1px solid #edf0f0;
-        background: #fbfcfc;
-      }
-
-      .dropzone {
-        display: grid;
-        min-height: 85px;
-        place-items: center;
-        padding: 12px;
-        border: 1px dashed #bbd5d0;
-        border-radius: 12px;
-        background: #f7fbfa;
-        color: #53746f;
-        text-align: center;
-      }
-
-      .dropzone span {
-        display: block;
-        margin-top: 5px;
-        color: #89999b;
-        font-size: 9px;
-      }
-
-      .toast {
-        position: fixed;
-        right: 20px;
-        bottom: 20px;
-        z-index: 60;
-        display: flex;
-        max-width: min(360px, calc(100vw - 32px));
-        align-items: center;
-        gap: 10px;
-        padding: 13px 16px;
-        border: 1px solid rgba(219, 239, 232, 0.8);
-        border-radius: 14px;
-        background: rgba(19, 51, 56, 0.95);
-        box-shadow: 0 14px 35px rgba(12, 41, 43, 0.24);
-        color: #f2fbf7;
-        font-size: 11px;
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(8px);
-        transition:
-          opacity 180ms ease,
-          transform 180ms ease;
-        backdrop-filter: blur(20px);
-      }
-
-      .toast.visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .toast-mark {
-        display: grid;
-        width: 20px;
-        height: 20px;
-        flex: 0 0 auto;
-        place-items: center;
-        border-radius: 7px;
-        background: rgba(106, 218, 182, 0.19);
-        color: #a7efd7;
-      }
-
-      .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-      }
-
-      @media (max-width: 1050px) {
-        .app-layout {
-          grid-template-columns: 220px minmax(0, 1fr);
-          padding: 10px;
-          gap: 10px;
-        }
-
-        .sidebar {
-          top: 10px;
-          height: calc(100vh - 20px);
-        }
-
-        .main-area {
-          padding-right: 8px;
-          padding-left: 8px;
-        }
-
-        .hero-panel {
-          grid-template-columns: minmax(0, 1fr) minmax(225px, 0.75fr);
-        }
-
-        .hero-copy {
-          padding: 23px;
-        }
-
-        .branch-orbit {
-          padding-right: 18px;
-        }
-
-        .stats-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-      }
-
-      @media (max-width: 760px) {
-        .app-layout {
-          display: block;
-          padding: 8px;
-        }
-
-        .sidebar {
-          position: fixed;
-          top: 8px;
-          bottom: 8px;
-          left: 8px;
-          width: min(285px, calc(100vw - 24px));
-          height: auto;
-          min-height: 0;
-          transform: translateX(calc(-100% - 14px));
-          transition: none;
-        }
-
-        .sidebar.open {
-          transform: translateX(0);
-        }
-
-        .sidebar-scrim {
-          position: fixed;
-          inset: 0;
-          z-index: 19;
-          display: none;
-          background: rgba(16, 36, 40, 0.32);
-          backdrop-filter: blur(3px);
-        }
-
-        .sidebar-scrim.visible {
-          display: block;
-        }
-
-        .main-area {
-          padding: 0 5px 28px;
-        }
-
-        .topbar {
-          min-height: 59px;
-        }
-
-        .mobile-menu {
-          display: grid;
-        }
-
-        .topbar-left {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .crumbs {
-          font-size: 10px;
-        }
-
-        .search-box {
-          width: 39px;
-          padding: 0 10px;
-          border-radius: 12px;
-        }
-
-        .search-box:focus-within {
-          position: absolute;
-          top: 63px;
-          right: 15px;
-          left: 15px;
-          z-index: 5;
-          width: auto;
-          box-shadow: 0 8px 24px rgba(20, 47, 49, 0.14);
-        }
-
-        .search-box input {
-          width: 0;
-        }
-
-        .search-box:focus-within input {
-          width: 100%;
-        }
-
-        .top-actions {
-          gap: 6px;
-        }
-
-        .top-actions .notification-button {
-          display: none;
-        }
-
-        .page-heading {
-          align-items: flex-start;
-          flex-direction: column;
-          margin: 12px 0 17px;
-        }
-
-        .page-heading h1 {
-          font-size: 25px;
-        }
-
-        .page-heading p {
-          max-width: 310px;
-          font-size: 11px;
-        }
-
-        .hero-panel {
-          grid-template-columns: 1fr;
-        }
-
-        .hero-copy {
-          padding: 23px 21px 12px;
-        }
-
-        .hero-copy h2 {
-          max-width: 380px;
-          font-size: 25px;
-        }
-
-        .branch-orbit {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          padding: 13px 17px 19px;
-        }
-
-        .branch-orbit::before {
-          display: none;
-        }
-
-        .branch-glass {
-          grid-template-columns: 31px 1fr;
-          padding: 9px;
-        }
-
-        .branch-open {
-          grid-column: 2;
-          margin-top: -6px;
-        }
-
-        .stats-grid {
-          gap: 8px;
-          margin: 10px 0;
-        }
-
-        .stat-card {
-          min-height: 104px;
-          padding: 12px;
-          border-radius: 14px;
-        }
-
-        .stat-value {
-          font-size: 21px;
-        }
-
-        .dashboard-grid,
-        .report-grid {
-          grid-template-columns: 1fr;
-          gap: 10px;
-        }
-
-        .panel {
-          border-radius: 15px;
-        }
-
-        .panel-header {
-          padding: 15px 14px 12px;
-        }
-
-        .section-toolbar {
-          align-items: flex-start;
-          flex-direction: column;
-        }
-
-        .section-toolbar .input-control {
-          max-width: none !important;
-          width: 100% !important;
-        }
-
-        .form-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .field.full {
-          grid-column: auto;
-        }
-      }
-
-      @media (max-width: 420px) {
-        .branch-orbit {
-          grid-template-columns: 1fr;
-        }
-
-        .branch-glass {
-          grid-template-columns: 32px 1fr auto;
-        }
-
-        .branch-open {
-          grid-column: auto;
-          margin-top: 0;
-        }
-
-        .heading-actions {
-          width: 100%;
-        }
-
-        .heading-actions .button {
-          flex: 1;
-        }
-
-        .stats-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          scroll-behavior: auto !important;
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
-    </style>
+    
   </head>
-  <body>
-    <div class="app-layout min-h-screen w-full">
-      <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
-        <div class="brand-lockup">
-          <div class="brand-symbol" aria-hidden="true">
+  <body class="m-[0] min-w-[320px] bg-[#f3f6f5] [background-image:radial-gradient(ellipse_at_68%_0%,_rgba(119,_205,_190,_0.13),_transparent_32rem)] text-[#10202a] font-sans antialiased motion-reduce:[&*]:![scroll-behavior:auto] motion-reduce:[&*]:![animation-duration:0.01ms] motion-reduce:[&*]:![animation-iteration-count:1] motion-reduce:[&*]:![transition-duration:0.01ms]">
+    <div class="app-layout min-h-screen w-full grid grid-cols-[252px_minmax(0,_1fr)] min-h-[100vh] p-[14px] gap-[14px] max-[1050px]:grid-cols-[220px_minmax(0,_1fr)] max-[1050px]:p-[10px] max-[1050px]:gap-[10px] max-[760px]:block max-[760px]:p-[8px]">
+      <aside class="sidebar sticky top-[14px] flex h-[calc(100vh_-_28px)] min-h-[670px] flex-col overflow-hidden [border:1px_solid_rgba(255,_255,_255,_0.14)] rounded-[24px] [background:radial-gradient(ellipse_at_8%_0%,_rgba(77,_157,_157,_0.21),_transparent_48%),_linear-gradient(160deg,_rgba(20,_54,_61,_0.96),_rgba(11,_31,_39,_0.98))] shadow-[0_22px_60px_rgba(27,_55,_59,_0.16)] text-[#eef7f5] p-[23px_15px_15px] z-[20] max-[1050px]:top-[10px] max-[1050px]:h-[calc(100vh_-_20px)] max-[760px]:fixed max-[760px]:top-[8px] max-[760px]:bottom-[8px] max-[760px]:left-[8px] max-[760px]:w-[min(285px,_calc(100vw_-_24px))] max-[760px]:h-auto max-[760px]:min-h-[0] max-[760px]:[transform:translateX(calc(-100%_-_14px))] max-[760px]:[transition:none] max-[760px]:[&.open]:[transform:translateX(0)]" id="sidebar" aria-label="Navegación principal">
+        <div class="brand-lockup flex items-center gap-[11px] p-[0_8px_20px]">
+          <div class="brand-symbol grid w-[40px] h-[40px] flex-none place-items-center [border:1px_solid_rgba(255,_255,_255,_0.28)] rounded-[14px] [background:linear-gradient(145deg,_rgba(75,_204,_180,_0.31),_rgba(73,_118,_127,_0.2))] shadow-[inset_0_1px_rgba(255,_255,_255,_0.21)] text-[#8be4d2]" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
               <path d="M5 19V6.8C5 5.25 6.25 4 7.8 4h5.4C14.75 4 16 5.25 16 6.8V19M3.5 19h14M8 8h5M8 11h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
               <path d="M16 8.5h2.1a1.4 1.4 0 0 1 1.4 1.4v5.6a1.5 1.5 0 0 0 3 0v-4.1l-2.2-2.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
@@ -1571,74 +41,74 @@
             </svg>
           </div>
           <div>
-            <div class="brand-name">San José</div>
-            <div class="brand-caption">Control de combustible</div>
+            <div class="brand-name text-[15px] font-[680] tracking-[-0.035em]">San José</div>
+            <div class="brand-caption mt-[3px] text-[#9db5b8] text-[10px] tracking-[0.02em]">Control de combustible</div>
           </div>
         </div>
 
-        <label class="branch-switch" id="branchSelector">
+        <label class="branch-switch flex min-h-[45px] items-center justify-between m-[0_2px_24px] p-[0_11px] [border:1px_solid_rgba(218,_243,_237,_0.13)] rounded-[13px] [background:rgba(235,_250,_246,_0.075)] text-[#e7f2ef] [&_.branch-label]:text-[#a7c0c0] [&_.branch-label]:text-[11px] [&_select]:w-[111px] [&_select]:[border:0] [&_select]:[background:transparent] [&_select]:text-[inherit] [&_select]:text-[11px] [&_select]:font-[600] [&_select]:[outline:none] [&_option]:text-[#10202a]" id="branchSelector">
           <span>
             <span class="branch-label">Sede activa</span>
           </span>
-          <select id="branchFilter" aria-label="Filtrar por sede">
+          <select id="branchFilter" aria-label="Filtrar por sede" class="focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]">
             <option value="Todas las sedes">Todas las sedes</option>
             <option value="San José">San José</option>
             <option value="Santa Marta">Santa Marta</option>
           </select>
         </label>
 
-        <div class="nav-heading">Espacio de trabajo</div>
-        <nav class="nav-menu" id="navMenu"></nav>
+        <div class="nav-heading p-[0_11px_9px] text-[#88a6aa] text-[10px] font-[650] tracking-[0.12em] uppercase">Espacio de trabajo</div>
+        <nav class="nav-menu grid gap-[4px]" id="navMenu"></nav>
 
-        <div class="sidebar-spacer"></div>
-        <div class="side-status">
-          <span class="live-dot" aria-hidden="true"></span>
+        <div class="sidebar-spacer flex-1"></div>
+        <div class="side-status flex items-start gap-[10px] m-[0_3px_14px] p-[13px_12px] [border:1px_solid_rgba(224,_245,_240,_0.11)] rounded-[14px] [background:rgba(238,_250,_247,_0.055)] [&_strong]:block [&_strong]:text-[11px] [&_strong]:font-[600] [&_small]:block [&_small]:mt-[4px] [&_small]:text-[#9cb2b5] [&_small]:text-[10px]">
+          <span class="live-dot w-[7px] h-[7px] flex-none mt-[4px] rounded-[50%] [background:#64d9ae] shadow-[0_0_0_4px_rgba(100,_217,_174,_0.13)]" aria-hidden="true"></span>
           <div>
             <strong>Dos sedes conectadas</strong>
             <small>Los saldos se comparten en línea</small>
           </div>
         </div>
-        <div class="profile-card">
-          <div class="avatar" id="profileAvatar">MP</div>
+        <div class="profile-card flex items-center gap-[10px] p-[12px_8px_4px] [border-top:1px_solid_rgba(230,_245,_241,_0.11)]">
+          <div class="avatar grid w-[34px] h-[34px] flex-none place-items-center rounded-[12px] [background:linear-gradient(135deg,_#edd6b0,_#9ac9bc)] text-[#16353a] text-[11px] font-[750]" id="profileAvatar">MP</div>
           <div>
-            <div class="profile-name" id="profileName">María Paredes</div>
-            <div class="profile-role" id="profileRole">Personal de oficina</div>
+            <div class="profile-name text-[#f4faf8] text-[11px] font-[630]" id="profileName">María Paredes</div>
+            <div class="profile-role mt-[3px] text-[#a4b9ba] text-[10px]" id="profileRole">Personal de oficina</div>
           </div>
         </div>
-        <label class="sr-only" for="roleSwitch">Cambiar perfil de demostración</label>
-        <select class="role-demo" id="roleSwitch">
+        <label class="sr-only absolute w-[1px] h-[1px] p-[0] m-[-1px] overflow-hidden [clip:rect(0,_0,_0,_0)] whitespace-nowrap [border:0]" for="roleSwitch">Cambiar perfil de demostración</label>
+        <select class="role-demo w-full mt-[10px] p-[7px_9px] [border:1px_solid_rgba(230,_245,_241,_0.13)] rounded-[10px] [background:rgba(240,_248,_247,_0.07)] text-[#c1d0d0] text-[10px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="roleSwitch">
           <option value="OFFICE">Vista de oficina</option>
           <option value="ADMIN">Vista de administrador</option>
           <option value="ATTENDANT">Vista de grifero</option>
         </select>
       </aside>
 
-      <div class="sidebar-scrim" id="sidebarScrim"></div>
+      <div class="sidebar-scrim hidden max-[760px]:fixed max-[760px]:[inset:0] max-[760px]:z-[19] max-[760px]:hidden max-[760px]:[background:rgba(16,_36,_40,_0.32)] max-[760px]:[backdrop-filter:blur(3px)] max-[760px]:[&.visible]:block" id="sidebarScrim"></div>
 
-      <main class="main-area">
-        <header class="topbar">
-          <div class="topbar-left">
-            <button class="icon-button mobile-menu" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar">
+      <main class="main-area min-w-0 p-[0_17px_38px] max-[1050px]:pr-[8px] max-[1050px]:pl-[8px] max-[760px]:p-[0_5px_28px]">
+        <header class="topbar flex min-h-[73px] items-center justify-between gap-[16px] max-[760px]:min-h-[59px]">
+          <div class="topbar-left max-[760px]:flex max-[760px]:items-center max-[760px]:gap-[10px]">
+            <button class="icon-button mobile-menu grid w-[39px] h-[39px] flex-none place-items-center [border:1px_solid_#dfe6e7] rounded-[12px] [background:rgba(255,_255,_255,_0.73)] text-[#51646a] [transition:background_160ms_ease] hover:[background:white] hidden max-[760px]:grid cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar">
               <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true">
                 <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
               </svg>
             </button>
-            <div class="crumbs">Estación de Servicio <span aria-hidden="true">/</span> <strong id="breadcrumb">Panel de control</strong></div>
+            <div class="crumbs text-[#87949a] text-[11px] [&_strong]:text-[#263b43] [&_strong]:font-[620] max-[760px]:text-[10px]">Estación de Servicio <span aria-hidden="true">/</span> <strong id="breadcrumb">Panel de control</strong></div>
           </div>
-          <div class="top-actions">
-            <label class="search-box">
+          <div class="top-actions flex items-center gap-[10px] max-[760px]:gap-[6px] max-[760px]:[&_.notification-button]:hidden">
+            <label class="search-box flex w-[min(250px,_25vw)] h-[38px] items-center gap-[8px] p-[0_11px] [border:1px_solid_rgba(210,_221,_222,_0.95)] rounded-[12px] [background:rgba(255,_255,_255,_0.67)] text-[#829096] [backdrop-filter:blur(18px)] [&_input]:w-full [&_input]:min-w-0 [&_input]:[border:0] [&_input]:[background:transparent] [&_input]:text-[#10202a] [&_input]:text-[11px] [&_input]:[outline:none] max-[760px]:w-[39px] max-[760px]:p-[0_10px] max-[760px]:rounded-[12px] max-[760px]:focus-within:absolute max-[760px]:focus-within:top-[63px] max-[760px]:focus-within:right-[15px] max-[760px]:focus-within:left-[15px] max-[760px]:focus-within:z-[5] max-[760px]:focus-within:w-auto max-[760px]:focus-within:shadow-[0_8px_24px_rgba(20,_47,_49,_0.14)] max-[760px]:[&_input]:w-[0] max-[760px]:[&:focus-within_input]:w-full">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true">
                 <circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7" />
                 <path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
               </svg>
-              <input id="globalSearch" type="search" placeholder="Buscar orden, vale…" aria-label="Buscar órdenes o vales" />
+              <input id="globalSearch" type="search" placeholder="Buscar orden, vale…" aria-label="Buscar órdenes o vales" / class="focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]">
             </label>
-            <button class="icon-button notification-button" id="notificationButton" aria-label="Ver pendientes">
+            <button class="icon-button notification-button grid w-[39px] h-[39px] flex-none place-items-center [border:1px_solid_#dfe6e7] rounded-[12px] [background:rgba(255,_255,_255,_0.73)] text-[#51646a] [transition:background_160ms_ease] hover:[background:white] relative after:absolute after:top-[8px] after:right-[8px] after:w-[6px] after:h-[6px] after:[border:1px_solid_white] after:rounded-[50%] after:[background:#ef9e4c] after:content-[''] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="notificationButton" aria-label="Ver pendientes">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
                 <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </button>
-            <button class="icon-button" id="profileButton" aria-label="Perfil y sesión">
+            <button class="icon-button grid w-[39px] h-[39px] flex-none place-items-center [border:1px_solid_#dfe6e7] rounded-[12px] [background:rgba(255,_255,_255,_0.73)] text-[#51646a] [transition:background_160ms_ease] hover:[background:white] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="profileButton" aria-label="Perfil y sesión">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
                 <circle cx="12" cy="8" r="3.3" stroke="currentColor" stroke-width="1.6" />
                 <path d="M5.2 20a6.8 6.8 0 0 1 13.6 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -1647,15 +117,15 @@
           </div>
         </header>
 
-        <section class="page-view" id="page-dashboard" data-page-view="dashboard">
-          <div class="page-heading">
+        <section class="page-view [animation:arrive_230ms_ease_both] animate-arrive" id="page-dashboard" data-page-view="dashboard">
+          <div class="page-heading flex items-end justify-between gap-[18px] m-[10px_0_22px] [&_h1]:m-[0] [&_h1]:text-[#13262e] [&_h1]:text-[clamp(24px,_3vw,_31px)] [&_h1]:font-[650] [&_h1]:tracking-[-0.055em] [&_h1]:leading-[1.08] [&_p]:m-[8px_0_0] [&_p]:text-[#77868b] [&_p]:text-[12px] [&_p]:leading-[1.5] max-[760px]:items-start max-[760px]:flex-col max-[760px]:m-[12px_0_17px] max-[760px]:[&_h1]:text-[25px] max-[760px]:[&_p]:max-w-[310px] max-[760px]:[&_p]:text-[11px]">
             <div>
               <h1>Buen día, María</h1>
               <p>Así se mueve la operación en tus dos sedes hoy.</p>
             </div>
-            <div class="heading-actions">
-              <span class="crumbs" id="todayLabel"></span>
-              <button class="button button-secondary" id="dashboardReportAction" data-action="reports">
+            <div class="heading-actions flex items-center gap-[8px] max-[420px]:w-full max-[420px]:[&_.button]:flex-1">
+              <span class="crumbs text-[#87949a] text-[11px] [&_strong]:text-[#263b43] [&_strong]:font-[620] max-[760px]:text-[10px]" id="todayLabel"></span>
+              <button class="button button-secondary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap border-[color:#dce5e6] [background:rgba(255,_255,_255,_0.72)] text-[#53656a] hover:[background:white] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="dashboardReportAction" data-action="reports">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
                   <path d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8v-6m4 6v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
@@ -1664,94 +134,60 @@
             </div>
           </div>
 
-          <div class="hero-panel">
-            <div class="hero-copy">
-              <div class="eyebrow"><span class="live-dot" aria-hidden="true"></span> Operación compartida</div>
-              <h2>Una operación.<br />Dos sedes. Un mismo control.</h2>
-              <p>Órdenes, vales y saldos se mantienen sincronizados para que cada despacho empiece con información clara.</p>
-              <button class="hero-link" data-action="orders">
-                Explorar órdenes
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
-                  <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </button>
-            </div>
-            <div class="branch-orbit" aria-label="Estado de las sedes">
-              <div class="branch-glass" data-branch-card="san-jose">
-                <span class="branch-orb" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-                    <path d="M4 20V8l8-4 8 4v12M8 20v-6h8v6M8 9h.01M16 9h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </span>
-                <span><strong>San José</strong><small><span id="sanJoseOrders">3</span> órdenes con saldo</small></span>
-                <span class="branch-open">Operativa</span>
-              </div>
-              <div class="branch-glass" data-branch-card="santa-marta">
-                <span class="branch-orb" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-                    <path d="M4 20V8l8-4 8 4v12M8 20v-6h8v6M8 9h.01M16 9h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </span>
-                <span><strong>Santa Marta</strong><small><span id="santaMartaOrders">2</span> órdenes con saldo</small></span>
-                <span class="branch-open">Operativa</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="stats-grid" aria-label="Resumen de hoy">
-            <article class="stat-card">
-              <div class="stat-top"><span id="metricOrdersLabel">Órdenes activas</span><span class="stat-icon">
+          <div class="stats-grid grid grid-cols-[repeat(4,_minmax(0,_1fr))] gap-[12px] m-[14px_0] max-[1050px]:grid-cols-[repeat(2,_minmax(0,_1fr))] max-[760px]:gap-[8px] max-[760px]:m-[10px_0] max-[420px]:grid-cols-[repeat(2,_minmax(0,_1fr))]" aria-label="Resumen de hoy">
+            <article class="stat-card min-h-[115px] p-[15px_16px] [border:1px_solid_#e6ebeb] rounded-[17px] [background:rgba(255,_255,_255,_0.78)] shadow-[0_6px_21px_rgba(31,_58,_60,_0.035)] max-[760px]:min-h-[104px] max-[760px]:p-[12px] max-[760px]:rounded-[14px]">
+              <div class="stat-top flex items-center justify-between text-[#77868b] text-[10px] font-[540]"><span id="metricOrdersLabel">Órdenes activas</span><span class="stat-icon grid w-[29px] h-[29px] place-items-center rounded-[10px] [background:#edf7f4] text-[#2e8b7b] [&.amber]:[background:#fcf3e7] [&.amber]:text-[#b87825]">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M9 13h6m-6 4h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
               </span></div>
-              <div class="stat-value" id="activeOrdersMetric">07</div>
-              <div class="stat-note"><em>En ambas sedes</em> · con saldo disponible</div>
+              <div class="stat-value mt-[11px] text-[#183039] text-[23px] font-[650] tracking-[-0.05em] max-[760px]:text-[21px]" id="activeOrdersMetric">07</div>
+              <div class="stat-note mt-[4px] text-[#8b979b] text-[9px] [&_em]:text-[#318b77] [&_em]:[font-style:normal] [&_em]:font-[650]"><em>En ambas sedes</em> · con saldo disponible</div>
             </article>
-            <article class="stat-card">
-              <div class="stat-top"><span id="metricGallonsLabel">Galones despachados</span><span class="stat-icon">
+            <article class="stat-card min-h-[115px] p-[15px_16px] [border:1px_solid_#e6ebeb] rounded-[17px] [background:rgba(255,_255,_255,_0.78)] shadow-[0_6px_21px_rgba(31,_58,_60,_0.035)] max-[760px]:min-h-[104px] max-[760px]:p-[12px] max-[760px]:rounded-[14px]">
+              <div class="stat-top flex items-center justify-between text-[#77868b] text-[10px] font-[540]"><span id="metricGallonsLabel">Galones despachados</span><span class="stat-icon grid w-[29px] h-[29px] place-items-center rounded-[10px] [background:#edf7f4] text-[#2e8b7b] [&.amber]:[background:#fcf3e7] [&.amber]:text-[#b87825]">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M12 3.5S6.5 10 6.5 14.6a5.5 5.5 0 1 0 11 0C17.5 10 12 3.5 12 3.5Z" stroke="currentColor" stroke-width="1.6" /><path d="M9.5 15.5a2.5 2.5 0 0 0 2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
               </span></div>
-              <div class="stat-value" id="gallonsMetric">184.5 <small style="font-size: 11px; font-weight: 560; letter-spacing: 0">gal</small></div>
-              <div class="stat-note">Total registrado hoy</div>
+              <div class="stat-value mt-[11px] text-[#183039] text-[23px] font-[650] tracking-[-0.05em] max-[760px]:text-[21px]" id="gallonsMetric">184.5 <small class="!text-[11px] !font-[560] !tracking-[0]">gal</small></div>
+              <div class="stat-note mt-[4px] text-[#8b979b] text-[9px] [&_em]:text-[#318b77] [&_em]:[font-style:normal] [&_em]:font-[650]">Total registrado hoy</div>
             </article>
-            <article class="stat-card">
-              <div class="stat-top"><span id="metricVouchersLabel">Vales con saldo</span><span class="stat-icon amber">
+            <article class="stat-card min-h-[115px] p-[15px_16px] [border:1px_solid_#e6ebeb] rounded-[17px] [background:rgba(255,_255,_255,_0.78)] shadow-[0_6px_21px_rgba(31,_58,_60,_0.035)] max-[760px]:min-h-[104px] max-[760px]:p-[12px] max-[760px]:rounded-[14px]">
+              <div class="stat-top flex items-center justify-between text-[#77868b] text-[10px] font-[540]"><span id="metricVouchersLabel">Vales con saldo</span><span class="stat-icon amber grid w-[29px] h-[29px] place-items-center rounded-[10px] [background:#edf7f4] text-[#2e8b7b] [&.amber]:[background:#fcf3e7] [&.amber]:text-[#b87825]">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6V7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" /><path d="M9 9v.01M9 12v.01M9 15v.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
               </span></div>
-              <div class="stat-value" id="activeVouchersMetric">12</div>
-              <div class="stat-note">Disponibles o parcialmente atendidos</div>
+              <div class="stat-value mt-[11px] text-[#183039] text-[23px] font-[650] tracking-[-0.05em] max-[760px]:text-[21px]" id="activeVouchersMetric">12</div>
+              <div class="stat-note mt-[4px] text-[#8b979b] text-[9px] [&_em]:text-[#318b77] [&_em]:[font-style:normal] [&_em]:font-[650]">Disponibles o parcialmente atendidos</div>
             </article>
-            <article class="stat-card">
-              <div class="stat-top"><span id="metricPendingLabel">Por verificar</span><span class="stat-icon amber">
+            <article class="stat-card min-h-[115px] p-[15px_16px] [border:1px_solid_#e6ebeb] rounded-[17px] [background:rgba(255,_255,_255,_0.78)] shadow-[0_6px_21px_rgba(31,_58,_60,_0.035)] max-[760px]:min-h-[104px] max-[760px]:p-[12px] max-[760px]:rounded-[14px]">
+              <div class="stat-top flex items-center justify-between text-[#77868b] text-[10px] font-[540]"><span id="metricPendingLabel">Por verificar</span><span class="stat-icon amber grid w-[29px] h-[29px] place-items-center rounded-[10px] [background:#edf7f4] text-[#2e8b7b] [&.amber]:[background:#fcf3e7] [&.amber]:text-[#b87825]">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M12 8v4l2.5 1.5M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
               </span></div>
-              <div class="stat-value" id="pendingMetric">03</div>
-              <div class="stat-note"><em>Revisión de vales físicos</em></div>
+              <div class="stat-value mt-[11px] text-[#183039] text-[23px] font-[650] tracking-[-0.05em] max-[760px]:text-[21px]" id="pendingMetric">03</div>
+              <div class="stat-note mt-[4px] text-[#8b979b] text-[9px] [&_em]:text-[#318b77] [&_em]:[font-style:normal] [&_em]:font-[650]"><em>Revisión de vales físicos</em></div>
             </article>
           </div>
 
-          <div class="dashboard-grid">
-            <section class="panel" id="dashboardReviewPanel">
-              <div class="panel-header">
+          <div class="dashboard-grid grid grid-cols-[minmax(0,_1.25fr)_minmax(260px,_0.75fr)] gap-[13px] max-[760px]:grid-cols-[1fr] max-[760px]:gap-[10px]">
+            <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px]" id="dashboardReviewPanel">
+              <div class="panel-header flex items-center justify-between gap-[12px] p-[17px_18px_13px] [&_h3]:m-[0] [&_h3]:text-[#22373e] [&_h3]:text-[12px] [&_h3]:font-[650] [&_h3]:tracking-[-0.02em] [&_p]:m-[5px_0_0] [&_p]:text-[#8c999d] [&_p]:text-[9px] max-[760px]:p-[15px_14px_12px]">
                 <div><h3>Actividad reciente</h3><p>Despachos registrados en ambas sedes</p></div>
-                <button class="text-button" data-action="attendances">Ver actividad
+                <button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-action="attendances">Ver actividad
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
                 </button>
               </div>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th>VALE / ORDEN</th><th>GRIFERO</th><th>SEDE</th><th>DESPACHADO</th><th>ESTADO</th></tr></thead>
-                  <tbody id="recentAttendanceRows"></tbody>
+              <div class="table-wrap w-full overflow-x-auto">
+                <table class="w-full border-collapse text-left">
+                  <thead><tr><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">VALE / ORDEN</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">GRIFERO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">SEDE</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">DESPACHADO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ESTADO</th></tr></thead>
+                  <tbody id="recentAttendanceRows" class="[&_tr:last-child_td]:[border-bottom:0] [&_tr:hover]:[background:rgba(238,_247,_244,_0.5)]"></tbody>
                 </table>
               </div>
             </section>
-            <section class="panel">
-              <div class="panel-header">
+            <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px]">
+              <div class="panel-header flex items-center justify-between gap-[12px] p-[17px_18px_13px] [&_h3]:m-[0] [&_h3]:text-[#22373e] [&_h3]:text-[12px] [&_h3]:font-[650] [&_h3]:tracking-[-0.02em] [&_p]:m-[5px_0_0] [&_p]:text-[#8c999d] [&_p]:text-[9px] max-[760px]:p-[15px_14px_12px]">
                 <div><h3>Revisión en oficina</h3><p>Vales físicos pendientes de cotejo</p></div>
-                <span class="status status-amber" id="reviewCount">3 pendientes</span>
+                <span class="status status-amber inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]" id="reviewCount">3 pendientes</span>
               </div>
-              <div class="queue-list" id="reviewQueue"></div>
-              <div style="padding: 0 17px 13px">
-                <button class="text-button" data-action="verifications">Abrir bandeja de revisión
+              <div class="queue-list grid gap-[0] p-[0_16px_6px]" id="reviewQueue"></div>
+              <div class="!p-[0_17px_13px]">
+                <button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-action="verifications">Abrir bandeja de revisión
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
                 </button>
               </div>
@@ -1759,206 +195,206 @@
           </div>
         </section>
 
-        <section class="page-view" id="page-orders" data-page-view="orders" hidden>
-          <div class="page-heading">
+        <section class="page-view [animation:arrive_230ms_ease_both] animate-arrive" id="page-orders" data-page-view="orders" hidden>
+          <div class="page-heading flex items-end justify-between gap-[18px] m-[10px_0_22px] [&_h1]:m-[0] [&_h1]:text-[#13262e] [&_h1]:text-[clamp(24px,_3vw,_31px)] [&_h1]:font-[650] [&_h1]:tracking-[-0.055em] [&_h1]:leading-[1.08] [&_p]:m-[8px_0_0] [&_p]:text-[#77868b] [&_p]:text-[12px] [&_p]:leading-[1.5] max-[760px]:items-start max-[760px]:flex-col max-[760px]:m-[12px_0_17px] max-[760px]:[&_h1]:text-[25px] max-[760px]:[&_p]:max-w-[310px] max-[760px]:[&_p]:text-[11px]">
             <div><h1>Órdenes de compra</h1><p>Consulta autorizaciones y saldo disponible por combustible.</p></div>
-            <div class="heading-actions">
-              <button class="button button-secondary" id="ocrOrderButton">
+            <div class="heading-actions flex items-center gap-[8px] max-[420px]:w-full max-[420px]:[&_.button]:flex-1">
+              <button class="button button-secondary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap border-[color:#dce5e6] [background:rgba(255,_255,_255,_0.72)] text-[#53656a] hover:[background:white] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="ocrOrderButton">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M9 13h6m-6 4h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
                 Importar PDF
               </button>
-              <button class="button button-primary" id="newOrderButton">
+              <button class="button button-primary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap [background:#173c42] shadow-[0_5px_12px_rgba(23,_60,_66,_0.13)] text-[white] hover:[background:#20545a] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newOrderButton">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
                 Nueva orden
               </button>
             </div>
           </div>
-          <section class="panel">
-            <div class="section-toolbar">
-              <div class="filter-group" role="group" aria-label="Filtrar órdenes">
-                <button class="filter-chip selected" data-filter="order" data-value="Todas">Todas</button>
-                <button class="filter-chip" data-filter="order" data-value="Con saldo">Con saldo</button>
-                <button class="filter-chip" data-filter="order" data-value="Agotadas">Agotadas</button>
+          <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px]">
+            <div class="section-toolbar flex items-center justify-between gap-[12px] p-[12px_15px] [border-bottom:1px_solid_#edf0f0] max-[760px]:items-start max-[760px]:flex-col max-[760px]:[&_.input-control]:!max-w-none max-[760px]:[&_.input-control]:!w-full">
+              <div class="filter-group flex [flex-wrap:wrap] items-center gap-[7px]" role="group" aria-label="Filtrar órdenes">
+                <button class="filter-chip selected min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="order" data-value="Todas">Todas</button>
+                <button class="filter-chip min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="order" data-value="Con saldo">Con saldo</button>
+                <button class="filter-chip min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="order" data-value="Agotadas">Agotadas</button>
               </div>
-              <input class="input-control" id="orderSearch" type="search" placeholder="Buscar por orden o entidad" style="max-width: 250px" aria-label="Buscar órdenes por número o entidad" />
+              <input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px] !max-w-[250px]" id="orderSearch" type="search" placeholder="Buscar por orden o entidad" aria-label="Buscar órdenes por número o entidad" />
             </div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>ORDEN / ENTIDAD</th><th>SEDE</th><th>EMITIDA</th><th>COMBUSTIBLE</th><th>AUTORIZADO</th><th>DISPONIBLE</th><th>ESTADO</th><th></th></tr></thead>
-                <tbody id="orderRows"></tbody>
+            <div class="table-wrap w-full overflow-x-auto">
+              <table class="w-full border-collapse text-left">
+                <thead><tr><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ORDEN / ENTIDAD</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">SEDE</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">EMITIDA</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">COMBUSTIBLE</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">AUTORIZADO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">DISPONIBLE</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ESTADO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap"></th></tr></thead>
+                <tbody id="orderRows" class="[&_tr:last-child_td]:[border-bottom:0] [&_tr:hover]:[background:rgba(238,_247,_244,_0.5)]"></tbody>
               </table>
             </div>
-            <div class="panel-header"><p id="orderCountText">Mostrando órdenes</p><button class="text-button" id="orderMore">Cargar más</button></div>
+            <div class="panel-header flex items-center justify-between gap-[12px] p-[17px_18px_13px] [&_h3]:m-[0] [&_h3]:text-[#22373e] [&_h3]:text-[12px] [&_h3]:font-[650] [&_h3]:tracking-[-0.02em] [&_p]:m-[5px_0_0] [&_p]:text-[#8c999d] [&_p]:text-[9px] max-[760px]:p-[15px_14px_12px]"><p id="orderCountText">Mostrando órdenes</p><button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="orderMore">Cargar más</button></div>
           </section>
         </section>
 
-        <section class="page-view" id="page-vouchers" data-page-view="vouchers" hidden>
-          <div class="page-heading">
+        <section class="page-view [animation:arrive_230ms_ease_both] animate-arrive" id="page-vouchers" data-page-view="vouchers" hidden>
+          <div class="page-heading flex items-end justify-between gap-[18px] m-[10px_0_22px] [&_h1]:m-[0] [&_h1]:text-[#13262e] [&_h1]:text-[clamp(24px,_3vw,_31px)] [&_h1]:font-[650] [&_h1]:tracking-[-0.055em] [&_h1]:leading-[1.08] [&_p]:m-[8px_0_0] [&_p]:text-[#77868b] [&_p]:text-[12px] [&_p]:leading-[1.5] max-[760px]:items-start max-[760px]:flex-col max-[760px]:m-[12px_0_17px] max-[760px]:[&_h1]:text-[25px] max-[760px]:[&_p]:max-w-[310px] max-[760px]:[&_p]:text-[11px]">
             <div><h1>Vales</h1><p>Cada vale se registra con su primera atención y conserva el saldo pendiente.</p></div>
-            <div class="heading-actions"><button class="button button-secondary" data-action="orders">Consultar órdenes</button></div>
+            <div class="heading-actions flex items-center gap-[8px] max-[420px]:w-full max-[420px]:[&_.button]:flex-1"><button class="button button-secondary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap border-[color:#dce5e6] [background:rgba(255,_255,_255,_0.72)] text-[#53656a] hover:[background:white] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-action="orders">Consultar órdenes</button></div>
           </div>
-          <section class="panel">
-            <div class="section-toolbar">
-              <div class="filter-group" role="group" aria-label="Filtrar vales">
-                <button class="filter-chip selected" data-filter="voucher" data-value="Todos">Todos</button>
-                <button class="filter-chip" data-filter="voucher" data-value="Disponible">Disponibles</button>
-                <button class="filter-chip" data-filter="voucher" data-value="Parcial">Parciales</button>
-                <button class="filter-chip" data-filter="voucher" data-value="Agotado">Agotados</button>
+          <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px]">
+            <div class="section-toolbar flex items-center justify-between gap-[12px] p-[12px_15px] [border-bottom:1px_solid_#edf0f0] max-[760px]:items-start max-[760px]:flex-col max-[760px]:[&_.input-control]:!max-w-none max-[760px]:[&_.input-control]:!w-full">
+              <div class="filter-group flex [flex-wrap:wrap] items-center gap-[7px]" role="group" aria-label="Filtrar vales">
+                <button class="filter-chip selected min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="voucher" data-value="Todos">Todos</button>
+                <button class="filter-chip min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="voucher" data-value="Disponible">Disponibles</button>
+                <button class="filter-chip min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="voucher" data-value="Parcial">Parciales</button>
+                <button class="filter-chip min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="voucher" data-value="Agotado">Agotados</button>
               </div>
-              <input class="input-control" id="voucherSearch" type="search" placeholder="Número, entidad u orden" style="max-width: 250px" aria-label="Buscar vales" />
+              <input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px] !max-w-[250px]" id="voucherSearch" type="search" placeholder="Número, entidad u orden" aria-label="Buscar vales" />
             </div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>N.º DE VALE</th><th>ORDEN / EMISOR</th><th>COMBUSTIBLE</th><th>ATENDIDO</th><th>SALDO DEL VALE</th><th>VERIFICACIÓN</th><th></th></tr></thead>
-                <tbody id="voucherRows"></tbody>
+            <div class="table-wrap w-full overflow-x-auto">
+              <table class="w-full border-collapse text-left">
+                <thead><tr><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">N.º DE VALE</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ORDEN / EMISOR</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">COMBUSTIBLE</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ATENDIDO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">SALDO DEL VALE</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">VERIFICACIÓN</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap"></th></tr></thead>
+                <tbody id="voucherRows" class="[&_tr:last-child_td]:[border-bottom:0] [&_tr:hover]:[background:rgba(238,_247,_244,_0.5)]"></tbody>
               </table>
             </div>
           </section>
         </section>
 
-        <section class="page-view" id="page-attendances" data-page-view="attendances" hidden>
-          <div class="page-heading">
+        <section class="page-view [animation:arrive_230ms_ease_both] animate-arrive" id="page-attendances" data-page-view="attendances" hidden>
+          <div class="page-heading flex items-end justify-between gap-[18px] m-[10px_0_22px] [&_h1]:m-[0] [&_h1]:text-[#13262e] [&_h1]:text-[clamp(24px,_3vw,_31px)] [&_h1]:font-[650] [&_h1]:tracking-[-0.055em] [&_h1]:leading-[1.08] [&_p]:m-[8px_0_0] [&_p]:text-[#77868b] [&_p]:text-[12px] [&_p]:leading-[1.5] max-[760px]:items-start max-[760px]:flex-col max-[760px]:m-[12px_0_17px] max-[760px]:[&_h1]:text-[25px] max-[760px]:[&_p]:max-w-[310px] max-[760px]:[&_p]:text-[11px]">
             <div><h1>Registrar despacho</h1><p>Valida el saldo y registra los galones realmente entregados.</p></div>
-            <div class="heading-actions"><span class="status status-green">Transacción protegida</span></div>
+            <div class="heading-actions flex items-center gap-[8px] max-[420px]:w-full max-[420px]:[&_.button]:flex-1"><span class="status status-green inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]">Transacción protegida</span></div>
           </div>
-          <div class="dashboard-grid">
-            <section class="panel" style="padding-bottom: 17px">
-              <div class="panel-header"><div><h3>Nueva atención</h3><p>En la primera atención se capturan los datos del vale físico.</p></div></div>
-              <form id="attendanceForm" style="padding: 4px 18px 0">
-                <div class="form-grid">
-                  <div class="field full"><label for="attendanceOrder">Orden de compra</label><select class="select-control" id="attendanceOrder" required></select></div>
-                  <div class="field"><label for="attendanceVoucher">Número de vale</label><input class="input-control" id="attendanceVoucher" placeholder="Ej. VM-2026-0142" required /><span class="field-hint" id="attendanceVoucherHint">Si el vale ya existe, escribe el mismo número para continuar su saldo.</span></div>
-                  <div class="field"><label for="attendanceIssuerType">Tipo de emisor</label><select class="select-control" id="attendanceIssuerType"><option value="INSTITUTION">Institución</option><option value="STATION">Estación</option></select></div>
-                  <div class="field full"><label for="attendanceIssuer">Nombre del emisor</label><input class="input-control" id="attendanceIssuer" placeholder="Nombre según vale físico" required /></div>
-                  <div class="field"><label for="attendanceAuthorized">Galones autorizados en el vale</label><input class="input-control" id="attendanceAuthorized" type="number" min="0.001" step="0.001" placeholder="0.000" required /></div>
-                  <div class="field"><label for="attendanceGallons">Galones entregados hoy</label><input class="input-control" id="attendanceGallons" type="number" min="0.001" step="0.001" placeholder="0.000" required /></div>
-                  <div class="field"><label for="attendanceBranch">Sede de despacho</label><select class="select-control" id="attendanceBranch"><option>San José</option><option>Santa Marta</option></select></div>
-                  <div class="field full"><label>Saldo de la orden</label><div class="balance-card"><span>Disponible antes del despacho <span class="field-hint" id="orderFuelLabel"></span></span><strong id="orderBalance">— gal</strong></div></div>
-                  <div class="field full"><div class="field-hint">El sistema registra la atención con tu usuario y la hora del servidor. Si el vale ya existe, se conserva su saldo y su historial.</div></div>
-                  <div class="field full"><button class="button button-primary" type="submit" style="width: 100%">Confirmar despacho</button></div>
+          <div class="dashboard-grid grid grid-cols-[minmax(0,_1.25fr)_minmax(260px,_0.75fr)] gap-[13px] max-[760px]:grid-cols-[1fr] max-[760px]:gap-[10px]">
+            <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px] !pb-[17px]">
+              <div class="panel-header flex items-center justify-between gap-[12px] p-[17px_18px_13px] [&_h3]:m-[0] [&_h3]:text-[#22373e] [&_h3]:text-[12px] [&_h3]:font-[650] [&_h3]:tracking-[-0.02em] [&_p]:m-[5px_0_0] [&_p]:text-[#8c999d] [&_p]:text-[9px] max-[760px]:p-[15px_14px_12px]"><div><h3>Nueva atención</h3><p>En la primera atención se capturan los datos del vale físico.</p></div></div>
+              <form id="attendanceForm" class="!p-[4px_18px_0]">
+                <div class="form-grid grid grid-cols-[repeat(2,_minmax(0,_1fr))] gap-[13px] max-[760px]:grid-cols-[1fr]">
+                  <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="attendanceOrder">Orden de compra</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="attendanceOrder" required></select></div>
+                  <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="attendanceVoucher">Número de vale</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="attendanceVoucher" placeholder="Ej. VM-2026-0142" required /><span class="field-hint text-[#919da0] text-[9px] leading-[1.5]" id="attendanceVoucherHint">Si el vale ya existe, escribe el mismo número para continuar su saldo.</span></div>
+                  <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="attendanceIssuerType">Tipo de emisor</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="attendanceIssuerType"><option value="INSTITUTION">Institución</option><option value="STATION">Estación</option></select></div>
+                  <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="attendanceIssuer">Nombre del emisor</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="attendanceIssuer" placeholder="Nombre según vale físico" required /></div>
+                  <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="attendanceAuthorized">Galones autorizados en el vale</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="attendanceAuthorized" type="number" min="0.001" step="0.001" placeholder="0.000" required /></div>
+                  <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="attendanceGallons">Galones entregados hoy</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="attendanceGallons" type="number" min="0.001" step="0.001" placeholder="0.000" required /></div>
+                  <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="attendanceBranch">Sede de despacho</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="attendanceBranch"><option>San José</option><option>Santa Marta</option></select></div>
+                  <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label>Saldo de la orden</label><div class="balance-card flex items-center justify-between gap-[12px] p-[13px_14px] [border:1px_solid_#dceee8] rounded-[12px] [background:#f2faf6] text-[#386e61] text-[10px] [&_strong]:text-[#225d50] [&_strong]:text-[14px] [&_strong]:tracking-[-0.03em]"><span>Disponible antes del despacho <span class="field-hint text-[#919da0] text-[9px] leading-[1.5]" id="orderFuelLabel"></span></span><strong id="orderBalance">— gal</strong></div></div>
+                  <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><div class="field-hint text-[#919da0] text-[9px] leading-[1.5]">El sistema registra la atención con tu usuario y la hora del servidor. Si el vale ya existe, se conserva su saldo y su historial.</div></div>
+                  <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><button class="button button-primary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap [background:#173c42] shadow-[0_5px_12px_rgba(23,_60,_66,_0.13)] text-[white] hover:[background:#20545a] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px] !w-full" type="submit">Confirmar despacho</button></div>
                 </div>
               </form>
             </section>
-            <section class="panel">
-              <div class="panel-header"><div><h3>Últimos despachos</h3><p>Actividad registrada por los griferos</p></div><span class="status status-blue">Hoy</span></div>
-              <div class="queue-list" id="attendanceActivity"></div>
-              <div style="padding: 0 17px 13px"><button class="text-button" data-action="vouchers">Consultar saldos de vales</button></div>
+            <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px]">
+              <div class="panel-header flex items-center justify-between gap-[12px] p-[17px_18px_13px] [&_h3]:m-[0] [&_h3]:text-[#22373e] [&_h3]:text-[12px] [&_h3]:font-[650] [&_h3]:tracking-[-0.02em] [&_p]:m-[5px_0_0] [&_p]:text-[#8c999d] [&_p]:text-[9px] max-[760px]:p-[15px_14px_12px]"><div><h3>Últimos despachos</h3><p>Actividad registrada por los griferos</p></div><span class="status status-blue inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]">Hoy</span></div>
+              <div class="queue-list grid gap-[0] p-[0_16px_6px]" id="attendanceActivity"></div>
+              <div class="!p-[0_17px_13px]"><button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-action="vouchers">Consultar saldos de vales</button></div>
             </section>
           </div>
-          <section class="panel" style="margin-top: 13px">
-            <div class="panel-header"><div><h3>Historial de atenciones</h3><p>Las atenciones confirmadas no se editan ni eliminan desde esta vista.</p></div></div>
-            <div class="table-wrap"><table><thead><tr><th>FECHA Y HORA</th><th>VALE / ORDEN</th><th>GRIFERO</th><th>SEDE</th><th>GALONES</th><th>VERIFICACIÓN</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
+          <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px] !mt-[13px]">
+            <div class="panel-header flex items-center justify-between gap-[12px] p-[17px_18px_13px] [&_h3]:m-[0] [&_h3]:text-[#22373e] [&_h3]:text-[12px] [&_h3]:font-[650] [&_h3]:tracking-[-0.02em] [&_p]:m-[5px_0_0] [&_p]:text-[#8c999d] [&_p]:text-[9px] max-[760px]:p-[15px_14px_12px]"><div><h3>Historial de atenciones</h3><p>Las atenciones confirmadas no se editan ni eliminan desde esta vista.</p></div></div>
+            <div class="table-wrap w-full overflow-x-auto"><table class="w-full border-collapse text-left"><thead><tr><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">FECHA Y HORA</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">VALE / ORDEN</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">GRIFERO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">SEDE</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">GALONES</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">VERIFICACIÓN</th></tr></thead><tbody id="attendanceRows" class="[&_tr:last-child_td]:[border-bottom:0] [&_tr:hover]:[background:rgba(238,_247,_244,_0.5)]"></tbody></table></div>
           </section>
         </section>
 
-        <section class="page-view" id="page-verifications" data-page-view="verifications" hidden>
-          <div class="page-heading">
+        <section class="page-view [animation:arrive_230ms_ease_both] animate-arrive" id="page-verifications" data-page-view="verifications" hidden>
+          <div class="page-heading flex items-end justify-between gap-[18px] m-[10px_0_22px] [&_h1]:m-[0] [&_h1]:text-[#13262e] [&_h1]:text-[clamp(24px,_3vw,_31px)] [&_h1]:font-[650] [&_h1]:tracking-[-0.055em] [&_h1]:leading-[1.08] [&_p]:m-[8px_0_0] [&_p]:text-[#77868b] [&_p]:text-[12px] [&_p]:leading-[1.5] max-[760px]:items-start max-[760px]:flex-col max-[760px]:m-[12px_0_17px] max-[760px]:[&_h1]:text-[25px] max-[760px]:[&_p]:max-w-[310px] max-[760px]:[&_p]:text-[11px]">
             <div><h1>Verificación de vales</h1><p>Coteja los datos capturados con el documento físico recibido en oficina.</p></div>
-            <div class="heading-actions"><span class="status status-amber" id="verificationTotal">3 por revisar</span></div>
+            <div class="heading-actions flex items-center gap-[8px] max-[420px]:w-full max-[420px]:[&_.button]:flex-1"><span class="status status-amber inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]" id="verificationTotal">3 por revisar</span></div>
           </div>
-          <section class="panel">
-            <div class="section-toolbar">
-              <div class="filter-group" role="group" aria-label="Filtrar verificaciones">
-                <button class="filter-chip selected" data-filter="review" data-value="Pendiente">Pendientes</button>
-                <button class="filter-chip" data-filter="review" data-value="Verificado">Verificados</button>
-                <button class="filter-chip" data-filter="review" data-value="Observado">Observados</button>
+          <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px]">
+            <div class="section-toolbar flex items-center justify-between gap-[12px] p-[12px_15px] [border-bottom:1px_solid_#edf0f0] max-[760px]:items-start max-[760px]:flex-col max-[760px]:[&_.input-control]:!max-w-none max-[760px]:[&_.input-control]:!w-full">
+              <div class="filter-group flex [flex-wrap:wrap] items-center gap-[7px]" role="group" aria-label="Filtrar verificaciones">
+                <button class="filter-chip selected min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="review" data-value="Pendiente">Pendientes</button>
+                <button class="filter-chip min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="review" data-value="Verificado">Verificados</button>
+                <button class="filter-chip min-h-[30px] p-[0_10px] [border:1px_solid_#e2e8e8] rounded-[9px] [background:white] text-[#607076] text-[10px] [&.selected]:border-[color:#b8ddd3] [&.selected]:[background:#ecf8f4] [&.selected]:text-[#2c796d] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-filter="review" data-value="Observado">Observados</button>
               </div>
-              <span class="crumbs">La oficina verifica; no vuelve a registrar el vale.</span>
+              <span class="crumbs text-[#87949a] text-[11px] [&_strong]:text-[#263b43] [&_strong]:font-[620] max-[760px]:text-[10px]">La oficina verifica; no vuelve a registrar el vale.</span>
             </div>
-            <div class="table-wrap"><table><thead><tr><th>VALE / ENTIDAD</th><th>ORDEN</th><th>CAPTURADO POR</th><th>DESPACHADO</th><th>FECHA</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead><tbody id="verificationRows"></tbody></table></div>
+            <div class="table-wrap w-full overflow-x-auto"><table class="w-full border-collapse text-left"><thead><tr><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">VALE / ENTIDAD</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ORDEN</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">CAPTURADO POR</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">DESPACHADO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">FECHA</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ESTADO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ACCIÓN</th></tr></thead><tbody id="verificationRows" class="[&_tr:last-child_td]:[border-bottom:0] [&_tr:hover]:[background:rgba(238,_247,_244,_0.5)]"></tbody></table></div>
           </section>
         </section>
 
-        <section class="page-view" id="page-reports" data-page-view="reports" hidden>
-          <div class="page-heading">
+        <section class="page-view [animation:arrive_230ms_ease_both] animate-arrive" id="page-reports" data-page-view="reports" hidden>
+          <div class="page-heading flex items-end justify-between gap-[18px] m-[10px_0_22px] [&_h1]:m-[0] [&_h1]:text-[#13262e] [&_h1]:text-[clamp(24px,_3vw,_31px)] [&_h1]:font-[650] [&_h1]:tracking-[-0.055em] [&_h1]:leading-[1.08] [&_p]:m-[8px_0_0] [&_p]:text-[#77868b] [&_p]:text-[12px] [&_p]:leading-[1.5] max-[760px]:items-start max-[760px]:flex-col max-[760px]:m-[12px_0_17px] max-[760px]:[&_h1]:text-[25px] max-[760px]:[&_p]:max-w-[310px] max-[760px]:[&_p]:text-[11px]">
             <div><h1>Reportes</h1><p>Consulta actividad y saldos por período, sede, usuario o estado.</p></div>
-            <div class="heading-actions">
-              <select class="select-control" id="reportPeriod" style="width: auto"><option>Últimos 7 días</option><option>Este mes</option><option>Este año</option></select>
-              <button class="button button-primary" id="exportReport">
+            <div class="heading-actions flex items-center gap-[8px] max-[420px]:w-full max-[420px]:[&_.button]:flex-1">
+              <select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px] !w-auto" id="reportPeriod"><option>Últimos 7 días</option><option>Este mes</option><option>Este año</option></select>
+              <button class="button button-primary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap [background:#173c42] shadow-[0_5px_12px_rgba(23,_60,_66,_0.13)] text-[white] hover:[background:#20545a] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="exportReport">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
                 Exportar
               </button>
             </div>
           </div>
-          <div class="stats-grid">
-            <article class="stat-card"><div class="stat-top"><span>Galones atendidos</span><span class="stat-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M12 3.5S6.5 10 6.5 14.6a5.5 5.5 0 1 0 11 0C17.5 10 12 3.5 12 3.5Z" stroke="currentColor" stroke-width="1.6" /><path d="M9.5 15.5a2.5 2.5 0 0 0 2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></span></div><div class="stat-value">1,284.5</div><div class="stat-note">En el período seleccionado</div></article>
-            <article class="stat-card"><div class="stat-top"><span>Atenciones</span><span class="stat-icon amber"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8v-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span></div><div class="stat-value">86</div><div class="stat-note">En ambas sedes</div></article>
-            <article class="stat-card"><div class="stat-top"><span>Órdenes activas</span><span class="stat-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M9 13h6m-6 4h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span></div><div class="stat-value">07</div><div class="stat-note">Con saldo pendiente</div></article>
-            <article class="stat-card"><div class="stat-top"><span>Vales por verificar</span><span class="stat-icon amber"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6" /><path d="M12 8v4l2.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></span></div><div class="stat-value" id="reportPending">03</div><div class="stat-note">Revisión de documento físico</div></article>
+          <div class="stats-grid grid grid-cols-[repeat(4,_minmax(0,_1fr))] gap-[12px] m-[14px_0] max-[1050px]:grid-cols-[repeat(2,_minmax(0,_1fr))] max-[760px]:gap-[8px] max-[760px]:m-[10px_0] max-[420px]:grid-cols-[repeat(2,_minmax(0,_1fr))]">
+            <article class="stat-card min-h-[115px] p-[15px_16px] [border:1px_solid_#e6ebeb] rounded-[17px] [background:rgba(255,_255,_255,_0.78)] shadow-[0_6px_21px_rgba(31,_58,_60,_0.035)] max-[760px]:min-h-[104px] max-[760px]:p-[12px] max-[760px]:rounded-[14px]"><div class="stat-top flex items-center justify-between text-[#77868b] text-[10px] font-[540]"><span>Galones atendidos</span><span class="stat-icon grid w-[29px] h-[29px] place-items-center rounded-[10px] [background:#edf7f4] text-[#2e8b7b] [&.amber]:[background:#fcf3e7] [&.amber]:text-[#b87825]"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M12 3.5S6.5 10 6.5 14.6a5.5 5.5 0 1 0 11 0C17.5 10 12 3.5 12 3.5Z" stroke="currentColor" stroke-width="1.6" /><path d="M9.5 15.5a2.5 2.5 0 0 0 2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></span></div><div class="stat-value mt-[11px] text-[#183039] text-[23px] font-[650] tracking-[-0.05em] max-[760px]:text-[21px]">1,284.5</div><div class="stat-note mt-[4px] text-[#8b979b] text-[9px] [&_em]:text-[#318b77] [&_em]:[font-style:normal] [&_em]:font-[650]">En el período seleccionado</div></article>
+            <article class="stat-card min-h-[115px] p-[15px_16px] [border:1px_solid_#e6ebeb] rounded-[17px] [background:rgba(255,_255,_255,_0.78)] shadow-[0_6px_21px_rgba(31,_58,_60,_0.035)] max-[760px]:min-h-[104px] max-[760px]:p-[12px] max-[760px]:rounded-[14px]"><div class="stat-top flex items-center justify-between text-[#77868b] text-[10px] font-[540]"><span>Atenciones</span><span class="stat-icon amber grid w-[29px] h-[29px] place-items-center rounded-[10px] [background:#edf7f4] text-[#2e8b7b] [&.amber]:[background:#fcf3e7] [&.amber]:text-[#b87825]"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8v-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span></div><div class="stat-value mt-[11px] text-[#183039] text-[23px] font-[650] tracking-[-0.05em] max-[760px]:text-[21px]">86</div><div class="stat-note mt-[4px] text-[#8b979b] text-[9px] [&_em]:text-[#318b77] [&_em]:[font-style:normal] [&_em]:font-[650]">En ambas sedes</div></article>
+            <article class="stat-card min-h-[115px] p-[15px_16px] [border:1px_solid_#e6ebeb] rounded-[17px] [background:rgba(255,_255,_255,_0.78)] shadow-[0_6px_21px_rgba(31,_58,_60,_0.035)] max-[760px]:min-h-[104px] max-[760px]:p-[12px] max-[760px]:rounded-[14px]"><div class="stat-top flex items-center justify-between text-[#77868b] text-[10px] font-[540]"><span>Órdenes activas</span><span class="stat-icon grid w-[29px] h-[29px] place-items-center rounded-[10px] [background:#edf7f4] text-[#2e8b7b] [&.amber]:[background:#fcf3e7] [&.amber]:text-[#b87825]"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M9 13h6m-6 4h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span></div><div class="stat-value mt-[11px] text-[#183039] text-[23px] font-[650] tracking-[-0.05em] max-[760px]:text-[21px]">07</div><div class="stat-note mt-[4px] text-[#8b979b] text-[9px] [&_em]:text-[#318b77] [&_em]:[font-style:normal] [&_em]:font-[650]">Con saldo pendiente</div></article>
+            <article class="stat-card min-h-[115px] p-[15px_16px] [border:1px_solid_#e6ebeb] rounded-[17px] [background:rgba(255,_255,_255,_0.78)] shadow-[0_6px_21px_rgba(31,_58,_60,_0.035)] max-[760px]:min-h-[104px] max-[760px]:p-[12px] max-[760px]:rounded-[14px]"><div class="stat-top flex items-center justify-between text-[#77868b] text-[10px] font-[540]"><span>Vales por verificar</span><span class="stat-icon amber grid w-[29px] h-[29px] place-items-center rounded-[10px] [background:#edf7f4] text-[#2e8b7b] [&.amber]:[background:#fcf3e7] [&.amber]:text-[#b87825]"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6" /><path d="M12 8v4l2.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></span></div><div class="stat-value mt-[11px] text-[#183039] text-[23px] font-[650] tracking-[-0.05em] max-[760px]:text-[21px]" id="reportPending">03</div><div class="stat-note mt-[4px] text-[#8b979b] text-[9px] [&_em]:text-[#318b77] [&_em]:[font-style:normal] [&_em]:font-[650]">Revisión de documento físico</div></article>
           </div>
-          <div class="report-grid">
-            <section class="panel">
-              <div class="panel-header"><div><h3>Galones despachados</h3><p>Actividad diaria por sede</p></div><span class="status status-green">Últimos 7 días</span></div>
-              <div class="chart-wrap">
-                <div class="chart" role="img" aria-label="Gráfico de barras de galones diarios por sede">
-                  <div class="bar-set"><i class="bar" style="height: 42%"></i><i class="bar secondary" style="height: 27%"></i><span>Lun</span></div>
-                  <div class="bar-set"><i class="bar" style="height: 64%"></i><i class="bar secondary" style="height: 45%"></i><span>Mar</span></div>
-                  <div class="bar-set"><i class="bar" style="height: 49%"></i><i class="bar secondary" style="height: 59%"></i><span>Mié</span></div>
-                  <div class="bar-set"><i class="bar" style="height: 77%"></i><i class="bar secondary" style="height: 53%"></i><span>Jue</span></div>
-                  <div class="bar-set"><i class="bar" style="height: 58%"></i><i class="bar secondary" style="height: 71%"></i><span>Vie</span></div>
-                  <div class="bar-set"><i class="bar" style="height: 91%"></i><i class="bar secondary" style="height: 68%"></i><span>Sáb</span></div>
-                  <div class="bar-set"><i class="bar" style="height: 52%"></i><i class="bar secondary" style="height: 37%"></i><span>Dom</span></div>
+          <div class="report-grid grid grid-cols-[minmax(0,_1.45fr)_minmax(240px,_0.75fr)] gap-[13px] max-[760px]:grid-cols-[1fr] max-[760px]:gap-[10px]">
+            <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px]">
+              <div class="panel-header flex items-center justify-between gap-[12px] p-[17px_18px_13px] [&_h3]:m-[0] [&_h3]:text-[#22373e] [&_h3]:text-[12px] [&_h3]:font-[650] [&_h3]:tracking-[-0.02em] [&_p]:m-[5px_0_0] [&_p]:text-[#8c999d] [&_p]:text-[9px] max-[760px]:p-[15px_14px_12px]"><div><h3>Galones despachados</h3><p>Actividad diaria por sede</p></div><span class="status status-green inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]">Últimos 7 días</span></div>
+              <div class="chart-wrap p-[5px_18px_15px]">
+                <div class="chart flex h-[205px] items-end gap-[15px] p-[18px_4px_28px] [border-bottom:1px_solid_#e8eded] [background:linear-gradient(to_bottom,_transparent_24%,_#edf1f0_24%,_#edf1f0_24.7%,_transparent_24.7%),_linear-gradient(to_bottom,_transparent_49%,_#edf1f0_49%,_#edf1f0_49.7%,_transparent_49.7%),_linear-gradient(to_bottom,_transparent_74%,_#edf1f0_74%,_#edf1f0_74.7%,_transparent_74.7%)]" role="img" aria-label="Gráfico de barras de galones diarios por sede">
+                  <div class="bar-set flex h-full flex-1 items-end justify-center gap-[4px] relative [&_span]:absolute [&_span]:bottom-[-19px] [&_span]:text-[#89969a] [&_span]:text-[9px]"><i class="bar w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[42%]"></i><i class="bar secondary w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[27%]"></i><span>Lun</span></div>
+                  <div class="bar-set flex h-full flex-1 items-end justify-center gap-[4px] relative [&_span]:absolute [&_span]:bottom-[-19px] [&_span]:text-[#89969a] [&_span]:text-[9px]"><i class="bar w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[64%]"></i><i class="bar secondary w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[45%]"></i><span>Mar</span></div>
+                  <div class="bar-set flex h-full flex-1 items-end justify-center gap-[4px] relative [&_span]:absolute [&_span]:bottom-[-19px] [&_span]:text-[#89969a] [&_span]:text-[9px]"><i class="bar w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[49%]"></i><i class="bar secondary w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[59%]"></i><span>Mié</span></div>
+                  <div class="bar-set flex h-full flex-1 items-end justify-center gap-[4px] relative [&_span]:absolute [&_span]:bottom-[-19px] [&_span]:text-[#89969a] [&_span]:text-[9px]"><i class="bar w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[77%]"></i><i class="bar secondary w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[53%]"></i><span>Jue</span></div>
+                  <div class="bar-set flex h-full flex-1 items-end justify-center gap-[4px] relative [&_span]:absolute [&_span]:bottom-[-19px] [&_span]:text-[#89969a] [&_span]:text-[9px]"><i class="bar w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[58%]"></i><i class="bar secondary w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[71%]"></i><span>Vie</span></div>
+                  <div class="bar-set flex h-full flex-1 items-end justify-center gap-[4px] relative [&_span]:absolute [&_span]:bottom-[-19px] [&_span]:text-[#89969a] [&_span]:text-[9px]"><i class="bar w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[91%]"></i><i class="bar secondary w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[68%]"></i><span>Sáb</span></div>
+                  <div class="bar-set flex h-full flex-1 items-end justify-center gap-[4px] relative [&_span]:absolute [&_span]:bottom-[-19px] [&_span]:text-[#89969a] [&_span]:text-[9px]"><i class="bar w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[52%]"></i><i class="bar secondary w-[min(17px,_32%)] min-h-[4px] rounded-[6px_6px_2px_2px] [background:linear-gradient(180deg,_#5fc7ae,_#45a894)] [transition:height_220ms_ease] [&.secondary]:[background:linear-gradient(180deg,_#a8d7ce,_#7ab8ad)] !h-[37%]"></i><span>Dom</span></div>
                 </div>
-                <div class="legend"><span><i></i>San José</span><span><i class="legend-second"></i>Santa Marta</span></div>
+                <div class="legend flex gap-[15px] pt-[12px] text-[#78878b] text-[9px] [&_i]:inline-block [&_i]:w-[7px] [&_i]:h-[7px] [&_i]:mr-[5px] [&_i]:rounded-[2px] [&_i]:[background:#50b49f] [&_.legend-second]:[background:#9dcfc4]"><span><i></i>San José</span><span><i class="legend-second"></i>Santa Marta</span></div>
               </div>
             </section>
-            <section class="panel">
-              <div class="panel-header"><div><h3>Resumen operativo</h3><p>Saldo actual del sistema</p></div></div>
-              <div class="summary-list">
-                <div class="summary-row"><span>Combustible autorizado</span><strong>8,420 gal</strong></div>
-                <div class="summary-row"><span>Combustible despachado</span><strong>5,116 gal</strong></div>
-                <div><div class="summary-row" style="margin-bottom: 8px"><span>Saldo global</span><strong>3,304 gal</strong></div><div class="progress-track"><div class="progress-bar" style="width: 61%"></div></div></div>
-                <div class="summary-row"><span>Verificaciones pendientes</span><strong id="reportPendingSummary">03</strong></div>
-                <button class="button button-secondary" id="printReport" style="width: 100%">Imprimir / guardar PDF</button>
+            <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px]">
+              <div class="panel-header flex items-center justify-between gap-[12px] p-[17px_18px_13px] [&_h3]:m-[0] [&_h3]:text-[#22373e] [&_h3]:text-[12px] [&_h3]:font-[650] [&_h3]:tracking-[-0.02em] [&_p]:m-[5px_0_0] [&_p]:text-[#8c999d] [&_p]:text-[9px] max-[760px]:p-[15px_14px_12px]"><div><h3>Resumen operativo</h3><p>Saldo actual del sistema</p></div></div>
+              <div class="summary-list grid gap-[16px] p-[4px_18px_19px]">
+                <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Combustible autorizado</span><strong>8,420 gal</strong></div>
+                <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Combustible despachado</span><strong>5,116 gal</strong></div>
+                <div><div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650] !mb-[8px]"><span>Saldo global</span><strong>3,304 gal</strong></div><div class="progress-track h-[6px] overflow-hidden rounded-[99px] [background:#e7eeee]"><div class="progress-bar h-full rounded-[inherit] [background:linear-gradient(90deg,_#59bea6,_#a4dbc3)] !w-[61%]"></div></div></div>
+                <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Verificaciones pendientes</span><strong id="reportPendingSummary">03</strong></div>
+                <button class="button button-secondary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap border-[color:#dce5e6] [background:rgba(255,_255,_255,_0.72)] text-[#53656a] hover:[background:white] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px] !w-full" id="printReport">Imprimir / guardar PDF</button>
               </div>
             </section>
           </div>
         </section>
 
-        <section class="page-view" id="page-users" data-page-view="users" hidden>
-          <div class="page-heading">
+        <section class="page-view [animation:arrive_230ms_ease_both] animate-arrive" id="page-users" data-page-view="users" hidden>
+          <div class="page-heading flex items-end justify-between gap-[18px] m-[10px_0_22px] [&_h1]:m-[0] [&_h1]:text-[#13262e] [&_h1]:text-[clamp(24px,_3vw,_31px)] [&_h1]:font-[650] [&_h1]:tracking-[-0.055em] [&_h1]:leading-[1.08] [&_p]:m-[8px_0_0] [&_p]:text-[#77868b] [&_p]:text-[12px] [&_p]:leading-[1.5] max-[760px]:items-start max-[760px]:flex-col max-[760px]:m-[12px_0_17px] max-[760px]:[&_h1]:text-[25px] max-[760px]:[&_p]:max-w-[310px] max-[760px]:[&_p]:text-[11px]">
             <div><h1>Usuarios</h1><p>Administra accesos y roles predefinidos del sistema.</p></div>
-            <div class="heading-actions"><button class="button button-primary" id="newUserButton">
+            <div class="heading-actions flex items-center gap-[8px] max-[420px]:w-full max-[420px]:[&_.button]:flex-1"><button class="button button-primary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap [background:#173c42] shadow-[0_5px_12px_rgba(23,_60,_66,_0.13)] text-[white] hover:[background:#20545a] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newUserButton">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
               Nuevo usuario
             </button></div>
           </div>
-          <section class="panel">
-            <div class="section-toolbar"><div class="filter-group"><span class="crumbs">8 cuentas · 3 roles</span></div><input class="input-control" id="userSearch" type="search" placeholder="Buscar por nombre o correo" style="max-width: 250px" aria-label="Buscar usuarios" /></div>
-            <div class="table-wrap"><table><thead><tr><th>USUARIO</th><th>ROL</th><th>SEDE</th><th>ESTADO</th><th>ACCESO</th></tr></thead><tbody id="userRows"></tbody></table></div>
+          <section class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px]">
+            <div class="section-toolbar flex items-center justify-between gap-[12px] p-[12px_15px] [border-bottom:1px_solid_#edf0f0] max-[760px]:items-start max-[760px]:flex-col max-[760px]:[&_.input-control]:!max-w-none max-[760px]:[&_.input-control]:!w-full"><div class="filter-group flex [flex-wrap:wrap] items-center gap-[7px]"><span class="crumbs text-[#87949a] text-[11px] [&_strong]:text-[#263b43] [&_strong]:font-[620] max-[760px]:text-[10px]">8 cuentas · 3 roles</span></div><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px] !max-w-[250px]" id="userSearch" type="search" placeholder="Buscar por nombre o correo" aria-label="Buscar usuarios" /></div>
+            <div class="table-wrap w-full overflow-x-auto"><table class="w-full border-collapse text-left"><thead><tr><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">USUARIO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ROL</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">SEDE</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ESTADO</th><th class="p-[10px_13px] [border-top:1px_solid_#edf0f0] [border-bottom:1px_solid_#edf0f0] [background:rgba(244,_247,_246,_0.65)] text-[#839095] text-[10px] font-[620] whitespace-nowrap">ACCESO</th></tr></thead><tbody id="userRows" class="[&_tr:last-child_td]:[border-bottom:0] [&_tr:hover]:[background:rgba(238,_247,_244,_0.5)]"></tbody></table></div>
           </section>
-          <div class="panel" style="margin-top: 13px">
-            <div class="panel-header"><div><h3>Roles del sistema</h3><p>Los permisos se asignan por rol y no se editan por usuario.</p></div></div>
-            <div class="summary-list">
-              <div class="summary-row"><span>Administrador</span><strong>Acceso a todos los módulos</strong></div>
-              <div class="summary-row"><span>Oficina</span><strong>Órdenes, verificación, saldos y reportes</strong></div>
-              <div class="summary-row"><span>Grifero</span><strong>Consulta y registro de sus atenciones</strong></div>
+          <div class="panel min-w-0 [border:1px_solid_#e5ebeb] rounded-[18px] [background:rgba(255,_255,_255,_0.79)] shadow-[0_7px_23px_rgba(31,_58,_60,_0.035)] max-[760px]:rounded-[15px] !mt-[13px]">
+            <div class="panel-header flex items-center justify-between gap-[12px] p-[17px_18px_13px] [&_h3]:m-[0] [&_h3]:text-[#22373e] [&_h3]:text-[12px] [&_h3]:font-[650] [&_h3]:tracking-[-0.02em] [&_p]:m-[5px_0_0] [&_p]:text-[#8c999d] [&_p]:text-[9px] max-[760px]:p-[15px_14px_12px]"><div><h3>Roles del sistema</h3><p>Los permisos se asignan por rol y no se editan por usuario.</p></div></div>
+            <div class="summary-list grid gap-[16px] p-[4px_18px_19px]">
+              <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Administrador</span><strong>Acceso a todos los módulos</strong></div>
+              <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Oficina</span><strong>Órdenes, verificación, saldos y reportes</strong></div>
+              <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Grifero</span><strong>Consulta y registro de sus atenciones</strong></div>
             </div>
           </div>
         </section>
 
-        <footer style="display:flex;justify-content:space-between;gap:12px;padding:20px 2px 0;color:#9aa5a7;font-size:9px">
+        <footer class="!flex !justify-between !gap-[12px] !p-[20px_2px_0] !text-[#9aa5a7] !text-[9px]">
           <span>Mockup interactivo · Estación de Servicio San José</span>
           <span>Los datos mostrados son de demostración</span>
         </footer>
       </main>
     </div>
 
-    <dialog id="appDialog" aria-labelledby="dialogTitle">
+    <dialog id="appDialog" aria-labelledby="dialogTitle" class="max-w-[min(570px,_calc(100vw_-_28px))] w-full max-h-[min(90vh,_760px)] p-[0] overflow-auto [border:1px_solid_rgba(255,_255,_255,_0.9)] rounded-[20px] [background:#fdfefe] shadow-[0_28px_90px_rgba(9,_32,_38,_0.28)] text-[#10202a] backdrop:[background:rgba(13,_35,_40,_0.38)] backdrop:[backdrop-filter:blur(6px)]">
       <form method="dialog" id="dialogForm">
-        <div class="dialog-head">
+        <div class="dialog-head flex items-start justify-between gap-[16px] p-[20px_21px_16px] [border-bottom:1px_solid_#edf0f0] [&_h2]:m-[0] [&_h2]:text-[#21383f] [&_h2]:text-[17px] [&_h2]:font-[650] [&_h2]:tracking-[-0.04em] [&_p]:m-[6px_0_0] [&_p]:text-[#839095] [&_p]:text-[10px] [&_p]:leading-[1.5]">
           <div><h2 id="dialogTitle"></h2><p id="dialogDescription"></p></div>
-          <button type="button" class="icon-button" id="dialogClose" aria-label="Cerrar ventana">
+          <button type="button" class="icon-button grid w-[39px] h-[39px] flex-none place-items-center [border:1px_solid_#dfe6e7] rounded-[12px] [background:rgba(255,_255,_255,_0.73)] text-[#51646a] [transition:background_160ms_ease] hover:[background:white] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="dialogClose" aria-label="Cerrar ventana">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
           </button>
         </div>
-        <div class="dialog-body" id="dialogBody"></div>
-        <div class="dialog-footer" id="dialogFooter"></div>
+        <div class="dialog-body p-[18px_21px]" id="dialogBody"></div>
+        <div class="dialog-footer flex justify-end gap-[8px] p-[14px_21px_18px] [border-top:1px_solid_#edf0f0] [background:#fbfcfc]" id="dialogFooter"></div>
       </form>
     </dialog>
 
-    <div class="toast" id="toast" role="status" aria-live="polite">
-      <span class="toast-mark" aria-hidden="true">
+    <div class="toast fixed right-[20px] bottom-[20px] z-[60] flex max-w-[min(360px,_calc(100vw_-_32px))] items-center gap-[10px] p-[13px_16px] [border:1px_solid_rgba(219,_239,_232,_0.8)] rounded-[14px] [background:rgba(19,_51,_56,_0.95)] shadow-[0_14px_35px_rgba(12,_41,_43,_0.24)] text-[#f2fbf7] text-[11px] opacity-0 pointer-events-none [transform:translateY(8px)] [transition:opacity_180ms_ease,_transform_180ms_ease] [backdrop-filter:blur(20px)] [&.visible]:opacity-100 [&.visible]:[transform:translateY(0)]" id="toast" role="status" aria-live="polite">
+      <span class="toast-mark grid w-[20px] h-[20px] flex-none place-items-center rounded-[7px] [background:rgba(106,_218,_182,_0.19)] text-[#a7efd7]" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
       </span>
       <span id="toastMessage"></span>
@@ -2077,7 +513,7 @@
           .filter((item) => allowed.includes(item.id))
           .map((item) => {
             const count = item.count ? item.count() : 0;
-            return `<button class="nav-link${state.page === item.id ? " active" : ""}" data-nav="${item.id}" aria-current="${state.page === item.id ? "page" : "false"}">
+            return `<button class="nav-link flex w-full min-h-[43px] items-center gap-[12px] p-[0_11px] [border:1px_solid_transparent] rounded-[13px] [background:transparent] text-[#b7c9c9] text-left [transition:background_180ms_ease,_color_180ms_ease,_border-color_180ms_ease] hover:[background:rgba(237,_249,_246,_0.08)] hover:text-[white] [&.active]:border-[color:rgba(149,_231,_211,_0.13)] [&.active]:[background:linear-gradient(100deg,_rgba(61,_198,_174,_0.2),_rgba(61,_198,_174,_0.07))] [&.active]:text-[#9cf0dc] [&_span]:text-[12px] [&_span]:font-[540] [&_.nav-count]:min-w-[22px] [&_.nav-count]:ml-[auto] [&_.nav-count]:p-[3px_6px] [&_.nav-count]:rounded-[7px] [&_.nav-count]:[background:rgba(233,_166,_74,_0.16)] [&_.nav-count]:text-[#f2c77f] [&_.nav-count]:text-[10px] [&_.nav-count]:text-center cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]${state.page === item.id ? " active" : ""}" data-nav="${item.id}" aria-current="${state.page === item.id ? "page" : "false"}">
               ${icon(item.icon, 16)}<span>${item.label}</span>${count ? `<b class="nav-count">${count}</b>` : ""}
             </button>`;
           })
@@ -2142,21 +578,21 @@
           ? rows.map((order) => {
             const remaining = orderBalance(order);
             return `<tr>
-              <td><span class="cell-primary">${escapeHtml(order.id)}</span><span class="cell-secondary">${escapeHtml(order.entity)}</span></td>
-              <td>${escapeHtml(order.branch)}</td>
-              <td>${escapeHtml(order.date)}</td>
-              <td>${escapeHtml(order.fuel)}</td>
-              <td>${gallons(order.total)} gal</td>
-              <td><span class="cell-primary">${gallons(remaining)} gal</span><span class="cell-secondary">${Math.round((remaining / order.total) * 100)}% del total</span></td>
-              <td><span class="status ${statusClass(remaining ? "Con saldo" : "Agotada")}">${remaining ? "Con saldo" : "Agotada"}</span></td>
-              <td><div style="display:flex;align-items:center;gap:8px">
-                <button class="text-button" data-order-detail="${escapeHtml(order.id)}">Ver</button>
-                <button class="text-button" data-order-edit="${escapeHtml(order.id)}">Editar</button>
-                <button class="text-button" data-order-delete="${escapeHtml(order.id)}" ${state.vouchers.some((voucher) => voucher.orderId === order.id) ? 'aria-disabled="true" title="No se puede eliminar porque tiene vales asociados"' : ""}>Eliminar</button>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="cell-primary block text-[#243941] text-[11px] font-[630]">${escapeHtml(order.id)}</span><span class="cell-secondary block mt-[4px] text-[#98a2a5] text-[10px]">${escapeHtml(order.entity)}</span></td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(order.branch)}</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(order.date)}</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(order.fuel)}</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${gallons(order.total)} gal</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="cell-primary block text-[#243941] text-[11px] font-[630]">${gallons(remaining)} gal</span><span class="cell-secondary block mt-[4px] text-[#98a2a5] text-[10px]">${Math.round((remaining / order.total) * 100)}% del total</span></td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="status  inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]${statusClass(remaining ? "Con saldo" : "Agotada")}">${remaining ? "Con saldo" : "Agotada"}</span></td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><div class="!flex !items-center !gap-[8px]">
+                <button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-order-detail="${escapeHtml(order.id)}">Ver</button>
+                <button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-order-edit="${escapeHtml(order.id)}">Editar</button>
+                <button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-order-delete="${escapeHtml(order.id)}" ${state.vouchers.some((voucher) => voucher.orderId === order.id) ? 'aria-disabled="true" title="No se puede eliminar porque tiene vales asociados"' : ""}>Eliminar</button>
               </div></td>
             </tr>`;
           }).join("")
-          : `<tr><td colspan="8"><div class="empty-state">No hay órdenes que coincidan con la búsqueda.</div></td></tr>`;
+          : `<tr><td colspan="8" class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><div class="empty-state p-[30px_16px] text-[#8b989c] text-[11px] text-center">No hay órdenes que coincidan con la búsqueda.</div></td></tr>`;
         document.getElementById("orderCountText").textContent = `${rows.length} ${rows.length === 1 ? "orden encontrada" : "órdenes encontradas"}`;
         document.getElementById("attendanceOrder").innerHTML = state.orders
           .filter((order) => orderBalance(order) > 0 && (state.branch === "Todas las sedes" || order.branch === state.branch))
@@ -2181,45 +617,45 @@
             const balance = voucherBalance(voucher);
             const status = balance === 0 ? "Agotado" : voucher.used === 0 ? "Disponible" : "Parcial";
             return `<tr>
-              <td><span class="cell-primary">${escapeHtml(voucher.id)}</span></td>
-              <td><span class="cell-primary">${escapeHtml(voucher.orderId)}</span><span class="cell-secondary">${escapeHtml(voucher.issuer)}</span></td>
-              <td>${escapeHtml(voucher.fuel)}</td>
-              <td>${gallons(voucher.used)} / ${gallons(voucher.total)} gal</td>
-              <td><span class="cell-primary">${gallons(balance)} gal</span><span class="cell-secondary">${Math.round((balance / voucher.total) * 100)}% restante</span></td>
-              <td><span class="status ${statusClass(voucher.verification)}">${escapeHtml(voucher.verification)}</span></td>
-              <td><div style="display:flex;align-items:center;gap:8px">
-                <button class="text-button" data-voucher-detail="${escapeHtml(voucher.id)}">Ver saldo</button>
-                ${state.role === "ADMIN" ? `<button class="text-button" data-voucher-edit="${escapeHtml(voucher.id)}">Corregir datos</button><button class="text-button" data-voucher-delete="${escapeHtml(voucher.id)}">Eliminar</button>` : ""}
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="cell-primary block text-[#243941] text-[11px] font-[630]">${escapeHtml(voucher.id)}</span></td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="cell-primary block text-[#243941] text-[11px] font-[630]">${escapeHtml(voucher.orderId)}</span><span class="cell-secondary block mt-[4px] text-[#98a2a5] text-[10px]">${escapeHtml(voucher.issuer)}</span></td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(voucher.fuel)}</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${gallons(voucher.used)} / ${gallons(voucher.total)} gal</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="cell-primary block text-[#243941] text-[11px] font-[630]">${gallons(balance)} gal</span><span class="cell-secondary block mt-[4px] text-[#98a2a5] text-[10px]">${Math.round((balance / voucher.total) * 100)}% restante</span></td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="status  inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]${statusClass(voucher.verification)}">${escapeHtml(voucher.verification)}</span></td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><div class="!flex !items-center !gap-[8px]">
+                <button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-voucher-detail="${escapeHtml(voucher.id)}">Ver saldo</button>
+                ${state.role === "ADMIN" ? `<button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-voucher-edit="${escapeHtml(voucher.id)}">Corregir datos</button><button class="text-button inline-flex min-h-[30px] items-center gap-[5px] p-[0_4px] [border:0] [background:transparent] text-[#3a8176] text-[10px] font-[630] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-voucher-delete="${escapeHtml(voucher.id)}">Eliminar</button>` : ""}
               </div></td>
             </tr>`;
           }).join("")
-          : `<tr><td colspan="7"><div class="empty-state">No hay vales que coincidan con la búsqueda.</div></td></tr>`;
+          : `<tr><td colspan="7" class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><div class="empty-state p-[30px_16px] text-[#8b989c] text-[11px] text-center">No hay vales que coincidan con la búsqueda.</div></td></tr>`;
       }
 
       function renderAttendanceRows() {
         const rows = [...visibleAttendances()].reverse();
         document.getElementById("attendanceRows").innerHTML = rows.map((item) => `
           <tr>
-            <td><span class="cell-primary">15 nov 2026 · ${escapeHtml(item.time)}</span></td>
-            <td><span class="cell-primary">${escapeHtml(item.voucher)}</span><span class="cell-secondary">${escapeHtml(item.orderId)}</span></td>
-            <td>${escapeHtml(item.attendant)}</td>
-            <td>${escapeHtml(item.branch)}</td>
-            <td>${gallons(item.gallons)} gal</td>
-            <td><span class="status ${statusClass(item.verification)}">${escapeHtml(item.verification)}</span></td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="cell-primary block text-[#243941] text-[11px] font-[630]">15 nov 2026 · ${escapeHtml(item.time)}</span></td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="cell-primary block text-[#243941] text-[11px] font-[630]">${escapeHtml(item.voucher)}</span><span class="cell-secondary block mt-[4px] text-[#98a2a5] text-[10px]">${escapeHtml(item.orderId)}</span></td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(item.attendant)}</td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(item.branch)}</td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${gallons(item.gallons)} gal</td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="status  inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]${statusClass(item.verification)}">${escapeHtml(item.verification)}</span></td>
           </tr>`).join("");
         document.getElementById("recentAttendanceRows").innerHTML = rows.slice(0, 4).map((item) => `
           <tr>
-            <td><span class="cell-primary">${escapeHtml(item.voucher)}</span><span class="cell-secondary">${escapeHtml(item.orderId)}</span></td>
-            <td>${escapeHtml(item.attendant.split(" ")[0])}</td>
-            <td>${escapeHtml(item.branch)}</td>
-            <td>${gallons(item.gallons)} gal</td>
-            <td><span class="status ${statusClass(item.verification)}">${escapeHtml(item.verification)}</span></td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="cell-primary block text-[#243941] text-[11px] font-[630]">${escapeHtml(item.voucher)}</span><span class="cell-secondary block mt-[4px] text-[#98a2a5] text-[10px]">${escapeHtml(item.orderId)}</span></td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(item.attendant.split(" ")[0])}</td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(item.branch)}</td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${gallons(item.gallons)} gal</td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="status  inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]${statusClass(item.verification)}">${escapeHtml(item.verification)}</span></td>
           </tr>`).join("");
         document.getElementById("attendanceActivity").innerHTML = rows.slice(0, 4).map((item) => `
-          <div class="queue-item">
-            <span class="queue-icon">${icon("attendances", 15)}</span>
-            <span><span class="queue-title">${escapeHtml(item.voucher)} · ${gallons(item.gallons)} gal</span><span class="queue-meta">${escapeHtml(item.attendant)} · ${escapeHtml(item.time)}</span></span>
-            <span class="status ${statusClass(item.verification)}">${escapeHtml(item.verification)}</span>
+          <div class="queue-item grid grid-cols-[33px_minmax(0,_1fr)_auto] items-center gap-[10px] p-[12px_2px] [border-top:1px_solid_#edf0f0]">
+            <span class="queue-icon grid w-[32px] h-[32px] place-items-center rounded-[11px] [background:#fbf3e6] text-[#a8752e]">${icon("attendances", 15)}</span>
+            <span><span class="queue-title text-[#2c4148] text-[10px] font-[620]">${escapeHtml(item.voucher)} · ${gallons(item.gallons)} gal</span><span class="queue-meta mt-[4px] text-[#929da0] text-[9px]">${escapeHtml(item.attendant)} · ${escapeHtml(item.time)}</span></span>
+            <span class="status  inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]${statusClass(item.verification)}">${escapeHtml(item.verification)}</span>
           </div>`).join("");
         renderReviews();
       }
@@ -2234,28 +670,28 @@
         });
         document.getElementById("verificationRows").innerHTML = rows.length
           ? rows.map((item) => `<tr>
-              <td><span class="cell-primary">${escapeHtml(item.voucher)}</span><span class="cell-secondary">Vale físico recibido</span></td>
-              <td>${escapeHtml(item.orderId)}</td>
-              <td>${escapeHtml(item.attendant)}</td>
-              <td>${gallons(item.gallons)} gal</td>
-              <td>15 nov · ${escapeHtml(item.time)}</td>
-              <td><span class="status ${statusClass(item.verification)}">${escapeHtml(item.verification)}</span></td>
-              <td>${item.verification === "Pendiente"
-                ? `<div style="display:flex;gap:5px"><button class="button button-soft button-small" data-review="${escapeHtml(item.id)}" data-decision="Verificado">Verificar</button><button class="button button-secondary button-small" data-review="${escapeHtml(item.id)}" data-decision="Observado">Observar</button></div>`
-                : `<span class="crumbs">${item.verification === "Observado" ? "Requiere revisión" : "Cotejado"}</span>`}</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="cell-primary block text-[#243941] text-[11px] font-[630]">${escapeHtml(item.voucher)}</span><span class="cell-secondary block mt-[4px] text-[#98a2a5] text-[10px]">Vale físico recibido</span></td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(item.orderId)}</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(item.attendant)}</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${gallons(item.gallons)} gal</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">15 nov · ${escapeHtml(item.time)}</td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="status  inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]${statusClass(item.verification)}">${escapeHtml(item.verification)}</span></td>
+              <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${item.verification === "Pendiente"
+                ? `<div class="!flex !gap-[5px]"><button class="button button-soft button-small inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap [background:rgba(57,_198,_174,_0.11)] text-[#247d70] min-h-[31px] p-[0_9px] rounded-[9px] text-[10px] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-review="${escapeHtml(item.id)}" data-decision="Verificado">Verificar</button><button class="button button-secondary button-small inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap border-[color:#dce5e6] [background:rgba(255,_255,_255,_0.72)] text-[#53656a] hover:[background:white] min-h-[31px] p-[0_9px] rounded-[9px] text-[10px] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-review="${escapeHtml(item.id)}" data-decision="Observado">Observar</button></div>`
+                : `<span class="crumbs text-[#87949a] text-[11px] [&_strong]:text-[#263b43] [&_strong]:font-[620] max-[760px]:text-[10px]">${item.verification === "Observado" ? "Requiere revisión" : "Cotejado"}</span>`}</td>
             </tr>`).join("")
-          : `<tr><td colspan="7"><div class="empty-state">No hay registros en esta bandeja.</div></td></tr>`;
+          : `<tr><td colspan="7" class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><div class="empty-state p-[30px_16px] text-[#8b989c] text-[11px] text-center">No hay registros en esta bandeja.</div></td></tr>`;
         const pending = pendingReviews().length;
         document.getElementById("verificationTotal").textContent = `${pending} por revisar`;
         document.getElementById("reviewCount").textContent = `${pending} pendientes`;
         document.getElementById("reportPending").textContent = String(pending).padStart(2, "0");
         document.getElementById("reportPendingSummary").textContent = String(pending).padStart(2, "0");
         document.getElementById("reviewQueue").innerHTML = pendingReviews().slice(0, 3).map((item) => `
-          <div class="queue-item">
-            <span class="queue-icon">${icon("vouchers", 15)}</span>
-            <span><span class="queue-title">${escapeHtml(item.voucher)}</span><span class="queue-meta">${escapeHtml(item.attendant)} · ${escapeHtml(item.branch)}</span></span>
-            <button class="queue-action" data-review-open="${escapeHtml(item.id)}" aria-label="Abrir verificación de ${escapeHtml(item.voucher)}">${icon("verifications", 14)}</button>
-          </div>`).join("") || `<div class="empty-state">Todo está al día. No hay vales pendientes.</div>`;
+          <div class="queue-item grid grid-cols-[33px_minmax(0,_1fr)_auto] items-center gap-[10px] p-[12px_2px] [border-top:1px_solid_#edf0f0]">
+            <span class="queue-icon grid w-[32px] h-[32px] place-items-center rounded-[11px] [background:#fbf3e6] text-[#a8752e]">${icon("vouchers", 15)}</span>
+            <span><span class="queue-title text-[#2c4148] text-[10px] font-[620]">${escapeHtml(item.voucher)}</span><span class="queue-meta mt-[4px] text-[#929da0] text-[9px]">${escapeHtml(item.attendant)} · ${escapeHtml(item.branch)}</span></span>
+            <button class="queue-action grid w-[30px] h-[30px] place-items-center [border:1px_solid_#e5eaea] rounded-[9px] [background:white] text-[#5d7477] hover:border-[color:#a9d8cd] hover:text-[#287e6e] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" data-review-open="${escapeHtml(item.id)}" aria-label="Abrir verificación de ${escapeHtml(item.voucher)}">${icon("verifications", 14)}</button>
+          </div>`).join("") || `<div class="empty-state p-[30px_16px] text-[#8b989c] text-[11px] text-center">Todo está al día. No hay vales pendientes.</div>`;
         renderNav();
       }
 
@@ -2266,10 +702,10 @@
           const initials = user.name.split(" ").slice(0, 2).map((word) => word[0]).join("");
           const userIndex = state.users.indexOf(user);
           return `<tr>
-            <td><div class="user-cell"><span class="mini-avatar">${escapeHtml(initials)}</span><span><span class="cell-primary">${escapeHtml(user.name)}</span><span class="cell-secondary">${escapeHtml(user.email)}</span></span></div></td>
-            <td>${escapeHtml(user.role)}</td><td>${escapeHtml(user.branch)}</td>
-            <td><span class="status ${user.active ? "status-green" : "status-gray"}">${user.active ? "Activo" : "Deshabilitado"}</span></td>
-            <td><button class="toggle${user.active ? " on" : ""}" data-user-toggle="${userIndex}" aria-label="${user.active ? "Deshabilitar" : "Habilitar"} a ${escapeHtml(user.name)}" aria-pressed="${user.active}"></button></td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><div class="user-cell flex items-center gap-[8px]"><span class="mini-avatar grid w-[27px] h-[27px] place-items-center rounded-[9px] [background:#e8f1ec] text-[#49796a] text-[9px] font-[700]">${escapeHtml(initials)}</span><span><span class="cell-primary block text-[#243941] text-[11px] font-[630]">${escapeHtml(user.name)}</span><span class="cell-secondary block mt-[4px] text-[#98a2a5] text-[10px]">${escapeHtml(user.email)}</span></span></div></td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(user.role)}</td><td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap">${escapeHtml(user.branch)}</td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><span class="status  inline-flex min-h-[23px] items-center gap-[5px] p-[0_8px] rounded-[8px] text-[9px] font-[610] before:w-[5px] before:h-[5px] before:rounded-[50%] before:[background:currentColor] before:content-[''] [&.status-green]:[background:#e9f6f0] [&.status-green]:text-[#397f67] [&.status-amber]:[background:#fbf1e2] [&.status-amber]:text-[#a76e24] [&.status-blue]:[background:#eaf2f6] [&.status-blue]:text-[#4a768d] [&.status-gray]:[background:#edf0f0] [&.status-gray]:text-[#6f7a7d]${user.active ? "status-green" : "status-gray"}">${user.active ? "Activo" : "Deshabilitado"}</span></td>
+            <td class="p-[12px_13px] [border-bottom:1px_solid_#eff2f2] text-[#52636a] text-[11px] whitespace-nowrap"><button class="toggle relative w-[34px] h-[20px] p-[0] [border:0] rounded-[99px] [background:#cbd4d4] [transition:background_160ms_ease] after:absolute after:top-[3px] after:left-[3px] after:w-[14px] after:h-[14px] after:rounded-[50%] after:[background:white] after:shadow-[0_1px_3px_rgba(0,_0,_0,_0.15)] after:content-[''] after:[transition:transform_160ms_ease] [&.on]:[background:#51b89e] [&.on]:after:[transform:translateX(14px)] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]${user.active ? " on" : ""}" data-user-toggle="${userIndex}" aria-label="${user.active ? "Deshabilitar" : "Habilitar"} a ${escapeHtml(user.name)}" aria-pressed="${user.active}"></button></td>
           </tr>`;
         }).join("");
       }
@@ -2285,7 +721,7 @@
         const gallonsToday = visible.reduce((total, item) => total + Number(item.gallons), 0);
         document.getElementById("activeOrdersMetric").textContent = String(activeOrders).padStart(2, "0");
         document.getElementById("activeVouchersMetric").textContent = String(activeVouchers).padStart(2, "0");
-        document.getElementById("gallonsMetric").innerHTML = `${gallons(gallonsToday)} <small style="font-size: 11px; font-weight: 560; letter-spacing: 0">gal</small>`;
+        document.getElementById("gallonsMetric").innerHTML = `${gallons(gallonsToday)} <small class="!text-[11px] !font-[560] !tracking-[0]">gal</small>`;
         const fourthMetric = state.role === "ATTENDANT" ? visible.length : visible.filter((item) => item.verification === "Pendiente").length;
         document.getElementById("pendingMetric").textContent = String(fourthMetric).padStart(2, "0");
         document.getElementById("sanJoseOrders").textContent = state.orders.filter((item) => item.branch === "San José" && orderBalance(item) > 0).length;
@@ -2316,8 +752,8 @@
         document.getElementById("dialogDescription").textContent = description;
         document.getElementById("dialogBody").innerHTML = body;
         document.getElementById("dialogFooter").innerHTML = `
-          <button class="button button-secondary" type="button" id="dialogCancel">${cancelLabel}</button>
-          <button class="button button-primary" type="submit">${confirmLabel}</button>`;
+          <button class="button button-secondary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap border-[color:#dce5e6] [background:rgba(255,_255,_255,_0.72)] text-[#53656a] hover:[background:white] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" type="button" id="dialogCancel">${cancelLabel}</button>
+          <button class="button button-primary inline-flex min-h-[39px] items-center justify-center gap-[8px] p-[0_13px] [border:1px_solid_transparent] rounded-[11px] text-[11px] font-[620] [transition:background_160ms_ease,_box-shadow_160ms_ease] whitespace-nowrap [background:#173c42] shadow-[0_5px_12px_rgba(23,_60,_66,_0.13)] text-[white] hover:[background:#20545a] cursor-pointer focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" type="submit">${confirmLabel}</button>`;
         dialog.showModal();
         document.getElementById("dialogCancel").addEventListener("click", () => dialog.close());
         document.getElementById("dialogClose").onclick = () => dialog.close();
@@ -2338,14 +774,14 @@
             ? "Actualiza los datos descriptivos sin alterar las atenciones registradas."
             : "Completa los datos de la autorización y revisa los galones antes de guardarla.",
           confirmLabel: existing ? "Guardar cambios" : "Guardar orden",
-          body: `<div class="form-grid">
-            <div class="field full"><label for="newOrderEntity">Entidad / institución</label><input class="input-control" id="newOrderEntity" required placeholder="Nombre de la institución" value="${escapeHtml(existing ? existing.entity : "")}" /></div>
-            <div class="field"><label for="newOrderNumber">Número de orden</label><input class="input-control" id="newOrderNumber" required placeholder="OC-2026-0049" value="${escapeHtml(existing ? existing.id : "")}" ${existing ? "readonly" : ""} /></div>
-            <div class="field"><label for="newOrderDate">Fecha de emisión</label><input class="input-control" id="newOrderDate" type="${existing ? "text" : "date"}" required value="${escapeHtml(existing ? existing.date : "2026-11-15")}" ${existing ? "readonly" : ""} /></div>
-            <div class="field"><label for="newOrderFuel">Combustible</label><select class="select-control" id="newOrderFuel"><option ${existing && existing.fuel === "Diésel B5" ? "selected" : ""}>Diésel B5</option><option ${existing && existing.fuel === "Gasohol 90" ? "selected" : ""}>Gasohol 90</option></select></div>
-            <div class="field"><label for="newOrderGallons">Galones autorizados</label><input class="input-control" id="newOrderGallons" type="number" min="0.001" step="0.001" required placeholder="0.000" value="${existing ? existing.total : ""}" /><span class="field-hint" id="orderFormError">${existing ? `Ya se despacharon ${gallons(existing.used)} gal.` : ""}</span></div>
-            <div class="field full"><label for="newOrderBranch">Sede proveedora</label><select class="select-control" id="newOrderBranch"><option ${existing && existing.branch === "San José" ? "selected" : ""}>San José</option><option ${existing && existing.branch === "Santa Marta" ? "selected" : ""}>Santa Marta</option></select></div>
-            ${existing ? "" : `<div class="field full"><label>Documento de origen (opcional)</label><label class="dropzone" for="orderPdf">${icon("orders", 18)}<span id="pdfLabel">Selecciona un PDF para prellenar los campos</span><input id="orderPdf" type="file" accept="application/pdf,.pdf" class="sr-only" /><span>El OCR propone datos; revísalos antes de guardar.</span></label></div>`}
+          body: `<div class="form-grid grid grid-cols-[repeat(2,_minmax(0,_1fr))] gap-[13px] max-[760px]:grid-cols-[1fr]">
+            <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newOrderEntity">Entidad / institución</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newOrderEntity" required placeholder="Nombre de la institución" value="${escapeHtml(existing ? existing.entity : "")}" /></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newOrderNumber">Número de orden</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newOrderNumber" required placeholder="OC-2026-0049" value="${escapeHtml(existing ? existing.id : "")}" ${existing ? "readonly" : ""} /></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newOrderDate">Fecha de emisión</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newOrderDate" type="${existing ? "text" : "date"}" required value="${escapeHtml(existing ? existing.date : "2026-11-15")}" ${existing ? "readonly" : ""} /></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newOrderFuel">Combustible</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newOrderFuel"><option ${existing && existing.fuel === "Diésel B5" ? "selected" : ""}>Diésel B5</option><option ${existing && existing.fuel === "Gasohol 90" ? "selected" : ""}>Gasohol 90</option></select></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newOrderGallons">Galones autorizados</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newOrderGallons" type="number" min="0.001" step="0.001" required placeholder="0.000" value="${existing ? existing.total : ""}" /><span class="field-hint text-[#919da0] text-[9px] leading-[1.5]" id="orderFormError">${existing ? `Ya se despacharon ${gallons(existing.used)} gal.` : ""}</span></div>
+            <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newOrderBranch">Sede proveedora</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newOrderBranch"><option ${existing && existing.branch === "San José" ? "selected" : ""}>San José</option><option ${existing && existing.branch === "Santa Marta" ? "selected" : ""}>Santa Marta</option></select></div>
+            ${existing ? "" : `<div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label>Documento de origen (opcional)</label><label class="dropzone grid min-h-[85px] place-items-center p-[12px] [border:1px_dashed_#bbd5d0] rounded-[12px] [background:#f7fbfa] text-[#53746f] text-center [&_span]:block [&_span]:mt-[5px] [&_span]:text-[#89999b] [&_span]:text-[9px]" for="orderPdf">${icon("orders", 18)}<span id="pdfLabel">Selecciona un PDF para prellenar los campos</span><input id="orderPdf" type="file" accept="application/pdf,.pdf" class="sr-only absolute w-[1px] h-[1px] p-[0] m-[-1px] overflow-hidden [clip:rect(0,_0,_0,_0)] whitespace-nowrap [border:0] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" /><span>El OCR propone datos; revísalos antes de guardar.</span></label></div>`}
           </div>`,
           onSubmit: () => {
             const total = Number(document.getElementById("newOrderGallons").value);
@@ -2406,15 +842,15 @@
           title: "Registrar primera atención",
           description: "Captura el vale presentado y la cantidad realmente despachada.",
           confirmLabel: "Confirmar despacho",
-          body: `<div class="form-grid">
-            <div class="field full"><label for="modalAttendanceOrder">Orden de compra</label><select class="select-control" id="modalAttendanceOrder">${availableOrders.map((order) => `<option value="${escapeHtml(order.id)}" ${order.id === initial ? "selected" : ""}>${escapeHtml(order.id)} · ${escapeHtml(order.entity)}</option>`).join("")}</select></div>
-            <div class="field"><label for="modalVoucher">Número de vale</label><input class="input-control" id="modalVoucher" required placeholder="VM-2026-0142" /><span class="field-hint" id="modalVoucherHint">Si el vale existe, se recuperan sus datos y saldo.</span></div>
-            <div class="field"><label for="modalIssuerType">Tipo de emisor</label><select class="select-control" id="modalIssuerType"><option value="INSTITUTION">Institución</option><option value="STATION">Estación</option></select></div>
-            <div class="field full"><label for="modalIssuer">Nombre del emisor</label><input class="input-control" id="modalIssuer" required placeholder="Según documento físico" /></div>
-            <div class="field"><label for="modalAuthorized">Galones autorizados en el vale</label><input class="input-control" id="modalAuthorized" type="number" min="0.001" step="0.001" required placeholder="0.000" /></div>
-            <div class="field"><label for="modalGallons">Galones despachados</label><input class="input-control" id="modalGallons" type="number" min="0.001" step="0.001" required placeholder="0.000" /></div>
-            <div class="field"><label for="modalBranch">Sede</label><select class="select-control" id="modalBranch"><option>San José</option><option>Santa Marta</option></select></div>
-            <div class="field full"><div class="balance-card"><span>Saldo máximo en orden</span><strong id="modalBalance"></strong></div><div class="field-hint" id="modalBalanceError" role="alert"></div></div>
+          body: `<div class="form-grid grid grid-cols-[repeat(2,_minmax(0,_1fr))] gap-[13px] max-[760px]:grid-cols-[1fr]">
+            <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="modalAttendanceOrder">Orden de compra</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="modalAttendanceOrder">${availableOrders.map((order) => `<option value="${escapeHtml(order.id)}" ${order.id === initial ? "selected" : ""}>${escapeHtml(order.id)} · ${escapeHtml(order.entity)}</option>`).join("")}</select></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="modalVoucher">Número de vale</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="modalVoucher" required placeholder="VM-2026-0142" /><span class="field-hint text-[#919da0] text-[9px] leading-[1.5]" id="modalVoucherHint">Si el vale existe, se recuperan sus datos y saldo.</span></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="modalIssuerType">Tipo de emisor</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="modalIssuerType"><option value="INSTITUTION">Institución</option><option value="STATION">Estación</option></select></div>
+            <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="modalIssuer">Nombre del emisor</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="modalIssuer" required placeholder="Según documento físico" /></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="modalAuthorized">Galones autorizados en el vale</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="modalAuthorized" type="number" min="0.001" step="0.001" required placeholder="0.000" /></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="modalGallons">Galones despachados</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="modalGallons" type="number" min="0.001" step="0.001" required placeholder="0.000" /></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="modalBranch">Sede</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="modalBranch"><option>San José</option><option>Santa Marta</option></select></div>
+            <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><div class="balance-card flex items-center justify-between gap-[12px] p-[13px_14px] [border:1px_solid_#dceee8] rounded-[12px] [background:#f2faf6] text-[#386e61] text-[10px] [&_strong]:text-[#225d50] [&_strong]:text-[14px] [&_strong]:tracking-[-0.03em]"><span>Saldo máximo en orden</span><strong id="modalBalance"></strong></div><div class="field-hint text-[#919da0] text-[9px] leading-[1.5]" id="modalBalanceError" role="alert"></div></div>
           </div>`,
           onSubmit: () => {
             const order = state.orders.find((item) => item.id === document.getElementById("modalAttendanceOrder").value);
@@ -2537,13 +973,13 @@
           title: "Agregar usuario",
           description: "Asigna uno de los roles predefinidos. La oficina administra ambas sedes.",
           confirmLabel: "Crear usuario",
-          body: `<div class="form-grid">
-            <div class="field"><label for="newUserName">Nombre completo</label><input class="input-control" id="newUserName" required placeholder="Nombre y apellidos" /></div>
-            <div class="field"><label for="newUserDni">DNI</label><input class="input-control" id="newUserDni" required placeholder="Número de documento" /></div>
-            <div class="field full"><label for="newUserEmail">Correo electrónico</label><input class="input-control" id="newUserEmail" type="email" required placeholder="nombre@estacion.pe" /></div>
-            <div class="field"><label for="newUserRole">Rol</label><select class="select-control" id="newUserRole"><option value="OFFICE">Oficina</option><option value="ATTENDANT">Grifero</option><option value="ADMIN">Administrador</option></select></div>
-            <div class="field" id="newUserBranchField"><label for="newUserBranch">Sede</label><select class="select-control" id="newUserBranch"><option>San José</option><option>Santa Marta</option></select><span class="field-hint">No aplica al personal de oficina ni al administrador.</span></div>
-            <div class="field full"><div class="field-hint">La cuenta requiere una clave temporal segura al integrarse con el backend.</div></div>
+          body: `<div class="form-grid grid grid-cols-[repeat(2,_minmax(0,_1fr))] gap-[13px] max-[760px]:grid-cols-[1fr]">
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newUserName">Nombre completo</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newUserName" required placeholder="Nombre y apellidos" /></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newUserDni">DNI</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newUserDni" required placeholder="Número de documento" /></div>
+            <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newUserEmail">Correo electrónico</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newUserEmail" type="email" required placeholder="nombre@estacion.pe" /></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="newUserRole">Rol</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newUserRole"><option value="OFFICE">Oficina</option><option value="ATTENDANT">Grifero</option><option value="ADMIN">Administrador</option></select></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]" id="newUserBranchField"><label for="newUserBranch">Sede</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="newUserBranch"><option>San José</option><option>Santa Marta</option></select><span class="field-hint text-[#919da0] text-[9px] leading-[1.5]">No aplica al personal de oficina ni al administrador.</span></div>
+            <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><div class="field-hint text-[#919da0] text-[9px] leading-[1.5]">La cuenta requiere una clave temporal segura al integrarse con el backend.</div></div>
           </div>`,
           onSubmit: () => {
             const name = document.getElementById("newUserName").value.trim();
@@ -2578,14 +1014,14 @@
           description: order.entity,
           confirmLabel: state.role === "ATTENDANT" ? "Iniciar atención" : "Cerrar",
           cancelLabel: "Listo",
-          body: `<div class="summary-list" style="padding:0">
-            <div class="summary-row"><span>Sede proveedora</span><strong>${escapeHtml(order.branch)}</strong></div>
-            <div class="summary-row"><span>Fecha de emisión</span><strong>${escapeHtml(order.date)}</strong></div>
-            <div class="summary-row"><span>Combustible</span><strong>${escapeHtml(order.fuel)}</strong></div>
-            <div class="summary-row"><span>Autorizado</span><strong>${gallons(order.total)} gal</strong></div>
-            <div class="summary-row"><span>Despachado</span><strong>${gallons(order.used)} gal</strong></div>
-            <div class="balance-card"><span>Saldo disponible</span><strong>${gallons(balance)} gal</strong></div>
-            <div class="field-hint">El saldo es compartido entre San José y Santa Marta y se calcula con las atenciones confirmadas.</div>
+          body: `<div class="summary-list grid gap-[16px] p-[4px_18px_19px] !p-[0]">
+            <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Sede proveedora</span><strong>${escapeHtml(order.branch)}</strong></div>
+            <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Fecha de emisión</span><strong>${escapeHtml(order.date)}</strong></div>
+            <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Combustible</span><strong>${escapeHtml(order.fuel)}</strong></div>
+            <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Autorizado</span><strong>${gallons(order.total)} gal</strong></div>
+            <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Despachado</span><strong>${gallons(order.used)} gal</strong></div>
+            <div class="balance-card flex items-center justify-between gap-[12px] p-[13px_14px] [border:1px_solid_#dceee8] rounded-[12px] [background:#f2faf6] text-[#386e61] text-[10px] [&_strong]:text-[#225d50] [&_strong]:text-[14px] [&_strong]:tracking-[-0.03em]"><span>Saldo disponible</span><strong>${gallons(balance)} gal</strong></div>
+            <div class="field-hint text-[#919da0] text-[9px] leading-[1.5]">El saldo es compartido entre San José y Santa Marta y se calcula con las atenciones confirmadas.</div>
           </div>`,
           onSubmit: () => {
             if (state.role === "ATTENDANT") {
@@ -2608,12 +1044,12 @@
           description: `${voucher.issuer} · ${voucher.orderId}`,
           confirmLabel: "Listo",
           cancelLabel: "Cerrar",
-          body: `<div class="summary-list" style="padding:0">
-            <div class="summary-row"><span>Combustible</span><strong>${escapeHtml(voucher.fuel)}</strong></div>
-            <div class="summary-row"><span>Autorizado en el vale</span><strong>${gallons(voucher.total)} gal</strong></div>
-            <div class="summary-row"><span>Atendido</span><strong>${gallons(voucher.used)} gal</strong></div>
-            <div class="balance-card"><span>Saldo restante del vale</span><strong>${gallons(remaining)} gal</strong></div>
-            <div class="summary-row"><span>Verificación física</span><strong>${escapeHtml(voucher.verification)}</strong></div>
+          body: `<div class="summary-list grid gap-[16px] p-[4px_18px_19px] !p-[0]">
+            <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Combustible</span><strong>${escapeHtml(voucher.fuel)}</strong></div>
+            <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Autorizado en el vale</span><strong>${gallons(voucher.total)} gal</strong></div>
+            <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Atendido</span><strong>${gallons(voucher.used)} gal</strong></div>
+            <div class="balance-card flex items-center justify-between gap-[12px] p-[13px_14px] [border:1px_solid_#dceee8] rounded-[12px] [background:#f2faf6] text-[#386e61] text-[10px] [&_strong]:text-[#225d50] [&_strong]:text-[14px] [&_strong]:tracking-[-0.03em]"><span>Saldo restante del vale</span><strong>${gallons(remaining)} gal</strong></div>
+            <div class="summary-row flex items-center justify-between gap-[12px] text-[#77868b] text-[10px] [&_strong]:text-[#263d44] [&_strong]:text-[11px] [&_strong]:font-[650]"><span>Verificación física</span><strong>${escapeHtml(voucher.verification)}</strong></div>
           </div>`,
           onSubmit: () => true,
         });
@@ -2627,10 +1063,10 @@
           title: "Corregir datos del vale",
           description: "Solo se actualizan datos descriptivos; el historial de atenciones no cambia.",
           confirmLabel: "Guardar corrección",
-          body: `<div class="form-grid">
-            <div class="field"><label for="editVoucherNumber">Número de vale</label><input class="input-control" id="editVoucherNumber" required value="${escapeHtml(voucher.id)}" /></div>
-            <div class="field"><label for="editVoucherType">Tipo de emisor</label><select class="select-control" id="editVoucherType"><option value="INSTITUTION" ${voucher.issuerType !== "STATION" ? "selected" : ""}>Institución</option><option value="STATION" ${voucher.issuerType === "STATION" ? "selected" : ""}>Estación</option></select></div>
-            <div class="field full"><label for="editVoucherIssuer">Nombre del emisor</label><input class="input-control" id="editVoucherIssuer" required value="${escapeHtml(voucher.issuer)}" /></div>
+          body: `<div class="form-grid grid grid-cols-[repeat(2,_minmax(0,_1fr))] gap-[13px] max-[760px]:grid-cols-[1fr]">
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="editVoucherNumber">Número de vale</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="editVoucherNumber" required value="${escapeHtml(voucher.id)}" /></div>
+            <div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="editVoucherType">Tipo de emisor</label><select class="select-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="editVoucherType"><option value="INSTITUTION" ${voucher.issuerType !== "STATION" ? "selected" : ""}>Institución</option><option value="STATION" ${voucher.issuerType === "STATION" ? "selected" : ""}>Estación</option></select></div>
+            <div class="field full grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="editVoucherIssuer">Nombre del emisor</label><input class="input-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="editVoucherIssuer" required value="${escapeHtml(voucher.issuer)}" /></div>
           </div>`,
           onSubmit: () => {
             const newId = document.getElementById("editVoucherNumber").value.trim();
@@ -2661,7 +1097,7 @@
           title: "Eliminar orden",
           description: "La orden se quitará de la lista de demostración. Esta acción no se puede deshacer.",
           confirmLabel: "Eliminar orden",
-          body: `<div class="field-hint">Orden seleccionada: <strong>${escapeHtml(id)}</strong></div>`,
+          body: `<div class="field-hint text-[#919da0] text-[9px] leading-[1.5]">Orden seleccionada: <strong>${escapeHtml(id)}</strong></div>`,
           onSubmit: () => {
             state.orders = state.orders.filter((order) => order.id !== id);
             renderAll();
@@ -2702,7 +1138,7 @@
             title: "Observar documento",
             description: "Indica qué dato no coincide para orientar la corrección administrativa.",
             confirmLabel: "Guardar observación",
-            body: `<div class="field"><label for="reviewObservation">Motivo de observación</label><textarea class="textarea-control" id="reviewObservation" required placeholder="Describe la diferencia encontrada"></textarea></div>`,
+            body: `<div class="field grid gap-[6px] [&.full]:[grid-column:1_/_-1] [&_label]:text-[#52646a] [&_label]:text-[10px] [&_label]:font-[620] max-[760px]:[&.full]:[grid-column:auto]"><label for="reviewObservation">Motivo de observación</label><textarea class="textarea-control min-h-[39px] w-full p-[0_11px] [border:1px_solid_#dce5e5] rounded-[10px] [background:white] text-[#30464d] text-[11px] min-h-[88px] p-[10px_11px] [resize:vertical] focus-visible:[outline:3px_solid_rgba(57,_198,_174,_0.72)] focus-visible:[outline-offset:3px]" id="reviewObservation" required placeholder="Describe la diferencia encontrada"></textarea></div>`,
             onSubmit: () => {
               const reason = document.getElementById("reviewObservation").value.trim();
               if (!reason) return false;
@@ -2754,7 +1190,6 @@
       function closeMobileMenu() {
         const sidebar = document.getElementById("sidebar");
         sidebar.classList.remove("open");
-        sidebar.style.removeProperty("transform");
         document.getElementById("sidebarScrim").classList.remove("visible");
         document.getElementById("menuToggle").setAttribute("aria-expanded", "false");
       }
@@ -2762,7 +1197,6 @@
       function openMobileMenu() {
         const sidebar = document.getElementById("sidebar");
         sidebar.classList.add("open");
-        sidebar.style.transform = "translateX(0)";
         document.getElementById("sidebarScrim").classList.add("visible");
         document.getElementById("menuToggle").setAttribute("aria-expanded", "true");
       }

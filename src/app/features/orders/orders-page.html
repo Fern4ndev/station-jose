@@ -1,0 +1,62 @@
+<app-ui-toast />
+
+<div class="animate-[fadeIn_230ms_ease_both]">
+  <app-ui-page-heading
+    title="Órdenes de compra"
+    subtitle="Consulta autorizaciones y saldo disponible por combustible."
+  >
+    @if (canManage()) {
+      <button type="button" class="sanjose-button sanjose-button--secondary" (click)="openNew()">
+        <app-ui-icon name="orders" [size]="14" />
+        Importar PDF
+      </button>
+      <button type="button" class="sanjose-button sanjose-button--primary" (click)="openNew()">
+        <app-ui-icon name="plus" [size]="14" />
+        Nueva orden
+      </button>
+    }
+  </app-ui-page-heading>
+
+  <app-ui-panel>
+    <app-orders-toolbar
+      [filter]="filter()"
+      [query]="query()"
+      (filterChange)="filter.set($event)"
+      (queryChange)="query.set($event)"
+    />
+
+    <app-orders-table
+      [rows]="rows()"
+      [canManage]="canManage()"
+      [lockedOrderIds]="lockedIds()"
+      (view)="openDetail($event)"
+      (edit)="openEdit($event)"
+      (remove)="askDelete($event)"
+    />
+
+    <div
+      panelFooter
+      class="flex items-center justify-between gap-[12px] p-[17px_18px_13px] max-[760px]:p-[15px_14px_12px]"
+    >
+      <p class="m-0 text-[9px] text-[#8c999d]">{{ countText() }}</p>
+      <button type="button" class="sanjose-text-button" (click)="loadMore()">Cargar más</button>
+    </div>
+  </app-ui-panel>
+
+  <app-order-form-dialog
+    [(visible)]="formOpen"
+    [order]="editing()"
+    [takenIds]="takenIds()"
+    (saved)="save($event)"
+  />
+
+  <app-order-detail-dialog [(visible)]="detailOpen" [order]="selected()" />
+
+  <app-ui-confirm-dialog
+    [(visible)]="deleteOpen"
+    title="Eliminar orden"
+    [message]="'Se eliminará la orden ' + (selected()?.id ?? '') + '. Esta acción no se puede deshacer.'"
+    confirmLabel="Eliminar"
+    (confirmed)="confirmDelete()"
+  />
+</div>

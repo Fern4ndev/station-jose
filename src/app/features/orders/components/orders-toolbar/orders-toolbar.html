@@ -1,0 +1,27 @@
+<div
+  class="flex items-center justify-between gap-[12px] border-b border-[#edf0f0] p-[12px_15px] max-[760px]:flex-col max-[760px]:items-start"
+>
+  <div class="flex flex-wrap items-center gap-[7px]" role="group" aria-label="Filtrar órdenes">
+    @for (option of filters; track option) {
+      <button
+        type="button"
+        class="sanjose-chip"
+        [class.selected]="option === filter()"
+        [attr.aria-pressed]="option === filter()"
+        (click)="filterChange.emit(option)"
+      >
+        {{ option }}
+      </button>
+    }
+  </div>
+
+  <input
+    id="orderSearch"
+    class="sanjose-input max-[760px]:max-w-none max-[760px]:w-full max-w-[250px]"
+    type="search"
+    placeholder="Buscar por orden o entidad"
+    aria-label="Buscar órdenes por número o entidad"
+    [value]="query()"
+    (input)="onQuery($event)"
+  />
+</div>

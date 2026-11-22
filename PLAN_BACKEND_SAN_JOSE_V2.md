@@ -6,15 +6,18 @@
 **Sedes:** San José y Santa Marta  
 **Backend:** Python + FastAPI  
 **Base de datos:** PostgreSQL  
-**Versión del plan:** 2.2
+**Versión del plan:** 2.3
+**Última actualización:** 20/11/2026
 **Fuente funcional:** `REQUERIMIENTOS_FUNCIONALES_SAN_JOSE_V2.md`  
 **Estado:** Plan técnico actualizado; no representa funcionalidades implementadas.
 
 > **Actualización 2.1:** se adopta una arquitectura por capas organizada por responsabilidad, similar al árbol de referencia compartido (`app/core`, `app/routers`, `app/schemas`, `app/services`, `app/database.py` y `app/tables.py`). Se añade una capa de repositorios para aislar las consultas SQL y proteger las operaciones transaccionales del dominio.
 >
-> **Cambio funcional principal respecto a la versión anterior:** el vale no se registra anticipadamente por Oficina. Se crea junto con su primer despacho, realizado por el grifero. Un mismo vale puede tener múltiples atenciones parciales. Cada atención descuenta exclusivamente los galones realmente despachados del saldo del vale y del saldo de la línea de combustible de la orden. Oficina verifica posteriormente el registro contra el vale físico, sin volver a capturarlo.
+> **Cambio funcional principal respecto a la versión anterior:** el vale no se registra anticipadamente por Oficina. Se crea junto con su primer despacho, realizado por el grifero. Un mismo vale puede tener múltiples atenciones parciales. Cada atención descuenta exclusivamente los galones realmente despachados del saldo del vale y del saldo de la línea de combustible de la orden. Oficina consultaba posteriormente el registro contra el vale físico; esa verificación administrativa fue retirada del alcance en la versión 2.3.
 >
 > **Actualización 2.2:** el esquema se mantiene manualmente en SQL. `db/001_schema.sql` y `db/002_seed.sql` son la fuente para una instalación nueva; los ALTER numerados son el puente temporal para bases existentes. No se utilizan herramientas automatizadas de migración.
+>
+> **Actualización 2.3 (20/11/2026):** se retira del alcance la verificación administrativa del vale físico (RF-013). Oficina y Administración solo consultan los registros; no existe tabla activa, estado, permiso ni endpoint de verificación. Se documentan además los cambios de esquema ya aplicados en `db/003_office_users_without_branch.sql`, `db/004_voucher_identity.sql` y `db/005_single_global_admin.sql`, y se marca `document_counters` como estructura reservada sin uso.
 
 ---
 
@@ -26,7 +29,7 @@ El backend administrará las órdenes de compra que las instituciones entregan a
 
 El personal de oficina registrará las órdenes de compra. Los griferos consultarán una orden y sus saldos antes de atender al cliente. Durante el primer despacho capturarán los datos del vale físico y registrarán la cantidad realmente entregada. Si el cliente no consume toda la cantidad autorizada, el mismo vale permanecerá con saldo y podrá utilizarse en atenciones posteriores.
 
-El personal de oficina recibirá el vale físico después de la atención y verificará que la información capturada coincida con el documento. Esta verificación no generará un segundo vale ni modificará los galones despachados.
+El personal de oficina consultará las órdenes, vales y atenciones registradas. La verificación administrativa del vale físico no forma parte de esta versión: Oficina no coteja ni observa documentos, y los galones despachados no se modifican desde ninguna pantalla administrativa.
 
 ## 1.2. Problema que resuelve
 
@@ -36,7 +39,7 @@ El backend centralizará las operaciones y será la única fuente autorizada par
 
 ## 1.3. Objetivo técnico
 
-Construir una API REST segura, transaccional y mantenible que permita administrar usuarios, registrar órdenes, capturar vales en su primera atención, registrar despachos parciales, calcular saldos por tipo de combustible, compartir la información entre sedes, permitir la verificación administrativa y generar reportes/exportaciones. RapidOCR apoyará exclusivamente el registro de órdenes a partir de PDF.
+Construir una API REST segura, transaccional y mantenible que permita administrar usuarios, registrar órdenes, capturar vales en su primera atención, registrar despachos parciales, calcular saldos por tipo de combustible, compartir la información entre sedes y generar reportes/exportaciones. RapidOCR apoyará exclusivamente el registro de órdenes a partir de PDF.
 
 ## 1.4. Resultado esperado
 
@@ -53,7 +56,6 @@ Una API versionada y documentada, respaldada por PostgreSQL, con reglas de negoc
 | Usuarios | Crear usuarios, asignar uno de tres roles, habilitar/deshabilitar cuentas y cerrar sesión. | RF-001 a RF-005 |
 | Supervisión de atenciones | Consultar atenciones realizadas por los griferos según permisos. | RF-006 |
 | Órdenes | Registrar, consultar, buscar, filtrar, ordenar, paginar, modificar y eliminar únicamente cuando no existan vales asociados. | RF-007 a RF-012, RF-032 |
-| Verificación administrativa | Listar atenciones pendientes y registrar la verificación del vale físico por Oficina. | RF-013 |
 | Consulta operativa | Buscar órdenes por número o entidad; consultar vales anteriores y saldos antes de atender. | RF-014, RF-015 |
 | Vales | Crear el vale durante la primera atención, consultar, paginar, ordenar, corregir datos descriptivos y bloquear su eliminación cuando tenga atenciones. | RF-015 a RF-018, RF-033 |
 | Atenciones | Registrar múltiples despachos parciales para un mismo vale, identificando grifero, fecha, hora y sede. | RF-019 |
@@ -68,6 +70,7 @@ Una API versionada y documentada, respaldada por PostgreSQL, con reglas de negoc
 
 No se implementarán en esta versión:
 
+- Verificación administrativa del vale físico y cualquier estado de verificación (`PENDING`, `VERIFIED`, `OBSERVED`). Retirada del alcance el 20/11/2026.
 - Autorregistro de usuarios o acceso para clientes, proveedores y usuarios externos.
 - Eliminación física de usuarios.
 - Eliminación de vales que tengan atenciones registradas.
@@ -122,7 +125,7 @@ El repositorio ahora incluye el código backend y los esquemas SQL. Los endpoint
 6. Órdenes de compra con líneas por tipo de combustible.
 7. Vales físicos con una o varias líneas autorizadas de combustible.
 8. Atenciones como eventos independientes, con detalle por combustible.
-9. Verificación de atenciones por Oficina.
+9. Consulta de atenciones y corrección descriptiva de vales por Administrador.
 10. Cálculo de saldos y estados derivados.
 11. Reportes, dashboard y exportación PDF/XLSX.
 12. Procesamiento temporal de PDF mediante RapidOCR.
@@ -141,7 +144,7 @@ El repositorio ahora incluye el código backend y los esquemas SQL. Los endpoint
 | OCR genérico para PDF/imagen. | RF-034 limita la entrada a PDF de órdenes. | Solo PDF de órdenes de compra; no vales ni fotografías. |
 | Reportes comparativos entre períodos. | RF V2 eliminó esa funcionalidad. | No crear endpoint, servicio ni consulta de comparación. |
 | Impresión directa. | RF V2 eliminó esa funcionalidad. | No crear endpoint de impresión. La exportación PDF/XLSX sí permanece. |
-| Oficina registra los vales. | Contradice el flujo operativo V2. | Oficina solo verifica los datos capturados por el grifero. |
+| Oficina registra o verifica los vales. | Contradice el flujo operativo y la decisión del 20/11/2026. | Oficina solo consulta; el vale nace con el primer despacho del grifero y no se verifica administrativamente. |
 
 ## 4.4. Riesgos técnicos principales
 
@@ -155,7 +158,7 @@ El repositorio ahora incluye el código backend y los esquemas SQL. Los endpoint
 | Cantidad autorizada confundida con consumo. | Saldo incorrecto de orden. | Separar galones autorizados de galones efectivamente despachados. |
 | Vale parcialmente atendido y orden agotada. | Vale con saldo propio, pero sin saldo de orden para completar. | Mostrar saldo del vale y disponibilidad de su línea; bloquear el siguiente despacho si la orden no tiene saldo. |
 | Corrección de despacho incorrecto no definida. | Alteración de saldos e historial. | No permitir editar/borrar el movimiento; bloquear el ajuste hasta aprobar PD-006. |
-| Oficina observa diferencias en el vale físico. | Registros no conciliados. | Estado de verificación `OBSERVED`; no modificar el despacho automáticamente. |
+| Diferencia detectada en el vale físico. | Registros no conciliados y sin flujo de corrección. | No existe verificación: solo se corrigen datos descriptivos del vale; las cantidades despachadas son inmutables (PD-006). |
 | OCR inexacto. | Datos erróneos en la orden. | Resultado OCR preliminar, revisión humana obligatoria y captura manual alternativa. |
 
 ---
@@ -167,7 +170,7 @@ El repositorio ahora incluye el código backend y los esquemas SQL. Los endpoint
 | Actor | Rol técnico | Responsabilidad backend |
 |---|---|---|
 | Administrador | `ADMIN` | Acceso a todos los módulos, administración de usuarios, supervisión, consulta de atenciones, corrección de datos descriptivos de vales y reportes. |
-| Personal de oficina | `OFFICE` | Registro y mantenimiento de órdenes, revisión de atenciones/vales físicos, consulta y exportación de reportes. No registra el despacho de combustible. |
+| Personal de oficina | `OFFICE` | Registro y mantenimiento de órdenes, consulta de vales y atenciones, y exportación de reportes. No registra despachos ni verifica vales. |
 | Grifero | `ATTENDANT` | Consulta órdenes y saldos, captura un vale en la primera atención y registra únicamente los despachos que realiza. |
 
 La cantidad estimada de usuarios es ocho, aunque el levantamiento también menciona seis trabajadores. El backend no impondrá un límite fijo de cuentas.
@@ -178,7 +181,7 @@ La cantidad estimada de usuarios es ocho, aunque el levantamiento también menci
 |---|---|---|
 | MOD-001 | Administración de usuarios y acceso | RF-001 a RF-006 |
 | MOD-002 | Gestión de órdenes de compra | RF-007 a RF-012, RF-032 |
-| MOD-003 | Atención de vales y verificación administrativa | RF-013 a RF-019, RF-033 |
+| MOD-003 | Atención de vales y despachos parciales | RF-014 a RF-019, RF-033 |
 | MOD-004 | Control de saldos y estados | RF-020 a RF-026 |
 | MOD-005 | Reportes y panel principal | RF-027 a RF-031 |
 | MOD-006 | OCR para órdenes de compra | RF-034 |
@@ -195,7 +198,7 @@ La cantidad estimada de usuarios es ocho, aunque el levantamiento también menci
 - **RN-008:** Los saldos se calculan automáticamente; no se editan manualmente.
 - **RN-009:** Los estados de consumo son automáticos y no se modifican manualmente.
 - **RN-010:** Los permisos son predefinidos por rol y validados en backend.
-- **RN-011:** El grifero no registra órdenes ni verifica vales; solo consulta y despacha.
+- **RN-011:** El grifero no registra órdenes ni administra usuarios; solo consulta y despacha.
 - **RN-012:** Cada despacho registra usuario, fecha/hora del servidor y sede.
 - **RN-013:** Las dos sedes consultan una fuente centralizada.
 - **RN-014:** Los vales atendidos y despachos no se eliminan; los usuarios se deshabilitan.
@@ -203,14 +206,14 @@ La cantidad estimada de usuarios es ocho, aunque el levantamiento también menci
 - **RN-016:** Una orden solo se elimina si no tiene vales asociados.
 - **RN-017:** Un despacho confirmado no se edita ni elimina directamente.
 - **RN-018:** La identidad del vale considera como mínimo entidad emisora, número y orden.
-- **RN-019:** Oficina verifica posteriormente el documento físico; verificar no genera otro vale ni modifica cantidades.
+- **RN-019:** Oficina consulta el registro capturado; no existe verificación administrativa ni un estado de verificación del vale.
 - **RN-020:** Un vale puede tener varias atenciones parciales.
 - **RN-021:** RapidOCR procesa únicamente PDF de órdenes; la revisión humana precede al registro.
 - **RN-022:** No se pueden reducir cantidades o eliminar líneas de orden por debajo de consumos ya registrados ni romper relaciones históricas.
 
 ## 5.4. Prioridad funcional
 
-El camino crítico es: registrar orden → localizar orden → crear/capturar vale en primer despacho → registrar atenciones parciales → calcular saldos → consultar saldos → verificar físicamente → reportar. Autenticación y permisos son prerrequisitos de seguridad aunque el levantamiento los clasifique como prioridad media/alta.
+El camino crítico es: registrar orden → localizar orden → crear/capturar vale en primer despacho → registrar atenciones parciales → calcular saldos → consultar saldos → reportar. Autenticación y permisos son prerrequisitos de seguridad aunque el levantamiento los clasifique como prioridad media/alta.
 
 ---
 
@@ -230,8 +233,8 @@ El camino crítico es: registrar orden → localizar orden → crear/capturar va
 | ADR-008 | Los saldos no se persisten como contadores editables. | Se calculan a partir de autorizaciones y detalles de atenciones. |
 | ADR-009 | Uso de transacciones y bloqueos por línea de orden. | Impide que dos sedes consuman simultáneamente más saldo del disponible. |
 | ADR-010 | Atenciones confirmadas inmutables. | RN-017; un error requiere procedimiento de ajuste pendiente de aprobación. |
-| ADR-011 | Verificación administrativa separada del consumo. | La verificación del vale físico no debe modificar cantidades ni saldos. |
-| ADR-012 | Estados derivados de saldos; verificación como estado independiente. | Evita confundir disponibilidad del combustible con revisión administrativa. |
+| ADR-011 | Sin verificación administrativa en esta versión. | El negocio confirmó el 20/11/2026 que Oficina no coteja el vale físico; no se crean tablas, estados ni endpoints de verificación. |
+| ADR-012 | Estados únicamente de consumo. | Al no existir verificación, el estado del vale refleja solo autorización, despachos y disponibilidad de la orden. |
 | ADR-013 | Deshabilitación lógica de usuarios. | Conserva identidad de las operaciones históricas. |
 | ADR-014 | Borrado lógico de órdenes solo si no tienen vales. | Cumple RF-012 y preserva referencias. |
 | ADR-015 | Sin eliminación de vales atendidos. | Todo vale operativo nace con al menos una atención. |
@@ -309,15 +312,9 @@ El estado agregado de un vale se calculará a partir de sus líneas. Si contiene
 - `AVAILABLE`: al menos una línea de combustible conserva saldo.
 - `DEPLETED`: todas las líneas de combustible tienen saldo cero.
 
-### Estado de verificación
+### Sin estado de verificación
 
-La revisión del vale físico se manejará de forma independiente del estado de consumo:
-
-- `PENDING`: una atención todavía no ha sido revisada por Oficina.
-- `VERIFIED`: Oficina confirmó que la información coincide con el documento físico.
-- `OBSERVED`: Oficina encontró diferencias y registró una observación.
-
-Una verificación no modifica saldos. Una atención con estado `OBSERVED` no se corrige editando la cantidad real despachada; el procedimiento de ajuste de cantidades está pendiente de aprobación.
+La versión actual no registra revisión administrativa del vale físico. Los únicos estados son los de consumo descritos arriba; no existen valores `PENDING`, `VERIFIED` ni `OBSERVED` asociados a verificación. Un posible error de captura se trata con la corrección descriptiva del vale o con el procedimiento de ajuste pendiente (PD-006), nunca editando la cantidad de una atención confirmada.
 
 ## 6.5. Política de captura y despacho
 
@@ -469,7 +466,6 @@ Aunque los archivos se agrupan por tipo técnico, cada capa conservará nombres 
 - Órdenes: `purchase_orders`.
 - Vales: `vouchers`.
 - Despachos: `attendances`.
-- Verificación física: `verifications`.
 - Saldos: `balances`.
 - Reportes: `reports`.
 - OCR de órdenes: `ocr`.
@@ -480,7 +476,7 @@ Los nombres se reflejarán en rutas, schemas, servicios y repositorios. No se cr
 
 `AttendanceService` será responsable de orquestar tanto la primera atención (creación de vale + líneas autorizadas + atención + detalles) como las atenciones posteriores. Utilizará los repositorios correspondientes dentro de una sola transacción PostgreSQL, bloqueará las líneas de orden y vale en orden determinista, validará los saldos actuales y confirmará todo junto.
 
-`PurchaseOrderService` coordinará las modificaciones de órdenes y sus líneas, comprobando que no se reduzcan cantidades ni se eliminen líneas por debajo de consumos ya registrados. `VoucherVerificationService` registrará decisiones de Oficina sin modificar `attendance_items`. Estas reglas no deben implementarse en los routers ni en el frontend.
+`PurchaseOrderService` coordinará las modificaciones de órdenes y sus líneas, comprobando que no se reduzcan cantidades ni se eliminen líneas por debajo de consumos ya registrados. `VoucherService` limitará la corrección a datos descriptivos y conservará intactos `attendance_items`. Estas reglas no deben implementarse en los routers ni en el frontend.
 
 ---
 
@@ -516,7 +512,6 @@ backend/
 │   │   ├── purchase_orders.py
 │   │   ├── vouchers.py
 │   │   ├── attendances.py
-│   │   ├── verifications.py
 │   │   ├── balances.py
 │   │   ├── reports.py
 │   │   └── ocr.py
@@ -529,7 +524,6 @@ backend/
 │   │   ├── purchase_order.py
 │   │   ├── voucher.py
 │   │   ├── attendance.py
-│   │   ├── verification.py
 │   │   ├── balance.py
 │   │   ├── report.py
 │   │   └── ocr.py
@@ -541,7 +535,6 @@ backend/
 │   │   ├── purchase_order_service.py
 │   │   ├── voucher_service.py
 │   │   ├── attendance_service.py
-│   │   ├── voucher_verification_service.py
 │   │   ├── balance_service.py
 │   │   ├── report_service.py
 │   │   ├── report_export_service.py
@@ -556,7 +549,6 @@ backend/
 │   │   ├── voucher_repository.py
 │   │   ├── voucher_item_repository.py
 │   │   ├── attendance_repository.py
-│   │   ├── verification_repository.py
 │   │   ├── balance_repository.py
 │   │   └── report_repository.py
 │   ├── database.py                     # Engine, SessionLocal, get_db y ciclo de vida
@@ -566,7 +558,7 @@ backend/
 │   ├── 001_schema.sql                  # Fuente de verdad del esquema para bases nuevas
 │   ├── 002_seed.sql                    # Datos iniciales/demo para bases nuevas
 │   ├── 003_*.sql                       # ALTER temporales para bases existentes
-│   └── README.md                       # Regla manual, verificaciones e historial de ALTER consolidados
+│   └── README.md                       # Regla manual de ALTER e historial de consolidaciones
 ├── scripts/
 │   ├── check_db.py                     # Diagnóstico de conexión
 │   └── create_admin.py                 # Alta segura del primer administrador
@@ -629,7 +621,7 @@ Inglés para tablas, columnas, rutas, parámetros, archivos, carpetas, clases, f
 - Tablas en plural y `snake_case`.
 - Columnas en singular y `snake_case`.
 - PK `id`; FK `<referenced_table_singular>_id`.
-- Tiempos `created_at`, `updated_at`, `attended_at`, `reviewed_at`.
+- Tiempos `created_at`, `updated_at`, `attended_at`.
 - Borrado lógico `deleted_at` únicamente en órdenes que puedan eliminarse sin dependencias y en cuentas cuando corresponda.
 - Restricciones `uq_`, `fk_`, `ck_`; índices `ix_`.
 - Cantidades/precios con `NUMERIC`, nunca `FLOAT`.
@@ -680,7 +672,6 @@ erDiagram
     BRANCHES ||--o{ PURCHASE_ORDERS : supplier_branch
     BRANCHES ||--o{ ATTENDANCES : served_at
     USERS ||--o{ ATTENDANCES : performs
-    USERS ||--o{ ATTENDANCE_VERIFICATIONS : reviews
     USERS ||--o{ AUTH_SESSIONS : owns
     PURCHASE_ORDERS ||--|{ PURCHASE_ORDER_ITEMS : contains
     FUEL_TYPES ||--o{ PURCHASE_ORDER_ITEMS : classifies
@@ -690,7 +681,6 @@ erDiagram
     VOUCHERS ||--o{ ATTENDANCES : receives
     ATTENDANCES ||--|{ ATTENDANCE_ITEMS : contains
     VOUCHER_ITEMS ||--o{ ATTENDANCE_ITEMS : consumes
-    ATTENDANCES ||--o{ ATTENDANCE_VERIFICATIONS : reviewed_by
 
     BRANCHES {
       uuid id PK
@@ -749,13 +739,6 @@ erDiagram
       numeric attended_gallons
       numeric unit_price_snapshot
     }
-    ATTENDANCE_VERIFICATIONS {
-      uuid id PK
-      uuid attendance_id FK
-      uuid reviewed_by_user_id FK
-      varchar decision
-      timestamptz reviewed_at
-    }
     AUTH_SESSIONS {
       uuid id PK
       uuid user_id FK
@@ -792,12 +775,14 @@ Seeds iniciales: `SAN_JOSE` y `SANTA_MARTA`. No crear CRUD de sedes, porque no e
 | `email` | VARCHAR(254) | NOT NULL, UNIQUE | Correo/login. |
 | `password_hash` | VARCHAR(255) | NOT NULL | Hash Argon2. |
 | `role` | VARCHAR(20) | NOT NULL, CHECK | `ADMIN`, `OFFICE`, `ATTENDANT`. |
-| `branch_id` | UUID | FK, NULL según rol | Sede habitual; obligatoria para Grifero y nula para usuarios de oficina. |
+| `branch_id` | UUID | FK, NULL según rol | Sede habitual; obligatoria para Grifero y nula para `OFFICE` y `ADMIN` (`users_attendant_branch_check`, `users_office_branch_check`, `users_admin_branch_check`). |
 | `is_active` | BOOLEAN | NOT NULL, DEFAULT TRUE | Habilitación. |
 | `created_at` | TIMESTAMPTZ | NOT NULL | Alta. |
 | `updated_at` | TIMESTAMPTZ | NOT NULL | Modificación. |
 
 DNI y correo únicos. El usuario no puede autoasignarse rol. Un usuario deshabilitado no inicia sesión y las sesiones activas se revocan. No se borra físicamente una cuenta que ya tenga registros operativos.
+
+El administrador es único y global: la cuenta `ADMIN` no pertenece a una sede y el índice parcial `users_single_admin_idx` (`ON users (role) WHERE role = 'ADMIN'`) impide una segunda cuenta con ese rol. `db/005_single_global_admin.sql` detiene la migración si detecta más de un administrador. `OFFICE` administra ambas sedes y `branch_id` debe ser `NULL` (`db/003_office_users_without_branch.sql`).
 
 ## 11.5. `auth_sessions`
 
@@ -885,12 +870,13 @@ Se requiere una clave única compuesta `(id, purchase_order_id)` para reforzar l
 
 No se almacenan cantidades ni saldo directamente en cabecera; esas cantidades viven en `voucher_items`. Se almacenan datos de emisor para resolver numeraciones de instituciones y de la estación. El responsable de la primera captura se obtiene desde la primera atención relacionada, sin duplicar una columna de auditoría en la cabecera.
 
-Restricciones de unicidad propuestas:
+Restricción de unicidad vigente en el esquema (implementada):
 
-- Vales institucionales: `(purchase_order_id, issuer_type, issuer_normalized, voucher_number_normalized)`.
-- Vales emitidos por la estación: `voucher_number_normalized` único en la serie central de estación, si se confirma que la numeración es global.
+- `vouchers_identity_unique` / índice `vouchers_identity_unique_idx`: `UNIQUE (purchase_order_id, issuer_normalized, voucher_number_normalized)`.
+- Índice `vouchers_lookup_idx` sobre `(purchase_order_id, issuer_type, issuer_normalized, voucher_number_normalized)`.
+- Índice `ix_vouchers_number_normalized` sobre `voucher_number_normalized`.
 
-Los índices parciales PostgreSQL deberán aplicar la regla de unicidad por tipo de emisor. Confirmar el alcance exacto de numeración mediante PD-002.
+La identidad no incorpora `issuer_type`; dos documentos del mismo emisor y número dentro de la misma orden se consideran el mismo vale. El índice único lo aplica `db/004_voucher_identity.sql` en bases existentes. Si el negocio exige una serie global para vales emitidos por la estación, deberá aprobarse un cambio adicional (PD-002).
 
 ## 11.10. `voucher_items`
 
@@ -905,7 +891,7 @@ Los índices parciales PostgreSQL deberán aplicar la regla de unicidad por tipo
 | `authorized_gallons` | NUMERIC(14,3) | NOT NULL, CHECK > 0 | Galones indicados en el vale para esta línea. |
 | `created_at` | TIMESTAMPTZ | NOT NULL | Alta. |
 
-Cada línea del vale se vincula a una línea de la orden y, por tanto, a un tipo de combustible. Las FK compuestas deben impedir que una línea de vale de una orden se relacione accidentalmente con una línea de otra orden. Restricción única `(voucher_id, purchase_order_item_id)` evita duplicar el mismo combustible/línea en la cabecera.
+Cada línea del vale se vincula a una línea de la orden y, por tanto, a un tipo de combustible. Las FK compuestas implementadas (`fk_voucher_item_order_item_same_order`) impiden que una línea de vale de una orden se relacione accidentalmente con una línea de otra orden. Restricción única `(voucher_id, purchase_order_item_id)` evita duplicar el mismo combustible/línea en la cabecera. La clave `UNIQUE (id, voucher_id)` (`voucher_items_id_voucher_unique`) existe para que `attendance_items` valide la pertenencia al mismo vale mediante FK compuesta.
 
 No se creará una tabla de vales previa en estado borrador: el vale operativo nace dentro de la primera atención.
 
@@ -924,7 +910,7 @@ No se creará una tabla de vales previa en estado borrador: el vale operativo na
 | `request_fingerprint` | VARCHAR(64) | NOT NULL | Hash del payload para detectar reutilización de clave con otra solicitud. |
 | `created_at` | TIMESTAMPTZ | NOT NULL | Registro técnico. |
 
-No debe existir restricción `UNIQUE(voucher_id)`: esa restricción impediría atenciones parciales. Se usará FK no única `voucher_id` y relación uno a muchos.
+No debe existir restricción `UNIQUE(voucher_id)`: esa restricción impediría atenciones parciales. Se usará FK no única `voucher_id` y relación uno a muchos. El esquema implementa `UNIQUE (id, voucher_id)` (`attendances_id_voucher_unique`) para que `attendance_items` pueda validar la pertenencia al vale, y el índice `ix_attendances_attended_at` sobre `attended_at` además de los índices por vale, usuario y sede.
 
 ## 11.12. `attendance_items`
 
@@ -940,28 +926,19 @@ No debe existir restricción `UNIQUE(voucher_id)`: esa restricción impediría a
 | `attended_amount` | NUMERIC(14,2) | NOT NULL, CHECK >= 0 | Importe calculado según precio snapshot y galones, sujeto a regla de redondeo PD-020. |
 | `created_at` | TIMESTAMPTZ | NOT NULL | Alta. |
 
-Restricción única `(attendance_id, voucher_item_id)` para que una atención agrupe una sola línea por cada combustible del vale. Añadir una FK compuesta que garantice que `attendance_id` y `voucher_item_id` pertenecen al mismo `voucher_id` (mediante `voucher_id` redundante controlado o una clave compuesta equivalente); no depender exclusivamente de una validación de servicio. Si el cliente recibe más combustible en una visita posterior, se genera otra atención con nuevos detalles.
+Restricción única `(attendance_id, voucher_item_id)` para que una atención agrupe una sola línea por cada combustible del vale. El esquema implementa la columna redundante `voucher_id NOT NULL` y dos FK compuestas: `fk_attendance_item_attendance_same_voucher` (`attendance_id, voucher_id` → `attendances`) y `fk_attendance_item_voucher_item_same_voucher` (`voucher_item_id, voucher_id` → `voucher_items`). No se depende de una validación de servicio. Si el cliente recibe más combustible en una visita posterior, se genera otra atención con nuevos detalles.
 
 El precio snapshot permite reportar el importe histórico de lo atendido aunque el precio de la orden cambie posteriormente. PD-009 debe confirmar qué interpretación exacta requiere el negocio para el “precio atendido por hora”.
 
-## 11.13. `attendance_verifications`
+## 11.13. `attendance_verifications` (retirada del alcance)
 
-**Propósito:** conservar la verificación administrativa de cada atención contra el vale físico. Es un historial específico de este flujo, no una auditoría general de todas las acciones.
+La verificación administrativa se retiró del alcance el 20/11/2026. La tabla, sus índices y su fila de demostración ya se eliminaron de `db/001_schema.sql`, `db/002_seed.sql` y `app/tables.py` (incluidas las relaciones `User.verifications` y `Attendance.verifications`), y la prueba de metadatos ya no la espera. En bases ya creadas, `db/006_drop_attendance_verifications.sql` elimina la tabla y sus índices y es re-ejecutable; ese ALTER se retirará del repositorio cuando todo el equipo lo haya aplicado, según `db/README.md`.
 
-| Columna | Tipo | Restricciones | Descripción |
-|---|---|---|---|
-| `id` | UUID | PK | Identificador. |
-| `attendance_id` | UUID | FK, NOT NULL | Atención revisada. |
-| `reviewed_by_user_id` | UUID | FK, NOT NULL | Usuario Oficina o Administrador. |
-| `decision` | VARCHAR(20) | NOT NULL, CHECK | `VERIFIED` o `OBSERVED`. |
-| `observation` | TEXT | NULL | Obligatoria cuando se observa una diferencia. |
-| `reviewed_at` | TIMESTAMPTZ | NOT NULL | Fecha/hora servidor. |
+No se crean estados, permisos ni endpoints asociados. La estructura ya no forma parte del esquema ni del contrato de la API.
 
-Se permiten varias revisiones para una atención si inicialmente fue observada y luego se vuelve a comprobar. El estado actual de verificación se obtiene de la última revisión. La verificación nunca actualiza `attendance_items`.
+## 11.14. `document_counters` (reservada, sin uso)
 
-## 11.14. `document_counters` (propuesta)
-
-**Propósito:** asignar el número correlativo central para vales emitidos por la estación cuando el negocio confirme el formato de numeración.
+**Propósito:** asignar el número correlativo central para vales emitidos por la estación cuando el negocio confirme el formato de numeración. La tabla existe en el esquema, pero ningún servicio la utiliza en la versión actual: los vales se identifican por emisor y número capturados. Se conserva reservada y sin escrituras; si no se aprueba la numeración automática, se retirará junto con la limpieza de estructuras no usadas.
 
 | Columna | Tipo | Restricciones | Descripción |
 |---|---|---|---|
@@ -970,7 +947,7 @@ Se permiten varias revisiones para una atención si inicialmente fue observada y
 | `last_value` | BIGINT | NOT NULL, CHECK >= 0 | Último valor asignado. |
 | `updated_at` | TIMESTAMPTZ | NOT NULL | Última asignación. |
 
-La fila se bloqueará dentro de la misma transacción que crea el vale. El formato final y si la numeración es global o por serie debe confirmarse con PD-002. Si no se requiere control transaccional sin huecos, podrá utilizarse una secuencia PostgreSQL estándar.
+Si se aprueba su uso, la fila se bloqueará dentro de la misma transacción que crea el vale. El formato final y si la numeración es global o por serie debe confirmarse con PD-002. Si no se requiere control transaccional sin huecos, podrá utilizarse una secuencia PostgreSQL estándar.
 
 ## 11.15. Integridad referencial
 
@@ -979,12 +956,10 @@ La fila se bloqueará dentro de la misma transacción que crea el vale. El forma
 - `vouchers -> voucher_items`: `ON DELETE RESTRICT`.
 - `vouchers -> attendances`: `ON DELETE RESTRICT`.
 - `voucher_items -> attendance_items`: `ON DELETE RESTRICT`.
-- `attendances -> attendance_verifications`: `ON DELETE RESTRICT`.
 - `users -> attendances`: `ON DELETE RESTRICT`.
-- `users -> attendance_verifications`: `ON DELETE RESTRICT`.
 - `branches -> users`, `purchase_orders` y `attendances`: `ON DELETE RESTRICT`.
 
-Nunca usar `ON DELETE CASCADE` sobre órdenes, vales, atenciones o verificaciones.
+Nunca usar `ON DELETE CASCADE` sobre órdenes, vales o atenciones.
 
 ## 11.16. Fórmulas de saldo
 
@@ -1019,6 +994,21 @@ purchase_order_status = AVAILABLE si existe alguna línea con balance > 0
 
 No se aceptarán cantidades en saldo dentro de requests de escritura. Los saldos de la respuesta deberán calcularse en base a registros persistidos.
 
+## 11.17. Cambios de esquema consolidados (20/11/2026)
+
+Estos cambios ya están reflejados en `db/001_schema.sql` y en `app/tables.py`; los ALTER numerados que los introdujeron siguen en el repositorio y pueden retirarse cuando todo el equipo los haya aplicado, según `db/README.md`.
+
+| Objeto | Cambio vigente | Archivo que lo introdujo |
+|---|---|---|
+| `users` | `OFFICE` y `ADMIN` sin sede; restricciones `users_office_branch_check` y `users_admin_branch_check`. | `003_office_users_without_branch.sql`, `005_single_global_admin.sql` |
+| `users` | Administrador único mediante índice parcial `users_single_admin_idx`. | `005_single_global_admin.sql` |
+| `vouchers` | Identidad única `(purchase_order_id, issuer_normalized, voucher_number_normalized)`; ya no se plantea una unicidad por `issuer_type`. | `001_schema.sql`, `004_voucher_identity.sql` |
+| `voucher_items` | FK compuesta a la línea de la misma orden y `UNIQUE (id, voucher_id)` para las FK de detalle. | `001_schema.sql` |
+| `attendances` | `UNIQUE (id, voucher_id)` e índice `ix_attendances_attended_at`. | `001_schema.sql` |
+| `attendance_items` | `voucher_id` redundante `NOT NULL` y FK compuestas a atención y línea de vale del mismo vale. | `001_schema.sql` |
+| `attendance_verifications` | Eliminada del esquema base, del seed y de `app/tables.py`; `006_drop_attendance_verifications.sql` la retira en bases existentes. | `001_schema.sql`, `002_seed.sql`, `006_drop_attendance_verifications.sql` |
+| `document_counters` | Reservada, sin uso en la versión actual. | `001_schema.sql` |
+
 ---
 
 # 12. Modelos SQLAlchemy
@@ -1026,16 +1016,15 @@ No se aceptarán cantidades en saldo dentro de requests de escritura. Los saldos
 | Clase | Tabla | Relaciones principales |
 |---|---|---|
 | `Branch` | `branches` | Usuarios, órdenes y atenciones. |
-| `User` | `users` | Sede, sesiones, atenciones y verificaciones. |
+| `User` | `users` | Sede, sesiones y atenciones. |
 | `AuthSession` | `auth_sessions` | Usuario. |
 | `FuelType` | `fuel_types` | Líneas de orden. |
 | `PurchaseOrder` | `purchase_orders` | Sede, creador, líneas y vales. |
 | `PurchaseOrderItem` | `purchase_order_items` | Orden, combustible y líneas de vales. |
 | `Voucher` | `vouchers` | Orden, creador, líneas y atenciones. |
 | `VoucherItem` | `voucher_items` | Vale, línea de orden y detalles de atención. |
-| `Attendance` | `attendances` | Vale, grifero, sede, detalles y verificaciones. |
+| `Attendance` | `attendances` | Vale, grifero, sede y detalles. |
 | `AttendanceItem` | `attendance_items` | Atención y línea de vale. |
-| `AttendanceVerification` | `attendance_verifications` | Atención y revisor. |
 | `DocumentCounter` | `document_counters` | Serie de numeración de vales de estación. |
 
 Reglas de implementación:
@@ -1056,7 +1045,6 @@ VoucherIssuerType: INSTITUTION, STATION
 OrderBalanceStatus: AVAILABLE, DEPLETED
 VoucherItemStatus: PENDING, PARTIALLY_ATTENDED, COMPLETED, BLOCKED_BY_ORDER_BALANCE
 VoucherStatus: PENDING, PARTIALLY_ATTENDED, COMPLETED, PARTIALLY_BLOCKED
-VerificationDecision: VERIFIED, OBSERVED
 ```
 
 Los estados de saldo son valores derivados para respuestas; no se cambian manualmente ni deben convertirse en campos de control modificables.
@@ -1093,7 +1081,7 @@ El contrato debe incluir los permisos efectivos del rol en `CurrentUserResponse`
 - `VoucherItemCreate`: `purchase_order_item_id`, `authorized_gallons`.
 - `VoucherResponse`: emisor, número, orden, líneas, autorizados, atendidos, saldos, estados y atenciones.
 - `VoucherDescriptiveUpdate`: solo campos descriptivos aprobados para corrección por Administrador.
-- `VoucherFilters`: número de vale, número de orden, entidad/institución, fecha, estado de consumo y verificación.
+- `VoucherFilters`: número de vale, número de orden, entidad/institución, fecha y estado de consumo.
 
 No debe existir `VoucherCreate` como operación normal independiente de registro previo. El schema para crear el vale se incluirá dentro de `InitialAttendanceCreate`.
 
@@ -1105,19 +1093,11 @@ No debe existir `VoucherCreate` como operación normal independiente de registro
 - `VoucherAttendanceCreate`: líneas de vale existentes (`voucher_item_id`) y cantidad real a despachar en esta visita.
 - `AttendanceItemResponse`: galones reales, tipo de combustible y precio snapshot.
 - `AttendanceResponse`: usuario, sede, fecha/hora, vale, detalles y saldos resultantes.
-- `AttendanceFilters`: fecha, usuario, sede, vale, orden, combustible y estado de verificación.
+- `AttendanceFilters`: fecha, usuario, sede, vale, orden y combustible.
 
 La fecha/hora, el usuario y la sede se obtienen del contexto autenticado y del servidor, nunca del body recibido.
 
-## 13.5. Verificaciones
-
-- `AttendanceVerificationCreate`: decisión `VERIFIED` u `OBSERVED`, comentario opcional/obligatorio según decisión.
-- `AttendanceVerificationResponse`: decisión, revisor, fecha/hora y observación.
-- `PendingVerificationFilters`: fecha, grifero, sede, orden, vale y estado actual.
-
-Para `OBSERVED`, `observation` debe ser obligatoria y no vacía.
-
-## 13.6. Saldos y reportes
+## 13.5. Saldos y reportes
 
 - `VoucherItemBalanceResponse`.
 - `OrderItemBalanceResponse`.
@@ -1131,7 +1111,7 @@ Para `OBSERVED`, `observation` debe ser obligatoria y no vacía.
 
 Los rangos serán `date_from` y `date_to`; validar `date_from <= date_to`. Los filtros por estados deben usar los enums vigentes.
 
-## 13.7. OCR
+## 13.6. OCR
 
 - `OcrPreviewResponse`: campos reconocidos y lista de observaciones.
 - `OcrFieldCandidate`: `field_name`, `value`, `confidence` cuando el motor lo proporcione, `page_number` y texto de origen cuando sea posible.
@@ -1180,7 +1160,7 @@ El resultado OCR es una previsualización, no una entidad `PurchaseOrder` ni un 
 | PATCH | `/api/v1/users/{user_id}/status` | Habilitar/deshabilitar cuenta. | RF-004 | `users.manage_status` |
 | GET | `/api/v1/users/{user_id}/attendances` | Consultar atenciones del grifero. | RF-006 | `attendances.read_all` |
 
-No se implementará `DELETE /users/{id}` como borrado físico. La interfaz utilizará el endpoint de estado. Un usuario deshabilitado conserva la autoría de sus órdenes, verificaciones y atenciones.
+No se implementará `DELETE /users/{id}` como borrado físico. La interfaz utilizará el endpoint de estado. Un usuario deshabilitado conserva la autoría de sus órdenes y atenciones.
 
 ### Catálogos
 
@@ -1214,15 +1194,7 @@ No crear CRUD de catálogos sin aprobación funcional.
 | POST | `/api/v1/purchase-orders/{order_id}/attendances` | Crear vale + líneas + primer despacho en una operación. | RF-019 | `attendances.create` |
 | POST | `/api/v1/vouchers/{voucher_id}/attendances` | Registrar una atención parcial posterior del mismo vale. | RF-019 | `attendances.create` |
 
-**No existe endpoint `POST /vouchers` para el alta normal de vales.** La creación del vale forma parte de la primera atención. Tampoco se crea un endpoint para que Oficina vuelva a registrar el documento.
-
-### Verificación administrativa
-
-| Método | Endpoint | Descripción | RF | Permiso |
-|---|---|---|---|---|
-| GET | `/api/v1/attendances/pending-verification` | Listar atenciones pendientes u observadas para revisión. | RF-013 | `attendances.verify` |
-| POST | `/api/v1/attendances/{attendance_id}/verifications` | Registrar resultado `VERIFIED` u `OBSERVED`. | RF-013 | `attendances.verify` |
-| GET | `/api/v1/attendances/{attendance_id}/verifications` | Consultar historial de revisiones. | RF-013 | `attendances.verify` |
+**No existe endpoint `POST /vouchers` para el alta normal de vales.** La creación del vale forma parte de la primera atención. Tampoco se crea un endpoint para que Oficina vuelva a registrar el documento ni para verificación administrativa.
 
 ### Saldos
 
@@ -1420,33 +1392,7 @@ Proceso:
 
 El número del vale no se vuelve a crear y la cantidad autorizada original no se sustituye. Un vale puede tener N atenciones, pero no puede exceder su autorización acumulada ni el total de la línea de orden.
 
-### API-005 — Verificar vale físico en Oficina
-
-```http
-POST /api/v1/attendances/{attendance_id}/verifications
-```
-
-Request cuando coincide:
-
-```json
-{
-  "decision": "VERIFIED",
-  "observation": null
-}
-```
-
-Request cuando hay diferencia:
-
-```json
-{
-  "decision": "OBSERVED",
-  "observation": "El número de vale del documento físico no coincide."
-}
-```
-
-Validar rol `OFFICE` o `ADMIN`. Guardar usuario revisor, fecha/hora y decisión. Si el resultado es `OBSERVED`, exigir observación. Esta operación no toca `attendances`, `attendance_items` ni saldos.
-
-### API-006 — Consulta de saldo de orden
+### API-005 — Consulta de saldo de orden
 
 ```http
 GET /api/v1/balances/purchase-orders/{order_id}
@@ -1474,7 +1420,7 @@ Respuesta conceptual:
 
 La respuesta al Grifero debe omitir precios unitarios, totales y campos administrativos no necesarios para el despacho.
 
-### API-007 — Reporte de atenciones
+### API-006 — Reporte de atenciones
 
 ```http
 GET /api/v1/reports/attendances?date_from=2026-11-01&date_to=2026-11-30&group_by=hour&user_id=uuid
@@ -1508,7 +1454,6 @@ Parámetros:
 - `institution`: nombre de entidad/institución.
 - `date_from` / `date_to`: rango inclusivo según fecha de negocio.
 - `status`: estado derivado permitido para el recurso.
-- `verification_status`: `PENDING`, `VERIFIED` u `OBSERVED` cuando corresponda.
 - `sort_by`: enum de columnas permitidas por endpoint.
 - `sort_order`: `asc` o `desc`.
 
@@ -1566,7 +1511,6 @@ Se implementará RBAC con tres roles predefinidos. El administrador asigna el ro
 | Eliminar orden sin vales asociados | Sí | Sí | No |
 | Consultar vales y atenciones | Sí | Sí | Solo los necesarios para atención y sus propios registros |
 | Capturar primera atención/vale y atenciones posteriores | Sí, por acceso a todos los módulos | No | Sí, solo las atenciones que realiza |
-| Verificar vale físico | Sí | Sí | No |
 | Corregir campos descriptivos del vale | Sí | Según matriz final; propuesta inicial: no | No |
 | Modificar cantidades de atenciones | No mediante edición directa | No | No |
 | Consultar dashboard y reportes | Sí | Sí | No |
@@ -1583,7 +1527,7 @@ Claves de permisos propuestas para el código (no son roles nuevos):
 
 - `users.manage`
 - `purchase_orders.read`, `purchase_orders.create`, `purchase_orders.update`, `purchase_orders.delete`
-- `vouchers.read`, `vouchers.verify`, `vouchers.correct_descriptive`
+- `vouchers.read`, `vouchers.correct_descriptive`, `vouchers.delete`
 - `attendances.create`, `attendances.read_own`, `attendances.read_all`
 - `balances.read`
 - `reports.read`, `reports.export`
@@ -1619,7 +1563,6 @@ Los servicios contienen los casos de uso y coordinan las transacciones. Los rout
 | `VoucherService` | Identidad del vale y captura durante primera atención. | `find_existing_voucher`, `create_voucher_with_first_attendance`, `update_descriptive_fields` |
 | `AttendanceService` | Registro de cada despacho parcial o completo. | `register_attendance`, `get_attendance`, `list_attendances` |
 | `BalanceService` | Cálculo por línea, vale y orden. | `get_order_balances`, `get_voucher_balance`, `calculate_balances` |
-| `VoucherVerificationService` | Revisión de vales físicos por Oficina. | `verify_voucher`, `mark_observed`, `get_pending_verifications` |
 | `ReportService` | Consultas agregadas para tablas y gráficos. | `get_order_report`, `get_attendance_report`, `get_dashboard_data` |
 | `ReportExportService` | Exportación de datasets ya autorizados. | `export_pdf`, `export_xlsx` |
 | `PurchaseOrderOcrService` | Extracción temporal de datos de PDF. | `extract_purchase_order_fields` |
@@ -1658,11 +1601,11 @@ La orden tendrá un descuento acumulado de 10 galones, no de 30. Si una orden co
 
 **Despacho parcial:** si el despacho es mayor que cero y menor al saldo restante, el estado queda `PARTIALLY_ATTENDED`; el vale puede volver a utilizarse hasta consumir su autorización, siempre que la orden aún tenga saldo.
 
-## 16.4. Verificación de Oficina
+## 16.4. Consulta y corrección descriptiva
 
-La verificación administrativa es independiente del consumo de combustible. Oficina revisa el documento físico contra los datos capturados por el grifero. Si coincide, registra `VERIFIED`; si no coincide, registra `OBSERVED` y una observación. Una verificación jamás cambia galones, atenciones o saldo.
+Oficina y Administración consultan vales y atenciones según sus permisos. No existe verificación administrativa ni un estado de verificación del vale.
 
-Si se necesita corregir un dato descriptivo, se utilizará la operación autorizada y se conservarán las atenciones. Si el error se encuentra en la cantidad realmente despachada, no se permitirá editar el movimiento original; el procedimiento de ajuste requiere aprobación de PD-006.
+Si se necesita corregir un dato descriptivo, se utilizará la operación autorizada por Administrador (`vouchers.correct_descriptive`) y se conservarán las atenciones. Si el error se encuentra en la cantidad realmente despachada, no se permitirá editar el movimiento original; el procedimiento de ajuste requiere aprobación de PD-006.
 
 ## 16.5. Orden, vale y estados derivados
 
@@ -1670,7 +1613,6 @@ Si se necesita corregir un dato descriptivo, se utilizará la operación autoriz
 - Cada línea de orden queda `AVAILABLE` o `DEPLETED` según su propio saldo.
 - La línea del vale queda `PENDING` si todavía no tiene atenciones; `PARTIALLY_ATTENDED` si existe consumo y conserva saldo; `COMPLETED` si el saldo llega a cero.
 - Si una orden se agota antes que un vale, el vale no se considera completado: permanece con saldo autorizado, pero no puede despacharse hasta que exista saldo de orden. El endpoint debe devolver esta condición explícita, sin saldo negativo ni cambio ficticio a `COMPLETED`.
-- El estado de verificación (`PENDING`, `VERIFIED`, `OBSERVED`) es distinto del estado de consumo.
 - Los estados no se editan manualmente: se derivan de datos y reglas.
 
 ## 16.6. Modificación y eliminación
@@ -1698,7 +1640,6 @@ Si se necesita corregir un dato descriptivo, se utilizará la operación autoriz
 | `VoucherRepository` | Buscar por identidad de negocio, crear y consultar vales. |
 | `VoucherItemRepository` | Consultar y bloquear líneas autorizadas de vales. |
 | `AttendanceRepository` | Crear y consultar atenciones y sus líneas; no editar ni borrar movimientos. |
-| `VerificationRepository` | Registrar decisiones de verificación y consultar pendientes. |
 | `BalanceRepository` | Calcular saldos con agregaciones por línea y combustible. |
 | `ReportRepository` | Obtener datos agrupados por intervalo, usuario, estado, sede y combustible. |
 
@@ -1745,15 +1686,13 @@ Las atenciones se enviarán con `Idempotency-Key` UUID generado en el cliente an
 
 **Atenciones:** cantidad real mayor que cero; referencia a vale/línea válida; cantidad menor o igual al menor saldo entre vale y orden; grifero activo; tipo de combustible coincidente; sede determinada desde el contexto de usuario; no aceptar usuario/fecha/sede manipulados desde el body; clave de idempotencia obligatoria.
 
-**Verificación:** solo Oficina/Admin; decisión `VERIFIED` o `OBSERVED`; observación obligatoria en caso de discrepancia; no alterar datos de consumo.
-
 **OCR:** solo PDF; límite de tamaño/páginas y timeout configurables; limpiar temporales; devolver error manejable ante PDF corrupto, protegido o ilegible.
 
 **Reportes:** agrupaciones permitidas `hour`, `day`, `week`, `month`; rangos válidos; filtros tipados; `page_size` máximo 100 en listados.
 
 ## 18.2. Excepciones del dominio
 
-Definir como mínimo: `ResourceNotFoundError`, `DuplicateResourceError`, `InsufficientOrderBalanceError`, `InsufficientVoucherBalanceError`, `OrderHasVouchersError`, `VoucherHasAttendancesError`, `InvalidFuelLineError`, `InactiveUserError`, `LastActiveAdminError`, `IdempotencyConflictError`, `VoucherIdentityConflictError`, `InvalidVerificationTransitionError` y `OcrProcessingError`.
+Definir como mínimo: `ResourceNotFoundError`, `DuplicateResourceError`, `InsufficientOrderBalanceError`, `InsufficientVoucherBalanceError`, `OrderHasVouchersError`, `VoucherHasAttendancesError`, `InvalidFuelLineError`, `InactiveUserError`, `LastActiveAdminError`, `IdempotencyConflictError`, `VoucherIdentityConflictError` y `OcrProcessingError`.
 
 ## 18.3. Respuesta estándar
 
@@ -1932,7 +1871,7 @@ Los límites OCR son valores iniciales propuestos y deben aprobarse con PD-012. 
 
 El contrato API se mantendrá documentado por endpoint, con versión inicial `1.0.0` y prefijo `/api/v1`.
 
-Tags: `Auth`, `Users`, `Branches`, `Catalogs`, `Purchase Orders`, `Vouchers`, `Attendances`, `Balances`, `Verifications`, `Reports`, `OCR` y `Health`.
+Tags: `Auth`, `Users`, `Branches`, `Catalogs`, `Purchase Orders`, `Vouchers`, `Attendances`, `Balances`, `Reports`, `OCR` y `Health`.
 
 Cada operación documentará roles autorizados, tipos de request/response, filtros, paginación, códigos de error y ejemplos sin datos reales. Angular mantendrá manualmente los tipos TypeScript y sus servicios HTTP; los cambios se revisarán contra este catálogo.
 
@@ -1947,7 +1886,7 @@ El contrato se considera **planificado** hasta que exista implementación y prue
 1. **Unitarias:** fórmulas de saldo, estados derivados, validaciones, reglas de acceso y servicios.
 2. **Integración:** repositorios, FK, unicidad, transacciones, `SELECT FOR UPDATE` e idempotencia en PostgreSQL.
 3. **API:** métodos HTTP, schemas, roles, respuestas, filtros, paginación y exportación.
-4. **End-to-end backend:** flujos completos de primera atención, atención posterior, verificación y reportes.
+4. **End-to-end backend:** flujos completos de primera atención, atención posterior y reportes.
 
 ## 24.2. Casos de prueba críticos de saldo
 
@@ -1964,21 +1903,19 @@ El contrato se considera **planificado** hasta que exista implementación y prue
 | TC-009 | La orden se agota mientras el vale conserva saldo. | Vale muestra saldo pendiente bloqueado por falta de saldo de orden; no se marca completado. |
 | TC-010 | Dos sedes despachan simultáneamente sobre la misma línea. | Bloqueo/transacción impide consumo acumulado mayor a saldo disponible. |
 | TC-011 | El cliente reintenta el mismo POST por pérdida de respuesta. | Idempotencia devuelve la atención original, sin doble descuento. |
-| TC-012 | Oficina verifica un vale. | Cambia estado de verificación; no cambia ninguna cantidad ni saldo. |
-| TC-013 | Oficina marca el vale observado. | Permanece pendiente/observado, con observación; saldo intacto. |
-| TC-014 | Intento de editar cantidad real de una atención. | Rechazado; movimiento original inmutable. |
-| TC-015 | Eliminar orden con vale vinculado. | `409 ORDER_HAS_VOUCHERS`; no borra ninguna entidad relacionada. |
-| TC-016 | Eliminar vale que tiene atenciones. | `409`; se conserva vale e historial. |
-| TC-017 | Deshabilitar usuario con atenciones previas. | Cuenta sin acceso; las atenciones conservan la identidad del autor. |
-| TC-018 | Usuario ATTENDANT solicita reportes financieros. | `403`. |
-| TC-019 | OCR PDF legible. | Devuelve campos candidatos; no crea orden. |
-| TC-020 | OCR PDF corrupto/ilegible. | Error controlado; temporal eliminado; formulario manual disponible. |
+| TC-012 | Intento de editar cantidad real de una atención. | Rechazado; movimiento original inmutable. |
+| TC-013 | Eliminar orden con vale vinculado. | `409 ORDER_HAS_VOUCHERS`; no borra ninguna entidad relacionada. |
+| TC-014 | Eliminar vale que tiene atenciones. | `409`; se conserva vale e historial. |
+| TC-015 | Deshabilitar usuario con atenciones previas. | Cuenta sin acceso; las atenciones conservan la identidad del autor. |
+| TC-016 | Usuario ATTENDANT solicita reportes financieros. | `403`. |
+| TC-017 | OCR PDF legible. | Devuelve campos candidatos; no crea orden. |
+| TC-018 | OCR PDF corrupto/ilegible. | Error controlado; temporal eliminado; formulario manual disponible. |
 
 ## 24.3. Pruebas por rol
 
 - **ADMIN:** gestión de usuarios; acceso a todos los módulos; consulta y supervisión; reportes/exportaciones; operaciones administrativas autorizadas. No edita directamente atenciones.
-- **OFFICE:** gestión de órdenes; consulta y verificación de vales; reportes/exportaciones; OCR. No registra despachos como grifero.
-- **ATTENDANT:** buscar órdenes, consultar saldos, capturar vales en primera atención, registrar atenciones parciales posteriores y consultar su resultado. No gestionar órdenes, verificar vales, administrar usuarios ni acceder a reportes financieros.
+- **OFFICE:** gestión de órdenes; consulta de vales y atenciones; reportes/exportaciones; OCR. No registra despachos como grifero ni verifica documentos.
+- **ATTENDANT:** buscar órdenes, consultar saldos, capturar vales en primera atención, registrar atenciones parciales posteriores y consultar su resultado. No gestionar órdenes, administrar usuarios ni acceder a reportes financieros.
 
 ## 24.4. Calidad
 
@@ -1994,9 +1931,9 @@ Registrar errores no controlados, latencia y código HTTP, fallos de conexión, 
 
 ## 25.2. Trazabilidad funcional
 
-La trazabilidad necesaria de los despachos estará en `attendances` y `attendance_items`: vale, cantidad efectivamente despachada, usuario autenticado que ejecutó la operación, sede, fecha/hora y tipo de combustible. Las verificaciones se conservan en `attendance_verifications` con usuario revisor, resultado, observación y fecha/hora.
+La trazabilidad necesaria de los despachos estará en `attendances` y `attendance_items`: vale, cantidad efectivamente despachada, usuario autenticado que ejecutó la operación, sede, fecha/hora y tipo de combustible.
 
-No se implementará auditoría general de todas las acciones de usuario, pues no está contemplada por RF V2. La inmutabilidad de atenciones y el historial de verificaciones sí son necesarios para el flujo descrito.
+No se implementará auditoría general de todas las acciones de usuario, pues no está contemplada por RF V2. La inmutabilidad de las atenciones sí es necesaria para el flujo descrito.
 
 ## 25.3. Health checks
 
@@ -2010,7 +1947,7 @@ No se implementará auditoría general de todas las acciones de usuario, pues no
 
 ## 26.1. Desde el inicio
 
-- Paginación en órdenes, vales, atenciones y bandeja de verificación.
+- Paginación en órdenes, vales y atenciones.
 - Índices en claves foráneas, números documentales, fechas, entidad y estados.
 - Consultas agregadas para saldos, sin recorrer registros en Python.
 - Bloqueos transaccionales para las líneas implicadas en cada atención.
@@ -2021,18 +1958,17 @@ No se implementará auditoría general de todas las acciones de usuario, pues no
 
 ## 26.2. Índices sugeridos
 
-- `users(email)` UNIQUE; `users(dni)` UNIQUE; `users(branch_id)`.
+- `users(email)` UNIQUE; `users(dni)` UNIQUE; `users(branch_id)`; `users_single_admin_idx` UNIQUE parcial `WHERE role = 'ADMIN'`.
 - `purchase_orders(executing_unit_ruc, order_number)` UNIQUE según PD-001.
 - `purchase_orders(institution_name)` para búsquedas normalizadas; `purchase_orders(issue_date)`.
 - `purchase_order_items(purchase_order_id, fuel_type_id)` con unicidad de combustible por orden si el modelo funcional lo confirma.
-- `vouchers(purchase_order_id, issuer_type, issuer_id, normalized_voucher_number)` UNIQUE según PD-002.
+- `vouchers_identity_unique` `(purchase_order_id, issuer_normalized, voucher_number_normalized)` UNIQUE; `vouchers_lookup_idx` e `ix_vouchers_number_normalized`.
 - `voucher_items(voucher_id, purchase_order_item_id)`.
 - `attendances(voucher_id, attended_at)`; `attendances(performed_by_user_id, attended_at)`; `attendances(branch_id, attended_at)`.
 - `attendance_items(attendance_id, voucher_item_id)`.
-- `attendance_verifications(attendance_id, verified_at)`.
 - `auth_sessions(jti)` UNIQUE y `auth_sessions(user_id, expires_at)`.
 
-Las restricciones de unicidad definitivas se fijarán después de validar si los vales pueden reutilizar un número por emisor, orden o institución.
+La unicidad de órdenes (`PD-001`) sigue pendiente. La identidad de vales ya está aplicada en el esquema y solo se revisará si se aprueba una serie global para vales de estación.
 
 ## 26.3. Posponer hasta tener métricas
 
@@ -2049,7 +1985,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 **RF:** todos; foco en RF-007, RF-013–RF-019, RF-020–RF-026 y RF-034.  
 **Módulos:** todos.
 
-**Tareas:** aprobar identidad única de orden/vale; catálogo de combustible; asociación de vale a una o varias líneas; reglas de cantidad decimal; política de despacho parcial; sede del usuario; verificación y manejo de observaciones; corrección de despachos erróneos; datos confidenciales; límites OCR; columnas de reportes; zona horaria y redondeos.
+**Tareas:** aprobar identidad única de orden/vale; catálogo de combustible; asociación de vale a una o varias líneas; reglas de cantidad decimal; política de despacho parcial; sede del usuario; corrección descriptiva de vales; corrección de despachos erróneos; datos confidenciales; límites OCR; columnas de reportes; zona horaria y redondeos.
 
 **Entregables:** ADR aprobados, ER lógico y matriz de permisos.  
 **Pruebas:** escenarios de aceptación firmados, incluyendo 10/5, 10/10 y múltiples combustibles.  
@@ -2069,7 +2005,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 **Objetivo:** persistencia normalizada con restricciones.  
 **Dependencias:** F1 y decisiones de F0.  
 **RF:** RF-001, RF-007, RF-013–RF-026.  
-**Tablas:** sedes, usuarios, sesiones, combustibles, órdenes, líneas, vales, líneas de vale, atenciones, líneas de atención y verificaciones.  
+**Tablas:** sedes, usuarios, sesiones, combustibles, órdenes, líneas, vales, líneas de vale, atenciones y líneas de atención.  
 **Tareas:** modelos ORM; relaciones; checks; índices; `ON DELETE RESTRICT`; crear `db/001_schema.sql` y `db/002_seed.sql`; seeds de sedes y combustibles; creación segura de Admin; definir el procedimiento temporal para ALTER numerados.
 **Pruebas:** instalación desde DB vacía con `001` + `002`; aplicar dos veces cada ALTER contra una copia; comparar DDL de base antigua actualizada con base nueva; probar FK, unicidad, integridad de líneas y datos seed.
 **Gate:** esquema construido desde SQL manual y equivalencia verificada en PostgreSQL; no se usa una herramienta de migraciones.
@@ -2104,20 +2040,20 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 **Pruebas:** TC-001 a TC-011; concurrencia entre sedes; reintentos móviles; consumo parcial y completo.  
 **Gate:** ninguna operación puede generar saldo negativo ni duplicar una atención; verificación integral con ejemplos 10/5, 10/2, 10/3 y entrega 10/10.
 
-## F6 — Bandeja y verificación de Oficina
+## F6 — Consulta, corrección descriptiva y cierre de vales
 
-**Objetivo:** permitir la revisión del vale físico sin volver a registrar el documento.  
+**Objetivo:** permitir la consulta de vales y atenciones y la corrección limitada de datos descriptivos, sin verificación administrativa.  
 **Dependencias:** F5.  
-**RF:** RF-013, RF-017, RF-018.  
-**Endpoints:** `GET /verifications/pending`, `POST /attendances/{id}/verifications`, `GET /vouchers/{id}` y corrección descriptiva autorizada.  
-**Tareas:** bandeja pendiente; detalle completo; resultado VERIFIED/OBSERVED; observación obligatoria si no coincide; registro del revisor/fecha; protección de movimientos; corrección de datos descriptivos; impedir eliminación de vales atendidos.  
-**Pruebas:** verificación coincidente, observación, segunda revisión y asegurar que ninguna cambia los saldos.  
-**Gate:** verificación no crea otro vale ni modifica consumo.
+**RF:** RF-017, RF-018, RF-033.  
+**Endpoints:** `GET /vouchers`, `GET /vouchers/{id}`, `PATCH /vouchers/{id}/descriptive-data`, `DELETE /vouchers/{id}` (rechazo `409` si tiene atenciones), `GET /attendances`, `GET /attendances/{id}`.  
+**Tareas:** consulta y detalle; corrección de datos descriptivos por Administrador; impedir eliminación de vales atendidos; bloquear cualquier intento de modificar cantidades despachadas; retirar la tabla `attendance_verifications` y sus restos en modelos y pruebas.
+**Pruebas:** la corrección descriptiva conserva atenciones y saldos; eliminación bloqueada; ausencia de endpoints de verificación.  
+**Gate:** no existe tabla, permiso, endpoint ni estado de verificación activo.
 
 ## F7 — Reportes, dashboard y exportación
 
 **Objetivo:** consulta gerencial y operativa de órdenes y atenciones.  
-**Dependencias:** F5; F6 para filtros de verificación si son solicitados.  
+**Dependencias:** F5.  
 **RF:** RF-027–RF-031.  
 **Endpoints:** `/reports/purchase-orders`, `/reports/attendances`, `/reports/dashboard`, exportación PDF/XLSX.  
 **Tareas:** queries agregadas; agrupación por hora/día/semana/mes; filtros por fecha/usuario/estado; dataset por combustible; gráficos; ReportLab/openpyxl; restricciones de datos sensibles según rol.  
@@ -2156,7 +2092,7 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F0 | Aprobar reglas de cantidades decimales, redondeos y zona horaria | [x] |
 | F0 | Aprobar política de despachos parciales | [x] |
 | F0 | Definir sede del usuario y contexto de atención | [x] |
-| F0 | Aprobar verificación, observaciones y corrección de despachos | [x] |
+| F0 | Aprobar corrección descriptiva y corrección de despachos | [x] |
 | F0 | Definir datos confidenciales y límites OCR | [x] |
 | F0 | Definir columnas de reportes | [x] |
 | F0 | Documentar ADR, ER lógico y matriz de permisos | [x] |
@@ -2184,7 +2120,8 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F2 | Crear modelos ORM de sedes, usuarios, sesiones y combustibles | [x] |
 | F2 | Crear modelos ORM de órdenes y líneas | [x] |
 | F2 | Crear modelos ORM de vales y líneas | [x] |
-| F2 | Crear modelos ORM de atenciones, líneas y verificaciones | [x] |
+| F2 | Crear modelos ORM de atenciones y líneas | [x] |
+| F2 | Eliminar `attendance_verifications` de `001_schema.sql`, `002_seed.sql`, `tables.py` y pruebas | [x] |
 | F2 | Definir relaciones, restricciones, índices y `ON DELETE RESTRICT` | [x] |
 | F2 | Crear `db/001_schema.sql` y `db/002_seed.sql` como fuente base | [x] |
 | F2 | Consolidar seeds de sedes y combustibles en `db/002_seed.sql` | [x] |
@@ -2217,14 +2154,12 @@ No incorporar Redis, Celery, Kafka, caché distribuida, réplicas de lectura, pa
 | F5 | Implementar estados derivados y contexto de sede/usuario | [x] |
 | F5 | Ejecutar TC-001 a TC-011 | [ ] |
 | F5 | Probar concurrencia, reintentos y consumos parciales/completos | [ ] |
-| F6 | Implementar bandeja pendiente de verificación | [x] |
-| F6 | Implementar detalle y resultado `VERIFIED`/`OBSERVED` | [x] |
-| F6 | Exigir observación en discrepancias | [x] |
-| F6 | Registrar revisor y fecha | [x] |
-| F6 | Proteger movimientos y saldos durante verificación | [x] |
+| F6 | Implementar consulta y detalle de vales y atenciones | [x] |
 | F6 | Implementar corrección descriptiva autorizada | [x] |
 | F6 | Bloquear eliminación de vales atendidos | [x] |
-| F6 | Probar que verificar no modifica consumo | [ ] |
+| F6 | Bloquear edición de cantidades despachadas | [x] |
+| F6 | Retirar endpoints, permisos y pruebas de verificación | [ ] |
+| F6 | Probar que la corrección descriptiva conserva atenciones y saldos | [ ] |
 | F7 | Implementar queries agregadas de reportes | [x] |
 | F7 | Implementar agrupación por hora, día, semana y mes | [x] |
 | F7 | Implementar filtros por fecha, usuario y estado | [x] |
@@ -2268,7 +2203,7 @@ La matriz resume el componente backend principal. Los endpoints son **propuestos
 | RF-010 | Paginar órdenes | purchase_orders | `GET /purchase-orders?page=&page_size=` | F4 |
 | RF-011 | Modificar orden | purchase_orders | `PATCH /purchase-orders/{id}` | F4 |
 | RF-012 | Eliminar orden sin vales | purchase_orders | `DELETE /purchase-orders/{id}` | F4 |
-| RF-013 | Verificar vale físico | verification | `POST /attendances/{id}/verifications` | F6 |
+| RF-013 | Verificar vale físico | Retirado del alcance (20/11/2026); sin tabla, estado ni endpoint | — | — |
 | RF-014 | Consultar orden/saldo y vale previo | balances/vouchers | `GET /purchase-orders`, `GET /vouchers/{id}/balance` | F4–F5 |
 | RF-015 | Buscar órdenes/vales por número o entidad | purchase_orders/vouchers | `GET /purchase-orders`, `GET /vouchers` | F4–F5 |
 | RF-016 | Paginar vales | vouchers | `GET /vouchers?page=&page_size=` | F5 |
@@ -2305,7 +2240,7 @@ La matriz resume el componente backend principal. Los endpoints son **propuestos
 | Una atención por vale | Se permiten múltiples atenciones parciales. | RF-019 y ejemplo 10/5. |
 | Una sola cantidad de vale | Se modelan líneas por tipo de combustible. | Evita mezclar saldos de combustibles diferentes. |
 | Descontar vale autorizado de orden | La orden descuenta solo galones realmente despachados. | RF-020. |
-| Oficina vuelve a registrar vale | Oficina solo verifica el registro capturado. | RF-013. |
+| Oficina vuelve a registrar o verificar el vale | Oficina solo consulta el registro capturado; no existe verificación administrativa. | Flujo V2 ajustado y decisión del 20/11/2026. |
 | Tesseract / OCR genérico | RapidOCR solo para PDF de órdenes. | RF-034. |
 | Borrado físico de usuarios | Deshabilitar cuentas y revocar sesiones. | RF-004 y conservación histórica. |
 | Borrado de orden con dependencias | Bloquear si tiene vales. | RF-012. |
@@ -2325,7 +2260,7 @@ La matriz resume el componente backend principal. Los endpoints son **propuestos
 | PD-008 | Cierre remoto | Confirmar si Admin puede revocar sesiones de otros usuarios o solo cada usuario la propia. | Sesiones y endpoint administrativo. | Complemento F3 |
 | PD-009 | Precios en reportes | Confirmar qué importes/precios se muestran, incluidos los snapshots y el acceso confidencial. | Schemas/reportes. | F7 completo |
 | PD-010 | Gráficos | Confirmar tipos de gráficos y agregaciones exactas. | Dashboard. | F7 completo |
-| PD-011 | Vale observado | Definir proceso cuando Oficina detecta discrepancia y quién puede resolverla; por ahora no altera despachos ni saldo. | Verificación y corrección. | Cierre F6 |
+| PD-011 | Vale observado | Retirada: no existe verificación administrativa en esta versión. | — | No aplica |
 | PD-012 | Restricciones PDF | Aprobar tamaño máximo, número de páginas y timeout. | OCR/seguridad. | F8 |
 | PD-013 | Datos confidenciales | Precisar campos confidenciales y reglas de acceso por rol. | Schemas y filtros. | Seguridad de F7 |
 | PD-014 | Sede del grifero | Confirmar si cada grifero pertenece a una sede fija o puede operar en ambas. | `users.branch_id`, `attendances.branch_id`. | F3/F5 |
@@ -2360,7 +2295,7 @@ Una fase estará terminada solo cuando:
 5. Los saldos se derivan de cantidades autorizadas y atenciones efectivas; no se aceptan del cliente.
 6. Las atenciones se registran de forma atómica, con locks e idempotencia.
 7. Las líneas de combustibles no comparten ni compensan saldos.
-8. La verificación administrativa no modifica consumo.
+8. Las atenciones y sus cantidades son inmutables; la corrección se limita a datos descriptivos del vale.
 9. Las dependencias protegen el historial y no hay cascadas destructivas.
 10. `001_schema.sql` y `002_seed.sql` están actualizados; el ALTER de cada cambio existente es re-ejecutable y la equivalencia del esquema está verificada.
 11. Las pruebas unitarias, integración y API relevantes pasan.
@@ -2382,7 +2317,7 @@ Una fase estará terminada solo cuando:
 6. Implementar captura del vale y su primera atención en una sola transacción.
 7. Implementar las atenciones parciales siguientes y el cálculo independiente de saldo por vale/línea/orden.
 8. Implementar idempotencia y pruebas de concurrencia entre sedes.
-9. Implementar bandeja de verificación de Oficina y corrección descriptiva.
+9. Implementar consulta de vales y atenciones, corrección descriptiva y bloqueo de eliminación.
 10. Implementar reportes/dashboard y exportación PDF/XLSX.
 11. Implementar RapidOCR para PDF de órdenes, manteniendo revisión humana.
 12. Ejecutar pruebas integrales, seguridad, documentación y despliegue.
@@ -2393,10 +2328,10 @@ No habilitar la captura real de atenciones hasta que se hayan probado los escena
 
 # 32. Cierre del plan
 
-La versión actualizada del backend debe reflejar el proceso real de la Estación de Servicio San José: la orden es registrada por Oficina; el cliente presenta su vale físico; el grifero consulta la orden y captura el vale junto con el despacho inicial; el mismo vale puede recibir una o varias atenciones parciales; cada atención descuenta exclusivamente los galones realmente entregados del saldo de su vale y de la línea correspondiente de la orden; y Oficina verifica después el documento físico sin duplicar el registro ni alterar el consumo.
+La versión actualizada del backend debe reflejar el proceso real de la Estación de Servicio San José: la orden es registrada por Oficina; el cliente presenta su vale físico; el grifero consulta la orden y captura el vale junto con el despacho inicial; el mismo vale puede recibir una o varias atenciones parciales; cada atención descuenta exclusivamente los galones realmente entregados del saldo de su vale y de la línea correspondiente de la orden; y Oficina consulta los registros; la corrección de datos descriptivos queda reservada al Administrador y nunca altera el consumo.
 
 La separación entre `vouchers`, `voucher_items`, `attendances` y `attendance_items` es la decisión estructural clave para representar este flujo correctamente. La API debe proteger esta lógica en transacciones PostgreSQL, con permisos de servidor, idempotencia y pruebas de concurrencia.
 
-La versión 2.1 conserva las decisiones funcionales de la versión 2.0 y actualiza la organización del código a una arquitectura por capas. Reemplaza la estructura de directorios anterior basada en `app/modules/`. Las propuestas técnicas y pendientes identificados deben revisarse antes de liberar los módulos correspondientes. Los endpoints, modelos y fases aquí descritos son una especificación de implementación, no evidencia de que el backend esté desarrollado.
+La versión 2.3 conserva las decisiones funcionales de la versión 2.0, retira la verificación administrativa y refleja los cambios de esquema consolidados. Reemplaza la estructura de directorios anterior basada en `app/modules/`. Las propuestas técnicas y pendientes identificados deben revisarse antes de liberar los módulos correspondientes. Los endpoints, modelos y fases aquí descritos son una especificación de implementación, no evidencia de que el backend esté desarrollado.
 
 **Fin del documento.**

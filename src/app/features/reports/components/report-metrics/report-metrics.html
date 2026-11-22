@@ -1,0 +1,15 @@
+<div
+  class="my-[14px] grid grid-cols-[repeat(4,minmax(0,1fr))] gap-[12px] max-[1050px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[760px]:my-[10px] max-[760px]:gap-[8px]"
+>
+  @for (metric of metrics(); track metric.id) {
+    <app-ui-stat-card
+      [label]="metric.label"
+      [value]="metric.value"
+      [suffix]="metric.suffix ?? ''"
+      [note]="metric.note"
+      [noteLead]="metric.noteLead ?? ''"
+      [icon]="metric.icon"
+      [tone]="metric.tone"
+    />
+  }
+</div>

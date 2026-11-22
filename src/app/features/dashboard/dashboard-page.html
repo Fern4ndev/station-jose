@@ -1,0 +1,15 @@
+<div class="animate-[fadeIn_230ms_ease_both]">
+  <app-ui-page-heading [title]="'Buen día, ' + firstName()" [subtitle]="subtitle()">
+    <span class="text-[11px] text-[#87949a] max-[760px]:text-[10px]">{{ today }}</span>
+    @if (role() !== 'ATTENDANT') {
+      <button type="button" class="sanjose-button sanjose-button--secondary" (click)="goReports()">
+        <app-ui-icon name="reports" [size]="14" />
+        Ver reportes
+      </button>
+    }
+  </app-ui-page-heading>
+
+  <app-dashboard-metrics [metrics]="metrics()" />
+
+  <app-dashboard-activity [rows]="recent()" [scope]="scope()" (viewAll)="goAttendances()" />
+</div>

@@ -1,0 +1,14 @@
+<app-ui-dialog
+  [(visible)]="visible"
+  title="Registrar atención"
+  description="Valida el saldo de la orden y del vale antes de confirmar el despacho."
+>
+  <app-attendance-form
+    [orders]="orders()"
+    [vouchers]="vouchers()"
+    [branch]="branch()"
+    [branchLocked]="branchLocked()"
+    [resetToken]="resetToken()"
+    (register)="register.emit($event)"
+  />
+</app-ui-dialog>

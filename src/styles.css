@@ -1,94 +1,47 @@
 @import "tailwindcss";
 
+/* El mockup es referencia visual, no fuente de estilos de producción. */
+@source not "../mockup.html";
+
 @theme {
-  --color-ink: #10202a;
-  --color-mint: #39c6ae;
-  --color-fuel: #e9a64a;
-  --color-primary-50: #f2f5fc;
-  --color-primary-100: #e2e9f8;
-  --color-primary-200: #cbd8f2;
-  --color-primary-300: #a6bee9;
-  --color-primary-400: #7a9cdd;
-  --color-primary-500: #557ad1;
-  --color-primary-600: #395cc1;
-  --color-primary-700: #1f3975;
-  /* <-- Tu color base */
-  --color-primary-800: #1b3163;
-  --color-primary-900: #192b53;
-  --color-primary-950: #111c37;
+  /* Escala de colores generada en armonía con #1F3975 */
+  --color-primary-50: #f4f7fc;   /* Tono muy claro ideal para fondos y canvas */
+  --color-primary-100: #e5ecf7;  /* Tono claro para hover sutil o tarjetas suaves */
+  --color-primary-200: #cad8ef;  /* Bordes suaves y divisores */
+  --color-primary-300: #9eb7e2;  /* Acentos suaves */
+  --color-primary-400: #6c8fd0;  /* Tono medio claro para brillos e iluminación */
+  --color-primary-500: #3d63b0;  /* Tono claro-medio vibrante para estados activos/hover */
+  --color-primary-600: #2a4c93;  /* Tono principal claro para botones y acciones UI */
+  --color-primary-700: #1f3975;  /* Tu color base #1F3975 (ideal para textos destacados o encabezados) */
+  --color-primary-800: #182c5c;  /* Tono profundo */
+  --color-primary-900: #122146;  /* Tono muy oscuro */
 
-  /* Colores Neutrales y de Superficie */
-  --color-secondary: #64748b;
+  --color-secondary: #6b7280;
   --color-surface: #ffffff;
-  --color-canvas: #f2f5fc;
+  --color-canvas: #f4f7fc;
 
-  /* Gradiente de marca (ej. para badges, sidebars o cabeceras) */
-  --background-image-sanjose-pill: radial-gradient(circle at 20% 20%, #395cc1 0%, #1f3975 55%, #111c37 100%);
+  /* Degradado con tonos más luminosos derivados de #1F3975 */
+  --background-image-admin-pill: radial-gradient(circle at 20% 20%, #6c8fd0 0%, #2a4c93 50%, #1f3975 100%);
 }
 
 :root {
-  color-scheme: light;
-  /* Tokens Semánticos de Marca */
-  --sanjose-primary: #173c42;
-  --sanjose-primary-hover: #20545a;
-  --sanjose-primary-active: #10202a;
-  --sanjose-primary-soft: #e9f6f0;
-  --sanjose-canvas: #f3f6f5;
-  --sanjose-surface: var(--color-surface);
-  --sanjose-text-main: #10202a;
-  --sanjose-text-muted: #77868b;
-}
-
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 22px;
-  line-height: 1;
-  letter-spacing: normal;
-  white-space: nowrap;
-  direction: ltr;
-  font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-}
-
-.responsive-table { max-width: 100%; overflow-x: auto; }
-.responsive-table td { overflow-wrap: anywhere; }
-@media (max-width: 760px) {
-  .responsive-table { overflow: visible; }
-  .responsive-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .responsive-table tbody tr { display: block; margin: 12px; border: 1px solid #e1e8ea; border-radius: 12px; overflow: hidden; }
-  .responsive-table tbody td[data-label] { display: grid; grid-template-columns: minmax(90px, 35%) minmax(0, 1fr); gap: 12px; }
-  .responsive-table tbody td[data-label]::before { content: attr(data-label); color: #52656d; font-size: 12px; font-weight: 600; }
+  /* Se priorizan los tonos claros (500/600) para una interfaz aireada y moderna, dejando #1F3975 en deep */
+  --sanjose-primary: var(--color-primary-600);
+  --sanjose-primary-light: var(--color-primary-400);
+  --sanjose-primary-dark: var(--color-primary-800);
+  --sanjose-primary-deep: var(--color-primary-700);
+  --sanjose-canvas: var(--color-primary-50);
 }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  min-width: 320px;
-  min-height: 100vh;
-  margin: 0;
-  background: radial-gradient(ellipse at 68% 0%, rgb(119 205 190 / 13%), transparent 32rem), var(--sanjose-canvas);
+  overflow-x: hidden;
+  background: var(--sanjose-canvas);
 }
 
 button {
   cursor: pointer;
-}
-
-:focus-visible {
-  outline: 3px solid var(--p-primary-color, var(--sanjose-primary));
-  outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
 }
 
 .bg-admin-pill {
@@ -101,18 +54,18 @@ button {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f4f7fc;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #9ca3af;
+  background: #9eb7e2;
   border-radius: 10px;
-  border: 2px solid #f1f1f1;
+  border: 2px solid #f4f7fc;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: #6c8fd0;
 }
 
 @keyframes fadeIn {
@@ -139,10 +92,9 @@ button {
   inset: 0;
   z-index: 2;
   mix-blend-mode: overlay;
-  opacity: 0.18;
+  opacity: 0.16;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 200 200'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.99' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.181 0.608 0.061 0 0.075 0.181 0.608 0.061 0 0.075 0.181 0.608 0.061 0 0.075 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
-
 }
 
 .auth-aura-layer-1,
@@ -156,13 +108,14 @@ button {
   z-index: 1;
 }
 
+/* Capas de aura suavizadas con los tonos claros de #1F3975 para evitar sombras pesadas */
 .auth-aura-layer-1 {
-  background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(77, 139, 255, 0.12) 30%, rgb(255, 255, 255) 20%, rgb(13, 59, 159) 70%, rgb(36, 41, 92) 100%);
+  background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(108, 143, 208, 0.14) 30%, rgb(255, 255, 255) 20%, rgba(42, 76, 147, 0.45) 70%, rgba(31, 57, 117, 0.65) 100%);
   filter: blur(75px);
 }
 
 .auth-aura-layer-2 {
-  background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(208, 213, 221, 0.22) 35%, rgb(255, 255, 255) 70%, rgb(36, 41, 92) 80%, rgb(13, 59, 159) 100%);
+  background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(202, 216, 239, 0.28) 35%, rgb(255, 255, 255) 70%, rgba(31, 57, 117, 0.55) 80%, rgba(42, 76, 147, 0.65) 100%);
   filter: blur(125px);
 }
 
@@ -173,5 +126,363 @@ button {
 
   .auth-aura-layer-2 {
     filter: blur(180px);
+  }
+}
+
+/* ==========================================================================
+   Sistema visual San José (consumido por los componentes compartidos).
+   Los tokens viven en shared/components/ui-theme/ui-theme.css.
+   ========================================================================== */
+
+.app-shell {
+  background-color: var(--sanjose-app-bg);
+  background-image: var(--sanjose-app-aura);
+  color: var(--sanjose-ink);
+}
+
+.sanjose-panel {
+  min-width: 0;
+  border: 1px solid var(--sanjose-panel-border);
+  border-radius: 18px;
+  background: var(--sanjose-panel);
+  box-shadow: var(--sanjose-panel-shadow);
+}
+
+.sanjose-sidebar-surface {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--sanjose-sidebar-bg);
+  box-shadow: var(--sanjose-sidebar-shadow);
+}
+
+.sanjose-icon-button {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #dfe6e7;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.73);
+  color: #51646a;
+  transition: background 160ms ease;
+  cursor: pointer;
+}
+
+.sanjose-icon-button:hover {
+  background: #ffffff;
+}
+
+.sanjose-icon-button:focus-visible {
+  outline: 3px solid rgba(57, 198, 174, 0.72);
+  outline-offset: 3px;
+}
+
+.sanjose-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.sanjose-th {
+  padding: 10px 13px;
+  border-top: 1px solid #edf0f0;
+  border-bottom: 1px solid #edf0f0;
+  background: rgba(244, 247, 246, 0.65);
+  color: #839095;
+  font-size: 10px;
+  font-weight: 620;
+  white-space: nowrap;
+}
+
+.sanjose-td {
+  padding: 12px 13px;
+  border-bottom: 1px solid #eff2f2;
+  color: #52636a;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.sanjose-table tbody tr:last-child .sanjose-td {
+  border-bottom: 0;
+}
+
+.sanjose-table tbody tr:hover {
+  background: rgba(238, 247, 244, 0.5);
+}
+
+.sanjose-cell-primary {
+  display: block;
+  color: #243941;
+  font-size: 11px;
+  font-weight: 630;
+}
+
+.sanjose-cell-secondary {
+  display: block;
+  margin-top: 4px;
+  color: #98a2a5;
+  font-size: 10px;
+}
+
+.sanjose-text-button {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--sanjose-accent);
+  font-size: 10px;
+  font-weight: 630;
+  cursor: pointer;
+}
+
+.sanjose-text-button:focus-visible {
+  outline: 3px solid rgba(57, 198, 174, 0.72);
+  outline-offset: 3px;
+}
+
+.sanjose-icon-action {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  border: 1px solid #e5eaea;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #5d7477;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease;
+  cursor: pointer;
+}
+
+.sanjose-icon-action:hover:not(:disabled) {
+  border-color: #a9d8cd;
+  background: #fbfdfc;
+  color: #287e6e;
+}
+
+.sanjose-icon-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sanjose-icon-action:focus-visible {
+  outline: 3px solid rgba(57, 198, 174, 0.72);
+  outline-offset: 3px;
+}
+
+.sanjose-button {
+  display: inline-flex;
+  min-height: 39px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  font-size: 11px;
+  font-weight: 620;
+  white-space: nowrap;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease;
+  cursor: pointer;
+}
+
+.sanjose-button:focus-visible {
+  outline: 3px solid rgba(57, 198, 174, 0.72);
+  outline-offset: 3px;
+}
+
+.sanjose-button--secondary {
+  border-color: #dce5e6;
+  background: rgba(255, 255, 255, 0.72);
+  color: #53656a;
+}
+
+.sanjose-button--secondary:hover {
+  background: #ffffff;
+}
+
+.sanjose-button--primary {
+  background: var(--sanjose-primary-action);
+  color: #ffffff;
+  box-shadow: 0 5px 12px rgba(23, 60, 66, 0.13);
+}
+
+.sanjose-button--primary:hover {
+  background: var(--sanjose-primary-action-hover);
+}
+
+.sanjose-chip {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #e2e8e8;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #607076;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.sanjose-chip.selected {
+  border-color: #b8ddd3;
+  background: #ecf8f4;
+  color: #2c796d;
+}
+
+.sanjose-chip:focus-visible {
+  outline: 3px solid rgba(57, 198, 174, 0.72);
+  outline-offset: 3px;
+}
+
+.sanjose-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.sanjose-field {
+  display: grid;
+  gap: 6px;
+}
+
+.sanjose-field.full {
+  grid-column: 1 / -1;
+}
+
+.sanjose-label {
+  color: #52646a;
+  font-size: 10px;
+  font-weight: 620;
+}
+
+.sanjose-input,
+.sanjose-select {
+  min-height: 39px;
+  width: 100%;
+  padding: 0 11px;
+  border: 1px solid #dce5e5;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #30464d;
+  font-size: 11px;
+}
+
+.sanjose-select {
+  appearance: auto;
+}
+
+.sanjose-input::placeholder {
+  color: #a5b1b4;
+}
+
+.sanjose-input[readonly] {
+  background: #f7fafa;
+  color: #5f6f73;
+}
+
+.sanjose-input:focus-visible,
+.sanjose-select:focus-visible {
+  outline: 3px solid rgba(57, 198, 174, 0.72);
+  outline-offset: 3px;
+}
+
+.sanjose-hint {
+  color: #919da0;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.sanjose-hint--error {
+  color: #a55a2c;
+}
+
+.sanjose-dialog.p-dialog {
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  border-radius: 20px !important;
+  background: #fdfefe !important;
+  box-shadow: 0 28px 90px rgba(9, 32, 38, 0.28) !important;
+  overflow: hidden;
+  color: var(--sanjose-ink);
+}
+
+.sanjose-dialog .p-dialog-header {
+  padding: 20px 21px 16px !important;
+  border-bottom: 1px solid #edf0f0;
+  background: #fdfefe;
+}
+
+.sanjose-dialog .p-dialog-content {
+  padding: 18px 21px !important;
+  background: #fdfefe;
+}
+
+.sanjose-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 21px 18px !important;
+  border-top: 1px solid #edf0f0;
+  background: #fbfcfc;
+}
+
+.sanjose-dialog-mask.p-dialog-mask {
+  background: rgba(13, 35, 40, 0.38) !important;
+  backdrop-filter: blur(6px);
+}
+
+.sanjose-dialog-close.p-button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #dfe6e7 !important;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.73) !important;
+  color: #51646a !important;
+  box-shadow: none !important;
+}
+
+.sanjose-toast.p-toast .p-toast-message {
+  min-height: 44px;
+  border: 1px solid rgba(219, 239, 232, 0.8);
+  border-radius: 14px;
+  background: rgba(19, 51, 56, 0.95);
+  box-shadow: 0 14px 35px rgba(12, 41, 43, 0.24);
+  color: #f2fbf7;
+  backdrop-filter: blur(20px);
+}
+
+.sanjose-toast.p-toast .p-toast-message-content {
+  align-items: center;
+  gap: 9px;
+  padding: 12px 15px;
+}
+
+.sanjose-toast.p-toast .p-toast-message-text,
+.sanjose-toast.p-toast .p-toast-summary {
+  color: #f2fbf7;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.sanjose-toast.p-toast .p-toast-icon-close,
+.sanjose-toast.p-toast .p-toast-icon {
+  color: #a7efd7;
+}
+
+@media (max-width: 760px) {
+  .sanjose-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sanjose-form-grid .sanjose-field.full {
+    grid-column: auto;
   }
 }

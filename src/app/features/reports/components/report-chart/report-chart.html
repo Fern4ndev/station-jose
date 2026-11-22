@@ -1,0 +1,32 @@
+<app-ui-panel title="Galones despachados" subtitle="Actividad por sede">
+  <app-ui-status-badge panelAction [label]="badge()" tone="green" />
+
+  <div class="p-[5px_18px_15px]">
+    <div
+      class="chart flex h-[205px] items-end gap-[15px] px-[4px] pt-[18px] pb-[28px]"
+      role="img"
+      [attr.aria-label]="'Gráfico de galones despachados por sede, ' + badge()"
+    >
+      @for (bucket of buckets(); track bucket.label) {
+        <div class="relative flex h-full flex-1 items-end justify-center gap-[4px]">
+          <i
+            class="bar"
+            [style.height.%]="height(bucket.sanJose)"
+            [attr.title]="'San José · ' + bucket.label + ': ' + bucket.sanJose + ' gal'"
+          ></i>
+          <i
+            class="bar bar--secondary"
+            [style.height.%]="height(bucket.santaMarta)"
+            [attr.title]="'Santa Marta · ' + bucket.label + ': ' + bucket.santaMarta + ' gal'"
+          ></i>
+          <span>{{ bucket.label }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="flex gap-[15px] pt-[12px] text-[9px] text-[#78878b]">
+      <span><i class="swatch"></i>San José</span>
+      <span><i class="swatch swatch--secondary"></i>Santa Marta</span>
+    </div>
+  </div>
+</app-ui-panel>

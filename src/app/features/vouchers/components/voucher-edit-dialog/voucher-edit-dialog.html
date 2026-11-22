@@ -1,0 +1,50 @@
+<app-ui-dialog
+  [(visible)]="visible"
+  title="Corregir datos del vale"
+  description="Solo se actualizan datos descriptivos; el historial de atenciones no cambia."
+>
+  <form id="voucherForm" class="sanjose-form-grid" (submit)="onSubmit($event)" novalidate>
+    <div class="sanjose-field">
+      <label class="sanjose-label" for="editVoucherNumber">Número de vale</label>
+      <input id="editVoucherNumber" class="sanjose-input" readonly [value]="voucher()?.id ?? ''" />
+    </div>
+
+    <div class="sanjose-field">
+      <label class="sanjose-label" for="editVoucherType">Tipo de emisor</label>
+      <select
+        id="editVoucherType"
+        class="sanjose-select"
+        [value]="issuerType()"
+        (change)="setIssuerType($event)"
+      >
+        <option value="INSTITUTION">Institución</option>
+        <option value="STATION">Estación</option>
+      </select>
+    </div>
+
+    <div class="sanjose-field full">
+      <label class="sanjose-label" for="editVoucherIssuer">Nombre del emisor</label>
+      <input
+        id="editVoucherIssuer"
+        class="sanjose-input"
+        placeholder="Nombre según vale físico"
+        [value]="issuer()"
+        (input)="setIssuer($event)"
+      />
+      <span class="sanjose-hint">El número de vale y los galones atendidos no se pueden corregir aquí.</span>
+    </div>
+
+    @if (error()) {
+      <p class="sanjose-hint sanjose-hint--error m-0" role="alert">{{ error() }}</p>
+    }
+  </form>
+
+  <div dialogFooter class="flex justify-end gap-[8px]">
+    <button type="button" class="sanjose-button sanjose-button--secondary" (click)="visible.set(false)">
+      Cancelar
+    </button>
+    <button type="submit" form="voucherForm" class="sanjose-button sanjose-button--primary">
+      Guardar corrección
+    </button>
+  </div>
+</app-ui-dialog>

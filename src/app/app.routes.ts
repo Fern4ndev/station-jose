@@ -1,143 +1,47 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard, permissionGuard } from './core/guards/auth.guards';
+import { adminOnlyGuard } from './features/users/users-access';
+import { AdminLayout } from './layouts/admin/admin-layout';
+import { AuthLayout } from './layouts/auth/auth-layout';
+import { LoginPage } from './layouts/auth/login-page';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'auth/login' },
   {
-    path: 'auth/login',
-    canActivate: [guestGuard],
-    loadComponent: () => import('./features/auth/login-page/login-page').then((module) => module.LoginPage),
+    path: 'login',
+    component: AuthLayout,
+    children: [{ path: '', component: LoginPage }],
   },
-  { path: 'access-denied', loadComponent: () => import('./features/system/access-denied').then((module) => module.AccessDeniedPage) },
-  { path: 'not-found', loadComponent: () => import('./features/system/not-found').then((module) => module.NotFoundPage) },
   {
     path: '',
-    canActivate: [authGuard],
-    canActivateChild: [authGuard],
-    loadComponent: () => import('./layouts/admin/admin').then((module) => module.AdminLayout),
+    component: AdminLayout,
     children: [
-      { path: '', loadComponent: () => import('./features/auth/home-redirect').then((module) => module.AppHomeRedirect) },
       {
-        path: 'dashboard',
-        canActivate: [permissionGuard],
-        data: { permission: 'reports.read', title: 'Panel principal' },
-        loadComponent: () => import('./features/dashboard/dashboard-page').then((module) => module.DashboardPage),
+        path: '',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard-page').then((m) => m.DashboardPage),
       },
       {
-        path: 'users/new',
-        canActivate: [permissionGuard],
-        data: { permission: 'users.manage', title: 'Nuevo usuario' },
-        loadComponent: () => import('./features/users/user-form-page/user-form-page').then((module) => module.UserFormPage),
+        path: 'ordenes',
+        loadComponent: () => import('./features/orders/orders-page').then((m) => m.OrdersPage),
       },
       {
-        path: 'users/:userId/attendances',
-        canActivate: [permissionGuard],
-        data: { permission: 'attendances.read_all', title: 'Atenciones del grifero' },
-        loadComponent: () => import('./features/users/user-attendances-page/user-attendances-page').then((module) => module.UserAttendancesPage),
+        path: 'vales',
+        loadComponent: () => import('./features/vouchers/vouchers-page').then((m) => m.VouchersPage),
       },
       {
-        path: 'users/:userId',
-        canActivate: [permissionGuard],
-        data: { permission: 'users.manage', title: 'Detalle de usuario' },
-        loadComponent: () => import('./features/users/user-detail-page/user-detail-page').then((module) => module.UserDetailPage),
+        path: 'atenciones',
+        loadComponent: () =>
+          import('./features/attendances/attendances-page').then((m) => m.AttendancesPage),
       },
       {
-        path: 'users',
-        canActivate: [permissionGuard],
-        data: { permission: 'users.manage', title: 'Usuarios' },
-        loadComponent: () => import('./features/users/users-page/users-page').then((module) => module.UsersPage),
+        path: 'reportes',
+        loadComponent: () => import('./features/reports/reports-page').then((m) => m.ReportsPage),
       },
       {
-        path: 'purchase-orders/new',
-        canActivate: [permissionGuard],
-        data: { permission: 'purchase_orders.create', title: 'Nueva orden' },
-        loadComponent: () => import('./features/purchase-orders/purchase-order-form-page/purchase-order-form-page').then((module) => module.PurchaseOrderFormPage),
-      },
-      {
-        path: 'purchase-orders/:orderId/edit',
-        canActivate: [permissionGuard],
-        data: { permission: 'purchase_orders.update', title: 'Editar orden' },
-        loadComponent: () => import('./features/purchase-orders/purchase-order-form-page/purchase-order-form-page').then((module) => module.PurchaseOrderFormPage),
-      },
-      {
-        path: 'purchase-orders/:orderId/attendances/new',
-        canActivate: [permissionGuard],
-        data: { permission: 'attendances.create', title: 'Primera atención' },
-        loadComponent: () => import('./features/attendant/workspace-page').then((module) => module.WorkspacePage),
-      },
-      {
-        path: 'purchase-orders/:orderId',
-        canActivate: [permissionGuard],
-        data: { permission: 'purchase_orders.read', title: 'Detalle de orden' },
-        loadComponent: () => import('./features/purchase-orders/purchase-order-detail-page/purchase-order-detail-page').then((module) => module.PurchaseOrderDetailPage),
-      },
-      {
-        path: 'purchase-orders',
-        canActivate: [permissionGuard],
-        data: { permission: 'purchase_orders.read', title: 'Órdenes de compra' },
-        loadComponent: () => import('./features/purchase-orders/purchase-orders-page/purchase-orders-page').then((module) => module.PurchaseOrdersPage),
-      },
-      {
-        path: 'vouchers/:voucherId/attendances/new',
-        canActivate: [permissionGuard],
-        data: { permission: 'attendances.create', title: 'Atención posterior' },
-        loadComponent: () => import('./features/attendant/workspace-page').then((module) => module.WorkspacePage),
-      },
-      {
-        path: 'vouchers/:voucherId',
-        canActivate: [permissionGuard],
-        data: { permission: 'vouchers.read', title: 'Detalle de vale' },
-        loadComponent: () => import('./features/vouchers/voucher-detail-page/voucher-detail-page').then((module) => module.VoucherDetailPage),
-      },
-      {
-        path: 'vouchers',
-        canActivate: [permissionGuard],
-        data: { permission: 'vouchers.read', title: 'Vales' },
-        loadComponent: () => import('./features/vouchers/vouchers-page/vouchers-page').then((module) => module.VouchersPage),
-      },
-      {
-        path: 'attendant/workspace',
-        canActivate: [permissionGuard],
-        data: { permission: 'attendances.create', title: 'Espacio de atención', description: 'Consulta órdenes, vales y sus saldos.' },
-        loadComponent: () => import('./features/attendant/workspace-page').then((module) => module.WorkspacePage),
-      },
-      {
-        path: 'attendant/attendances',
-        canActivate: [permissionGuard],
-        data: { permission: 'attendances.read_own', title: 'Vales atendidos' },
-        loadComponent: () => import('./features/vouchers/attended-vouchers-page/attended-vouchers-page').then((module) => module.AttendedVouchersPage),
-      },
-      {
-        path: 'attendances',
-        canActivate: [permissionGuard],
-        data: { permission: 'attendances.read_all', title: 'Atenciones' },
-        loadComponent: () => import('./features/attendances/attendances-page/attendances-page').then((module) => module.AttendancesPage),
-      },
-      {
-        path: 'balances',
-        canActivate: [permissionGuard],
-        data: { permission: 'balances.read', title: 'Saldos' },
-        loadComponent: () => import('./features/balances/balances-page/balances-page').then((module) => module.BalancesPage),
-      },
-      {
-        path: 'reports/purchase-orders',
-        canActivate: [permissionGuard],
-        data: { permission: 'reports.read', title: 'Reporte de órdenes' },
-        loadComponent: () => import('./features/reports/report-purchase-orders-page/report-purchase-orders-page').then((module) => module.ReportPurchaseOrdersPage),
-      },
-      {
-        path: 'reports/attendances',
-        canActivate: [permissionGuard],
-        data: { permission: 'reports.read', title: 'Reporte de atenciones' },
-        loadComponent: () => import('./features/reports/report-attendances-page/report-attendances-page').then((module) => module.ReportAttendancesPage),
-      },
-      {
-        path: 'reports',
-        canActivate: [permissionGuard],
-        data: { permission: 'reports.read', title: 'Reportes' },
-        loadComponent: () => import('./features/reports/reports-page/reports-page').then((module) => module.ReportsPage),
+        path: 'usuarios',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./features/users/users-page').then((m) => m.UsersPage),
       },
     ],
   },
-  { path: '**', redirectTo: 'not-found' },
+  { path: '**', redirectTo: '' },
 ];

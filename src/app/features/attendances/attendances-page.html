@@ -1,0 +1,52 @@
+<app-ui-toast />
+
+<div class="animate-[fadeIn_230ms_ease_both]">
+  <app-ui-page-heading
+    title="Registrar despacho"
+    subtitle="Valida el saldo y registra los galones realmente entregados."
+  >
+    <button
+      type="button"
+      class="sanjose-button sanjose-button--primary"
+      (click)="registerOpen.set(true)"
+    >
+      <app-ui-icon name="plus" [size]="14" />
+      Registrar
+    </button>
+  </app-ui-page-heading>
+
+  <div
+    class="grid grid-cols-[minmax(0,_1fr)_300px] gap-[13px] max-[1279px]:grid-cols-[minmax(0,_1fr)] max-[1279px]:gap-[10px]"
+  >
+    <app-ui-panel
+      title="Historial de atenciones"
+      subtitle="Las atenciones confirmadas no se editan ni eliminan desde esta vista."
+    >
+      <app-attendance-history [rows]="visible()" />
+    </app-ui-panel>
+
+    <div class="self-start">
+      <app-ui-panel title="Últimos despachos" subtitle="Actividad registrada por los griferos">
+        <app-ui-status-badge panelAction label="Hoy" tone="blue" />
+
+        <app-attendance-recent [rows]="recent()" />
+
+        <div panelFooter class="p-[0_17px_13px]">
+          <button type="button" class="sanjose-text-button" (click)="goVouchers()">
+            Consultar saldos de vales
+          </button>
+        </div>
+      </app-ui-panel>
+    </div>
+  </div>
+
+  <app-attendance-form-dialog
+    [(visible)]="registerOpen"
+    [orders]="availableOrders()"
+    [vouchers]="vouchers()"
+    [branch]="branch()"
+    [branchLocked]="branchLocked()"
+    [resetToken]="resetToken()"
+    (register)="register($event)"
+  />
+</div>

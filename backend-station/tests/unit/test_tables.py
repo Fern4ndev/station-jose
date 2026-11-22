@@ -16,7 +16,6 @@ def test_all_phase_two_tables_are_declared() -> None:
         "voucher_items",
         "attendances",
         "attendance_items",
-        "attendance_verifications",
         "document_counters",
     }
 
@@ -24,6 +23,6 @@ def test_all_phase_two_tables_are_declared() -> None:
 
 
 def test_operational_tables_have_no_delete_cascade() -> None:
-    for table_name in ("purchase_orders", "vouchers", "attendances", "attendance_verifications"):
+    for table_name in ("purchase_orders", "vouchers", "attendances"):
         table = Base.metadata.tables[table_name]
         assert all(foreign_key.ondelete != "CASCADE" for foreign_key in table.foreign_keys)

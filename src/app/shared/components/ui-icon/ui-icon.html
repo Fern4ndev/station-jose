@@ -1,0 +1,82 @@
+<svg
+  [attr.width]="size()"
+  [attr.height]="size()"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  [attr.stroke-width]="strokeWidth()"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  @switch (name()) {
+    @case ('dashboard') {
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="5" rx="1.5" />
+      <rect x="14" y="12" width="7" height="9" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    }
+    @case ('orders') {
+      <path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+      <path d="M14 3v5h5M9 13h6m-6 4h6" />
+    }
+    @case ('vouchers') {
+      <path
+        d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a3 3 0 0 0 0 6v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a3 3 0 0 0 0-6V7Z"
+      />
+      <path d="M9 9v.01M9 12v.01M9 15v.01" />
+    }
+    @case ('attendances') {
+      <path d="M12 3.5S6.5 10 6.5 14.6a5.5 5.5 0 1 0 11 0C17.5 10 12 3.5 12 3.5Z" />
+      <path d="M9.5 15.5a2.5 2.5 0 0 0 2.5 2.5" />
+    }
+    @case ('reports') {
+      <path d="M4 20V4m0 16h16" />
+      <path d="M8 16v-4m4 4V7m4 9v-6m4 6v-3" />
+    }
+    @case ('users') {
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 5.5a3 3 0 0 1 0 5.8m1 3a5 5 0 0 1 3.5 4.7" />
+    }
+    @case ('search') {
+      <circle cx="10.8" cy="10.8" r="6.8" />
+      <path d="m16 16 4.2 4.2" />
+    }
+    @case ('bell') {
+      <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" />
+    }
+    @case ('user') {
+      <circle cx="12" cy="8" r="3.3" />
+      <path d="M5.2 20a6.8 6.8 0 0 1 13.6 0" />
+    }
+    @case ('menu') {
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    }
+    @case ('close') {
+      <path d="m6 6 12 12M18 6 6 18" />
+    }
+    @case ('arrow-right') {
+      <path d="M5 12h14m-6-6 6 6-6 6" />
+    }
+    @case ('plus') {
+      <path d="M12 5v14m-7-7h14" />
+    }
+    @case ('check') {
+      <path d="m5 12 4 4L19 6" />
+    }
+    @case ('download') {
+      <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3" />
+    }
+    @case ('eye') {
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    }
+    @case ('edit') {
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    }
+    @case ('trash') {
+      <path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 5v5m4-5v5" />
+    }
+  }
+</svg>

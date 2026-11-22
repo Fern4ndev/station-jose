@@ -1,0 +1,64 @@
+.chart {
+  border-bottom: 1px solid #e8eded;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 24%,
+      #edf1f0 24%,
+      #edf1f0 24.7%,
+      transparent 24.7%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 49%,
+      #edf1f0 49%,
+      #edf1f0 49.7%,
+      transparent 49.7%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 74%,
+      #edf1f0 74%,
+      #edf1f0 74.7%,
+      transparent 74.7%
+    );
+}
+
+.bar {
+  display: block;
+  width: min(17px, 32%);
+  min-height: 4px;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, #5fc7ae, #45a894);
+  transition: height 220ms ease;
+}
+
+.bar--secondary {
+  background: linear-gradient(180deg, #a8d7ce, #7ab8ad);
+}
+
+.chart span {
+  position: absolute;
+  bottom: -19px;
+  color: #89969a;
+  font-size: 9px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 5px;
+  border-radius: 2px;
+  background: #50b49f;
+}
+
+.swatch--secondary {
+  background: #9dcfc4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    transition: none;
+  }
+}

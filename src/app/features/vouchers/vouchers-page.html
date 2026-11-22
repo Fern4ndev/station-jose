@@ -1,0 +1,41 @@
+<app-ui-toast />
+
+<div class="animate-[fadeIn_230ms_ease_both]">
+  <app-ui-page-heading
+    title="Vales"
+    subtitle="Cada vale se registra con su primera atención y conserva el saldo pendiente."
+  >
+    <button type="button" class="sanjose-button sanjose-button--secondary" (click)="goOrders()">
+      Consultar órdenes
+    </button>
+  </app-ui-page-heading>
+
+  <app-ui-panel>
+    <app-vouchers-toolbar
+      [filter]="filter()"
+      [query]="query()"
+      (filterChange)="filter.set($event)"
+      (queryChange)="query.set($event)"
+    />
+
+    <app-vouchers-table
+      [rows]="rows()"
+      [canCorrect]="canCorrect()"
+      [lockedVoucherIds]="lockedIds()"
+      (detail)="openDetail($event)"
+      (edit)="openEdit($event)"
+      (remove)="askDelete($event)"
+    />
+  </app-ui-panel>
+
+  <app-voucher-detail-dialog [(visible)]="detailOpen" [voucher]="selected()" />
+  <app-voucher-edit-dialog [(visible)]="editOpen" [voucher]="selected()" (saved)="correct($event)" />
+
+  <app-ui-confirm-dialog
+    [(visible)]="deleteOpen"
+    title="Eliminar vale"
+    [message]="'Se eliminará el vale ' + (selected()?.id ?? '') + '. Esta acción no se puede deshacer.'"
+    confirmLabel="Eliminar"
+    (confirmed)="confirmDelete()"
+  />
+</div>

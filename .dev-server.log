@@ -1,0 +1,1690 @@
+[33m❯[39m Building...
+[32m✔[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m [36m86.77 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m       [2m | [22m [36m44.03 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m[2m | [22m[1m130.80 kB[22m
+
+Application bundle generation complete. [4.513 seconds] - 2026-11-22T06:04:42.348Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+[2m1:04:43 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m4200[22m/[39m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m [2m | [22m[1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m[2m | [22m[36m48.31 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.795 seconds] - 2026-11-22T06:09:09.668Z
+
+Stylesheet update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.244 seconds] - 2026-11-22T06:09:13.969Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'navItems' does not exist on type 'AdminLayout'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/layouts/admin/admin-layout.html:5:13:
+[37m      5 │     [items]="[32mnavItems[37m()"
+        ╵              [32m~~~~~~~~[0m
+
+  Error occurs in the template of component AdminLayout.
+
+    src/app/layouts/admin/admin-layout.ts:22:15:
+[37m      22 │   templateUrl: [32m'./admin-layout.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'user' does not exist on type 'AdminLayout'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/layouts/admin/admin-layout.html:7:12:
+[37m      7 │     [user]="[32muser[37m()"
+        ╵             [32m~~~~[0m
+
+  Error occurs in the template of component AdminLayout.
+
+    src/app/layouts/admin/admin-layout.ts:22:15:
+[37m      22 │   templateUrl: [32m'./admin-layout.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'role' does not exist on type 'AdminLayout'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/layouts/admin/admin-layout.html:8:12:
+[37m      8 │     [role]="[32mrole[37m()"
+        ╵             [32m~~~~[0m
+
+  Error occurs in the template of component AdminLayout.
+
+    src/app/layouts/admin/admin-layout.ts:22:15:
+[37m      22 │   templateUrl: [32m'./admin-layout.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.862 seconds] - 2026-11-22T06:09:17.857Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'branch' since it isn't a known property of 'app-admin-sidebar'.
+1. If 'app-admin-sidebar' is an Angular component and it has 'branch' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-admin-sidebar' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/layouts/admin/admin-layout.html:9:4:
+[37m      9 │     [32m[branch]="state.branch()"[37m
+        ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AdminLayout.
+
+    src/app/layouts/admin/admin-layout.ts:22:15:
+[37m      22 │   templateUrl: [32m'./admin-layout.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'Event' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/layouts/admin/admin-layout.html:13:36:
+[37m      13 │     (branchChange)="state.setBranch([32m$event[37m)"
+         ╵                                     [32m~~~~~~[0m
+
+  Error occurs in the template of component AdminLayout.
+
+    src/app/layouts/admin/admin-layout.ts:22:15:
+[37m      22 │   templateUrl: [32m'./admin-layout.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m [36m89.09 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m       [2m | [22m [36m48.31 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m[2m | [22m[1m137.41 kB[22m
+
+Application bundle generation complete. [0.919 seconds] - 2026-11-22T06:09:22.578Z
+
+Page reload sent to client(s).
+[2m1:09:24 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ new dependencies optimized: [33m@angular/core/rxjs-interop, rxjs[32m[39m
+[2m1:09:24 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m93.28 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.766 seconds] - 2026-11-22T06:09:46.598Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m [36m93.28 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m       [2m | [22m [36m48.31 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m[2m | [22m[1m141.60 kB[22m
+
+Application bundle generation complete. [0.569 seconds] - 2026-11-22T06:09:53.181Z
+
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m[36m136.25 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m       [2m | [22m [36m48.99 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m[2m | [22m[1m185.23 kB[22m
+
+Application bundle generation complete. [1.342 seconds] - 2026-11-22T06:10:51.679Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.415 seconds] - 2026-11-22T06:13:47.164Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2459: Module '"../../dashboard-data"' declares 'formatGallons' locally, but it is not exported.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/components/dashboard-activity/dashboard-activity.ts:5:9:
+[37m      5 │ import { [32mformatGallons[37m, type DemoAttendance } from '../../dashboard...
+        ╵          [32m~~~~~~~~~~~~~[0m
+
+  'formatGallons' is declared here.
+
+    src/app/features/dashboard/dashboard-data.ts:3:22:
+[37m      3 │ import { DEMO_ORDERS, [32mformatGallons[37m, orderBalance } from '../orders...
+        ╵                       [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m[36m136.29 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m       [2m | [22m [36m48.99 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m[2m | [22m[1m185.28 kB[22m
+
+Application bundle generation complete. [0.286 seconds] - 2026-11-22T06:13:54.353Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m142.08 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.621 seconds] - 2026-11-22T06:14:07.157Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.907 seconds] - 2026-11-22T06:15:02.196Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and '"closeButton"' does not exist in type 'AllPassThrough<DialogPassThroughOptions<unknown>> | ((context: PassThroughContext<unknown, unknown>) => AllPassThrough<DialogPassThroughOptions<unknown>>)'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/components/ui-dialog/ui-dialog.html:12:4:
+[37m      12 │     [32mcloseButton[37m: { class: 'sanjose-dialog-close' }
+         ╵     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component UiDialog.
+
+    src/app/shared/components/ui-dialog/ui-dialog.ts:12:15:
+[37m      12 │   templateUrl: [32m'./ui-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.096 seconds] - 2026-11-22T06:15:05.954Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: UiToast is not used within the template of AdminLayout[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/layouts/admin/admin-layout.ts:21:53:
+[37m      21 │   imports: [AdminHeader, AdminSidebar, RouterOutlet, [32mUiToast[37m],
+         ╵                                                      [32m~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and '"closeButton"' does not exist in type 'AllPassThrough<DialogPassThroughOptions<unknown>> | ((context: PassThroughContext<unknown, unknown>) => AllPassThrough<DialogPassThroughOptions<unknown>>)'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/components/ui-dialog/ui-dialog.html:12:4:
+[37m      12 │     [32mcloseButton[37m: { class: 'sanjose-dialog-close' }
+         ╵     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component UiDialog.
+
+    src/app/shared/components/ui-dialog/ui-dialog.ts:12:15:
+[37m      12 │   templateUrl: [32m'./ui-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.754 seconds] - 2026-11-22T06:15:11.665Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and '"closeButton"' does not exist in type 'AllPassThrough<DialogPassThroughOptions<unknown>> | ((context: PassThroughContext<unknown, unknown>) => AllPassThrough<DialogPassThroughOptions<unknown>>)'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/components/ui-dialog/ui-dialog.html:12:4:
+[37m      12 │     [32mcloseButton[37m: { class: 'sanjose-dialog-close' }
+         ╵     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component UiDialog.
+
+    src/app/shared/components/ui-dialog/ui-dialog.ts:12:15:
+[37m      12 │   templateUrl: [32m'./ui-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.553 seconds] - 2026-11-22T06:16:42.182Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and '"closeButton"' does not exist in type 'AllPassThrough<DialogPassThroughOptions<unknown>> | ((context: PassThroughContext<unknown, unknown>) => AllPassThrough<DialogPassThroughOptions<unknown>>)'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/components/ui-dialog/ui-dialog.html:12:4:
+[37m      12 │     [32mcloseButton[37m: { class: 'sanjose-dialog-close' }
+         ╵     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component UiDialog.
+
+    src/app/shared/components/ui-dialog/ui-dialog.ts:12:15:
+[37m      12 │   templateUrl: [32m'./ui-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.328 seconds] - 2026-11-22T06:16:46.686Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and '"closeButton"' does not exist in type 'AllPassThrough<DialogPassThroughOptions<unknown>> | ((context: PassThroughContext<unknown, unknown>) => AllPassThrough<DialogPassThroughOptions<unknown>>)'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/components/ui-dialog/ui-dialog.html:12:4:
+[37m      12 │     [32mcloseButton[37m: { class: 'sanjose-dialog-close' }
+         ╵     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component UiDialog.
+
+    src/app/shared/components/ui-dialog/ui-dialog.ts:12:15:
+[37m      12 │   templateUrl: [32m'./ui-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.353 seconds] - 2026-11-22T06:16:50.638Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and '"closeButton"' does not exist in type 'AllPassThrough<DialogPassThroughOptions<unknown>> | ((context: PassThroughContext<unknown, unknown>) => AllPassThrough<DialogPassThroughOptions<unknown>>)'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/components/ui-dialog/ui-dialog.html:12:4:
+[37m      12 │     [32mcloseButton[37m: { class: 'sanjose-dialog-close' }
+         ╵     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component UiDialog.
+
+    src/app/shared/components/ui-dialog/ui-dialog.ts:12:15:
+[37m      12 │   templateUrl: [32m'./ui-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.233 seconds] - 2026-11-22T06:16:55.240Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and '"closeButton"' does not exist in type 'AllPassThrough<DialogPassThroughOptions<unknown>> | ((context: PassThroughContext<unknown, unknown>) => AllPassThrough<DialogPassThroughOptions<unknown>>)'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/components/ui-dialog/ui-dialog.html:12:4:
+[37m      12 │     [32mcloseButton[37m: { class: 'sanjose-dialog-close' }
+         ╵     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component UiDialog.
+
+    src/app/shared/components/ui-dialog/ui-dialog.ts:12:15:
+[37m      12 │   templateUrl: [32m'./ui-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.400 seconds] - 2026-11-22T06:17:17.329Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and '"closeButton"' does not exist in type 'AllPassThrough<DialogPassThroughOptions<unknown>> | ((context: PassThroughContext<unknown, unknown>) => AllPassThrough<DialogPassThroughOptions<unknown>>)'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/components/ui-dialog/ui-dialog.html:12:4:
+[37m      12 │     [32mcloseButton[37m: { class: 'sanjose-dialog-close' }
+         ╵     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component UiDialog.
+
+    src/app/shared/components/ui-dialog/ui-dialog.ts:12:15:
+[37m      12 │   templateUrl: [32m'./ui-dialog.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m[36m224.81 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m       [2m | [22m [36m50.47 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m[2m | [22m[1m275.28 kB[22m
+
+Application bundle generation complete. [0.854 seconds] - 2026-11-22T06:17:54.787Z
+
+Page reload sent to client(s).
+[2m1:17:58 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ new dependencies optimized: [33mprimeng/toast, primeng/dialog[32m[39m
+[2m1:17:58 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m224.92 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.753 seconds] - 2026-11-22T06:17:59.681Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m212.12 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.591 seconds] - 2026-11-22T06:18:47.607Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m [2m | [22m[1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m[2m | [22m[36m56.62 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.884 seconds] - 2026-11-22T06:19:09.284Z
+
+Stylesheet update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m[36m77.85 kB[39m[2m | [22m
+[32mchunk-DQIJLHSX.js[39m  [2m | [22m[2m-[22m             [2m | [22m[36m13.26 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mchunk-A4X2234D.js[39m  [2m | [22m[2morders-page[22m   [2m | [22m[36m76.40 kB[39m[2m | [22m
+[32mchunk-DUUYYAHJ.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m[36m25.63 kB[39m[2m | [22m
+[32mchunk-53GJ2NHK.js[39m  [2m | [22m[2m-[22m             [2m | [22m[36m18.76 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.633 seconds] - 2026-11-22T06:19:17.722Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.791 seconds] - 2026-11-22T06:19:35.938Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-ui-toast' is not a known element:
+1. If 'app-ui-toast' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-ui-toast' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/layouts/admin/admin-layout.html:29:4:
+[37m      29 │     [32m<app-ui-toast />[37m
+         ╵     [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AdminLayout.
+
+    src/app/layouts/admin/admin-layout.ts:22:15:
+[37m      22 │   templateUrl: [32m'./admin-layout.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m [36m75.58 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m        [2m | [22m [36m56.62 kB[39m[2m | [22m
+[32mchunk-DQIJLHSX.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m13.26 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m [2m | [22m[1m145.45 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m [1mRaw size[22m
+[32mchunk-A4X2234D.js[39m  [2m | [22m[2morders-page[22m   [2m | [22m [36m76.40 kB[39m[2m | [22m
+[32mchunk-DUUYYAHJ.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m [36m25.63 kB[39m[2m | [22m
+[32mchunk-53GJ2NHK.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m18.76 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.790 seconds] - 2026-11-22T06:19:40.032Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m       [2m | [22m[36m75.58 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mchunk-M7YNO523.js[39m  [2m | [22m[2morders-page[22m[2m | [22m[36m78.64 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.841 seconds] - 2026-11-22T06:19:44.594Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: UiToast is not used within the template of OrdersPage[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/orders/orders-page.ts:33:4:
+[37m      33 │     [32mUiToast[37m,
+         ╵     [32m~~~~~~~[0m
+
+[39m[22m
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m       [2m | [22m[36m75.58 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mchunk-AS6XIDJ2.js[39m  [2m | [22m[2morders-page[22m[2m | [22m[36m78.71 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.689 seconds] - 2026-11-22T06:19:48.816Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m       [2m | [22m[36m75.58 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mchunk-NNT5MA75.js[39m  [2m | [22m[2morders-page[22m[2m | [22m[36m78.75 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.888 seconds] - 2026-11-22T06:20:48.158Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m       [2m | [22m[36m75.58 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mchunk-24BOTWOX.js[39m  [2m | [22m[2morders-page[22m[2m | [22m[36m78.75 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.005 seconds] - 2026-11-22T06:22:06.675Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m[36m75.58 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mchunk-TLVT3A5W.js[39m  [2m | [22m[2morders-page[22m   [2m | [22m[36m78.75 kB[39m[2m | [22m
+[32mchunk-QSL65CZA.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m[36m25.63 kB[39m[2m | [22m
+[32mchunk-D2GD4HAS.js[39m  [2m | [22m[2m-[22m             [2m | [22m[36m18.80 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.639 seconds] - 2026-11-22T06:26:06.440Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m[36m75.58 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mchunk-G7L4W5JI.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m[36m25.86 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.722 seconds] - 2026-11-22T06:26:16.152Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m[36m75.58 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mchunk-CU7AFPNG.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m[36m25.91 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.646 seconds] - 2026-11-22T06:26:20.167Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m[36m75.58 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mchunk-R6FZBRTF.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m[36m26.12 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.775 seconds] - 2026-11-22T06:26:23.839Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m[36m75.58 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mchunk-BOEEE4YF.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m[36m26.17 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.647 seconds] - 2026-11-22T06:26:28.272Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.158 seconds] - 2026-11-22T06:26:47.305Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2459: Module '"../dashboard/dashboard-data"' declares 'DEMO_VOUCHERS' locally, but it is not exported.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/orders/orders-page.ts:9:9:
+[37m      9 │ import { [32mDEMO_VOUCHERS[37m } from '../dashboard/dashboard-data';
+        ╵          [32m~~~~~~~~~~~~~[0m
+
+  'DEMO_VOUCHERS' is declared here.
+
+    src/app/features/dashboard/dashboard-data.ts:4:9:
+[37m      4 │ import { [32mDEMO_VOUCHERS[37m, voucherBalance } from '../vouchers/vouchers...
+        ╵          [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'voucher' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/orders/orders-page.ts:60:67:
+[37m      60 │ ...= computed(() => DEMO_VOUCHERS.map(([32mvoucher[37m) => voucher.orderId));
+         ╵                                        [32m~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m [36m75.58 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m        [2m | [22m [36m56.62 kB[39m[2m | [22m
+[32mchunk-DQIJLHSX.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m13.26 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m [2m | [22m[1m145.45 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m [1mRaw size[22m
+[32mchunk-X6K6P65R.js[39m  [2m | [22m[2morders-page[22m   [2m | [22m [36m78.75 kB[39m[2m | [22m
+[32mchunk-BN3726BA.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m [36m28.80 kB[39m[2m | [22m
+[32mchunk-BYKC2MNM.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m16.36 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.943 seconds] - 2026-11-22T06:26:50.376Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m[36m75.70 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mchunk-4UKM6I3P.js[39m  [2m | [22m[2morders-page[22m   [2m | [22m[36m64.52 kB[39m[2m | [22m
+[32mchunk-4GNVVR5U.js[39m  [2m | [22m[2mvouchers-page[22m [2m | [22m[36m49.24 kB[39m[2m | [22m
+[32mchunk-YY4N2PYT.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m[36m26.20 kB[39m[2m | [22m
+[32mchunk-7EWIO2CM.js[39m  [2m | [22m[2m-[22m             [2m | [22m[36m17.32 kB[39m[2m | [22m
+[32mchunk-ZRK23O4X.js[39m  [2m | [22m[2m-[22m             [2m | [22m[36m14.26 kB[39m[2m | [22m
+[32mchunk-6YH7NUJ2.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m2.86 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.383 seconds] - 2026-11-22T06:28:05.410Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: UiIcon is not used within the template of VouchersPage[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/vouchers/vouchers-page.ts:28:4:
+[37m      28 │     [32mUiIcon[37m,
+         ╵     [32m~~~~~~[0m
+
+[39m[22m
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m[36m75.74 kB[39m[2m | [22m
+[32mchunk-ZBP3QQAF.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m9.26 kB[39m[2m | [22m
+[32mchunk-QQWZES24.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m4.01 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mchunk-GQ5B637O.js[39m  [2m | [22m[2morders-page[22m   [2m | [22m[36m64.56 kB[39m[2m | [22m
+[32mchunk-QBLDW5IS.js[39m  [2m | [22m[2mvouchers-page[22m [2m | [22m[36m49.19 kB[39m[2m | [22m
+[32mchunk-OQBYIC4U.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m[36m26.24 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.049 seconds] - 2026-11-22T06:28:18.517Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.418 seconds] - 2026-11-22T06:31:05.748Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2459: Module '"../../dashboard-data"' declares 'DemoAttendance' locally, but it is not exported.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/components/dashboard-activity/dashboard-activity.ts:6:14:
+[37m      6 │ import type { [32mDemoAttendance[37m } from '../../dashboard-data';
+        ╵               [32m~~~~~~~~~~~~~~[0m
+
+  'DemoAttendance' is declared here.
+
+    src/app/features/dashboard/dashboard-data.ts:3:27:
+[37m      3 │ ...rt { DEMO_ATTENDANCES, [32mtype DemoAttendance[37m } from '../attendance...
+        ╵                           [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2459: Module '"../dashboard/dashboard-data"' declares 'DEMO_ATTENDANCES' locally, but it is not exported.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/vouchers/vouchers-page.ts:9:9:
+[37m      9 │ import { [32mDEMO_ATTENDANCES[37m } from '../dashboard/dashboard-data';
+        ╵          [32m~~~~~~~~~~~~~~~~[0m
+
+  'DEMO_ATTENDANCES' is declared here.
+
+    src/app/features/dashboard/dashboard-data.ts:3:9:
+[37m      3 │ import { [32mDEMO_ATTENDANCES[37m, type DemoAttendance } from '../attendanc...
+        ╵          [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'item' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/vouchers/vouchers-page.ts:56:70:
+[37m      56 │ ...ds = computed(() => DEMO_ATTENDANCES.map(([32mitem[37m) => item.voucher));
+         ╵                                              [32m~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.384 seconds] - 2026-11-22T06:31:09.852Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2459: Module '"../dashboard/dashboard-data"' declares 'DEMO_ATTENDANCES' locally, but it is not exported.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/vouchers/vouchers-page.ts:9:9:
+[37m      9 │ import { [32mDEMO_ATTENDANCES[37m } from '../dashboard/dashboard-data';
+        ╵          [32m~~~~~~~~~~~~~~~~[0m
+
+  'DEMO_ATTENDANCES' is declared here.
+
+    src/app/features/dashboard/dashboard-data.ts:3:9:
+[37m      3 │ import { [32mDEMO_ATTENDANCES[37m, type DemoAttendance } from '../attendanc...
+        ╵          [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'item' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/vouchers/vouchers-page.ts:56:70:
+[37m      56 │ ...ds = computed(() => DEMO_ATTENDANCES.map(([32mitem[37m) => item.voucher));
+         ╵                                              [32m~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m [36m75.74 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m        [2m | [22m [36m56.62 kB[39m[2m | [22m
+[32mchunk-ZBP3QQAF.js[39m  [2m | [22m[2m-[22m             [2m | [22m  [36m9.26 kB[39m[2m | [22m
+[32mchunk-QQWZES24.js[39m  [2m | [22m[2m-[22m             [2m | [22m  [36m4.01 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m [2m | [22m[1m145.63 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m [1mRaw size[22m
+[32mchunk-GQ5B637O.js[39m  [2m | [22m[2morders-page[22m   [2m | [22m [36m64.56 kB[39m[2m | [22m
+[32mchunk-3ZYYVBES.js[39m  [2m | [22m[2mvouchers-page[22m [2m | [22m [36m49.19 kB[39m[2m | [22m
+[32mchunk-KSS4YXKM.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m [36m28.03 kB[39m[2m | [22m
+[32mchunk-7EWIO2CM.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m17.32 kB[39m[2m | [22m
+[32mchunk-ZRK23O4X.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m14.26 kB[39m[2m | [22m
+[32mchunk-5J5M4XOE.js[39m  [2m | [22m[2m-[22m             [2m | [22m  [36m1.10 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.860 seconds] - 2026-11-22T06:31:13.939Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m75.88 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m[36m57.66 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-4ZBP2QKA.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m[36m64.59 kB[39m[2m | [22m
+[32mchunk-4KQ4BD6O.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m[36m49.23 kB[39m[2m | [22m
+[32mchunk-6TG7DRNO.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m43.27 kB[39m[2m | [22m
+[32mchunk-GG26KE47.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m[36m28.03 kB[39m[2m | [22m
+[32mchunk-CTSXWESN.js[39m  [2m | [22m[2m-[22m               [2m | [22m[36m17.32 kB[39m[2m | [22m
+[32mchunk-LEPZLMNE.js[39m  [2m | [22m[2m-[22m               [2m | [22m[36m12.04 kB[39m[2m | [22m
+[32mchunk-LN3LWNNZ.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m3.66 kB[39m[2m | [22m
+[32mchunk-W23XK3I4.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m2.21 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.584 seconds] - 2026-11-22T06:32:45.658Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m75.88 kB[39m[2m | [22m
+[32mchunk-5CNWPHRZ.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m9.62 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-NGNS5RUA.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m[36m64.59 kB[39m[2m | [22m
+[32mchunk-UGA445MY.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m43.27 kB[39m[2m | [22m
+[32mchunk-LDNDZ2CY.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m[36m28.03 kB[39m[2m | [22m
+
+Application bundle generation complete. [2.127 seconds] - 2026-11-22T06:47:15.428Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.193 seconds] - 2026-11-22T06:47:16.630Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module './features/reports/reports-page' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.routes.ts:36:36:
+[37m      36 │ ...: () => import([32m'./features/reports/reports-page'[37m).then((m) => m...
+         ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "./features/reports/reports-page"[0m
+
+    src/app/app.routes.ts:32:44:
+[37m      32 │ ...: () => import([32m'./features/reports/reports-page'[37m).then((m) => m...
+         ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m [36m76.01 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m [36m58.93 kB[39m[2m | [22m
+[32mchunk-5CNWPHRZ.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m9.62 kB[39m[2m | [22m
+[32mchunk-QQWZES24.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m4.01 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m   [2m | [22m[1m148.57 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mchunk-NGNS5RUA.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m [36m64.59 kB[39m[2m | [22m
+[32mchunk-4KQ4BD6O.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m [36m49.23 kB[39m[2m | [22m
+[32mchunk-NDYHZTD2.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m [36m43.27 kB[39m[2m | [22m
+[32mchunk-V32UWSSG.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m [36m32.18 kB[39m[2m | [22m
+[32mchunk-4NVL7BHM.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m [36m20.55 kB[39m[2m | [22m
+[32mchunk-CTSXWESN.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m17.32 kB[39m[2m | [22m
+[32mchunk-LEPZLMNE.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m12.04 kB[39m[2m | [22m
+[32mchunk-FWTCN55I.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m7.45 kB[39m[2m | [22m
+[32mchunk-LN3LWNNZ.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.66 kB[39m[2m | [22m
+[32mchunk-W23XK3I4.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m2.21 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.557 seconds] - 2026-11-22T06:49:00.464Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.01 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-DZ6PBX3G.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m[36m64.59 kB[39m[2m | [22m
+[32mchunk-K76I2EGQ.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m[36m49.23 kB[39m[2m | [22m
+[32mchunk-LYR43IJP.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m43.27 kB[39m[2m | [22m
+[32mchunk-4GPFXQ2C.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m[36m32.18 kB[39m[2m | [22m
+[32mchunk-NYVSWYPA.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m[36m20.55 kB[39m[2m | [22m
+[32mchunk-AQGYNHVI.js[39m  [2m | [22m[2m-[22m               [2m | [22m[36m17.39 kB[39m[2m | [22m
+[32mchunk-2LMVEWMB.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m3.66 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.045 seconds] - 2026-11-22T06:52:31.609Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m          [2m | [22m[36m76.01 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m         [2m | [22m[1mRaw size[22m
+[32mchunk-SNCIGGAJ.js[39m  [2m | [22m[2mreports-page[22m  [2m | [22m[36m32.18 kB[39m[2m | [22m
+[32mchunk-DASNHEXR.js[39m  [2m | [22m[2mdashboard-page[22m[2m | [22m[36m20.55 kB[39m[2m | [22m
+[32mchunk-2OYKBUNN.js[39m  [2m | [22m[2m-[22m             [2m | [22m [36m7.45 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.912 seconds] - 2026-11-22T06:52:33.357Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.763 seconds] - 2026-11-22T06:52:49.307Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../dashboard-data"' has no exported member 'DashboardMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/components/dashboard-metrics/dashboard-metrics.ts:3:14:
+[37m      3 │ import type { [32mDashboardMetric[37m } from '../../dashboard-data';
+        ╵               [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2459: Module '"./dashboard-data"' declares 'visibleAttendances' locally, but it is not exported.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard-page.ts:8:32:
+[37m      8 │ ...buildDashboardMetrics, [32mvisibleAttendances[37m } from './dashboard-da...
+        ╵                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+  'visibleAttendances' is declared here.
+
+    src/app/features/dashboard/dashboard-data.ts:2:27:
+[37m      2 │ ...rt { DEMO_ATTENDANCES, [32mvisibleAttendances[37m } from '../attendances...
+        ╵                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.789 seconds] - 2026-11-22T06:52:50.642Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../dashboard-data"' has no exported member 'DashboardMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/components/dashboard-metrics/dashboard-metrics.ts:3:14:
+[37m      3 │ import type { [32mDashboardMetric[37m } from '../../dashboard-data';
+        ╵               [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2459: Module '"./dashboard-data"' declares 'visibleAttendances' locally, but it is not exported.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard-page.ts:8:32:
+[37m      8 │ ...buildDashboardMetrics, [32mvisibleAttendances[37m } from './dashboard-da...
+        ╵                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+  'visibleAttendances' is declared here.
+
+    src/app/features/dashboard/dashboard-data.ts:2:27:
+[37m      2 │ ...rt { DEMO_ATTENDANCES, [32mvisibleAttendances[37m } from '../attendances...
+        ╵                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../reports-data"' has no exported member 'ReportMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/components/report-metrics/report-metrics.ts:3:14:
+[37m      3 │ import type { [32mReportMetric[37m } from '../../reports-data';
+        ╵               [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/reports-page.ts:39:65:
+[37m      39 │ ...ry = computed(() => buildReportSummary([32mundefined[37m, this.branch()));
+         ╵                                           [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/reports-page.ts:40:67:
+[37m      40 │ ...d(() => countActiveVouchers([32mundefined[37m, undefined, this.branch()));
+         ╵                                [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/reports-page.ts:50:31:
+[37m      50 │     const csv = buildReportCsv([32mundefined[37m, this.branch());
+         ╵                                [32m~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.843 seconds] - 2026-11-22T06:53:07.895Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2459: Module '"./dashboard-data"' declares 'visibleAttendances' locally, but it is not exported.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard-page.ts:8:32:
+[37m      8 │ ...buildDashboardMetrics, [32mvisibleAttendances[37m } from './dashboard-da...
+        ╵                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+  'visibleAttendances' is declared here.
+
+    src/app/features/dashboard/dashboard-data.ts:2:27:
+[37m      2 │ ...rt { DEMO_ATTENDANCES, [32mvisibleAttendances[37m } from '../attendances...
+        ╵                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../reports-data"' has no exported member 'ReportMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/components/report-metrics/report-metrics.ts:3:14:
+[37m      3 │ import type { [32mReportMetric[37m } from '../../reports-data';
+        ╵               [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/reports-page.ts:39:65:
+[37m      39 │ ...ry = computed(() => buildReportSummary([32mundefined[37m, this.branch()));
+         ╵                                           [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/reports-page.ts:40:67:
+[37m      40 │ ...d(() => countActiveVouchers([32mundefined[37m, undefined, this.branch()));
+         ╵                                [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/reports-page.ts:50:31:
+[37m      50 │     const csv = buildReportCsv([32mundefined[37m, this.branch());
+         ╵                                [32m~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.841 seconds] - 2026-11-22T06:53:08.740Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard-page.ts:44:8:
+[37m      44 │     [...[32mvisibleAttendances[37m(this.attendantName(), this.state.branch...
+         ╵         [32m~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'branch' was not provided.
+
+    src/app/features/attendances/attendances-data.ts:53:2:
+[37m      53 │   [32mbranch: string[37m,
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../reports-data"' has no exported member 'ReportMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/components/report-metrics/report-metrics.ts:3:14:
+[37m      3 │ import type { [32mReportMetric[37m } from '../../reports-data';
+        ╵               [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/reports-page.ts:39:65:
+[37m      39 │ ...ry = computed(() => buildReportSummary([32mundefined[37m, this.branch()));
+         ╵                                           [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/reports-page.ts:40:67:
+[37m      40 │ ...d(() => countActiveVouchers([32mundefined[37m, undefined, this.branch()));
+         ╵                                [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/reports-page.ts:50:31:
+[37m      50 │     const csv = buildReportCsv([32mundefined[37m, this.branch());
+         ╵                                [32m~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.788 seconds] - 2026-11-22T06:53:09.532Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard-page.ts:44:8:
+[37m      44 │     [...[32mvisibleAttendances[37m(this.attendantName(), this.state.branch...
+         ╵         [32m~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'branch' was not provided.
+
+    src/app/features/attendances/attendances-data.ts:53:2:
+[37m      53 │   [32mbranch: string[37m,
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../reports-data"' has no exported member 'ReportMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/components/report-metrics/report-metrics.ts:3:14:
+[37m      3 │ import type { [32mReportMetric[37m } from '../../reports-data';
+        ╵               [32m~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.829 seconds] - 2026-11-22T06:53:10.365Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard-page.ts:44:8:
+[37m      44 │     [...[32mvisibleAttendances[37m(this.attendantName(), this.state.branch...
+         ╵         [32m~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'branch' was not provided.
+
+    src/app/features/attendances/attendances-data.ts:53:2:
+[37m      53 │   [32mbranch: string[37m,
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../reports-data"' has no exported member 'ReportMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/components/report-metrics/report-metrics.ts:3:14:
+[37m      3 │ import type { [32mReportMetric[37m } from '../../reports-data';
+        ╵               [32m~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.870 seconds] - 2026-11-22T06:53:11.238Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard-page.ts:44:8:
+[37m      44 │     [...[32mvisibleAttendances[37m(this.attendantName(), this.state.branch...
+         ╵         [32m~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'branch' was not provided.
+
+    src/app/features/attendances/attendances-data.ts:53:2:
+[37m      53 │   [32mbranch: string[37m,
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../reports-data"' has no exported member 'ReportMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/components/report-metrics/report-metrics.ts:3:14:
+[37m      3 │ import type { [32mReportMetric[37m } from '../../reports-data';
+        ╵               [32m~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.689 seconds] - 2026-11-22T06:53:11.931Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 3 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard-page.ts:44:8:
+[37m      44 │     [...[32mvisibleAttendances[37m(this.attendantName(), this.state.branch...
+         ╵         [32m~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'branch' was not provided.
+
+    src/app/features/attendances/attendances-data.ts:53:2:
+[37m      53 │   [32mbranch: string[37m,
+         ╵   [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../reports-data"' has no exported member 'ReportMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/components/report-metrics/report-metrics.ts:3:14:
+[37m      3 │ import type { [32mReportMetric[37m } from '../../reports-data';
+        ╵               [32m~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.729 seconds] - 2026-11-22T06:53:30.274Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../reports-data"' has no exported member 'ReportMetric'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/reports/components/report-metrics/report-metrics.ts:3:14:
+[37m      3 │ import type { [32mReportMetric[37m } from '../../reports-data';
+        ╵               [32m~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m [36m76.01 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m [36m58.93 kB[39m[2m | [22m
+[32mchunk-5CNWPHRZ.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m9.62 kB[39m[2m | [22m
+[32mchunk-QQWZES24.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m4.01 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m   [2m | [22m[1m148.57 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mchunk-5NKRSONK.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m [36m64.59 kB[39m[2m | [22m
+[32mchunk-VBW5A6BQ.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m [36m49.23 kB[39m[2m | [22m
+[32mchunk-4LQWDT7M.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m [36m43.27 kB[39m[2m | [22m
+[32mchunk-RWPJRBPU.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m [36m31.07 kB[39m[2m | [22m
+[32mchunk-K4YF6XLS.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m [36m20.30 kB[39m[2m | [22m
+[32mchunk-HGRYLQMN.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m17.47 kB[39m[2m | [22m
+[32mchunk-LEPZLMNE.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m12.04 kB[39m[2m | [22m
+[32mchunk-2OYKBUNN.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m7.45 kB[39m[2m | [22m
+[32mchunk-EUD2656Q.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.66 kB[39m[2m | [22m
+[32mchunk-W23XK3I4.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m2.21 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.833 seconds] - 2026-11-22T06:53:31.414Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.01 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m[36m59.13 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-Z6ATW3LM.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m[36m64.59 kB[39m[2m | [22m
+[32mchunk-54DKAKHM.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m[36m49.23 kB[39m[2m | [22m
+[32mchunk-YXI7NPUZ.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m43.27 kB[39m[2m | [22m
+[32mchunk-H2YLCGRX.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m[36m31.07 kB[39m[2m | [22m
+[32mchunk-J6QIWVVN.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m[36m20.30 kB[39m[2m | [22m
+[32mchunk-YN45ES4A.js[39m  [2m | [22m[2m-[22m               [2m | [22m[36m17.54 kB[39m[2m | [22m
+[32mchunk-CQ4EO6MR.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m3.66 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.720 seconds] - 2026-11-22T06:54:56.259Z
+
+Stylesheet update sent to client(s).
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m       [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m        [2m | [22m[36m76.01 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m       [2m | [22m[1mRaw size[22m
+[32mchunk-IGAZES6M.js[39m  [2m | [22m[2mreports-page[22m[2m | [22m[36m31.03 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.738 seconds] - 2026-11-22T06:54:57.844Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m76.25 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.938 seconds] - 2026-11-22T06:56:11.304Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m76.26 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.733 seconds] - 2026-11-22T06:56:12.040Z
+
+Component update sent to client(s).
+[1m[31mComponent update failed: ctx.menuOpen is not a function
+TypeError: ctx.menuOpen is not a function
+    at AdminHeader_Template (http://localhost:4200/@ng/component?c=src%2Fapp%2Flayouts%2Fadmin%2Fcomponents%2Fheader%2Fadmin-header.ts%40AdminHeader&t=1795330572043:30:56)
+    at executeTemplate (http://localhost:4200/@fs/C:/dev/station-jose%20-%20Copy/.angular/cache/21.2.30/station/vite/deps/chunk-UVPOTV3Y.js?v=cde42733:5334:5)
+    at refreshView (http://localhost:4200/@fs/C:/dev/station-jose%20-%20Copy/.angular/cache/21.2.30/station/vite/deps/chunk-UVPOTV3Y.js?v=cde42733:5995:7)
+    at recreate (http://localhost:4200/@fs/C:/dev/station-jose%20-%20Copy/.angular/cache/21.2.30/station/vite/deps/chunk-UVPOTV3Y.js?v=cde42733:17240:5)
+    at executeWithInvalidateFallback (http://localhost:4200/@fs/C:/dev/station-jose%20-%20Copy/.angular/cache/21.2.30/station/vite/deps/chunk-UVPOTV3Y.js?v=cde42733:17250:5)
+    at http://localhost:4200/@fs/C:/dev/station-jose%20-%20Copy/.angular/cache/21.2.30/station/vite/deps/chunk-UVPOTV3Y.js?v=cde42733:17245:20
+    at NoopNgZone.run (http://localhost:4200/@fs/C:/dev/station-jose%20-%20Copy/.angular/cache/21.2.30/station/vite/deps/chunk-NZYT55QD.js?v=cde42733:3184:15)
+    at recreateLView (http://localhost:4200/@fs/C:/dev/station-jose%20-%20Copy/.angular/cache/21.2.30/station/vite/deps/chunk-UVPOTV3Y.js?v=cde42733:17245:10)
+    at recreateMatchingLViews (http://localhost:4200/@fs/C:/dev/station-jose%20-%20Copy/.angular/cache/21.2.30/station/vite/deps/chunk-UVPOTV3Y.js?v=cde42733:17194:5)
+    at recreateMatchingLViews (http://localhost:4200/@fs/C:/dev/station-jose%20-%20Copy/.angular/cache/21.2.30/station/vite/deps/chunk-UVPOTV3Y.js?v=cde42733:17207:7)
+Please consider reporting the error at https://github.com/angular/angular-cli/issues[39m[22m
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m76.35 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.894 seconds] - 2026-11-22T06:56:13.065Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m [36m76.51 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m [36m59.43 kB[39m[2m | [22m
+[32mchunk-ZNS7ORAB.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.13 kB[39m[2m | [22m
+[32mchunk-VUJOFXKG.js[39m  [2m | [22m[2m-[22m               [2m | [22m[36m938 bytes[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mchunk-NYBOSF3D.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m [36m64.71 kB[39m[2m | [22m
+[32mchunk-QCOZDTKH.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m [36m49.35 kB[39m[2m | [22m
+[32mchunk-XEMPCYDF.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m [36m43.34 kB[39m[2m | [22m
+[32mchunk-V2GL2TID.js[39m  [2m | [22m[2musers-page[22m      [2m | [22m [36m40.92 kB[39m[2m | [22m
+[32mchunk-AF4WHGAF.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m [36m31.10 kB[39m[2m | [22m
+[32mchunk-SQ2DDLO4.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m [36m20.37 kB[39m[2m | [22m
+[32mchunk-I55WCHQQ.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m13.30 kB[39m[2m | [22m
+[32mchunk-B4YFRGK6.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m6.23 kB[39m[2m | [22m
+[32mchunk-MKNU5CH3.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m5.74 kB[39m[2m | [22m
+[32mchunk-F7ND2AXH.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m4.29 kB[39m[2m | [22m
+[32mchunk-H5YG4PDA.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.66 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.979 seconds] - 2026-11-22T07:01:09.473Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m     [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m      [2m | [22m[36m76.51 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m     [2m | [22m[1mRaw size[22m
+[32mchunk-HFNTUW2Z.js[39m  [2m | [22m[2musers-page[22m[2m | [22m[36m40.94 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.882 seconds] - 2026-11-22T07:05:03.568Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m76.81 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.186 seconds] - 2026-11-22T07:05:06.750Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m     [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m      [2m | [22m[36m76.81 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m     [2m | [22m[1mRaw size[22m
+[32mchunk-YVSPIUEZ.js[39m  [2m | [22m[2musers-page[22m[2m | [22m[36m41.08 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.043 seconds] - 2026-11-22T07:05:07.799Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m [36m76.81 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m [36m59.43 kB[39m[2m | [22m
+[32mchunk-5CNWPHRZ.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m9.62 kB[39m[2m | [22m
+[32mchunk-ZNS7ORAB.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.13 kB[39m[2m | [22m
+[32mchunk-VUJOFXKG.js[39m  [2m | [22m[2m-[22m               [2m | [22m[36m938 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m   [2m | [22m[1m149.92 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mchunk-NYBOSF3D.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m [36m64.71 kB[39m[2m | [22m
+[32mchunk-QCOZDTKH.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m [36m49.35 kB[39m[2m | [22m
+[32mchunk-XEMPCYDF.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m [36m43.34 kB[39m[2m | [22m
+[32mchunk-YVSPIUEZ.js[39m  [2m | [22m[2musers-page[22m      [2m | [22m [36m41.08 kB[39m[2m | [22m
+[32mchunk-AF4WHGAF.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m [36m31.10 kB[39m[2m | [22m
+[32mchunk-SQ2DDLO4.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m [36m20.37 kB[39m[2m | [22m
+[32mchunk-I55WCHQQ.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m13.30 kB[39m[2m | [22m
+[32mchunk-2OYKBUNN.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m7.45 kB[39m[2m | [22m
+[32mchunk-B4YFRGK6.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m6.23 kB[39m[2m | [22m
+[32mchunk-MKNU5CH3.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m5.74 kB[39m[2m | [22m
+[32mchunk-F7ND2AXH.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m4.29 kB[39m[2m | [22m
+[32mchunk-H5YG4PDA.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.66 kB[39m[2m | [22m
+[32mchunk-W23XK3I4.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m2.21 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.005 seconds] - 2026-11-22T07:05:08.807Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m     [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m      [2m | [22m[36m76.81 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m    [2m | [22m[36m59.48 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m     [2m | [22m[1mRaw size[22m
+[32mchunk-BKEI6AEY.js[39m  [2m | [22m[2musers-page[22m[2m | [22m[36m41.08 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.805 seconds] - 2026-11-22T07:05:18.889Z
+
+Stylesheet update sent to client(s).
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.81 kB[39m[2m | [22m
+[32mchunk-PJZB4URW.js[39m  [2m | [22m[2m-[22m               [2m | [22m[36m10.90 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-6MP44Z7Y.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m[36m64.71 kB[39m[2m | [22m
+[32mchunk-ZYS4QJOI.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m43.34 kB[39m[2m | [22m
+[32mchunk-HH62FYB2.js[39m  [2m | [22m[2musers-page[22m      [2m | [22m[36m41.08 kB[39m[2m | [22m
+[32mchunk-LAPPBJTA.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m[36m31.10 kB[39m[2m | [22m
+[32mchunk-LZFZFVRU.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m[36m20.37 kB[39m[2m | [22m
+[32mchunk-JW5UNQYF.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m7.45 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.497 seconds] - 2026-11-22T07:09:15.833Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m [36m76.81 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m [36m59.48 kB[39m[2m | [22m
+[32mchunk-PJZB4URW.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m10.90 kB[39m[2m | [22m
+[32mchunk-ZNS7ORAB.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.13 kB[39m[2m | [22m
+[32mchunk-VUJOFXKG.js[39m  [2m | [22m[2m-[22m               [2m | [22m[36m938 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m   [2m | [22m[1m151.25 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mchunk-6MP44Z7Y.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m [36m64.71 kB[39m[2m | [22m
+[32mchunk-QCOZDTKH.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m [36m49.35 kB[39m[2m | [22m
+[32mchunk-ZYS4QJOI.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m [36m43.34 kB[39m[2m | [22m
+[32mchunk-HH62FYB2.js[39m  [2m | [22m[2musers-page[22m      [2m | [22m [36m41.08 kB[39m[2m | [22m
+[32mchunk-LAPPBJTA.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m [36m31.10 kB[39m[2m | [22m
+[32mchunk-LZFZFVRU.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m [36m20.37 kB[39m[2m | [22m
+[32mchunk-I55WCHQQ.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m13.30 kB[39m[2m | [22m
+[32mchunk-JW5UNQYF.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m7.45 kB[39m[2m | [22m
+[32mchunk-B4YFRGK6.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m6.23 kB[39m[2m | [22m
+[32mchunk-MKNU5CH3.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m5.74 kB[39m[2m | [22m
+[32mchunk-F7ND2AXH.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m4.29 kB[39m[2m | [22m
+[32mchunk-H5YG4PDA.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.66 kB[39m[2m | [22m
+[32mchunk-W23XK3I4.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m2.21 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.124 seconds] - 2026-11-22T07:09:16.961Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m [2m | [22m[1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m[2m | [22m[36m59.89 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.849 seconds] - 2026-11-22T07:09:26.377Z
+
+Stylesheet update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m       [2m | [22m[36m76.81 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mchunk-N5BYLPMX.js[39m  [2m | [22m[2morders-page[22m[2m | [22m[36m64.73 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.897 seconds] - 2026-11-22T07:09:29.009Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: UiIcon is not used within the template of OrdersTable[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/orders/components/orders-table/orders-table.ts:8:12:
+[37m      8 │   imports: [[32mUiIcon[37m, UiStatusBadge],
+        ╵             [32m~~~~~~[0m
+
+[39m[22m
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m       [2m | [22m[36m76.81 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m     [2m | [22m[36m59.92 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m      [2m | [22m[1mRaw size[22m
+[32mchunk-B2G4PRY7.js[39m  [2m | [22m[2morders-page[22m[2m | [22m[36m66.75 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.069 seconds] - 2026-11-22T07:09:30.083Z
+
+Stylesheet update sent to client(s).
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.78 kB[39m[2m | [22m
+[32mchunk-EAWIECHF.js[39m  [2m | [22m[2m-[22m               [2m | [22m[36m11.78 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-2RFCD4M2.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m[36m66.71 kB[39m[2m | [22m
+[32mchunk-3ON4FNV2.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m[36m49.38 kB[39m[2m | [22m
+[32mchunk-TQ7UV3DD.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m43.31 kB[39m[2m | [22m
+[32mchunk-G2J42RFQ.js[39m  [2m | [22m[2musers-page[22m      [2m | [22m[36m41.04 kB[39m[2m | [22m
+[32mchunk-R5JGPYYY.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m[36m31.07 kB[39m[2m | [22m
+[32mchunk-OOCVU2MT.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m[36m20.34 kB[39m[2m | [22m
+[32mchunk-N7VWTPRL.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m7.45 kB[39m[2m | [22m
+[32mchunk-57KTYVDT.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m3.66 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.009 seconds] - 2026-11-22T07:09:37.299Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: UiIcon is not used within the template of VouchersTable[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/vouchers/components/vouchers-table/vouchers-table.ts:15:12:
+[37m      15 │   imports: [[32mUiIcon[37m, UiStatusBadge],
+         ╵             [32m~~~~~~[0m
+
+[39m[22m
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m[36m76.78 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m        [2m | [22m[1mRaw size[22m
+[32mchunk-QYIJ6QXU.js[39m  [2m | [22m[2mvouchers-page[22m[2m | [22m[36m51.40 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.089 seconds] - 2026-11-22T07:09:38.394Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m[36m76.78 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m        [2m | [22m[1mRaw size[22m
+[32mchunk-GR3HYT7B.js[39m  [2m | [22m[2morders-page[22m  [2m | [22m[36m66.71 kB[39m[2m | [22m
+[32mchunk-X5DL3VZC.js[39m  [2m | [22m[2mvouchers-page[22m[2m | [22m[36m51.40 kB[39m[2m | [22m
+[32mchunk-2WL26IYO.js[39m  [2m | [22m[2musers-page[22m   [2m | [22m[36m41.04 kB[39m[2m | [22m
+[32mchunk-GOXFOARC.js[39m  [2m | [22m[2m-[22m            [2m | [22m [36m6.29 kB[39m[2m | [22m
+[32mchunk-4X4MPYPM.js[39m  [2m | [22m[2m-[22m            [2m | [22m [36m5.74 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.963 seconds] - 2026-11-22T07:16:22.461Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.78 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-KZ5G4IRY.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m43.20 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.673 seconds] - 2026-11-22T07:24:25.288Z
+
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+Application bundle generation failed. [1.052 seconds] - 2026-11-22T07:24:42.216Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: AttendanceForm is not used within the template of AttendancesPage[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.ts:24:12:
+[37m      24 │   imports: [[32mAttendanceForm[37m, AttendanceHistory, AttendanceRecent, U...
+         ╵             [32m~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'registerOpen' does not exist on type 'AttendancesPage'. Did you mean 'register'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:22:19:
+[37m      22 │           (click)="[32mregisterOpen[37m.set(true)"
+         ╵                    [32m~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-ui-icon' is not a known element:
+1. If 'app-ui-icon' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-ui-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:24:10:
+[37m      24 │           [32m<app-ui-icon name="plus" [size]="14" />[37m
+         ╵           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'size' since it isn't a known property of 'app-ui-icon'.
+1. If 'app-ui-icon' is an Angular component and it has 'size' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-ui-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:24:35:
+[37m      24 │           <app-ui-icon name="plus" [32m[size]="14"[37m />
+         ╵                                    [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-attendance-form-dialog' is not a known element:
+1. If 'app-attendance-form-dialog' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-attendance-form-dialog' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:55:2:
+[37m      55 │   [32m<app-attendance-form-dialog[37m
+         ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'visible' since it isn't a known property of 'app-attendance-form-dialog'.
+1. If 'app-attendance-form-dialog' is an Angular component and it has 'visible' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-attendance-form-dialog' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:56:4:
+[37m      56 │     [32m[(visible)]="registerOpen"[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'registerOpen' does not exist on type 'AttendancesPage'. Did you mean 'register'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:56:17:
+[37m      56 │     [(visible)]="[32mregisterOpen[37m"
+         ╵                  [32m~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'registerOpen' does not exist on type 'AttendancesPage'. Did you mean 'register'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:56:17:
+[37m      56 │     [(visible)]="[32mregisterOpen[37m"
+         ╵                  [32m~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'orders' since it isn't a known property of 'app-attendance-form-dialog'.
+1. If 'app-attendance-form-dialog' is an Angular component and it has 'orders' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-attendance-form-dialog' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:57:4:
+[37m      57 │     [32m[orders]="availableOrders()"[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'vouchers' since it isn't a known property of 'app-attendance-form-dialog'.
+1. If 'app-attendance-form-dialog' is an Angular component and it has 'vouchers' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-attendance-form-dialog' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:58:4:
+[37m      58 │     [32m[vouchers]="vouchers()"[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'branch' since it isn't a known property of 'app-attendance-form-dialog'.
+1. If 'app-attendance-form-dialog' is an Angular component and it has 'branch' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-attendance-form-dialog' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:59:4:
+[37m      59 │     [32m[branch]="branch()"[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'branchLocked' since it isn't a known property of 'app-attendance-form-dialog'.
+1. If 'app-attendance-form-dialog' is an Angular component and it has 'branchLocked' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-attendance-form-dialog' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:60:4:
+[37m      60 │     [32m[branchLocked]="branchLocked()"[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'resetToken' since it isn't a known property of 'app-attendance-form-dialog'.
+1. If 'app-attendance-form-dialog' is an Angular component and it has 'resetToken' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-attendance-form-dialog' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:61:4:
+[37m      61 │     [32m[resetToken]="resetToken()"[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type 'Event' is not assignable to parameter of type 'AttendanceRequest'.
+  Type 'Event' is missing the following properties from type 'AttendanceRequest': orderId, voucherId, issuer, issuerType, and 3 more.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/attendances/attendances-page.html:62:25:
+[37m      62 │     (register)="register([32m$event[37m)"
+         ╵                          [32m~~~~~~[0m
+
+  Error occurs in the template of component AttendancesPage.
+
+    src/app/features/attendances/attendances-page.ts:26:15:
+[37m      26 │   templateUrl: [32m'./attendances-page.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m [36m76.78 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m [36m60.06 kB[39m[2m | [22m
+[32mchunk-EAWIECHF.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m11.78 kB[39m[2m | [22m
+[32mchunk-ZNS7ORAB.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.13 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m   [2m | [22m[1m151.74 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m
+[32mchunk-GR3HYT7B.js[39m  [2m | [22m[2morders-page[22m     [2m | [22m [36m66.71 kB[39m[2m | [22m
+[32mchunk-X5DL3VZC.js[39m  [2m | [22m[2mvouchers-page[22m   [2m | [22m [36m51.40 kB[39m[2m | [22m
+[32mchunk-T25BQXKE.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m [36m50.78 kB[39m[2m | [22m
+[32mchunk-2WL26IYO.js[39m  [2m | [22m[2musers-page[22m      [2m | [22m [36m41.04 kB[39m[2m | [22m
+[32mchunk-R5JGPYYY.js[39m  [2m | [22m[2mreports-page[22m    [2m | [22m [36m31.07 kB[39m[2m | [22m
+[32mchunk-OOCVU2MT.js[39m  [2m | [22m[2mdashboard-page[22m  [2m | [22m [36m20.34 kB[39m[2m | [22m
+[32mchunk-I55WCHQQ.js[39m  [2m | [22m[2m-[22m               [2m | [22m [36m13.30 kB[39m[2m | [22m
+[32mchunk-N7VWTPRL.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m7.45 kB[39m[2m | [22m
+[32mchunk-GOXFOARC.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m6.29 kB[39m[2m | [22m
+[32mchunk-4X4MPYPM.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m5.74 kB[39m[2m | [22m
+[32mchunk-F7ND2AXH.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m4.29 kB[39m[2m | [22m
+[32mchunk-57KTYVDT.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m3.66 kB[39m[2m | [22m
+[32mchunk-W23XK3I4.js[39m  [2m | [22m[2m-[22m               [2m | [22m  [36m2.21 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.984 seconds] - 2026-11-22T07:24:44.461Z
+
+Page reload sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.78 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m[36m60.56 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-YAPOKKRP.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m51.65 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.361 seconds] - 2026-11-22T07:28:43.023Z
+
+Stylesheet update sent to client(s).
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.78 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m[36m60.61 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-GHLS4QAK.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m49.59 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.352 seconds] - 2026-11-22T07:29:00.182Z
+
+Stylesheet update sent to client(s).
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.78 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m[36m60.88 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-4I2LOBLN.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m49.56 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.332 seconds] - 2026-11-22T07:30:14.011Z
+
+Stylesheet update sent to client(s).
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.78 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m[36m61.05 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-HLGV4X2C.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m49.56 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.358 seconds] - 2026-11-22T07:30:33.122Z
+
+Stylesheet update sent to client(s).
+Component update sent to client(s).
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m            [2m | [22m[36m76.78 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m          [2m | [22m[36m61.16 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m           [2m | [22m[1mRaw size[22m
+[32mchunk-IULQ6ESW.js[39m  [2m | [22m[2mattendances-page[22m[2m | [22m[36m49.58 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.844 seconds] - 2026-11-22T07:31:07.508Z
+
+Stylesheet update sent to client(s).
+Component update sent to client(s).

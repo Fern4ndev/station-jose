@@ -1,0 +1,28 @@
+<article
+  class="min-h-[115px] rounded-[17px] border border-[#e6ebeb] bg-[rgba(255,255,255,0.78)] p-[15px_16px] shadow-[0_6px_21px_rgba(31,58,60,0.035)] max-[760px]:min-h-[104px] max-[760px]:rounded-[14px] max-[760px]:p-[12px]"
+>
+  <div class="flex items-center justify-between text-[10px] font-[540] text-[#77868b]">
+    <span>{{ label() }}</span>
+    <span
+      class="grid h-[29px] w-[29px] place-items-center rounded-[10px]"
+      [class]="tone() === 'amber' ? 'bg-[#fcf3e7] text-[#b87825]' : 'bg-[#edf7f4] text-[#2e8b7b]'"
+    >
+      <app-ui-icon [name]="icon()" [size]="15" />
+    </span>
+  </div>
+
+  <div class="mt-[11px] text-[23px] font-[650] tracking-[-0.05em] text-[#183039] max-[760px]:text-[21px]">
+    {{ value() }}
+    @if (suffix()) {
+      <small class="text-[11px] font-[560] tracking-normal">{{ suffix() }}</small>
+    }
+  </div>
+
+  <div class="mt-[4px] text-[9px] text-[#8b979b]">
+    @if (noteLead()) {
+      <em class="font-[650] not-italic text-[#318b77]">{{ noteLead() }}</em>
+      {{ ' ' }}
+    }
+    {{ note() }}
+  </div>
+</article>

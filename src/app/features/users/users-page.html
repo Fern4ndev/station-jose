@@ -1,0 +1,45 @@
+<app-ui-toast />
+
+<div class="animate-[fadeIn_230ms_ease_both]">
+  <app-ui-page-heading
+    title="Usuarios"
+    subtitle="Administra accesos y roles predefinidos del sistema."
+  >
+    <button
+      type="button"
+      class="sanjose-button sanjose-button--primary"
+      (click)="createOpen.set(true)"
+    >
+      <app-ui-icon name="plus" [size]="14" [strokeWidth]="1.8" />
+      Nuevo usuario
+    </button>
+  </app-ui-page-heading>
+
+  <app-ui-panel>
+    <app-users-toolbar
+      [total]="rows().length"
+      [query]="query()"
+      (queryChange)="query.set($event)"
+    />
+
+    <app-users-table [rows]="rows()" (toggle)="toggle($event)" />
+  </app-ui-panel>
+
+  <div class="mt-[13px]">
+    <app-ui-panel
+      title="Roles del sistema"
+      subtitle="Los permisos se asignan por rol y no se editan por usuario."
+    >
+      <div class="grid gap-[16px] p-[4px_18px_19px]">
+        @for (role of roles; track role.label) {
+          <div class="flex items-center justify-between gap-[12px] text-[10px] text-[#77868b]">
+            <span>{{ role.label }}</span>
+            <strong class="text-[11px] font-[650] text-[#263d44]">{{ role.detail }}</strong>
+          </div>
+        }
+      </div>
+    </app-ui-panel>
+  </div>
+
+  <app-user-form-dialog [(visible)]="createOpen" (saved)="create($event)" />
+</div>
