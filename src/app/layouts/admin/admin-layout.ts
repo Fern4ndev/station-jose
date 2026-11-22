@@ -10,7 +10,7 @@ import {
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
-import { PAGE_LABELS, PAGE_PATHS, pageFromUrl, type DemoRole, type PageId } from './admin-nav';
+import { PAGE_LABELS, PAGE_PATHS, pageFromUrl, type PageId } from './admin-nav';
 import { AdminUiState } from './admin-ui-state';
 import { AdminHeader } from './components/header/admin-header';
 import { AdminSidebar } from './components/sidebar/admin-sidebar';
@@ -51,10 +51,6 @@ export class AdminLayout {
   protected onPageChange(page: PageId): void {
     this.menuOpen.set(false);
     void this.router.navigateByUrl(`/${PAGE_PATHS[page]}`);
-  }
-
-  protected onRoleChange(role: DemoRole): void {
-    this.state.setRole(role);
   }
 
   protected toggleMenu(): void {

@@ -1,18 +1,25 @@
 import { Routes } from '@angular/router';
-import { adminOnlyGuard } from './features/users/users-access';
-import { AdminLayout } from './layouts/admin/admin-layout';
+import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from './core/guards/guest.guard';
+import { adminOnlyGuard } from './core/guards/permission.guard';
 import { AuthLayout } from './layouts/auth/auth-layout';
-import { LoginPage } from './layouts/auth/login-page';
 
 export const routes: Routes = [
   {
     path: 'login',
     component: AuthLayout,
-    children: [{ path: '', component: LoginPage }],
+    canActivate: [guestGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./layouts/auth/login-page').then((m) => m.LoginPage),
+      },
+    ],
   },
   {
     path: '',
-    component: AdminLayout,
+    loadComponent: () => import('./layouts/admin/admin-layout').then((m) => m.AdminLayout),
+    canActivate: [authGuard],
     children: [
       {
         path: '',

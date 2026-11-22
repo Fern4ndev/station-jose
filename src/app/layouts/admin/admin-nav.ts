@@ -1,6 +1,5 @@
+import type { Permission } from '../../core/models/auth.model';
 import type { UiIconName } from '../../shared/components/ui-icon/ui-icon';
-
-export type DemoRole = 'OFFICE' | 'ADMIN' | 'ATTENDANT';
 
 export type PageId = 'dashboard' | 'orders' | 'vouchers' | 'attendances' | 'reports' | 'users';
 
@@ -8,34 +7,43 @@ export interface AdminNavItem {
   readonly id: PageId;
   readonly label: string;
   readonly icon: UiIconName;
-  readonly roles: readonly DemoRole[];
+  /** Permisos del JWT que habilitan la sección; basta con tener uno. */
+  readonly permissions: readonly Permission[];
 }
 
-export interface DemoUser {
+/** Cuenta ya derivada de `AuthService` para pintar el armazón. */
+export interface AdminUser {
   readonly name: string;
   readonly initials: string;
   readonly label: string;
 }
 
+/**
+ * Menú del panel. La visibilidad la decide el permiso que el backend emite en
+ * `permissions` al iniciar sesión, no el rol.
+ */
 export const ADMIN_NAV: readonly AdminNavItem[] = [
-  { id: 'dashboard', label: 'Panel de control', icon: 'dashboard', roles: ['OFFICE', 'ADMIN', 'ATTENDANT'] },
-  { id: 'orders', label: 'Órdenes de compra', icon: 'orders', roles: ['OFFICE', 'ADMIN', 'ATTENDANT'] },
-  { id: 'vouchers', label: 'Vales', icon: 'vouchers', roles: ['OFFICE', 'ADMIN', 'ATTENDANT'] },
-  { id: 'attendances', label: 'Atenciones', icon: 'attendances', roles: ['ADMIN', 'ATTENDANT'] },
-  { id: 'reports', label: 'Reportes', icon: 'reports', roles: ['OFFICE', 'ADMIN'] },
-  { id: 'users', label: 'Usuarios', icon: 'users', roles: ['ADMIN'] },
-];
-
-export const ROLE_USERS: Readonly<Record<DemoRole, DemoUser>> = {
-  OFFICE: { name: 'María Paredes', initials: 'MP', label: 'Personal de oficina' },
-  ADMIN: { name: 'Carlos Mendoza', initials: 'CM', label: 'Administrador' },
-  ATTENDANT: { name: 'Luis Cárdenas', initials: 'LC', label: 'Grifero · San José' },
-};
-
-export const ROLE_OPTIONS: readonly { value: DemoRole; label: string }[] = [
-  { value: 'OFFICE', label: 'Vista de oficina' },
-  { value: 'ADMIN', label: 'Vista de administrador' },
-  { value: 'ATTENDANT', label: 'Vista de grifero' },
+  {
+    id: 'dashboard',
+    label: 'Panel de control',
+    icon: 'dashboard',
+    permissions: ['balances.read'],
+  },
+  {
+    id: 'orders',
+    label: 'Órdenes de compra',
+    icon: 'orders',
+    permissions: ['purchase_orders.read'],
+  },
+  { id: 'vouchers', label: 'Vales', icon: 'vouchers', permissions: ['vouchers.read'] },
+  {
+    id: 'attendances',
+    label: 'Atenciones',
+    icon: 'attendances',
+    permissions: ['attendances.read_own', 'attendances.read_all'],
+  },
+  { id: 'reports', label: 'Reportes', icon: 'reports', permissions: ['reports.read'] },
+  { id: 'users', label: 'Usuarios', icon: 'users', permissions: ['users.manage'] },
 ];
 
 export const PAGE_PATHS: Readonly<Record<PageId, string>> = {

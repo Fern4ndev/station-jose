@@ -46,11 +46,12 @@
       class="sanjose-branch-select w-[111px] border-0 bg-transparent text-[11px] font-[600] text-inherit outline-none focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
       aria-label="Filtrar por sede"
       [value]="branch()"
+      [disabled]="branchLocked()"
       (change)="onBranchChange($event)"
     >
-      <option value="Todas las sedes">Todas las sedes</option>
-      <option value="San José">San José</option>
-      <option value="Santa Marta">Santa Marta</option>
+      @for (option of branches(); track option) {
+        <option [value]="option">{{ option }}</option>
+      }
     </select>
   </label>
 
@@ -100,15 +101,4 @@
     </div>
   </div>
 
-  <label class="sr-only" for="roleSwitch">Cambiar perfil de demostración</label>
-  <select
-    id="roleSwitch"
-    class="sanjose-role-select mt-[10px] w-full rounded-[10px] border border-[rgba(230,245,241,0.13)] bg-[rgba(240,248,247,0.07)] p-[7px_9px] text-[10px] text-[#c1d0d0] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-    [value]="role()"
-    (change)="onRoleChange($event)"
-  >
-    @for (option of roleOptions; track option.value) {
-      <option [value]="option.value">{{ option.label }}</option>
-    }
-  </select>
 </aside>

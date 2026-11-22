@@ -5,11 +5,11 @@
     [items]="state.navItems()"
     [active]="page()"
     [user]="state.user()"
-    [role]="state.role()"
     [branch]="state.branch()"
+    [branches]="state.branches()"
+    [branchLocked]="state.branchLocked()"
     [mobileOpen]="menuOpen()"
     (pageChange)="onPageChange($event)"
-    (roleChange)="onRoleChange($event)"
     (branchChange)="state.setBranch($event)"
   />
 

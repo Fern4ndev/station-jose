@@ -1,0 +1,4438 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "San José Fuel Control API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/health/live": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Live",
+        "operationId": "live_api_v1_health_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Ready",
+        "operationId": "ready_api_v1_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Me",
+        "operationId": "me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/purchase-orders/{order_id}/attendances": {
+      "post": {
+        "tags": [
+          "Attendances"
+        ],
+        "summary": "Create First Attendance",
+        "operationId": "create_first_attendance_api_v1_purchase_orders__order_id__attendances_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstAttendanceCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AttendanceResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OperationalAttendance"
+                    }
+                  ],
+                  "title": "Response Create First Attendance Api V1 Purchase Orders  Order Id  Attendances Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vouchers/{voucher_id}/attendances": {
+      "post": {
+        "tags": [
+          "Attendances"
+        ],
+        "summary": "Create Follow Up Attendance",
+        "operationId": "create_follow_up_attendance_api_v1_vouchers__voucher_id__attendances_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "voucher_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Voucher Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpAttendanceCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AttendanceResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OperationalAttendance"
+                    }
+                  ],
+                  "title": "Response Create Follow Up Attendance Api V1 Vouchers  Voucher Id  Attendances Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/branches": {
+      "get": {
+        "tags": [
+          "Branches",
+          "Catalogs"
+        ],
+        "summary": "List Branches",
+        "operationId": "list_branches_api_v1_branches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BranchResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Branches Api V1 Branches Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/fuel-types": {
+      "get": {
+        "tags": [
+          "Branches",
+          "Catalogs"
+        ],
+        "summary": "List Fuel Types",
+        "operationId": "list_fuel_types_api_v1_fuel_types_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FuelTypeResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Fuel Types Api V1 Fuel Types Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ocr/purchase-order-previews": {
+      "post": {
+        "tags": [
+          "OCR"
+        ],
+        "summary": "Create Purchase Order Preview",
+        "operationId": "create_purchase_order_preview_api_v1_ocr_purchase_order_previews_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_purchase_order_preview_api_v1_ocr_purchase_order_previews_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderOcrPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/purchase-orders": {
+      "get": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "List Purchase Orders",
+        "operationId": "list_purchase_orders_api_v1_purchase_orders_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "branch_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Branch Id"
+            }
+          },
+          {
+            "name": "issue_date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Issue Date From"
+            }
+          },
+          {
+            "name": "issue_date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Issue Date To"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "issue_date",
+                "order_number",
+                "institution_name"
+              ],
+              "type": "string",
+              "default": "issue_date",
+              "title": "Sort By"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string",
+              "default": "desc",
+              "title": "Sort Order"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PurchaseOrderListResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OperationalOrderList"
+                    }
+                  ],
+                  "title": "Response List Purchase Orders Api V1 Purchase Orders Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Create Purchase Order",
+        "operationId": "create_purchase_order_api_v1_purchase_orders_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/purchase-orders/{order_id}": {
+      "get": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Get Purchase Order",
+        "operationId": "get_purchase_order_api_v1_purchase_orders__order_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PurchaseOrderResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OperationalOrder"
+                    }
+                  ],
+                  "title": "Response Get Purchase Order Api V1 Purchase Orders  Order Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Update Purchase Order",
+        "operationId": "update_purchase_order_api_v1_purchase_orders__order_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Purchase Orders"
+        ],
+        "summary": "Delete Purchase Order",
+        "operationId": "delete_purchase_order_api_v1_purchase_orders__order_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/purchase-orders": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Purchase Order Report",
+        "operationId": "purchase_order_report_api_v1_reports_purchase_orders_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "branch_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Branch Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 30
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseOrderReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/attendances": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Attendance Report",
+        "operationId": "attendance_report_api_v1_reports_attendances_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "branch_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Branch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/dashboard": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Dashboard Report",
+        "operationId": "dashboard_report_api_v1_reports_dashboard_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "branch_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Branch Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 30
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ReportGrouping",
+              "default": "day"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/purchase-orders/export": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Export Purchase Order Report",
+        "operationId": "export_purchase_order_report_api_v1_reports_purchase_orders_export_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "pdf",
+                "xlsx"
+              ],
+              "type": "string",
+              "title": "Format"
+            }
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "branch_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Branch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/attendances/export": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Export Attendance Report",
+        "operationId": "export_attendance_report_api_v1_reports_attendances_export_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "pdf",
+                "xlsx"
+              ],
+              "type": "string",
+              "title": "Format"
+            }
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "branch_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Branch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List Users",
+        "operationId": "list_users_api_v1_users_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create User",
+        "operationId": "create_user_api_v1_users_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User",
+        "operationId": "get_user_api_v1_users__user_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update User",
+        "operationId": "update_user_api_v1_users__user_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}/role": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update Role",
+        "operationId": "update_role_api_v1_users__user_id__role_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRoleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}/status": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update Status",
+        "operationId": "update_status_api_v1_users__user_id__status_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserStatusUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vouchers": {
+      "get": {
+        "tags": [
+          "Vouchers"
+        ],
+        "summary": "List Vouchers",
+        "operationId": "list_vouchers_api_v1_vouchers_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "purchase_order_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Purchase Order Id"
+            }
+          },
+          {
+            "name": "voucher_number",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 60
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Voucher Number"
+            }
+          },
+          {
+            "name": "issuer_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Issuer Name"
+            }
+          },
+          {
+            "name": "created_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Created From"
+            }
+          },
+          {
+            "name": "created_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Created To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/VoucherListResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OperationalVoucherList"
+                    }
+                  ],
+                  "title": "Response List Vouchers Api V1 Vouchers Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vouchers/attended": {
+      "get": {
+        "tags": [
+          "Vouchers"
+        ],
+        "summary": "List Attended Vouchers",
+        "operationId": "list_attended_vouchers_api_v1_vouchers_attended_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "voucher_number",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 60
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Voucher Number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationalVoucherList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vouchers/{voucher_id}": {
+      "get": {
+        "tags": [
+          "Vouchers"
+        ],
+        "summary": "Get Voucher",
+        "operationId": "get_voucher_api_v1_vouchers__voucher_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "voucher_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Voucher Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/VoucherResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OperationalVoucher"
+                    }
+                  ],
+                  "title": "Response Get Voucher Api V1 Vouchers  Voucher Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Vouchers"
+        ],
+        "summary": "Delete Voucher",
+        "operationId": "delete_voucher_api_v1_vouchers__voucher_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "voucher_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Voucher Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vouchers/{voucher_id}/descriptive-data": {
+      "patch": {
+        "tags": [
+          "Vouchers"
+        ],
+        "summary": "Correct Voucher",
+        "operationId": "correct_voucher_api_v1_vouchers__voucher_id__descriptive_data_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "voucher_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Voucher Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoucherDescriptiveUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoucherResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AttendanceItemCreate": {
+        "properties": {
+          "purchase_order_item_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Order Item Id"
+          },
+          "voucher_item_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voucher Item Id"
+          },
+          "attended_gallons": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,15}0*$)\\d{0,11}\\.\\d{0,3}0*$)"
+              }
+            ],
+            "title": "Attended Gallons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attended_gallons"
+        ],
+        "title": "AttendanceItemCreate"
+      },
+      "AttendanceItemResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "voucher_item_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Voucher Item Id"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "unit_price_snapshot": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Unit Price Snapshot"
+          },
+          "attended_amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "voucher_item_id",
+          "attended_gallons",
+          "unit_price_snapshot",
+          "attended_amount"
+        ],
+        "title": "AttendanceItemResponse"
+      },
+      "AttendanceReportResponse": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ReportFilters"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AttendanceReportRow"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "filters",
+          "items",
+          "total"
+        ],
+        "title": "AttendanceReportResponse"
+      },
+      "AttendanceReportRow": {
+        "properties": {
+          "attendance_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Attendance Id"
+          },
+          "voucher_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Voucher Id"
+          },
+          "voucher_number": {
+            "type": "string",
+            "title": "Voucher Number"
+          },
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Order Id"
+          },
+          "order_number": {
+            "type": "string",
+            "title": "Order Number"
+          },
+          "attended_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Attended At"
+          },
+          "performed_by_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Performed By User Id"
+          },
+          "performer_name": {
+            "type": "string",
+            "title": "Performer Name"
+          },
+          "branch_name": {
+            "type": "string",
+            "title": "Branch Name"
+          },
+          "fuel_type_code": {
+            "type": "string",
+            "title": "Fuel Type Code"
+          },
+          "fuel_type_name": {
+            "type": "string",
+            "title": "Fuel Type Name"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "unit_price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Unit Price"
+          },
+          "attended_amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attendance_id",
+          "voucher_id",
+          "voucher_number",
+          "order_id",
+          "order_number",
+          "attended_at",
+          "performed_by_user_id",
+          "performer_name",
+          "branch_name",
+          "fuel_type_code",
+          "fuel_type_name",
+          "attended_gallons",
+          "unit_price",
+          "attended_amount"
+        ],
+        "title": "AttendanceReportRow"
+      },
+      "AttendanceResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "voucher_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Voucher Id"
+          },
+          "performed_by_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Performed By User Id"
+          },
+          "branch_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Branch Id"
+          },
+          "attended_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Attended At"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Idempotency Key"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AttendanceItemResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "voucher_id",
+          "performed_by_user_id",
+          "branch_id",
+          "attended_at",
+          "idempotency_key",
+          "items"
+        ],
+        "title": "AttendanceResponse"
+      },
+      "Body_create_purchase_order_preview_api_v1_ocr_purchase_order_previews_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "PDF de la orden de compra"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_create_purchase_order_preview_api_v1_ocr_purchase_order_previews_post"
+      },
+      "BranchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "is_active"
+        ],
+        "title": "BranchResponse"
+      },
+      "BranchSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name"
+        ],
+        "title": "BranchSummary"
+      },
+      "CurrentUserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "dni": {
+            "type": "string",
+            "title": "Dni"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "branch": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BranchSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "first_name",
+          "last_name",
+          "dni",
+          "email",
+          "role",
+          "is_active",
+          "permissions"
+        ],
+        "title": "CurrentUserResponse"
+      },
+      "DashboardResponse": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ReportFilters"
+          },
+          "orders": {
+            "type": "integer",
+            "title": "Orders"
+          },
+          "vouchers": {
+            "type": "integer",
+            "title": "Vouchers"
+          },
+          "attendances": {
+            "type": "integer",
+            "title": "Attendances"
+          },
+          "authorized_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Authorized Gallons"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "available_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Gallons"
+          },
+          "attended_amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Amount"
+          },
+          "by_fuel": {
+            "items": {
+              "$ref": "#/components/schemas/FuelDashboardRow"
+            },
+            "type": "array",
+            "title": "By Fuel"
+          },
+          "by_period": {
+            "items": {
+              "$ref": "#/components/schemas/PeriodDashboardRow"
+            },
+            "type": "array",
+            "title": "By Period"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "filters",
+          "orders",
+          "vouchers",
+          "attendances",
+          "authorized_gallons",
+          "attended_gallons",
+          "available_gallons",
+          "attended_amount",
+          "by_fuel",
+          "by_period"
+        ],
+        "title": "DashboardResponse"
+      },
+      "FirstAttendanceCreate": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AttendanceItemCreate"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Items"
+          },
+          "issuer_type": {
+            "type": "string",
+            "pattern": "^(INSTITUTION|STATION)$",
+            "title": "Issuer Type"
+          },
+          "issuer_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Issuer Name"
+          },
+          "voucher_number": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Voucher Number"
+          },
+          "voucher_items": {
+            "items": {
+              "$ref": "#/components/schemas/VoucherAuthorizationItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Voucher Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "issuer_type",
+          "issuer_name",
+          "voucher_number",
+          "voucher_items"
+        ],
+        "title": "FirstAttendanceCreate"
+      },
+      "FollowUpAttendanceCreate": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AttendanceItemCreate"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "FollowUpAttendanceCreate"
+      },
+      "FuelDashboardRow": {
+        "properties": {
+          "fuel_type_code": {
+            "type": "string",
+            "title": "Fuel Type Code"
+          },
+          "fuel_type_name": {
+            "type": "string",
+            "title": "Fuel Type Name"
+          },
+          "authorized_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Authorized Gallons"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "available_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Gallons"
+          },
+          "attended_amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fuel_type_code",
+          "fuel_type_name",
+          "authorized_gallons",
+          "attended_gallons",
+          "available_gallons",
+          "attended_amount"
+        ],
+        "title": "FuelDashboardRow"
+      },
+      "FuelTypeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "is_active"
+        ],
+        "title": "FuelTypeResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LiveResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "LiveResponse"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "OcrLineCandidate": {
+        "properties": {
+          "fuel_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fuel Description"
+          },
+          "authorized_gallons": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authorized Gallons"
+          },
+          "unit_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Price"
+          },
+          "total_amount": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Amount"
+          }
+        },
+        "type": "object",
+        "title": "OcrLineCandidate"
+      },
+      "OperationalAttendance": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "voucher_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Voucher Id"
+          },
+          "performed_by_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Performed By User Id"
+          },
+          "branch_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Branch Id"
+          },
+          "attended_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Attended At"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Idempotency Key"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OperationalAttendanceItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "voucher_id",
+          "performed_by_user_id",
+          "branch_id",
+          "attended_at",
+          "idempotency_key",
+          "items"
+        ],
+        "title": "OperationalAttendance"
+      },
+      "OperationalAttendanceItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "voucher_item_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Voucher Item Id"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "voucher_item_id",
+          "attended_gallons"
+        ],
+        "title": "OperationalAttendanceItem"
+      },
+      "OperationalOrder": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "order_number": {
+            "type": "string",
+            "title": "Order Number"
+          },
+          "siaf_number": {
+            "type": "string",
+            "title": "Siaf Number"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Issue Date"
+          },
+          "institution_name": {
+            "type": "string",
+            "title": "Institution Name"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "supplier_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Details"
+          },
+          "executing_unit": {
+            "type": "string",
+            "title": "Executing Unit"
+          },
+          "executing_unit_ruc": {
+            "type": "string",
+            "title": "Executing Unit Ruc"
+          },
+          "branch": {
+            "$ref": "#/components/schemas/BranchResponse"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OperationalOrderItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "order_number",
+          "siaf_number",
+          "issue_date",
+          "institution_name",
+          "supplier_name",
+          "supplier_details",
+          "executing_unit",
+          "executing_unit_ruc",
+          "branch",
+          "deleted_at",
+          "items",
+          "status"
+        ],
+        "title": "OperationalOrder"
+      },
+      "OperationalOrderItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "fuel_type": {
+            "$ref": "#/components/schemas/FuelTypeResponse"
+          },
+          "authorized_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Authorized Gallons"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "available_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Gallons"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "fuel_type",
+          "authorized_gallons",
+          "attended_gallons",
+          "available_gallons",
+          "status"
+        ],
+        "title": "OperationalOrderItem"
+      },
+      "OperationalOrderList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OperationalOrder"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "title": "OperationalOrderList"
+      },
+      "OperationalVoucher": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "purchase_order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Purchase Order Id"
+          },
+          "issuer_type": {
+            "type": "string",
+            "title": "Issuer Type"
+          },
+          "issuer_name": {
+            "type": "string",
+            "title": "Issuer Name"
+          },
+          "voucher_number": {
+            "type": "string",
+            "title": "Voucher Number"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OperationalVoucherItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "attendances": {
+            "items": {
+              "$ref": "#/components/schemas/OperationalAttendance"
+            },
+            "type": "array",
+            "title": "Attendances"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "purchase_order_id",
+          "issuer_type",
+          "issuer_name",
+          "voucher_number",
+          "created_at",
+          "status",
+          "items",
+          "attendances"
+        ],
+        "title": "OperationalVoucher"
+      },
+      "OperationalVoucherItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "purchase_order_item_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Purchase Order Item Id"
+          },
+          "authorized_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Authorized Gallons"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "available_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Gallons"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "purchase_order_item_id",
+          "authorized_gallons",
+          "attended_gallons",
+          "available_gallons",
+          "status"
+        ],
+        "title": "OperationalVoucherItem"
+      },
+      "OperationalVoucherList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OperationalVoucher"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "title": "OperationalVoucherList"
+      },
+      "Pagination": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Page Size"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Total"
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "page_size",
+          "total",
+          "pages"
+        ],
+        "title": "Pagination"
+      },
+      "PaginationResponse": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "pages": {
+            "type": "integer",
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "page_size",
+          "total",
+          "pages"
+        ],
+        "title": "PaginationResponse"
+      },
+      "PeriodDashboardRow": {
+        "properties": {
+          "period": {
+            "type": "string",
+            "title": "Period"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "attended_amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Amount"
+          },
+          "attendances": {
+            "type": "integer",
+            "title": "Attendances"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "attended_gallons",
+          "attended_amount",
+          "attendances"
+        ],
+        "title": "PeriodDashboardRow"
+      },
+      "PurchaseOrderCreate": {
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Order Number"
+          },
+          "siaf_number": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Siaf Number"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Issue Date"
+          },
+          "institution_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Institution Name"
+          },
+          "supplier_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Supplier Name"
+          },
+          "supplier_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Details"
+          },
+          "executing_unit": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Executing Unit"
+          },
+          "executing_unit_ruc": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Executing Unit Ruc"
+          },
+          "branch_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Branch Id"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderItemCreate"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_number",
+          "siaf_number",
+          "issue_date",
+          "institution_name",
+          "supplier_name",
+          "executing_unit",
+          "executing_unit_ruc",
+          "branch_id",
+          "items"
+        ],
+        "title": "PurchaseOrderCreate"
+      },
+      "PurchaseOrderItemCreate": {
+        "properties": {
+          "fuel_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Fuel Type Id"
+          },
+          "authorized_gallons": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,15}0*$)\\d{0,11}\\.\\d{0,3}0*$)"
+              }
+            ],
+            "title": "Authorized Gallons"
+          },
+          "unit_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,15}0*$)\\d{0,10}\\.\\d{0,4}0*$)"
+              }
+            ],
+            "title": "Unit Price"
+          },
+          "total_amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Total Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fuel_type_id",
+          "authorized_gallons",
+          "unit_price",
+          "total_amount"
+        ],
+        "title": "PurchaseOrderItemCreate"
+      },
+      "PurchaseOrderItemResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "fuel_type": {
+            "$ref": "#/components/schemas/FuelTypeResponse"
+          },
+          "authorized_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Authorized Gallons"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "available_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Gallons"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "unit_price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Unit Price"
+          },
+          "total_amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Total Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "fuel_type",
+          "authorized_gallons",
+          "attended_gallons",
+          "available_gallons",
+          "status",
+          "unit_price",
+          "total_amount"
+        ],
+        "title": "PurchaseOrderItemResponse"
+      },
+      "PurchaseOrderListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "title": "PurchaseOrderListResponse"
+      },
+      "PurchaseOrderOcrFields": {
+        "properties": {
+          "order_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Number"
+          },
+          "siaf_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Siaf Number"
+          },
+          "issue_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issue Date"
+          },
+          "institution_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Institution Name"
+          },
+          "supplier_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Name"
+          },
+          "executing_unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executing Unit"
+          },
+          "executing_unit_ruc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executing Unit Ruc"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/OcrLineCandidate"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "title": "PurchaseOrderOcrFields"
+      },
+      "PurchaseOrderOcrPreview": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "pages_processed": {
+            "type": "integer",
+            "title": "Pages Processed"
+          },
+          "extracted_text": {
+            "type": "string",
+            "title": "Extracted Text"
+          },
+          "fields": {
+            "$ref": "#/components/schemas/PurchaseOrderOcrFields"
+          },
+          "unrecognized_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unrecognized Fields"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "requires_manual_review": {
+            "type": "boolean",
+            "title": "Requires Manual Review",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "content_type",
+          "pages_processed",
+          "extracted_text",
+          "fields",
+          "unrecognized_fields",
+          "warnings"
+        ],
+        "title": "PurchaseOrderOcrPreview"
+      },
+      "PurchaseOrderReportResponse": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ReportFilters"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderReportRow"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "filters",
+          "items",
+          "total"
+        ],
+        "title": "PurchaseOrderReportResponse"
+      },
+      "PurchaseOrderReportRow": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Order Id"
+          },
+          "order_number": {
+            "type": "string",
+            "title": "Order Number"
+          },
+          "institution_name": {
+            "type": "string",
+            "title": "Institution Name"
+          },
+          "branch_name": {
+            "type": "string",
+            "title": "Branch Name"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Issue Date"
+          },
+          "fuel_type_code": {
+            "type": "string",
+            "title": "Fuel Type Code"
+          },
+          "fuel_type_name": {
+            "type": "string",
+            "title": "Fuel Type Name"
+          },
+          "authorized_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Authorized Gallons"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "available_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Gallons"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "unit_price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Unit Price"
+          },
+          "total_amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Total Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "order_number",
+          "institution_name",
+          "branch_name",
+          "issue_date",
+          "fuel_type_code",
+          "fuel_type_name",
+          "authorized_gallons",
+          "attended_gallons",
+          "available_gallons",
+          "status",
+          "unit_price",
+          "total_amount"
+        ],
+        "title": "PurchaseOrderReportRow"
+      },
+      "PurchaseOrderResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "order_number": {
+            "type": "string",
+            "title": "Order Number"
+          },
+          "siaf_number": {
+            "type": "string",
+            "title": "Siaf Number"
+          },
+          "issue_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Issue Date"
+          },
+          "institution_name": {
+            "type": "string",
+            "title": "Institution Name"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "supplier_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Details"
+          },
+          "executing_unit": {
+            "type": "string",
+            "title": "Executing Unit"
+          },
+          "executing_unit_ruc": {
+            "type": "string",
+            "title": "Executing Unit Ruc"
+          },
+          "branch": {
+            "$ref": "#/components/schemas/BranchResponse"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderItemResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "order_number",
+          "siaf_number",
+          "issue_date",
+          "institution_name",
+          "supplier_name",
+          "supplier_details",
+          "executing_unit",
+          "executing_unit_ruc",
+          "branch",
+          "deleted_at",
+          "items",
+          "status"
+        ],
+        "title": "PurchaseOrderResponse"
+      },
+      "PurchaseOrderUpdate": {
+        "properties": {
+          "siaf_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 60,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Siaf Number"
+          },
+          "issue_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issue Date"
+          },
+          "institution_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Institution Name"
+          },
+          "supplier_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Name"
+          },
+          "supplier_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Details"
+          },
+          "executing_unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executing Unit"
+          },
+          "executing_unit_ruc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executing Unit Ruc"
+          },
+          "branch_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Id"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PurchaseOrderItemCreate"
+                },
+                "type": "array",
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "title": "PurchaseOrderUpdate"
+      },
+      "ReadyResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "database": {
+            "type": "string",
+            "title": "Database"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "database"
+        ],
+        "title": "ReadyResponse"
+      },
+      "ReportFilters": {
+        "properties": {
+          "date_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          },
+          "date_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "branch_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "group_by": {
+            "$ref": "#/components/schemas/ReportGrouping",
+            "default": "day"
+          }
+        },
+        "type": "object",
+        "title": "ReportFilters"
+      },
+      "ReportGrouping": {
+        "type": "string",
+        "enum": [
+          "hour",
+          "day",
+          "week",
+          "month"
+        ],
+        "title": "ReportGrouping"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponse"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "expires_in",
+          "user",
+          "permissions"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserCreate": {
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Last Name"
+          },
+          "dni": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Dni"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "branch_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "first_name",
+          "last_name",
+          "dni",
+          "email",
+          "password",
+          "role"
+        ],
+        "title": "UserCreate"
+      },
+      "UserListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UserResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "title": "UserListResponse"
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "dni": {
+            "type": "string",
+            "title": "Dni"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "branch": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BranchSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "first_name",
+          "last_name",
+          "dni",
+          "email",
+          "role",
+          "is_active"
+        ],
+        "title": "UserResponse"
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "ADMIN",
+          "OFFICE",
+          "ATTENDANT"
+        ],
+        "title": "UserRole"
+      },
+      "UserRoleUpdate": {
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "branch_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "title": "UserRoleUpdate"
+      },
+      "UserStatusUpdate": {
+        "properties": {
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_active"
+        ],
+        "title": "UserStatusUpdate"
+      },
+      "UserUpdate": {
+        "properties": {
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          }
+        },
+        "type": "object",
+        "title": "UserUpdate"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VoucherAuthorizationItem": {
+        "properties": {
+          "purchase_order_item_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Purchase Order Item Id"
+          },
+          "authorized_gallons": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,11}|(?=[\\d.]{1,15}0*$)\\d{0,11}\\.\\d{0,3}0*$)"
+              }
+            ],
+            "title": "Authorized Gallons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "purchase_order_item_id",
+          "authorized_gallons"
+        ],
+        "title": "VoucherAuthorizationItem"
+      },
+      "VoucherDescriptiveUpdate": {
+        "properties": {
+          "issuer_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(INSTITUTION|STATION)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer Type"
+          },
+          "issuer_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer Name"
+          },
+          "voucher_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 60,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voucher Number"
+          }
+        },
+        "type": "object",
+        "title": "VoucherDescriptiveUpdate"
+      },
+      "VoucherItemDetailResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "purchase_order_item_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Purchase Order Item Id"
+          },
+          "authorized_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Authorized Gallons"
+          },
+          "attended_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Attended Gallons"
+          },
+          "available_gallons": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Available Gallons"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "purchase_order_item_id",
+          "authorized_gallons",
+          "attended_gallons",
+          "available_gallons",
+          "status"
+        ],
+        "title": "VoucherItemDetailResponse"
+      },
+      "VoucherListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VoucherResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "title": "VoucherListResponse"
+      },
+      "VoucherResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "purchase_order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Purchase Order Id"
+          },
+          "issuer_type": {
+            "type": "string",
+            "title": "Issuer Type"
+          },
+          "issuer_name": {
+            "type": "string",
+            "title": "Issuer Name"
+          },
+          "voucher_number": {
+            "type": "string",
+            "title": "Voucher Number"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VoucherItemDetailResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "attendances": {
+            "items": {
+              "$ref": "#/components/schemas/AttendanceResponse"
+            },
+            "type": "array",
+            "title": "Attendances"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "purchase_order_id",
+          "issuer_type",
+          "issuer_name",
+          "voucher_number",
+          "created_at",
+          "status",
+          "items",
+          "attendances"
+        ],
+        "title": "VoucherResponse"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

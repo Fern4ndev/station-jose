@@ -74,6 +74,12 @@
   background: var(--sanjose-primary-action-hover);
 }
 
+.sanjose-auth-submit:disabled {
+  background: #9db5b8;
+  box-shadow: none;
+  cursor: progress;
+}
+
 .sanjose-auth-submit:focus-visible {
   outline: 3px solid rgba(57, 198, 174, 0.72);
   outline-offset: 3px;

@@ -42,9 +42,13 @@
   outline-offset: 3px;
 }
 
-.sanjose-branch-select option,
-.sanjose-role-select option {
+.sanjose-branch-select option {
   color: #10202a;
+}
+
+.sanjose-branch-select:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
 }
 
 @media (max-width: 1050px) {

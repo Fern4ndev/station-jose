@@ -95,18 +95,18 @@
       Usa tu cuenta asignada por la administración de la estación.
     </p>
 
-    <form class="grid gap-[14px]" (submit)="onSubmit($event)" novalidate>
+    <form class="grid gap-[14px]" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <div>
         <label class="sanjose-auth-label" for="loginEmail">Correo electrónico</label>
         <input
           id="loginEmail"
           class="sanjose-auth-input"
           type="email"
-          name="email"
+          formControlName="email"
           autocomplete="username"
           placeholder="nombre@estacion.test"
-          [value]="email()"
-          (input)="onEmail($event)"
+          [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
+          (input)="clearError()"
         />
       </div>
 
@@ -117,11 +117,11 @@
             id="loginPassword"
             class="sanjose-auth-input pr-[72px]"
             [type]="showPassword() ? 'text' : 'password'"
-            name="password"
+            formControlName="password"
             autocomplete="current-password"
             placeholder="Tu contraseña"
-            [value]="password()"
-            (input)="onPassword($event)"
+            [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+            (input)="clearError()"
           />
           <button
             type="button"
@@ -134,25 +134,26 @@
       </div>
 
       @if (error()) {
-        <p class="sanjose-auth-error m-0" role="alert">{{ error() }}</p>
+        <p class="sanjose-auth-error m-0" role="alert" aria-live="polite">{{ error() }}</p>
       }
 
       <label class="flex items-center gap-[8px] text-[10px] text-[#6d7c80]">
         <input
           type="checkbox"
           class="h-[14px] w-[14px] accent-[#3a8176]"
-          [checked]="remember()"
-          (change)="toggleRemember()"
+          formControlName="remember"
         />
         Mantener la sesión en este equipo
       </label>
 
-      <button type="submit" class="sanjose-auth-submit">Entrar al panel</button>
+      <button type="submit" class="sanjose-auth-submit" [disabled]="loading()">
+        {{ loading() ? 'Validando credenciales…' : 'Entrar al panel' }}
+      </button>
     </form>
 
     <p class="mt-[16px] mb-0 text-[9px] leading-[1.6] text-[#98a2a5]">
-      Demostración: cualquier correo y contraseña abren el panel con el perfil de oficina. El selector de rol está en
-      la barra lateral.
+      Acceso restringido al personal autorizado de la estación. Si no puedes ingresar, contacta al administrador del
+      sistema.
     </p>
   </section>
 </div>

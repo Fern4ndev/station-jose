@@ -34,8 +34,40 @@
 
     <app-notifications-bell />
 
-    <button type="button" class="sanjose-icon-button" aria-label="Perfil y sesión">
-      <app-ui-icon name="user" />
-    </button>
+    <div class="relative">
+      <button
+        type="button"
+        class="sanjose-icon-button"
+        aria-label="Cuenta y sesión"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="profileOpen()"
+        (click)="toggleProfile()"
+      >
+        @if (initials()) {
+          <span class="text-[10px] font-[750] tracking-[0.02em]">{{ initials() }}</span>
+        } @else {
+          <app-ui-icon name="user" />
+        }
+      </button>
+
+      @if (profileOpen()) {
+        <div
+          class="absolute top-[46px] right-0 z-30 w-[232px] rounded-[16px] border border-[rgba(210,221,222,0.95)] bg-white p-[12px] shadow-[0_12px_32px_rgba(20,47,49,0.16)]"
+          role="menu"
+        >
+          <div class="text-[11px] font-[650] text-[#10202a]">{{ fullName() }}</div>
+          <div class="mt-[2px] truncate text-[10px] text-[#87949a]">{{ email() }}</div>
+          <div class="mt-[2px] text-[10px] text-[#87949a]">{{ roleLabel() }}</div>
+          <button
+            type="button"
+            role="menuitem"
+            class="mt-[10px] w-full rounded-[10px] border border-[rgba(210,221,222,0.95)] bg-[rgba(246,250,250,0.9)] p-[7px_9px] text-left text-[10px] font-[620] text-[#263b43] hover:bg-[rgba(236,245,244,1)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+            (click)="logout()"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      }
+    </div>
   </div>
 </header>
