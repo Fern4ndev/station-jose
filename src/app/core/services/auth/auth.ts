@@ -11,8 +11,7 @@ import {
   throwError,
   type Observable,
 } from 'rxjs';
-import { BaseApi } from '../../api/api-url';
-import { API_ENDPOINTS } from '../../api/endpoints';
+import { API_ENDPOINTS, BaseApi } from '../../api/api-url';
 import {
   LOCKOUT_MS,
   RATE_LIMIT_MAX,

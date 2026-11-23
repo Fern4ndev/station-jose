@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { BaseApi } from '../api/api-url';
-import { API_ENDPOINTS, IDEMPOTENCY_HEADER } from '../api/endpoints';
+import { API_ENDPOINTS, BaseApi, IDEMPOTENCY_HEADER } from '../api/api-url';
 import type {
   AttendanceResult,
   FirstAttendanceCreate,

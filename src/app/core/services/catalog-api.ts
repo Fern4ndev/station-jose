@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { BaseApi } from '../api/api-url';
-import { API_ENDPOINTS } from '../api/endpoints';
+import { API_ENDPOINTS, BaseApi } from '../api/api-url';
 import type { BranchResponse, FuelTypeResponse } from '../models/catalog';
 
 /** Catálogos de solo lectura: sedes y tipos de combustible. */
