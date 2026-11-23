@@ -32,10 +32,10 @@ import {
     VouchersTable,
     VouchersToolbar,
   ],
-  selector: 'app-vouchers-page',
-  templateUrl: './vouchers-page.html',
+  selector: 'app-vouchers',
+  templateUrl: './vouchers.html',
 })
-export class VouchersPage {
+export class Vouchers {
   private readonly router = inject(Router);
   private readonly state = inject(AdminUiState);
   private readonly messages = inject(MessageService);

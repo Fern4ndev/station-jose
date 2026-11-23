@@ -8,11 +8,11 @@ import { AuthService } from '../../core/services/auth/auth';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule],
-  selector: 'app-login-page',
-  styleUrl: './login-page.css',
-  templateUrl: './login-page.html',
+  selector: 'app-login',
+  styleUrl: './login.css',
+  templateUrl: './login.html',
 })
-export class LoginPage {
+export class Login {
   private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
   private readonly fb = inject(FormBuilder);

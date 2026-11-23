@@ -20,10 +20,10 @@ import {
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReportChart, ReportMetrics, ReportSummaryPanel, UiIcon, UiPageHeading, UiToast],
-  selector: 'app-reports-page',
-  templateUrl: './reports-page.html',
+  selector: 'app-reports',
+  templateUrl: './reports.html',
 })
-export class ReportsPage {
+export class Reports {
   private readonly state = inject(AdminUiState);
   private readonly messages = inject(MessageService);
 

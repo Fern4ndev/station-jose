@@ -32,10 +32,10 @@ import {
     UiPanel,
     UiToast,
   ],
-  selector: 'app-orders-page',
-  templateUrl: './orders-page.html',
+  selector: 'app-orders',
+  templateUrl: './orders.html',
 })
-export class OrdersPage {
+export class Orders {
   private readonly state = inject(AdminUiState);
   private readonly messages = inject(MessageService);
 

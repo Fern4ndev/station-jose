@@ -19,10 +19,10 @@ import {
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UiIcon, UiPageHeading, UiPanel, UiToast, UserFormDialog, UsersTable, UsersToolbar],
-  selector: 'app-users-page',
-  templateUrl: './users-page.html',
+  selector: 'app-users',
+  templateUrl: './users.html',
 })
-export class UsersPage {
+export class Users {
   private readonly messages = inject(MessageService);
 
   protected readonly users = signal<readonly DemoUserRow[]>([...DEMO_USERS]);

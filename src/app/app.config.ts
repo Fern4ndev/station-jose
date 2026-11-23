@@ -12,7 +12,7 @@ import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { providePrimeNG } from 'primeng/config';
 import aura from '@primeuix/themes/aura';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { authInterceptor } from './core/interceptors/auth';
 import { AuthService } from './core/services/auth/auth';
 
@@ -33,6 +33,7 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
+    ConfirmationService,
     MessageService,
   ],
 };

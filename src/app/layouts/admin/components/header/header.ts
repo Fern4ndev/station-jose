@@ -16,14 +16,14 @@ import { NotificationsBell } from '../notifications-bell/notifications-bell';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NotificationsBell, UiIcon],
-  selector: 'app-admin-header',
-  templateUrl: './admin-header.html',
+  selector: 'app-header',
+  templateUrl: './header.html',
 })
-export class AdminHeader {
+export class Header {
   private readonly auth = inject(AuthService);
 
   readonly pageLabel = input.required<string>();
-  readonly menuOpen = input(false);
+  readonly mobileOpen = input(false);
   readonly menuToggle = output<void>();
 
   protected readonly searchTerm = signal('');

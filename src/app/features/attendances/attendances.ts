@@ -32,10 +32,10 @@ import {
     UiStatusBadge,
     UiToast,
   ],
-  selector: 'app-attendances-page',
-  templateUrl: './attendances-page.html',
+  selector: 'app-attendances',
+  templateUrl: './attendances.html',
 })
-export class AttendancesPage {
+export class Attendances {
   private readonly router = inject(Router);
   private readonly state = inject(AdminUiState);
   private readonly messages = inject(MessageService);

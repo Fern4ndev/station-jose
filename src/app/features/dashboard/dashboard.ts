@@ -11,10 +11,10 @@ import { buildDashboardMetrics } from './dashboard-data';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DashboardActivity, DashboardMetrics, UiIcon, UiPageHeading],
-  selector: 'app-dashboard-page',
-  templateUrl: './dashboard-page.html',
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.html',
 })
-export class DashboardPage {
+export class Dashboard {
   private readonly router = inject(Router);
   private readonly state = inject(AdminUiState);
 

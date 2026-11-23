@@ -4,7 +4,7 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet],
-  selector: 'app-auth-layout',
-  templateUrl: './auth-layout.html',
+  selector: 'app-auth',
+  templateUrl: './auth.html',
 })
-export class AuthLayout {}
+export class Auth {}

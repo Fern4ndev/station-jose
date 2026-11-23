@@ -1,7 +1,43 @@
-<button
-  type="button"
-  class="sanjose-icon-button relative after:absolute after:right-[8px] after:top-[8px] after:h-[6px] after:w-[6px] after:rounded-[50%] after:border after:border-white after:bg-[#ef9e4c] after:content-['']"
-  aria-label="Ver pendientes"
->
-  <app-ui-icon name="bell" />
-</button>
+<div class="relative">
+  <button
+    type="button"
+    class="sanjose-icon-button relative"
+    aria-label="Ver pendientes"
+    aria-haspopup="menu"
+    aria-controls="notificationsPanel"
+    [attr.aria-expanded]="open()"
+    (click)="toggle()"
+  >
+    <app-ui-icon name="bell" />
+    @if (unreadCount() > 0) {
+      <span
+        class="absolute right-[8px] top-[8px] h-[6px] w-[6px] rounded-[50%] border border-white bg-[#ef9e4c]"
+        aria-hidden="true"
+      ></span>
+    }
+  </button>
+
+  @if (open()) {
+    <div
+      id="notificationsPanel"
+      role="menu"
+      class="absolute top-[46px] right-0 z-30 w-[250px] rounded-[16px] border border-[rgba(210,221,222,0.95)] bg-white p-[12px] shadow-[0_12px_32px_rgba(20,47,49,0.16)]"
+    >
+      <div class="text-[10px] font-[650] uppercase tracking-[0.12em] text-[#88a6aa]">Pendientes</div>
+
+      @if (loading()) {
+        <p class="m-0 mt-[10px] text-[10px] text-[#87949a]">Cargando…</p>
+      } @else if (notifications().length === 0) {
+        <p class="m-0 mt-[10px] text-[10px] leading-[1.6] text-[#87949a]">
+          No hay notificaciones por ahora.
+        </p>
+      } @else {
+        <ul class="m-0 mt-[10px] grid list-none gap-[6px] p-0">
+          @for (notification of notifications(); track $index) {
+            <li class="text-[10px] leading-[1.5] text-[#263b43]">{{ notification }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>
