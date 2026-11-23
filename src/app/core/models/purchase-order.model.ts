@@ -7,6 +7,13 @@ export type DecimalInput = number | string;
 export type OrderSortField = 'issue_date' | 'order_number' | 'institution_name';
 export type SortOrder = 'asc' | 'desc';
 
+/** Ordenamientos que acepta `GET /purchase-orders`. */
+export const ORDER_SORT_FIELDS = [
+  'issue_date',
+  'order_number',
+  'institution_name',
+] as const satisfies readonly OrderSortField[];
+
 export interface PurchaseOrderItemCreate {
   readonly fuel_type_id: string;
   readonly authorized_gallons: DecimalInput;
@@ -100,7 +107,7 @@ export interface OperationalOrderList {
   readonly pagination: Pagination;
 }
 
-export interface PurchaseOrderQuery {
+export type PurchaseOrderQuery = {
   readonly search?: string | null;
   readonly branch_id?: string | null;
   readonly issue_date_from?: string | null;
@@ -109,4 +116,4 @@ export interface PurchaseOrderQuery {
   readonly page_size?: number;
   readonly sort_by?: OrderSortField;
   readonly sort_order?: SortOrder;
-}
+};

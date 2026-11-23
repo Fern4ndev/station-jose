@@ -55,24 +55,26 @@
     </select>
   </label>
 
-  <div class="px-[11px] pb-[9px] text-[10px] font-[650] uppercase tracking-[0.12em] text-[#88a6aa]">
-    Espacio de trabajo
-  </div>
+  @for (group of groups(); track group.id) {
+    <div class="px-[11px] pb-[9px] text-[10px] font-[650] uppercase tracking-[0.12em] text-[#88a6aa]">
+      {{ group.label }}
+    </div>
 
-  <nav class="grid gap-[4px]" aria-label="Secciones">
-    @for (item of items(); track item.id) {
-      <button
-        type="button"
-        class="sanjose-nav-link"
-        [class.active]="item.id === active()"
-        [attr.aria-current]="item.id === active() ? 'page' : null"
-        (click)="onNavigate(item.id)"
-      >
-        <app-ui-icon [name]="item.icon" />
-        <span>{{ item.label }}</span>
-      </button>
-    }
-  </nav>
+    <nav class="mb-[14px] grid gap-[4px]" [attr.aria-label]="group.label">
+      @for (item of group.children; track item.id) {
+        <button
+          type="button"
+          class="sanjose-nav-link"
+          [class.active]="item.id === active()"
+          [attr.aria-current]="item.id === active() ? 'page' : null"
+          (click)="onNavigate(item)"
+        >
+          <app-ui-icon [name]="item.icon" />
+          <span>{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+  }
 
   <div class="flex-1"></div>
 

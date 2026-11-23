@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { APP_ROUTES, SESSION_EXPIRED_REASON } from '../../core/constants/system.constants';
+import { ActivatedRoute } from '@angular/router';
+import { APP_ROUTES, SESSION_EXPIRED_REASON } from '../../core/constants/nav';
 import { isApiError } from '../../core/models/error.model';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -13,7 +13,6 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './login-page.html',
 })
 export class LoginPage {
-  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
   private readonly fb = inject(FormBuilder);
@@ -27,6 +26,8 @@ export class LoginPage {
   protected readonly showPassword = signal(false);
   protected readonly error = signal(this.initialMessage());
   protected readonly loading = this.auth.authenticating;
+  protected readonly lockedOut = this.auth.isLockedOut;
+  protected readonly lockSeconds = this.auth.lockRemainingSeconds;
 
   protected togglePassword(): void {
     this.showPassword.update((visible) => !visible);
@@ -39,7 +40,7 @@ export class LoginPage {
   }
 
   protected submit(): void {
-    if (this.loading()) {
+    if (this.loading() || this.lockedOut()) {
       return;
     }
 
@@ -51,8 +52,7 @@ export class LoginPage {
 
     this.error.set('');
     const { email, password, remember } = this.form.getRawValue();
-    this.auth.login({ email, password, remember }).subscribe({
-      next: () => void this.router.navigateByUrl(this.returnUrl()),
+    this.auth.login({ email, password, remember, returnUrl: this.returnUrl() }).subscribe({
       error: (failure: unknown) =>
         this.error.set(
           isApiError(failure)

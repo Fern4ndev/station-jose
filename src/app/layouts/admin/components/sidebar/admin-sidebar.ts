@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { UiIcon } from '../../../../shared/components/ui-icon/ui-icon';
-import type { AdminNavItem, AdminUser, PageId } from '../../admin-nav';
+import type { NavChild, NavGroup } from '../../../../core/constants/nav';
+import type { AdminUser } from '../../admin-ui-state';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -10,18 +11,18 @@ import type { AdminNavItem, AdminUser, PageId } from '../../admin-nav';
   templateUrl: './admin-sidebar.html',
 })
 export class AdminSidebar {
-  readonly items = input.required<readonly AdminNavItem[]>();
-  readonly active = input.required<PageId>();
+  readonly groups = input.required<readonly NavGroup[]>();
+  readonly active = input.required<string>();
   readonly user = input.required<AdminUser>();
   readonly branch = input.required<string>();
   readonly branches = input.required<readonly string[]>();
   readonly branchLocked = input(false);
   readonly mobileOpen = input(false);
 
-  readonly pageChange = output<PageId>();
+  readonly pageChange = output<NavChild>();
   readonly branchChange = output<string>();
 
-  protected onNavigate(page: PageId): void {
+  protected onNavigate(page: NavChild): void {
     this.pageChange.emit(page);
   }
 

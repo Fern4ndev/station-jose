@@ -14,10 +14,10 @@ export interface PaginatedResponse<T> {
 }
 
 /** Parámetros de paginación comunes (page: 1, page_size: 20 en FastAPI). */
-export interface PageQuery {
+export type PageQuery = {
   readonly page?: number;
   readonly page_size?: number;
-}
+};
 
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PAGE_SIZE = 20;

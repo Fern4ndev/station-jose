@@ -1,6 +1,17 @@
 export type ReportGrouping = 'hour' | 'day' | 'week' | 'month';
 export type ReportExportFormat = 'pdf' | 'xlsx';
 
+/** Agrupación temporal que acepta `GET /reports/dashboard`. */
+export const REPORT_GROUPINGS = [
+  'hour',
+  'day',
+  'week',
+  'month',
+] as const satisfies readonly ReportGrouping[];
+
+/** Formatos de exportación de reportes. */
+export const REPORT_EXPORT_FORMATS = ['pdf', 'xlsx'] as const satisfies readonly ReportExportFormat[];
+
 export interface ReportFilters {
   readonly date_from: string | null;
   readonly date_to: string | null;
@@ -87,21 +98,21 @@ export interface AttendanceReportResponse {
   readonly total: number;
 }
 
-export interface ReportQuery {
+export type ReportQuery = {
   readonly date_from?: string | null;
   readonly date_to?: string | null;
   readonly branch_id?: string | null;
   readonly status?: string | null;
-}
+};
 
-export interface AttendanceReportQuery {
+export type AttendanceReportQuery = {
   readonly date_from?: string | null;
   readonly date_to?: string | null;
   readonly user_id?: string | null;
   readonly branch_id?: string | null;
-}
+};
 
-export interface DashboardQuery extends AttendanceReportQuery {
+export type DashboardQuery = AttendanceReportQuery & {
   readonly status?: string | null;
   readonly group_by?: ReportGrouping;
-}
+};

@@ -10,7 +10,7 @@ import {
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
-import { PAGE_LABELS, PAGE_PATHS, pageFromUrl, type PageId } from './admin-nav';
+import { ROLE_HOME, navChildForRoute, type NavChild } from '../../core/constants/nav';
 import { AdminUiState } from './admin-ui-state';
 import { AdminHeader } from './components/header/admin-header';
 import { AdminSidebar } from './components/sidebar/admin-sidebar';
@@ -36,21 +36,25 @@ export class AdminLayout {
     { initialValue: '/' },
   );
 
-  protected readonly page = computed(() => pageFromUrl(this.url()));
-  protected readonly pageLabel = computed(() => PAGE_LABELS[this.page()]);
+  private readonly currentNav = computed(() => navChildForRoute(this.url()));
+  protected readonly page = computed(() => this.currentNav()?.id ?? 'dashboard');
+  protected readonly pageLabel = computed(() => this.currentNav()?.label ?? 'Panel de control');
 
   constructor() {
     effect(() => {
-      const allowed = this.state.navItems().some((item) => item.id === this.page());
+      const current = this.currentNav();
+      const allowed =
+        current !== undefined && this.state.navItems().some((item) => item.id === current.id);
       if (!allowed) {
-        void this.router.navigateByUrl('/');
+        const role = this.state.role();
+        void this.router.navigateByUrl(role ? ROLE_HOME[role] : '/');
       }
     });
   }
 
-  protected onPageChange(page: PageId): void {
+  protected onPageChange(page: NavChild): void {
     this.menuOpen.set(false);
-    void this.router.navigateByUrl(`/${PAGE_PATHS[page]}`);
+    void this.router.navigateByUrl(page.path);
   }
 
   protected toggleMenu(): void {

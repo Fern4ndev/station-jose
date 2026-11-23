@@ -4,6 +4,14 @@ import type { PaginatedResponse, Pagination } from './pagination.model';
 
 export type VoucherIssuerType = 'INSTITUTION' | 'STATION';
 
+/** Tipos de emisor de un vale (`^(INSTITUTION|STATION)$`). */
+export const ISSUER_TYPES = ['INSTITUTION', 'STATION'] as const satisfies readonly VoucherIssuerType[];
+
+export const ISSUER_TYPE_LABELS: Readonly<Record<VoucherIssuerType, string>> = {
+  INSTITUTION: 'Institución',
+  STATION: 'Estación',
+};
+
 /** Autorización por ítem que se declara al crear el primer vale. */
 export interface VoucherAuthorizationItem {
   readonly purchase_order_item_id: string;
@@ -66,7 +74,7 @@ export interface OperationalVoucherList {
   readonly pagination: Pagination;
 }
 
-export interface VoucherQuery {
+export type VoucherQuery = {
   readonly page?: number;
   readonly page_size?: number;
   readonly purchase_order_id?: string | null;
@@ -74,10 +82,10 @@ export interface VoucherQuery {
   readonly issuer_name?: string | null;
   readonly created_from?: string | null;
   readonly created_to?: string | null;
-}
+};
 
-export interface AttendedVoucherQuery {
+export type AttendedVoucherQuery = {
   readonly page?: number;
   readonly page_size?: number;
   readonly voucher_number?: string | null;
-}
+};

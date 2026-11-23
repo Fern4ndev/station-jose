@@ -11,8 +11,7 @@ import localeEs from '@angular/common/locales/es';
 import { providePrimeNG } from 'primeng/config';
 import aura from '@primeuix/themes/aura';
 import { MessageService } from 'primeng/api';
-import { authInterceptor } from './core/interceptors/auth.interceptor';
-import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { authInterceptor } from './core/interceptors/auth';
 
 registerLocaleData(localeEs);
 
@@ -20,7 +19,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     { provide: LOCALE_ID, useValue: 'es' },
     providePrimeNG({
       theme: {

@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { STORAGE_KEYS, type StoragePersistence } from '../constants/storage.constants';
+import { AUTH_STORAGE_KEYS, type StoragePersistence } from '../constants/auth-storage';
 import type { CurrentUserResponse, Permission, TokenResponse } from '../models/auth.model';
 
 interface PersistedSession {
@@ -103,9 +103,9 @@ export class TokenStorageService {
       return null;
     }
     try {
-      const token = storage.getItem(STORAGE_KEYS.accessToken);
-      const expiresAt = Number(storage.getItem(STORAGE_KEYS.expiresAt) ?? 0);
-      const rawUser = storage.getItem(STORAGE_KEYS.user);
+      const token = storage.getItem(AUTH_STORAGE_KEYS.accessToken);
+      const expiresAt = Number(storage.getItem(AUTH_STORAGE_KEYS.expiresAt) ?? 0);
+      const rawUser = storage.getItem(AUTH_STORAGE_KEYS.session);
       if (!token || !rawUser || !expiresAt || expiresAt <= Date.now()) {
         this.remove(kind);
         return null;
@@ -127,11 +127,10 @@ export class TokenStorageService {
       return;
     }
     try {
-      storage.setItem(STORAGE_KEYS.accessToken, session.token);
-      storage.setItem(STORAGE_KEYS.expiresAt, String(session.expiresAt));
-      storage.setItem(STORAGE_KEYS.user, JSON.stringify(session.user));
-      storage.setItem(STORAGE_KEYS.permissions, JSON.stringify(session.user.permissions));
-      storage.setItem(STORAGE_KEYS.persistence, kind);
+      storage.setItem(AUTH_STORAGE_KEYS.accessToken, session.token);
+      storage.setItem(AUTH_STORAGE_KEYS.expiresAt, String(session.expiresAt));
+      storage.setItem(AUTH_STORAGE_KEYS.session, JSON.stringify(session.user));
+      storage.setItem(AUTH_STORAGE_KEYS.persistence, kind);
     } catch {
       // Almacenamiento lleno o bloqueado: la sesión sigue viva en memoria.
     }
@@ -143,7 +142,7 @@ export class TokenStorageService {
       return;
     }
     try {
-      for (const key of Object.values(STORAGE_KEYS)) {
+      for (const key of Object.values(AUTH_STORAGE_KEYS)) {
         storage.removeItem(key);
       }
     } catch {

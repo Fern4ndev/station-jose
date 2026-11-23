@@ -1,12 +1,30 @@
+import type { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { API_ENDPOINTS } from '../api/endpoints';
 import type { ApiError, ApiErrorEnvelope, ValidationError } from '../models/error.model';
+import { AuthService } from '../services/auth.service';
 
 const GENERIC_MESSAGE = 'No se pudo completar la solicitud.';
+
+/** Endpoints públicos o de control de sesión: ni token ni cierre de sesión. */
+const AUTH_ENDPOINTS: readonly string[] = [
+  API_ENDPOINTS.auth.login,
+  API_ENDPOINTS.auth.logout,
+];
+
+/** Solo se tocan peticiones que van a nuestra API (nunca URLs externas). */
+export const isApiRequest = (url: string): boolean => url.startsWith(environment.apiUrl);
+
+export const isAuthEndpoint = (url: string): boolean =>
+  AUTH_ENDPOINTS.some((endpoint) => url.includes(endpoint));
 
 /**
  * Normaliza cualquier fallo de `HttpClient` al contrato `{ success, error }`
  * del backend y a mensajes listos para mostrar al usuario.
  */
-export const toApiError = (error: unknown): ApiError => {
+const toApiError = (error: unknown): ApiError => {
   const httpError = error as { status?: unknown; error?: unknown; message?: unknown };
   const status = typeof httpError.status === 'number' ? httpError.status : 0;
   const envelope = asEnvelope(httpError.error);
@@ -89,4 +107,36 @@ const legacyValidation = (body: unknown): readonly ValidationError[] => {
   }
   const detail = (body as { detail?: unknown }).detail;
   return Array.isArray(detail) ? (detail as readonly ValidationError[]) : [];
+};
+
+/**
+ * Escenario B del backend: solo `access_token`, sin `/auth/refresh`.
+ * - Adjunta `Authorization` únicamente a la API y a endpoints protegidos.
+ * - Ante un 401 fuera del login, cierra la sesión y devuelve el error normalizado.
+ */
+export const authInterceptor: HttpInterceptorFn = (request, next) => {
+  if (!isApiRequest(request.url)) {
+    return next(request);
+  }
+
+  const auth = inject(AuthService);
+  const authRequest = isAuthEndpoint(request.url);
+  const token = auth.accessToken();
+  const authorized =
+    !authRequest && token
+      ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : request;
+
+  return next(authorized).pipe(
+    catchError((error: unknown) => {
+      const apiError = toApiError(error);
+
+      // Login/logout quedan fuera del cierre de sesión para no entrar en bucle.
+      if (apiError.status === 401 && !authRequest) {
+        auth.handleSessionExpired();
+      }
+
+      return throwError(() => apiError);
+    }),
+  );
 };

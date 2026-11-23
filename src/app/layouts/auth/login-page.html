@@ -133,7 +133,11 @@
         </div>
       </div>
 
-      @if (error()) {
+      @if (lockedOut()) {
+        <p class="sanjose-auth-error m-0" role="alert" aria-live="polite">
+          Demasiados intentos fallidos. Espera {{ lockSeconds() }} s antes de volver a intentarlo.
+        </p>
+      } @else if (error()) {
         <p class="sanjose-auth-error m-0" role="alert" aria-live="polite">{{ error() }}</p>
       }
 
@@ -146,8 +150,12 @@
         Mantener la sesión en este equipo
       </label>
 
-      <button type="submit" class="sanjose-auth-submit" [disabled]="loading()">
-        {{ loading() ? 'Validando credenciales…' : 'Entrar al panel' }}
+      <button type="submit" class="sanjose-auth-submit" [disabled]="loading() || lockedOut()">
+        @if (lockedOut()) {
+          Bloqueado · espera {{ lockSeconds() }} s
+        } @else {
+          {{ loading() ? 'Validando credenciales…' : 'Entrar al panel' }}
+        }
       </button>
     </form>
 

@@ -39,7 +39,7 @@ export interface UserStatusUpdate {
 
 export type UserListResponse = PaginatedResponse<UserResponse>;
 
-export interface UserListQuery {
+export type UserListQuery = {
   readonly page?: number;
   readonly page_size?: number;
-}
+};

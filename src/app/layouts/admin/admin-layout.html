@@ -2,7 +2,7 @@
   class="grid min-h-screen w-full grid-cols-[252px_minmax(0,_1fr)] gap-[14px] p-[14px] max-[1050px]:grid-cols-[220px_minmax(0,_1fr)] max-[1050px]:gap-[10px] max-[1050px]:p-[10px] max-[760px]:block max-[760px]:p-[8px]"
 >
   <app-admin-sidebar
-    [items]="state.navItems()"
+    [groups]="state.navGroups()"
     [active]="page()"
     [user]="state.user()"
     [branch]="state.branch()"

@@ -8,7 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { ROLE_LABELS } from '../../../../core/constants/system.constants';
+import { ROLE_LABELS } from '../../../../core/constants/nav';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UiIcon } from '../../../../shared/components/ui-icon/ui-icon';
 import { NotificationsBell } from '../notifications-bell/notifications-bell';

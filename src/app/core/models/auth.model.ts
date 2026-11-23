@@ -49,6 +49,8 @@ export interface LoginCredentials {
   readonly password: string;
   /** true → localStorage; false → sessionStorage. */
   readonly remember: boolean;
+  /** Ruta interna solicitada antes del login; si falta, se usa `ROLE_HOME`. */
+  readonly returnUrl?: string;
 }
 
 /** Sesión ya normalizada y persistida en el navegador. */

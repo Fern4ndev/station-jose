@@ -30,7 +30,7 @@ export interface ApiErrorEnvelope {
   readonly error: ApiErrorBody;
 }
 
-/** Error normalizado que entrega `errorInterceptor` a los consumidores. */
+/** Error normalizado que entrega `authInterceptor` a los consumidores. */
 export interface ApiError {
   readonly status: number;
   readonly code: string;
