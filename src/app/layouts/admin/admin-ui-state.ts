@@ -1,10 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { catchError, of } from 'rxjs';
+import { catchError, of, tap } from 'rxjs';
 import { navForRole, type NavGroup } from '../../core/constants/nav';
 import { ROLE_LABELS } from '../../core/constants/nav';
-import type { UserRole } from '../../core/models/auth.model';
-import { AuthService } from '../../core/services/auth.service';
-import { CatalogsService } from '../../core/services/catalogs.service';
+import type { UserRole } from '../../core/models/user';
+import type { BranchResponse } from '../../core/models/catalog';
+import { AuthService } from '../../core/services/auth/auth';
+import { CatalogApi } from '../../core/services/catalog-api';
 
 export const ALL_BRANCHES = 'Todas las sedes';
 
@@ -22,19 +23,20 @@ export interface AdminUser {
 @Injectable({ providedIn: 'root' })
 export class AdminUiState {
   private readonly auth = inject(AuthService);
-  private readonly catalogs = inject(CatalogsService);
+  private readonly catalog = inject(CatalogApi);
 
   private readonly branchOverride = signal<string | null>(null);
+  private readonly branchesState = signal<readonly BranchResponse[]>([]);
 
   readonly role = computed<UserRole | null>(() => this.auth.role());
 
   readonly user = computed<AdminUser>(() => {
     const role = this.auth.role();
     const label = role ? ROLE_LABELS[role] : 'Sesión sin rol';
-    const branch = this.auth.user()?.branch?.name;
+    const branch = this.auth.currentUser()?.branch?.name;
     return {
       name: this.auth.fullName() || 'Usuario sin identificar',
-      initials: this.auth.initials() || '—',
+      initials: this.auth.userInitials() || '—',
       label: branch ? `${label} · ${branch}` : label,
     };
   });
@@ -58,11 +60,17 @@ export class AdminUiState {
     if (this.branchLocked()) {
       return [this.auth.branchName()];
     }
-    return [ALL_BRANCHES, ...this.catalogs.branches().map((branch) => branch.name)];
+    return [ALL_BRANCHES, ...this.branchesState().map((branch) => branch.name)];
   });
 
   constructor() {
-    this.catalogs.loadBranches().pipe(catchError(() => of([]))).subscribe();
+    this.catalog
+      .branches()
+      .pipe(
+        tap((branches) => this.branchesState.set(branches)),
+        catchError(() => of([])),
+      )
+      .subscribe();
   }
 
   setBranch(branch: string): void {

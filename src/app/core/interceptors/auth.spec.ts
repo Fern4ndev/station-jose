@@ -5,10 +5,9 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { environment } from '../../../environments/environment';
-import type { TokenResponse } from '../models/auth.model';
-import type { ApiError } from '../models/error.model';
-import { AuthService } from '../services/auth.service';
-import { TokenStorageService } from '../services/token-storage.service';
+import { AUTH_STORAGE_KEYS } from '../constants/auth-storage';
+import type { ApiError } from '../models/error';
+import { AuthService } from '../services/auth/auth';
 import { authInterceptor, isApiRequest, isAuthEndpoint } from './auth';
 
 const api = (path: string) => `${environment.apiUrl}${path}`;
@@ -158,24 +157,21 @@ describe('authInterceptor', () => {
       ],
     });
 
-    const session: TokenResponse = {
-      access_token: 'jwt-token',
-      token_type: 'bearer',
-      expires_in: 3600,
-      user: {
-        id: 'user-1',
-        first_name: 'Ana',
-        last_name: 'Pérez',
-        dni: '12345678',
-        email: 'ana@estacion.test',
-        role: 'OFFICE',
-        branch: null,
-        is_active: true,
-      },
+    const sessionUser = {
+      id: 'user-1',
+      first_name: 'Ana',
+      last_name: 'Pérez',
+      dni: '12345678',
+      email: 'ana@estacion.test',
+      role: 'OFFICE',
+      branch: null,
+      is_active: true,
       permissions: [],
     };
-    const storage = TestBed.inject(TokenStorageService);
-    storage.save(session, false);
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, 'jwt-token');
+    localStorage.setItem(AUTH_STORAGE_KEYS.expiresAt, String(Date.now() + 3_600_000));
+    localStorage.setItem(AUTH_STORAGE_KEYS.session, JSON.stringify(sessionUser));
+    localStorage.setItem(AUTH_STORAGE_KEYS.persistence, 'local');
 
     const router = TestBed.inject(Router);
     const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
@@ -187,8 +183,8 @@ describe('authInterceptor', () => {
     expect(request.request.headers.get('Authorization')).toBe('Bearer jwt-token');
     request.flush(null, { status: 401, statusText: 'Unauthorized' });
 
-    expect(storage.token()).toBeNull();
-    expect(storage.user()).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.session)).toBeNull();
     expect(navigate).toHaveBeenCalledWith(['/login'], {
       queryParams: { reason: 'session_expired' },
     });

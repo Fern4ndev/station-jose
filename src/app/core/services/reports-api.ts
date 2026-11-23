@@ -1,23 +1,19 @@
+import { Injectable } from '@angular/core';
+import type { Observable } from 'rxjs';
+import { BaseApi } from '../api/api-url';
+import { API_ENDPOINTS } from '../api/endpoints';
+
+/* Contratos exclusivos de este router: nadie más los consume. */
+
 export type ReportGrouping = 'hour' | 'day' | 'week' | 'month';
 export type ReportExportFormat = 'pdf' | 'xlsx';
 
-/** Agrupación temporal que acepta `GET /reports/dashboard`. */
-export const REPORT_GROUPINGS = [
-  'hour',
-  'day',
-  'week',
-  'month',
-] as const satisfies readonly ReportGrouping[];
-
-/** Formatos de exportación de reportes. */
-export const REPORT_EXPORT_FORMATS = ['pdf', 'xlsx'] as const satisfies readonly ReportExportFormat[];
-
 export interface ReportFilters {
-  readonly date_from: string | null;
-  readonly date_to: string | null;
-  readonly user_id: string | null;
-  readonly branch_id: string | null;
-  readonly status: string | null;
+  readonly date_from?: string | null;
+  readonly date_to?: string | null;
+  readonly user_id?: string | null;
+  readonly branch_id?: string | null;
+  readonly status?: string | null;
   readonly group_by?: ReportGrouping;
 }
 
@@ -116,3 +112,42 @@ export type DashboardQuery = AttendanceReportQuery & {
   readonly status?: string | null;
   readonly group_by?: ReportGrouping;
 };
+
+/** Reportes y dashboard: consultas analíticas y exportaciones binarias. */
+@Injectable({ providedIn: 'root' })
+export class ReportsApi extends BaseApi {
+  dashboard(query: DashboardQuery = {}): Observable<DashboardResponse> {
+    return this.get<DashboardResponse>(API_ENDPOINTS.reports.dashboard, query);
+  }
+
+  purchaseOrders(query: ReportQuery = {}): Observable<PurchaseOrderReportResponse> {
+    return this.get<PurchaseOrderReportResponse>(
+      API_ENDPOINTS.reports.purchaseOrders,
+      query,
+    );
+  }
+
+  attendances(query: AttendanceReportQuery = {}): Observable<AttendanceReportResponse> {
+    return this.get<AttendanceReportResponse>(API_ENDPOINTS.reports.attendances, query);
+  }
+
+  exportPurchaseOrders(
+    format: ReportExportFormat,
+    query: ReportQuery = {},
+  ): Observable<Blob> {
+    return this.getBlob(API_ENDPOINTS.reports.purchaseOrdersExport, {
+      format,
+      ...query,
+    });
+  }
+
+  exportAttendances(
+    format: ReportExportFormat,
+    query: AttendanceReportQuery = {},
+  ): Observable<Blob> {
+    return this.getBlob(API_ENDPOINTS.reports.attendancesExport, {
+      format,
+      ...query,
+    });
+  }
+}

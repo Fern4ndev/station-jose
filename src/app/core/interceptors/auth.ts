@@ -3,8 +3,8 @@ import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../api/endpoints';
-import type { ApiError, ApiErrorEnvelope, ValidationError } from '../models/error.model';
-import { AuthService } from '../services/auth.service';
+import type { ApiError, ApiErrorEnvelope, ValidationError } from '../models/error';
+import { AuthService } from '../services/auth/auth';
 
 const GENERIC_MESSAGE = 'No se pudo completar la solicitud.';
 

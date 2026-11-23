@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { ROLE_LABELS } from '../../../../core/constants/nav';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService } from '../../../../core/services/auth/auth';
 import { UiIcon } from '../../../../shared/components/ui-icon/ui-icon';
 import { NotificationsBell } from '../notifications-bell/notifications-bell';
 
@@ -30,14 +30,14 @@ export class AdminHeader {
   protected readonly profileOpen = signal(false);
 
   protected readonly fullName = this.auth.fullName;
-  protected readonly initials = this.auth.initials;
-  protected readonly email = computed(() => this.auth.user()?.email ?? '');
+  protected readonly initials = this.auth.userInitials;
+  protected readonly email = computed(() => this.auth.currentUser()?.email ?? '');
   protected readonly roleLabel = computed(() => {
     const role = this.auth.role();
     if (!role) {
       return 'Sesión sin rol';
     }
-    const branch = this.auth.user()?.branch?.name;
+    const branch = this.auth.currentUser()?.branch?.name;
     return branch ? `${ROLE_LABELS[role]} · ${branch}` : ROLE_LABELS[role];
   });
 

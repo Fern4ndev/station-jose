@@ -14,8 +14,3 @@ export interface FuelTypeResponse {
   readonly name: string;
   readonly is_active: boolean;
 }
-
-export interface HealthResponse {
-  readonly status: string;
-  readonly database?: string;
-}

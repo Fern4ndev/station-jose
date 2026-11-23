@@ -1,5 +1,5 @@
-import type { BranchResponse, FuelTypeResponse } from './catalog.model';
-import type { PaginatedResponse, Pagination } from './pagination.model';
+import type { BranchResponse, FuelTypeResponse } from './catalog';
+import type { PaginatedResponse, Pagination } from './pagination';
 
 /** FastAPI acepta `number` o `string` decimal en las entradas. */
 export type DecimalInput = number | string;

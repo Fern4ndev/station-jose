@@ -1,4 +1,4 @@
-/** Elemento del arreglo `details.errors` que devuelve FastAPI en un 422. */
+/** Elemento del arreglo `detail` que devuelve FastAPI en un 422. */
 export interface ValidationError {
   readonly loc: readonly (string | number)[];
   readonly msg: string;
@@ -7,10 +7,7 @@ export interface ValidationError {
   readonly ctx?: Readonly<Record<string, unknown>>;
 }
 
-/**
- * Forma nativa de FastAPI (`HTTPValidationError`). El backend actual la envuelve
- * en `ApiErrorEnvelope`, pero se conserva para respuestas sin envoltura.
- */
+/** Forma nativa de FastAPI (`HTTPValidationError`). */
 export interface HTTPValidationError {
   readonly detail?: readonly ValidationError[];
 }

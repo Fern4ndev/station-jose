@@ -1,5 +1,5 @@
-import type { DecimalInput } from './purchase-order.model';
-import type { VoucherAuthorizationItem, VoucherIssuerType } from './voucher.model';
+import type { DecimalInput } from './purchase-order';
+import type { VoucherAuthorizationItem, VoucherIssuerType } from './voucher';
 
 export interface AttendanceItemCreate {
   readonly purchase_order_item_id?: string | null;

@@ -1,4 +1,4 @@
-import type { Permission, UserRole } from '../models/auth.model';
+import type { Permission, UserRole } from '../models/user';
 import type { UiIconName } from '../../shared/components/ui-icon/ui-icon';
 
 /** El panel (`layouts/admin`) cuelga de la raíz; se deja explícito para componer rutas. */

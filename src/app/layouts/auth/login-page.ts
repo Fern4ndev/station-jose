@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { APP_ROUTES, SESSION_EXPIRED_REASON } from '../../core/constants/nav';
-import { isApiError } from '../../core/models/error.model';
-import { AuthService } from '../../core/services/auth.service';
+import { isApiError } from '../../core/models/error';
+import { AuthService } from '../../core/services/auth/auth';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

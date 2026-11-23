@@ -2,8 +2,8 @@ import { inject } from '@angular/core';
 import { Router, type CanActivateFn } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { APP_ROUTES, ROLE_HOME, rolesForRoute } from '../constants/nav';
-import type { UserRole } from '../models/auth.model';
-import { AuthService } from '../services/auth.service';
+import type { UserRole } from '../models/user';
+import { AuthService } from '../services/auth/auth';
 
 /** Ruta inicial del rol; sin rol, el login. */
 export const homeFor = (role: UserRole | undefined): string =>

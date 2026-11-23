@@ -1,3 +1,10 @@
+import { Injectable } from '@angular/core';
+import type { Observable } from 'rxjs';
+import { BaseApi } from '../api/api-url';
+import { API_ENDPOINTS } from '../api/endpoints';
+
+/* Contratos exclusivos de este router. Todos los campos son opcionales. */
+
 export interface OcrLineCandidate {
   readonly fuel_description?: string | null;
   readonly authorized_gallons?: string | null;
@@ -25,4 +32,17 @@ export interface PurchaseOrderOcrPreview {
   readonly unrecognized_fields: readonly string[];
   readonly warnings: readonly string[];
   readonly requires_manual_review?: boolean;
+}
+
+/** OCR de órdenes de compra: sube un archivo y devuelve la vista previa leída. */
+@Injectable({ providedIn: 'root' })
+export class OcrApi extends BaseApi {
+  analyze(file: File): Observable<PurchaseOrderOcrPreview> {
+    const body = new FormData();
+    body.append('file', file);
+    return this.postForm<PurchaseOrderOcrPreview>(
+      API_ENDPOINTS.ocr.purchaseOrderPreviews,
+      body,
+    );
+  }
 }

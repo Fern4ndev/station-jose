@@ -1,11 +1,14 @@
-import type { AttendanceResponse, OperationalAttendance } from './attendance.model';
-import type { DecimalInput } from './purchase-order.model';
-import type { PaginatedResponse, Pagination } from './pagination.model';
+import type { AttendanceResponse, OperationalAttendance } from './attendance';
+import type { DecimalInput } from './purchase-order';
+import type { PaginatedResponse, Pagination } from './pagination';
 
 export type VoucherIssuerType = 'INSTITUTION' | 'STATION';
 
 /** Tipos de emisor de un vale (`^(INSTITUTION|STATION)$`). */
-export const ISSUER_TYPES = ['INSTITUTION', 'STATION'] as const satisfies readonly VoucherIssuerType[];
+export const ISSUER_TYPES = [
+  'INSTITUTION',
+  'STATION',
+] as const satisfies readonly VoucherIssuerType[];
 
 export const ISSUER_TYPE_LABELS: Readonly<Record<VoucherIssuerType, string>> = {
   INSTITUTION: 'Institución',

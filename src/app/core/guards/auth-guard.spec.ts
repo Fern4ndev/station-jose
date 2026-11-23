@@ -4,12 +4,11 @@ import { provideRouter, type ActivatedRouteSnapshot, type CanActivateFn, type Ro
 import { MessageService } from 'primeng/api';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NAV, ROLE_HOME, navForRole, rolesForRoute } from '../constants/nav';
-import type { UserRole } from '../models/auth.model';
-import type { UserResponse } from '../models/user.model';
-import { AuthService } from '../services/auth.service';
+import type { UserOut, UserRole } from '../models/user';
+import { AuthService } from '../services/auth/auth';
 import { authGuard, loginGuard, navGuard } from './auth-guard';
 
-const userFor = (role: UserRole): UserResponse => ({
+const userFor = (role: UserRole): UserOut => ({
   id: `user-${role}`,
   first_name: 'Ana',
   last_name: 'Pérez',
@@ -29,7 +28,7 @@ const pathsFor = (role: UserRole): string[] =>
   );
 
 const setup = (role: UserRole | null) => {
-  const user = signal<UserResponse | null>(role ? userFor(role) : null);
+  const user = signal<UserOut | null>(role ? userFor(role) : null);
   const auth = {
     user,
     role: computed(() => user()?.role ?? null),
