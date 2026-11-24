@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* El mockup no forma parte de la aplicación. */
-@source not "../mockup.html";
-
 @theme {
   /* Escala de colores generada en armonía con #1F3975 */
   --color-primary-50: #f4f7fc;   /* Tono muy claro ideal para fondos y canvas */

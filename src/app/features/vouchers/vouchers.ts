@@ -49,7 +49,7 @@ export class Vouchers {
 
   protected readonly canCorrect = computed(() => this.state.role() === 'ADMIN');
   protected readonly rows = computed(() =>
-    filterVouchers(this.vouchers(), this.filter(), this.query(), this.state.branch(), this.operations.orders()),
+    filterVouchers(this.vouchers(), this.filter(), this.query(), this.state.role() === 'ATTENDANT' ? 'Todas las sedes' : this.state.branch(), this.operations.orders()),
   );
   protected readonly lockedIds = computed(() => this.vouchers().map((item) => item.id));
 

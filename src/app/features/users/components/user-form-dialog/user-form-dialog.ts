@@ -3,11 +3,13 @@ import {
   Component,
   computed,
   effect,
+  input,
   model,
   output,
   signal,
 } from '@angular/core';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
+import type { BranchResponse } from '../../../../core/models/catalog';
 import {
   USER_ROLES,
   type UserDraft,
@@ -22,17 +24,19 @@ import {
 })
 export class UserFormDialog {
   readonly visible = model(false);
+  readonly branches = input<readonly BranchResponse[]>([]);
+  readonly saving = input(false);
 
   readonly saved = output<UserDraft>();
 
   protected readonly roles = USER_ROLES;
-  protected readonly branches: readonly string[] = ['San José', 'Santa Marta'];
 
   protected readonly name = signal('');
   protected readonly dni = signal('');
   protected readonly email = signal('');
   protected readonly role = signal<UserRoleValue>('OFFICE');
-  protected readonly branch = signal('San José');
+  protected readonly branch = signal('');
+  protected readonly password = signal('');
   protected readonly error = signal('');
 
   protected readonly showBranch = computed(() => this.role() === 'ATTENDANT');
@@ -46,7 +50,8 @@ export class UserFormDialog {
       this.dni.set('');
       this.email.set('');
       this.role.set('OFFICE');
-      this.branch.set('San José');
+      this.branch.set('');
+      this.password.set('');
       this.error.set('');
     });
   }
@@ -71,6 +76,10 @@ export class UserFormDialog {
     this.branch.set((event.target as HTMLSelectElement).value);
   }
 
+  protected setPassword(event: Event): void {
+    this.password.set((event.target as HTMLInputElement).value);
+  }
+
   protected onSubmit(event: Event): void {
     event.preventDefault();
     const name = this.name().trim();
@@ -89,8 +98,19 @@ export class UserFormDialog {
       this.error.set('Indica un correo electrónico válido.');
       return;
     }
+    if (name.split(/\s+/).length < 2) {
+      this.error.set('Indica nombre y apellidos.');
+      return;
+    }
+    if (this.password().length < 8) {
+      this.error.set('La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (this.role() === 'ATTENDANT' && !this.branches().some((item) => item.id === this.branch())) {
+      this.error.set('Selecciona una sede válida.');
+      return;
+    }
 
-    this.saved.emit({ name, dni, email, role: this.role(), branch: this.branch() });
-    this.visible.set(false);
+    this.saved.emit({ name, dni, email, role: this.role(), branch: this.branch(), password: this.password() });
   }
 }

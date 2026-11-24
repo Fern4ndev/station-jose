@@ -36,6 +36,8 @@ export interface AttendanceResponse {
   readonly attended_at: string;
   readonly idempotency_key: string;
   readonly items: readonly AttendanceItemResponse[];
+  readonly performer_name?: string | null;
+  readonly branch_name?: string | null;
 }
 
 export interface OperationalAttendanceItem {
@@ -52,6 +54,8 @@ export interface OperationalAttendance {
   readonly attended_at: string;
   readonly idempotency_key: string;
   readonly items: readonly OperationalAttendanceItem[];
+  readonly performer_name?: string | null;
+  readonly branch_name?: string | null;
 }
 
 export type AttendanceResult = AttendanceResponse | OperationalAttendance;

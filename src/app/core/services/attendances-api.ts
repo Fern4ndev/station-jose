@@ -6,10 +6,19 @@ import type {
   FirstAttendanceCreate,
   FollowUpAttendanceCreate,
 } from '../models/attendance';
+import type { PaginatedResponse } from '../models/pagination';
 
 /** Atenciones: primera atención de la orden y siguientes sobre un vale. */
 @Injectable({ providedIn: 'root' })
 export class AttendancesApi extends BaseApi {
+  list(query: { page?: number; page_size?: number } = {}): Observable<PaginatedResponse<AttendanceResult>> {
+    return this.get<PaginatedResponse<AttendanceResult>>(API_ENDPOINTS.attendances.base, query);
+  }
+
+  detail(attendanceId: string): Observable<AttendanceResult> {
+    return this.get<AttendanceResult>(API_ENDPOINTS.attendances.byId(attendanceId));
+  }
+
   /** Primera atención de la orden: crea el vale con su autorización. */
   createFirst(
     orderId: string,

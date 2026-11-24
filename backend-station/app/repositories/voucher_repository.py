@@ -6,6 +6,7 @@ from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.sql.elements import UnaryExpression
 
 from app.tables import (
     Attendance,
@@ -173,6 +174,7 @@ class VoucherRepository:
             filters.append(Voucher.created_at >= created_from)
         if created_to is not None:
             filters.append(Voucher.created_at <= created_to)
+        ordering: tuple[UnaryExpression[datetime], ...]
         if attended_by_user_id is not None:
             attended_voucher_ids = select(Attendance.voucher_id).where(
                 Attendance.performed_by_user_id == attended_by_user_id

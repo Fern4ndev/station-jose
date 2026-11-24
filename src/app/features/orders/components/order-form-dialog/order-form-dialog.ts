@@ -1,139 +1,173 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  input,
-  model,
-  output,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, output, signal } from '@angular/core';
+import type { BranchResponse, FuelTypeResponse } from '../../../../core/models/catalog';
+import { OcrApi } from '../../../../core/services/ocr-api';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
-import { UiIcon } from '../../../../shared/components/ui-icon/ui-icon';
-import { formatGallons, type DemoOrder, type OrderDraft } from '../../orders-data';
+import { extractApiError } from '../../../../shared/utils/api-error';
+import { todayIso } from '../../../../shared/utils/date-range';
+import type { DemoOrder, OrderDraft } from '../../orders-data';
+
+interface DraftLine {
+  readonly fuel_type_id: string;
+  readonly gallons: string;
+  readonly unit_price: string;
+}
+
+function lineAmount(gallons: string, price: string): string {
+  const scaled = (value: string, places: number): bigint => {
+    const [whole, fractional = ''] = value.split('.');
+    return BigInt(whole) * 10n ** BigInt(places) + BigInt(fractional.padEnd(places, '0') || '0');
+  };
+  const cents = (scaled(gallons, 3) * scaled(price, 4) + 50_000n) / 100_000n;
+  return `${cents / 100n}.${String(cents % 100n).padStart(2, '0')}`;
+}
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiDialog, UiIcon],
+  imports: [UiDialog],
   selector: 'app-order-form-dialog',
   templateUrl: './order-form-dialog.html',
 })
 export class OrderFormDialog {
+  private readonly ocr = inject(OcrApi);
   readonly visible = model(false);
   readonly order = input<DemoOrder | null>(null);
   readonly takenIds = input<readonly string[]>([]);
-
+  readonly branches = input<readonly BranchResponse[]>([]);
+  readonly fuels = input<readonly FuelTypeResponse[]>([]);
+  readonly saving = input(false);
   readonly saved = output<OrderDraft>();
 
-  protected readonly fuels: readonly string[] = ['Diésel B5', 'Gasohol 90'];
-  protected readonly branches: readonly string[] = ['San José', 'Santa Marta'];
-
+  protected readonly title = computed(() => this.order() ? 'Modificar orden' : 'Registrar orden de compra');
   protected readonly entity = signal('');
   protected readonly number = signal('');
-  protected readonly date = signal('2026-11-15');
-  protected readonly fuel = signal('Diésel B5');
-  protected readonly total = signal('');
-  protected readonly branch = signal('San José');
+  protected readonly siaf = signal('');
+  protected readonly date = signal(todayIso());
+  protected readonly supplier = signal('');
+  protected readonly supplierDetails = signal('');
+  protected readonly executingUnit = signal('');
+  protected readonly ruc = signal('');
+  protected readonly branch = signal('');
+  protected readonly lines = signal<readonly DraftLine[]>([{ fuel_type_id: '', gallons: '', unit_price: '' }]);
   protected readonly error = signal('');
   protected readonly pdfLabel = signal('Selecciona un PDF para prellenar los campos');
-
-  protected readonly isEditing = computed(() => this.order() !== null);
-  protected readonly title = computed(() =>
-    this.isEditing() ? 'Modificar orden' : 'Registrar orden de compra',
-  );
-  protected readonly description = computed(() =>
-    this.isEditing()
-      ? 'Actualiza los datos descriptivos sin alterar las atenciones registradas.'
-      : 'Completa los datos de la autorización y revisa los galones antes de guardarla.',
-  );
-  protected readonly usedHint = computed(() => {
-    const order = this.order();
-    return order ? `Ya se despacharon ${formatGallons(order.used)} gal.` : '';
-  });
+  protected readonly loadingOcr = signal(false);
 
   constructor() {
     effect(() => {
-      if (!this.visible()) {
-        return;
-      }
-      const existing = this.order();
-      this.entity.set(existing?.entity ?? '');
-      this.number.set(existing?.id ?? '');
-      this.date.set('2026-11-15');
-      this.fuel.set(existing?.fuel ?? 'Diésel B5');
-      this.total.set(existing ? String(existing.total) : '');
-      this.branch.set(existing?.branch ?? 'San José');
+      if (!this.visible()) return;
+      const source = this.order()?.source;
+      this.entity.set(source?.institution_name ?? '');
+      this.number.set(source?.order_number ?? '');
+      this.siaf.set(source?.siaf_number ?? '');
+      this.date.set(source?.issue_date ?? todayIso());
+      this.supplier.set(source?.supplier_name ?? '');
+      this.supplierDetails.set(source?.supplier_details ?? '');
+      this.executingUnit.set(source?.executing_unit ?? '');
+      this.ruc.set(source?.executing_unit_ruc ?? '');
+      this.branch.set(source?.branch.id ?? '');
+      this.lines.set(source?.items.map((item) => ({
+        fuel_type_id: item.fuel_type.id,
+        gallons: item.authorized_gallons,
+        unit_price: 'unit_price' in item ? item.unit_price : '',
+      })) ?? [{ fuel_type_id: '', gallons: '', unit_price: '' }]);
       this.error.set('');
       this.pdfLabel.set('Selecciona un PDF para prellenar los campos');
     });
   }
 
-  protected setEntity(event: Event): void {
-    this.entity.set((event.target as HTMLInputElement).value);
+  protected set(field: 'entity' | 'number' | 'siaf' | 'date' | 'supplier' | 'supplierDetails' | 'executingUnit' | 'ruc' | 'branch', event: Event): void {
+    const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
+    this[field].set(value);
   }
 
-  protected setNumber(event: Event): void {
-    this.number.set((event.target as HTMLInputElement).value);
+  protected setLine(index: number, field: keyof DraftLine, event: Event): void {
+    const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
+    this.lines.update((lines) => lines.map((line, at) => at === index ? { ...line, [field]: value } : line));
   }
 
-  protected setDate(event: Event): void {
-    this.date.set((event.target as HTMLInputElement).value);
+  protected addLine(): void {
+    this.lines.update((lines) => [...lines, { fuel_type_id: '', gallons: '', unit_price: '' }]);
   }
 
-  protected setFuel(event: Event): void {
-    this.fuel.set((event.target as HTMLSelectElement).value);
-  }
-
-  protected setTotal(event: Event): void {
-    this.total.set((event.target as HTMLInputElement).value);
-  }
-
-  protected setBranch(event: Event): void {
-    this.branch.set((event.target as HTMLSelectElement).value);
+  protected removeLine(index: number): void {
+    if (this.lines().length > 1) this.lines.update((lines) => lines.filter((_, at) => at !== index));
   }
 
   protected onPdf(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) {
-      return;
-    }
-    this.pdfLabel.set(`${file.name} · listo para revisar`);
-    if (!this.entity().trim()) {
-      this.entity.set(file.name.replace(/\.pdf$/i, '').replace(/[_-]/g, ' '));
-    }
+    if (!file) return;
+    this.loadingOcr.set(true);
+    this.pdfLabel.set(`Procesando ${file.name}…`);
+    this.ocr.analyze(file).subscribe({
+      next: (preview) => {
+        const fields = preview.fields;
+        if (fields.order_number) this.number.set(fields.order_number);
+        if (fields.siaf_number) this.siaf.set(fields.siaf_number);
+        if (fields.issue_date) this.date.set(fields.issue_date.slice(0, 10));
+        if (fields.institution_name) this.entity.set(fields.institution_name);
+        if (fields.supplier_name) this.supplier.set(fields.supplier_name);
+        if (fields.executing_unit) this.executingUnit.set(fields.executing_unit);
+        if (fields.executing_unit_ruc) this.ruc.set(fields.executing_unit_ruc);
+        if (fields.lines?.length) {
+          this.lines.set(fields.lines.map((line) => ({
+            fuel_type_id: this.fuels().find((fuel) => line.fuel_description?.toLowerCase().includes(fuel.name.toLowerCase()))?.id ?? '',
+            gallons: line.authorized_gallons ?? '',
+            unit_price: line.unit_price ?? '',
+          })));
+        }
+        this.pdfLabel.set(`${file.name} · datos sugeridos, revisa todos los campos`);
+        this.loadingOcr.set(false);
+      },
+      error: (error: unknown) => {
+        this.error.set(extractApiError(error, 'No se pudo procesar el PDF. Puedes completar la orden manualmente.'));
+        this.pdfLabel.set('Selecciona un PDF para prellenar los campos');
+        this.loadingOcr.set(false);
+      },
+    });
   }
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
-    const existing = this.order();
-    const total = Number(this.total());
-    const id = this.number().trim();
-    const entity = this.entity().trim();
-
-    if (!entity || !id) {
-      this.error.set('Completa la entidad y el número de orden.');
+    const required = [this.entity(), this.number(), this.siaf(), this.date(), this.supplier(), this.executingUnit(), this.ruc(), this.branch()];
+    if (required.some((value) => !value.trim())) {
+      this.error.set('Completa todos los datos obligatorios de la orden.');
       return;
     }
-    if (!Number.isFinite(total) || total <= 0) {
-      this.error.set('Indica una cantidad de galones mayor que cero.');
+    if (!this.branches().some((item) => item.id === this.branch())) {
+      this.error.set('Selecciona una sede válida.');
       return;
     }
-    if (existing && total < existing.used) {
-      this.error.set(`El total no puede ser menor a los ${formatGallons(existing.used)} gal ya despachados.`);
-      return;
-    }
-    if (!existing && this.takenIds().some((taken) => taken.toLowerCase() === id.toLowerCase())) {
+    if (!this.order() && this.takenIds().some((id) => id.toLowerCase() === this.number().trim().toLowerCase())) {
       this.error.set('Ese número de orden ya existe.');
       return;
     }
-
-    const date = existing
-      ? existing.date
-      : new Date(`${this.date()}T12:00:00`)
-          .toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
-          .replace(/\./g, '');
-
-    this.saved.emit({ id, entity, date, fuel: this.fuel(), total, branch: this.branch() });
-    this.visible.set(false);
+    const lines = this.lines();
+    if (lines.some((line) => !this.fuels().some((fuel) => fuel.id === line.fuel_type_id)
+      || !/^\d+(?:\.\d{1,3})?$/.test(line.gallons) || Number(line.gallons) <= 0
+      || !/^\d+(?:\.\d{1,4})?$/.test(line.unit_price))) {
+      this.error.set('Cada línea requiere combustible, galones y precio unitario válidos.');
+      return;
+    }
+    if (new Set(lines.map((line) => line.fuel_type_id)).size !== lines.length) {
+      this.error.set('No repitas un combustible en la misma orden.');
+      return;
+    }
+    this.saved.emit({ payload: {
+      order_number: this.number().trim(),
+      siaf_number: this.siaf().trim(),
+      issue_date: this.date(),
+      institution_name: this.entity().trim(),
+      supplier_name: this.supplier().trim(),
+      supplier_details: this.supplierDetails().trim() || null,
+      executing_unit: this.executingUnit().trim(),
+      executing_unit_ruc: this.ruc().trim(),
+      branch_id: this.branch(),
+      items: lines.map((line) => ({
+        fuel_type_id: line.fuel_type_id,
+        authorized_gallons: line.gallons,
+        unit_price: line.unit_price,
+        total_amount: lineAmount(line.gallons, line.unit_price),
+      })),
+    } });
   }
 }

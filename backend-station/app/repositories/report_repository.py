@@ -2,11 +2,13 @@
 
 from datetime import UTC, date, datetime, time, timedelta
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.sql.elements import ColumnElement
 
+from app.core.config import get_settings
 from app.tables import (
     Attendance,
     AttendanceItem,
@@ -83,4 +85,5 @@ class ReportRepository:
 
 
 def _start_of_day(value: date) -> datetime:
-    return datetime.combine(value, time.min, tzinfo=UTC)
+    business_zone = ZoneInfo(get_settings().TIMEZONE)
+    return datetime.combine(value, time.min, tzinfo=business_zone).astimezone(UTC)

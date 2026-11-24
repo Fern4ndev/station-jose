@@ -14,10 +14,10 @@ export class OrderDetailDialog {
 
   protected readonly balance = computed(() => {
     const order = this.order();
-    return order ? `${formatGallons(orderBalance(order))} gal` : '—';
+    return order ? `${formatGallons(order.source?.items.reduce((sum, item) => sum + Number(item.available_gallons), 0) ?? orderBalance(order))} gal` : '—';
   });
 
-  protected gallons(value: number | undefined): string {
-    return value === undefined ? '—' : `${formatGallons(value)} gal`;
+  protected gallons(value: number | string | undefined): string {
+    return value === undefined ? '—' : `${formatGallons(Number(value))} gal`;
   }
 }

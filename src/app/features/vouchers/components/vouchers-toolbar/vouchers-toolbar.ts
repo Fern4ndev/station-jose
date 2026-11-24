@@ -18,6 +18,7 @@ export class VouchersToolbar {
     { value: 'Disponible', label: 'Disponibles' },
     { value: 'Parcial', label: 'Parciales' },
     { value: 'Agotado', label: 'Agotados' },
+    { value: 'Bloqueado', label: 'Bloqueados' },
   ];
 
   protected onQuery(event: Event): void {

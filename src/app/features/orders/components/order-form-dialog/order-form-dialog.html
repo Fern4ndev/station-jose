@@ -1,108 +1,66 @@
-<app-ui-dialog [(visible)]="visible" [title]="title()" [description]="description()">
+<app-ui-dialog [(visible)]="visible" [title]="title()" description="Revisa todos los campos antes de guardar la orden.">
   <form id="orderForm" class="grid grid-cols-2 gap-[13px] max-[760px]:grid-cols-1" (submit)="onSubmit($event)" novalidate>
-    <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
-      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderEntity">Entidad / institución</label>
-      <input
-        id="newOrderEntity"
-        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-        placeholder="Nombre de la institución"
-        [value]="entity()"
-        (input)="setEntity($event)"
-      />
-    </div>
-
-    <div class="grid gap-[6px]">
-      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderNumber">Número de orden</label>
-      <input
-        id="newOrderNumber"
-        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-        placeholder="OC-2026-0049"
-        [readonly]="isEditing()"
-        [value]="number()"
-        (input)="setNumber($event)"
-      />
-    </div>
-
-    <div class="grid gap-[6px]">
-      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderDate">Fecha de emisión</label>
-      @if (isEditing()) {
-        <input id="newOrderDate" class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" readonly [value]="order()?.date ?? ''" />
-      } @else {
-        <input
-          id="newOrderDate"
-          class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-          type="date"
-          [value]="date()"
-          (input)="setDate($event)"
-        />
+    <label class="grid gap-[6px] text-[11px] text-[#52646a]">Número de orden
+      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [readonly]="!!order()" [value]="number()" (input)="set('number', $event)" />
+    </label>
+    <label class="grid gap-[6px] text-[11px] text-[#52646a]">Número SIAF
+      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="siaf()" (input)="set('siaf', $event)" />
+    </label>
+    <label class="grid gap-[6px] text-[11px] text-[#52646a]">Fecha de emisión
+      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" type="date" [value]="date()" (input)="set('date', $event)" />
+    </label>
+    <label class="grid gap-[6px] text-[11px] text-[#52646a]">Sede proveedora
+      <select class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="branch()" (change)="set('branch', $event)">
+        <option value="">Selecciona una sede</option>
+        @for (item of branches(); track item.id) { <option [value]="item.id">{{ item.name }}</option> }
+      </select>
+    </label>
+    <label class="grid gap-[6px] text-[11px] text-[#52646a]">Entidad / institución
+      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="entity()" (input)="set('entity', $event)" />
+    </label>
+    <label class="grid gap-[6px] text-[11px] text-[#52646a]">Proveedor
+      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="supplier()" (input)="set('supplier', $event)" />
+    </label>
+    <label class="grid gap-[6px] text-[11px] text-[#52646a]">Unidad ejecutora
+      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="executingUnit()" (input)="set('executingUnit', $event)" />
+    </label>
+    <label class="grid gap-[6px] text-[11px] text-[#52646a]">RUC de unidad ejecutora
+      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="ruc()" (input)="set('ruc', $event)" />
+    </label>
+    <label class="grid gap-[6px] text-[11px] text-[#52646a] col-span-full">Detalles del proveedor (opcional)
+      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="supplierDetails()" (input)="set('supplierDetails', $event)" />
+    </label>
+    <div class="col-span-full grid gap-[10px]">
+      <strong class="text-[11px] text-[#263d44]">Líneas de combustible</strong>
+      @for (line of lines(); track $index; let index = $index) {
+        <div class="grid grid-cols-[2fr_1fr_1fr_auto] gap-[8px] max-[760px]:grid-cols-2">
+          <label class="grid gap-[4px] text-[10px] text-[#52646a]">Combustible
+            <select class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[9px]" [value]="line.fuel_type_id" (change)="setLine(index, 'fuel_type_id', $event)">
+              <option value="">Selecciona</option>
+              @for (fuel of fuels(); track fuel.id) { <option [value]="fuel.id">{{ fuel.name }}</option> }
+            </select>
+          </label>
+          <label class="grid gap-[4px] text-[10px] text-[#52646a]">Galones
+            <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[9px]" type="number" min="0.001" step="0.001" [value]="line.gallons" (input)="setLine(index, 'gallons', $event)" />
+          </label>
+          <label class="grid gap-[4px] text-[10px] text-[#52646a]">Precio unitario
+            <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[9px]" type="number" min="0" step="0.0001" [value]="line.unit_price" (input)="setLine(index, 'unit_price', $event)" />
+          </label>
+          <button type="button" class="self-end min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[9px] text-[11px]" [disabled]="lines().length === 1" (click)="removeLine(index)" [attr.aria-label]="'Quitar línea ' + (index + 1)">Quitar</button>
+        </div>
       }
+      <button type="button" class="justify-self-start rounded-[10px] border border-[#dce5e5] px-[12px] py-[8px] text-[11px]" (click)="addLine()">Agregar combustible</button>
     </div>
-
-    <div class="grid gap-[6px]">
-      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderFuel">Combustible</label>
-      <select id="newOrderFuel" class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" [value]="fuel()" (change)="setFuel($event)">
-        @for (option of fuels; track option) {
-          <option [value]="option">{{ option }}</option>
-        }
-      </select>
-    </div>
-
-    <div class="grid gap-[6px]">
-      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderGallons">Galones autorizados</label>
-      <input
-        id="newOrderGallons"
-        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-        type="number"
-        min="0.001"
-        step="0.001"
-        placeholder="0.000"
-        [value]="total()"
-        (input)="setTotal($event)"
-      />
-      <span class="text-[9px] leading-[1.5] text-[#919da0]">{{ usedHint() }}</span>
-    </div>
-
-    <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
-      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderBranch">Sede proveedora</label>
-      <select id="newOrderBranch" class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" [value]="branch()" (change)="setBranch($event)">
-        @for (option of branches; track option) {
-          <option [value]="option">{{ option }}</option>
-        }
-      </select>
-    </div>
-
-    @if (!isEditing()) {
-      <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
-        <span class="mb-0 block text-[10px] font-[620] text-[#52646a]">Documento de origen (opcional)</span>
-        <label
-          class="grid min-h-[85px] place-items-center gap-[5px] rounded-[12px] border border-dashed border-[#bbd5d0] bg-[#f7fbfa] p-[12px] text-center text-[11px] text-[#53746f]"
-          for="orderPdf"
-        >
-          <app-ui-icon name="orders" [size]="18" />
-          <span>{{ pdfLabel() }}</span>
-          <input
-            id="orderPdf"
-            class="sr-only"
-            type="file"
-            accept="application/pdf,.pdf"
-            (change)="onPdf($event)"
-          />
-          <span class="text-[9px] text-[#89999b]">El OCR propone datos; revísalos antes de guardar.</span>
-        </label>
-      </div>
+    @if (!order()) {
+      <label class="col-span-full grid gap-[6px] rounded-[12px] border border-dashed border-[#bbd5d0] bg-[#f7fbfa] p-[12px] text-[11px] text-[#53746f]">PDF de orden (opcional)
+        <input type="file" accept="application/pdf,.pdf" (change)="onPdf($event)" [disabled]="loadingOcr()" />
+        <span>{{ pdfLabel() }}</span>
+      </label>
     }
-
-    @if (error()) {
-      <p class="text-[9px] leading-[1.5] text-[#919da0] text-[#a55a2c] m-0" role="alert">{{ error() }}</p>
-    }
+    @if (error()) { <p class="col-span-full m-0 text-[11px] text-[#a55a2c]" role="alert">{{ error() }}</p> }
   </form>
-
   <div dialogFooter class="flex justify-end gap-[8px]">
-    <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] border-[#dce5e6] bg-[rgba(255,255,255,0.72)] text-[#53656a] hover:bg-white" (click)="visible.set(false)">
-      Cancelar
-    </button>
-    <button type="submit" form="orderForm" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)">
-      {{ isEditing() ? 'Guardar cambios' : 'Guardar orden' }}
-    </button>
+    <button type="button" class="min-h-[39px] rounded-[11px] border border-[#dce5e6] bg-white px-[13px] text-[11px]" (click)="visible.set(false)">Cancelar</button>
+    <button type="submit" form="orderForm" class="min-h-[39px] rounded-[11px] bg-(--sanjose-primary-action) px-[13px] text-[11px] text-white" [disabled]="loadingOcr() || saving()">{{ saving() ? 'Guardando…' : 'Guardar orden' }}</button>
   </div>
 </app-ui-dialog>

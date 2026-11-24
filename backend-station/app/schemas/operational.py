@@ -58,6 +58,8 @@ class OperationalAttendance(OperationalModel):
     attended_at: datetime
     idempotency_key: UUID
     items: list[OperationalAttendanceItem]
+    performer_name: str | None = None
+    branch_name: str | None = None
 
 
 class OperationalVoucherItem(OperationalModel):

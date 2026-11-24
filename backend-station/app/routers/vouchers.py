@@ -41,7 +41,7 @@ def list_vouchers(
         issuer_name=issuer_name,
         created_from=created_from,
         created_to=created_to,
-        branch_id=user.branch_id if user.role == "ATTENDANT" else None,
+        branch_id=None,
     )
     if user.role == "ATTENDANT":
         safe = OperationalVoucherList(
@@ -73,7 +73,7 @@ def list_attended_vouchers(
         created_from=None,
         created_to=None,
         attended_by_user_id=user.id,
-        branch_id=user.branch_id,
+        branch_id=None,
     )
     return OperationalVoucherList(
         items=[operational_voucher(item, user.id) for item in result.items],
@@ -90,7 +90,7 @@ def get_voucher(
     result = AttendanceService().get_voucher(
         db,
         voucher_id,
-        branch_id=user.branch_id if user.role == "ATTENDANT" else None,
+        branch_id=None,
     )
     if user.role == "ATTENDANT":
         return JSONResponse(operational_voucher(result, user.id).model_dump(mode="json"))

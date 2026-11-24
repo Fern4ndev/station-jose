@@ -4,6 +4,7 @@ from collections import defaultdict
 from datetime import UTC, datetime
 from decimal import Decimal
 from io import BytesIO
+from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import Session
 
@@ -215,6 +216,7 @@ class ReportService:
 
 
 def _period_key(value: datetime, grouping: str) -> str:
+    value = value.astimezone(ZoneInfo(get_settings().TIMEZONE))
     if grouping == "hour":
         return value.strftime("%Y-%m-%d %H:00")
     if grouping == "week":

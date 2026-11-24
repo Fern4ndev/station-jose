@@ -52,7 +52,7 @@ export class Attendances {
     this.orders().filter(
       (order) =>
         orderBalance(order) > 0 &&
-        (this.branch() === 'Todas las sedes' || order.branch === this.branch()),
+        (this.branchLocked() || this.branch() === 'Todas las sedes' || order.branch === this.branch()),
     ),
   );
   protected readonly visible = computed(() =>

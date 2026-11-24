@@ -20,6 +20,7 @@ from app.schemas.report import (
 from app.services.report_service import ReportService
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
+dashboard_router = APIRouter(tags=["Dashboard"])
 
 
 def _filters(
@@ -78,6 +79,11 @@ def attendance_report(
     )
 
 
+@dashboard_router.get(
+    "/dashboard",
+    response_model=DashboardResponse,
+    dependencies=[Depends(require_permission("reports.read"))],
+)
 @router.get(
     "/dashboard",
     response_model=DashboardResponse,

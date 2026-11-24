@@ -42,6 +42,7 @@
               [attr.data-on]="user.active || null"
               [attr.aria-pressed]="user.active"
               [attr.aria-label]="(user.active ? 'Deshabilitar a ' : 'Habilitar a ') + user.name"
+              [disabled]="user.roleValue === 'ADMIN'"
               (click)="toggle.emit(user)"
             ></button>
           </td>

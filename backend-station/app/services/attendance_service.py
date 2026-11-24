@@ -57,7 +57,7 @@ class AttendanceService:
             db, idempotency_key, data, user_id=user_id, order_id=order_id
         )
         if existing is not None:
-            return self._attendance_response(existing)
+            return self.attendance_response(existing)
 
         item_ids = [item.purchase_order_item_id for item in data.voucher_items]
         order_items = self.vouchers.lock_items(db, [item_id for item_id in item_ids if item_id])
@@ -68,10 +68,6 @@ class AttendanceService:
             raise InvalidFuelLineError("Todas las líneas deben pertenecer a la orden indicada.")
         if any(item.purchase_order.deleted_at is not None for item in order_items):
             raise ResourceNotFoundError("La orden no está disponible.")
-        if branch_id is not None and any(
-            item.purchase_order.branch_id != branch_id for item in order_items
-        ):
-            raise ResourceNotFoundError("Orden de compra no encontrada.")
 
         normalized_issuer = normalize_identity(data.issuer_name)
         normalized_number = normalize_identity(data.voucher_number)
@@ -123,7 +119,7 @@ class AttendanceService:
             prices=by_id,
         )
         db.flush()
-        return self._attendance_response(attendance)
+        return self.attendance_response(attendance)
 
     def create_follow_up(
         self,
@@ -140,7 +136,7 @@ class AttendanceService:
             db, idempotency_key, data, user_id=user_id, voucher_id=voucher_id
         )
         if existing is not None:
-            return self._attendance_response(existing)
+            return self.attendance_response(existing)
         item_ids = [item.voucher_item_id for item in data.items]
         order_item_ids = self.vouchers.order_item_ids_for_voucher(db, voucher_id)
         locked_order_items = self.vouchers.lock_items(db, order_item_ids)
@@ -148,8 +144,6 @@ class AttendanceService:
         if voucher is None:
             raise ResourceNotFoundError("Vale no encontrado.")
         if not locked_order_items:
-            raise ResourceNotFoundError("Vale no encontrado.")
-        if branch_id is not None and self._order_branch_id(locked_order_items) != branch_id:
             raise ResourceNotFoundError("Vale no encontrado.")
         voucher_items = self.vouchers.lock_voucher_items(
             db, [item_id for item_id in item_ids if item_id]
@@ -178,7 +172,7 @@ class AttendanceService:
             prices=prices,
         )
         db.flush()
-        return self._attendance_response(attendance)
+        return self.attendance_response(attendance)
 
     def get_voucher(
         self,
@@ -367,8 +361,15 @@ class AttendanceService:
         db.add(attendance)
         return attendance
 
-    def _attendance_response(self, attendance: Attendance) -> AttendanceResponse:
-        return AttendanceResponse.model_validate(attendance, from_attributes=True)
+    def attendance_response(self, attendance: Attendance) -> AttendanceResponse:
+        response = AttendanceResponse.model_validate(attendance, from_attributes=True)
+        return response.model_copy(update={
+            "performer_name": (
+                f"{attendance.performed_by.first_name} {attendance.performed_by.last_name}"
+                if attendance.performed_by is not None else None
+            ),
+            "branch_name": attendance.branch.name if attendance.branch is not None else None,
+        })
 
     def _voucher_response(self, db: Session, voucher: Voucher) -> VoucherResponse:
         item_ids = [item.id for item in voucher.items]
@@ -419,7 +420,7 @@ class AttendanceService:
             status=status,
             items=detail_items,
             attendances=[
-                self._attendance_response(attendance) for attendance in voucher.attendances
+                self.attendance_response(attendance) for attendance in voucher.attendances
             ],
         )
 

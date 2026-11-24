@@ -50,9 +50,10 @@ export class AttendanceForm {
 
     effect(() => {
       const id = this.voucherId().trim().toLowerCase();
-      const existing = id ? this.vouchers().find((voucher) =>
+      const matches = id ? this.vouchers().filter((voucher) =>
         voucher.id.toLowerCase() === id && voucher.orderItemId === this.orderId(),
-      ) : undefined;
+      ) : [];
+      const existing = matches.length === 1 ? matches[0] : undefined;
       if (existing) {
         this.issuer.set(existing.issuer);
         this.issuerType.set(existing.issuerType);
@@ -68,7 +69,9 @@ export class AttendanceForm {
           this.issuerType.set('INSTITUTION');
           this.authorized.set('');
         }
-        this.hint.set('Para un vale nuevo, ingresa emisor y galones autorizados.');
+        this.hint.set(matches.length > 1
+          ? 'Hay vales con ese número de distintos emisores. Indica el emisor exacto.'
+          : 'Para un vale nuevo, ingresa emisor y galones autorizados.');
       }
       this.wasLocked = existing !== undefined;
     });
@@ -146,16 +149,19 @@ export class AttendanceForm {
       this.error.set('Indica los galones realmente entregados.');
       return;
     }
+    const normalize = (value: string) => value.normalize('NFKC').trim().toLocaleLowerCase().replace(/\s+/g, ' ');
     const existing = this.vouchers().find((voucher) =>
-      voucher.orderItemId === order.id && voucher.id.toLowerCase() === voucherId.toLowerCase(),
+      voucher.orderItemId === order.id
+      && normalize(voucher.id) === normalize(voucherId)
+      && normalize(voucher.issuer) === normalize(this.issuer()),
     );
     if (gallons > orderBalance(order) || (existing && gallons > voucherBalance(existing))) {
       this.error.set('El despacho supera el saldo disponible de la orden o del vale.');
       return;
     }
     const authorized = Number(this.authorized());
-    if (!existing && (!Number.isFinite(authorized) || authorized < gallons || authorized > orderBalance(order))) {
-      this.error.set('Los galones autorizados deben cubrir el despacho sin superar el saldo de la orden.');
+    if (!existing && (!Number.isFinite(authorized) || authorized < gallons)) {
+      this.error.set('Los galones autorizados deben cubrir el despacho.');
       return;
     }
 

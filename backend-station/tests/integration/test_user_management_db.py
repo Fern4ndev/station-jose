@@ -58,7 +58,7 @@ def test_user_lifecycle_and_duplicate(client_db: TestClient) -> None:
     role = client_db.patch(
         f"/api/v1/users/{user_id}/role", json={"role": "ADMIN", "branch_id": None}
     )
-    assert role.status_code == 200 and role.json()["role"] == "ADMIN"
+    assert role.status_code == 422
     disabled = client_db.patch(f"/api/v1/users/{user_id}/status", json={"is_active": False})
     assert disabled.status_code == 200 and disabled.json()["is_active"] is False
     enabled = client_db.patch(f"/api/v1/users/{user_id}/status", json={"is_active": True})

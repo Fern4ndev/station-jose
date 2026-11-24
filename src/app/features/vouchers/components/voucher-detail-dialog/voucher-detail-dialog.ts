@@ -15,7 +15,7 @@ export class VoucherDetailDialog {
 
   protected readonly balance = computed(() => {
     const voucher = this.voucher();
-    return voucher ? `${formatGallons(voucherBalance(voucher))} gal` : '—';
+    return voucher ? `${formatGallons(voucher.lines?.reduce((sum, line) => sum + line.available, 0) ?? voucherBalance(voucher))} gal` : '—';
   });
 
   protected readonly status = computed(() => {

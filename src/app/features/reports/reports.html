@@ -3,8 +3,12 @@
 <div class="animate-[fadeIn_230ms_ease_both]">
   <app-ui-page-heading
     title="Reportes"
-    subtitle="Consulta actividad y saldos por período, sede, usuario o estado."
+    subtitle="Consulta actividad y saldos por período y sede."
   >
+    <select class="min-h-[39px] rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px]" aria-label="Tipo de reporte" [value]="kind()" (change)="kind.set($any($event.target).value)">
+      <option value="orders">Órdenes</option>
+      <option value="attendances">Atenciones</option>
+    </select>
     <select
       id="reportPeriod"
       class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] !w-auto"
@@ -17,10 +21,11 @@
       }
     </select>
 
-    <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)" (click)="exportCsv()">
+    <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)" (click)="exportReport('pdf')">
       <app-ui-icon name="download" [size]="14" />
-      Exportar
+      PDF
     </button>
+    <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-[#dce5e6] bg-white px-[13px] text-[11px] font-[620] text-[#30464d]" (click)="exportReport('xlsx')">Excel</button>
   </app-ui-page-heading>
 
   <app-report-metrics [metrics]="metrics()" />
@@ -28,7 +33,29 @@
   <div
     class="grid grid-cols-[minmax(0,1.45fr)_minmax(240px,0.75fr)] gap-[13px] max-[760px]:grid-cols-[1fr] max-[760px]:gap-[10px]"
   >
-    <app-report-chart [buckets]="dataset().buckets" [badge]="dataset().badge" />
+    <app-report-chart [buckets]="buckets()" [badge]="badge()" />
     <app-report-summary [summary]="summary()" />
+  </div>
+
+  <div class="mt-[13px] overflow-x-auto rounded-[12px] border border-[#e5eaea] bg-white p-[14px] text-[11px] text-[#52636a]">
+    @if (kind() === 'orders') {
+      <table class="w-full border-collapse text-left">
+        <thead><tr><th>Orden</th><th>Entidad</th><th>Sede</th><th>Combustible</th><th>Autorizado</th><th>Despachado</th><th>Saldo</th></tr></thead>
+        <tbody>
+          @for (row of orderRows(); track row.order_id + row.fuel_type_code) {
+            <tr class="border-t border-[#edf0f0]"><td>{{ row.order_number }}</td><td>{{ row.institution_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.authorized_gallons }}</td><td>{{ row.attended_gallons }}</td><td>{{ row.available_gallons }}</td></tr>
+          } @empty { <tr><td colspan="7">No hay órdenes en el período.</td></tr> }
+        </tbody>
+      </table>
+    } @else {
+      <table class="w-full border-collapse text-left">
+        <thead><tr><th>Fecha</th><th>Vale</th><th>Orden</th><th>Grifero</th><th>Sede</th><th>Combustible</th><th>Galones</th></tr></thead>
+        <tbody>
+          @for (row of attendanceRows(); track row.attendance_id + row.fuel_type_code) {
+            <tr class="border-t border-[#edf0f0]"><td>{{ row.attended_at }}</td><td>{{ row.voucher_number }}</td><td>{{ row.order_number }}</td><td>{{ row.performer_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.attended_gallons }}</td></tr>
+          } @empty { <tr><td colspan="7">No hay atenciones en el período.</td></tr> }
+        </tbody>
+      </table>
+    }
   </div>
 </div>

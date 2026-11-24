@@ -1,3 +1,5 @@
+import type { PurchaseOrderCreate, PurchaseOrderDetail } from '../../core/models/purchase-order';
+
 export interface DemoOrder {
   readonly id: string;
   readonly entity: string;
@@ -6,28 +8,16 @@ export interface DemoOrder {
   readonly fuel: string;
   readonly total: number;
   readonly used: number;
+  readonly apiId?: string;
+  readonly key?: string;
+  readonly source?: PurchaseOrderDetail;
 }
 
 export type OrderFilter = 'Todas' | 'Con saldo' | 'Agotadas';
 
 export interface OrderDraft {
-  readonly id: string;
-  readonly entity: string;
-  readonly date: string;
-  readonly branch: string;
-  readonly fuel: string;
-  readonly total: number;
+  readonly payload: PurchaseOrderCreate;
 }
-
-export const DEMO_ORDERS: readonly DemoOrder[] = [
-  { id: 'OC-2026-0048', entity: 'Municipalidad Provincial', date: '14 nov 2026', branch: 'San José', fuel: 'Diésel B5', total: 2400, used: 1680 },
-  { id: 'OC-2026-0046', entity: 'Red de Salud Norte', date: '12 nov 2026', branch: 'Santa Marta', fuel: 'Gasohol 90', total: 1800, used: 945 },
-  { id: 'OC-2026-0044', entity: 'Gobierno Regional', date: '10 nov 2026', branch: 'San José', fuel: 'Diésel B5', total: 3200, used: 3100 },
-  { id: 'OC-2026-0041', entity: 'Unidad de Gestión Educativa', date: '08 nov 2026', branch: 'Santa Marta', fuel: 'Gasohol 90', total: 1200, used: 1200 },
-  { id: 'OC-2026-0038', entity: 'Municipalidad Distrital', date: '05 nov 2026', branch: 'San José', fuel: 'Diésel B5', total: 2800, used: 1375 },
-  { id: 'OC-2026-0035', entity: 'Red de Salud Norte', date: '02 nov 2026', branch: 'Santa Marta', fuel: 'Diésel B5', total: 1600, used: 1220 },
-  { id: 'OC-2026-0031', entity: 'Gobierno Regional', date: '29 oct 2026', branch: 'San José', fuel: 'Gasohol 90', total: 2000, used: 2000 },
-];
 
 export const orderBalance = (order: DemoOrder): number => Math.max(0, order.total - order.used);
 

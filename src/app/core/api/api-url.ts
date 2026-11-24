@@ -111,8 +111,12 @@ export const API_ENDPOINTS = {
     attendances: (voucherId: string) =>
       `/vouchers/${encodeURIComponent(voucherId)}/attendances`,
   },
+  attendances: {
+    base: '/attendances',
+    byId: (attendanceId: string) => `/attendances/${encodeURIComponent(attendanceId)}`,
+  },
   reports: {
-    dashboard: '/reports/dashboard',
+    dashboard: '/dashboard',
     purchaseOrders: '/reports/purchase-orders',
     purchaseOrdersExport: '/reports/purchase-orders/export',
     attendances: '/reports/attendances',

@@ -20,6 +20,8 @@ PERMISSIONS_BY_ROLE: dict[UserRole, frozenset[str]] = {
             "vouchers.read",
             "vouchers.correct_descriptive",
             "vouchers.delete",
+            "attendances.read_all",
+            "attendances.create",
             "balances.read",
             "reports.read",
             "reports.export",

@@ -41,5 +41,5 @@
     </app-ui-panel>
   </div>
 
-  <app-user-form-dialog [(visible)]="createOpen" (saved)="create($event)" />
+  <app-user-form-dialog [(visible)]="createOpen" [branches]="branches()" [saving]="saving()" (saved)="create($event)" />
 </div>

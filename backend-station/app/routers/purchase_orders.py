@@ -43,7 +43,7 @@ def list_purchase_orders(
         page=page,
         page_size=page_size,
         search=search,
-        branch_id=user.branch_id if user.role == "ATTENDANT" else branch_id,
+        branch_id=branch_id,
         issue_date_from=issue_date_from,
         issue_date_to=issue_date_to,
         sort_by=sort_by,
@@ -78,7 +78,7 @@ def get_purchase_order(
     result = PurchaseOrderService().get(
         db,
         order_id,
-        branch_id=user.branch_id if user.role == "ATTENDANT" else None,
+        branch_id=None,
     )
     if user.role == "ATTENDANT":
         return JSONResponse(OperationalOrder.model_validate(result).model_dump(mode="json"))

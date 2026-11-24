@@ -5,18 +5,14 @@
 >
   @if (voucher(); as detail) {
     <div class="grid gap-[16px]">
-      <div class="flex items-center justify-between gap-[12px] text-[10px] text-[#77868b]">
-        <span>Combustible</span>
-        <strong class="text-[11px] font-[650] text-[#263d44]">{{ detail.fuel }}</strong>
-      </div>
-      <div class="flex items-center justify-between gap-[12px] text-[10px] text-[#77868b]">
-        <span>Autorizado en el vale</span>
-        <strong class="text-[11px] font-[650] text-[#263d44]">{{ gallons(detail.total) }}</strong>
-      </div>
-      <div class="flex items-center justify-between gap-[12px] text-[10px] text-[#77868b]">
-        <span>Atendido</span>
-        <strong class="text-[11px] font-[650] text-[#263d44]">{{ gallons(detail.used) }}</strong>
-      </div>
+      @for (line of detail.lines ?? []; track line.id) {
+        <div class="grid gap-[5px] rounded-[10px] border border-[#e5eaea] p-[10px] text-[10px] text-[#52636a]">
+          <strong class="text-[11px] text-[#263d44]">{{ line.fuel }}</strong>
+          <span>Autorizado: {{ gallons(line.authorized) }}</span>
+          <span>Atendido: {{ gallons(line.attended) }}</span>
+          <span>Disponible: {{ gallons(line.available) }}</span>
+        </div>
+      }
 
       <div
         class="flex items-center justify-between gap-[12px] rounded-[12px] border border-[#dceee8] bg-[#f2faf6] p-[13px_14px] text-[10px] text-[#386e61]"

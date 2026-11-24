@@ -118,5 +118,6 @@ class UserService:
     def _ensure_admin_is_not_editable(user: User) -> None:
         if user.role == UserRole.ADMIN.value:
             raise ProtectedAdminAccountError(
-                "La cuenta administradora es global y no se puede modificar desde el panel de usuarios."
+                "La cuenta administradora es global y no se puede modificar "
+                "desde el panel de usuarios."
             )

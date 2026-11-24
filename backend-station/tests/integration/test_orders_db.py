@@ -3,7 +3,7 @@
 import os
 from collections.abc import Generator
 from types import SimpleNamespace
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from app.core.dependencies import get_current_user
@@ -139,6 +139,8 @@ def test_partial_dispatch_preserves_voucher_balance_and_idempotency(
     client, branch_id, fuels, session = order_context
     actor_id = uuid4()
     suffix = uuid4().hex[:12]
+    dispatch_branch_id = uuid4()
+    session.add(Branch(id=dispatch_branch_id, code=f"D{suffix[:8]}", name=f"Despacho {suffix}"))
     session.add(
         User(
             id=actor_id,
@@ -148,7 +150,7 @@ def test_partial_dispatch_preserves_voucher_balance_and_idempotency(
             email=f"f4-{suffix}@example.com",
             password_hash="disabled",
             role="ATTENDANT",
-            branch_id=branch_id,
+            branch_id=dispatch_branch_id,
         )
     )
     session.flush()
@@ -176,7 +178,7 @@ def test_partial_dispatch_preserves_voucher_balance_and_idempotency(
     order_id = order.json()["id"]
     line1, line2 = [item["id"] for item in order.json()["items"]]
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
-        role="ATTENDANT", id=actor_id, branch_id=branch_id
+        role="ATTENDANT", id=actor_id, branch_id=dispatch_branch_id
     )
     payload = {
         "issuer_type": "INSTITUTION",
@@ -195,6 +197,7 @@ def test_partial_dispatch_preserves_voucher_balance_and_idempotency(
         headers={"Idempotency-Key": key},
     )
     assert first.status_code == 201, first.text
+    assert first.json()["branch_id"] == str(dispatch_branch_id)
     assert "unit_price_snapshot" not in first.json()["items"][0]
     replay = client.post(
         f"/api/v1/purchase-orders/{order_id}/attendances",
@@ -207,6 +210,21 @@ def test_partial_dispatch_preserves_voucher_balance_and_idempotency(
     by_order = {line["purchase_order_item_id"]: line for line in voucher["items"]}
     assert float(by_order[line1]["available_gallons"]) == 5
     assert float(by_order[line2]["available_gallons"]) == 4
+    order_balance = client.get(f"/api/v1/balances/purchase-orders/{order_id}")
+    assert order_balance.status_code == 200
+    assert float(order_balance.json()["items"][0]["available_gallons"]) == 15
+    voucher_balance = client.get(f"/api/v1/balances/vouchers/{voucher_id}")
+    assert voucher_balance.status_code == 200
+    assert float(voucher_balance.json()["items"][0]["available_gallons"]) == 5
+    overview = client.get("/api/v1/balances/overview")
+    assert overview.status_code == 200
+    assert overview.json()["pagination"]["total"] >= 1
+    attendances = client.get("/api/v1/attendances")
+    assert attendances.status_code == 200
+    assert attendances.json()["pagination"]["total"] == 1
+    assert "unit_price_snapshot" not in attendances.json()["items"][0]["items"][0]
+    assert client.get(f"/api/v1/attendances/{first.json()['id']}").status_code == 200
+    assert client.get(f"/api/v1/users/{actor_id}/attendances").status_code == 403
     follow_up = client.post(
         f"/api/v1/vouchers/{voucher_id}/attendances",
         headers={"Idempotency-Key": str(uuid4())},
@@ -273,7 +291,7 @@ def test_review_and_correction_preserve_balances(
     assert order.status_code == 201
     order_id, line_id = order.json()["id"], order.json()["items"][0]["id"]
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
-        role="ATTENDANT", id=attendant_id, branch_id=branch_id
+        role="ATTENDANT", id=attendant_id, branch_id=UUID(branch_id)
     )
     first = client.post(
         f"/api/v1/purchase-orders/{order_id}/attendances",
@@ -294,6 +312,8 @@ def test_review_and_correction_preserve_balances(
     before = client.get(f"/api/v1/purchase-orders/{order_id}").json()["items"][0][
         "available_gallons"
     ]
+    user_attendances = client.get(f"/api/v1/users/{attendant_id}/attendances")
+    assert user_attendances.json()["pagination"]["total"] == 1
     assert (
         client.patch(
             f"/api/v1/vouchers/{voucher_id}/descriptive-data", json={"issuer_name": "Otro"}

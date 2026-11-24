@@ -95,6 +95,8 @@ class AttendanceResponse(BaseModel):
     attended_at: datetime
     idempotency_key: UUID
     items: list[AttendanceItemResponse]
+    performer_name: str | None = None
+    branch_name: str | None = None
 
 
 class VoucherResponse(BaseModel):
