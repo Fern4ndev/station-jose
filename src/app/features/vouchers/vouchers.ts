@@ -6,6 +6,7 @@ import { AdminUiState } from '../../layouts/admin/admin-ui-state';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
 import { UiToast } from '../../shared/components/ui-toast/ui-toast';
+import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { extractApiError } from '../../shared/utils/api-error';
 import { OperationsStore, type DispatchVoucher } from '../attendances/operations-store';
 import { VoucherDetailDialog } from './components/voucher-detail-dialog/voucher-detail-dialog';
@@ -24,6 +25,7 @@ import {
     UiPageHeading,
     UiPanel,
     UiToast,
+    TableRefresh,
     VoucherDetailDialog,
     VoucherEditDialog,
     VouchersTable,
@@ -46,6 +48,7 @@ export class Vouchers {
   protected readonly detailOpen = signal(false);
   protected readonly editOpen = signal(false);
   protected readonly selected = signal<DispatchVoucher | null>(null);
+  protected readonly refreshing = signal(false);
 
   protected readonly canCorrect = computed(() => this.state.role() === 'ADMIN');
   protected readonly rows = computed(() =>
@@ -54,9 +57,19 @@ export class Vouchers {
   protected readonly lockedIds = computed(() => this.vouchers().map((item) => item.id));
 
   constructor() {
-    void this.operations.load().catch((error: unknown) => {
+    void this.refresh();
+  }
+
+  protected async refresh(): Promise<void> {
+    if (this.refreshing()) return;
+    this.refreshing.set(true);
+    try {
+      await this.operations.load();
+    } catch (error) {
       this.messages.add({ severity: 'error', summary: extractApiError(error, 'No se pudieron cargar los vales.'), life: 4000 });
-    });
+    } finally {
+      this.refreshing.set(false);
+    }
   }
 
   protected openDetail(voucher: DispatchVoucher): void {

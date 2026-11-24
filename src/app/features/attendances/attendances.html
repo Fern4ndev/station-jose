@@ -25,6 +25,7 @@
       title="Historial de atenciones"
       subtitle="Las atenciones confirmadas no se editan ni eliminan desde esta vista."
     >
+      <app-table-refresh panelAction [loading]="refreshing()" (refresh)="refresh()" />
       <app-attendance-history [rows]="visible()" />
     </app-ui-panel>
 

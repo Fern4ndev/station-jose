@@ -8,6 +8,7 @@ import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-h
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
 import { UiStatusBadge } from '../../shared/components/ui-status-badge/ui-status-badge';
 import { UiToast } from '../../shared/components/ui-toast/ui-toast';
+import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { extractApiError } from '../../shared/utils/api-error';
 import { formatGallons, orderBalance } from '../orders/orders-data';
 import { AttendanceFormDialog } from './components/attendance-form-dialog/attendance-form-dialog';
@@ -27,6 +28,7 @@ import { OperationsStore } from './operations-store';
     UiPanel,
     UiStatusBadge,
     UiToast,
+    TableRefresh,
   ],
   selector: 'app-attendances',
   templateUrl: './attendances.html',
@@ -44,6 +46,7 @@ export class Attendances {
   protected readonly resetToken = signal(0);
   protected readonly registerOpen = signal(false);
   protected readonly saving = signal(false);
+  protected readonly refreshing = signal(false);
   protected readonly canRegister = computed(() => this.auth.hasPermission('attendances.create'));
 
   protected readonly branch = this.state.branch;
@@ -65,9 +68,19 @@ export class Attendances {
   protected readonly recent = computed(() => this.visible().slice(0, 4));
 
   constructor() {
-    void this.operations.load().catch((error: unknown) => {
+    void this.refresh();
+  }
+
+  protected async refresh(): Promise<void> {
+    if (this.refreshing()) return;
+    this.refreshing.set(true);
+    try {
+      await this.operations.load();
+    } catch (error) {
       this.messages.add({ severity: 'error', summary: extractApiError(error, 'No se pudieron cargar los despachos.'), life: 4000 });
-    });
+    } finally {
+      this.refreshing.set(false);
+    }
   }
 
   protected async register(request: AttendanceRequest): Promise<void> {

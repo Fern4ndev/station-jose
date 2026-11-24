@@ -12,6 +12,7 @@ import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
 import { UiToast } from '../../shared/components/ui-toast/ui-toast';
+import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { extractApiError } from '../../shared/utils/api-error';
 import { OrderDetailDialog } from './components/order-detail-dialog/order-detail-dialog';
 import { OrderFormDialog } from './components/order-form-dialog/order-form-dialog';
@@ -21,7 +22,7 @@ import { filterOrders, type DemoOrder, type OrderDraft, type OrderFilter } from 
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [OrderDetailDialog, OrderFormDialog, OrdersTable, OrdersToolbar, UiConfirmDialog, UiIcon, UiPageHeading, UiPanel, UiToast],
+  imports: [OrderDetailDialog, OrderFormDialog, OrdersTable, OrdersToolbar, TableRefresh, UiConfirmDialog, UiIcon, UiPageHeading, UiPanel, UiToast],
   selector: 'app-orders',
   templateUrl: './orders.html',
 })
@@ -44,6 +45,7 @@ export class Orders {
   protected readonly selected = signal<DemoOrder | null>(null);
   protected readonly deleteOpen = signal(false);
   protected readonly saving = signal(false);
+  protected readonly refreshing = signal(false);
 
   protected readonly canManage = computed(() => this.state.role() !== 'ATTENDANT');
   protected readonly rows = computed(() => filterOrders(this.orders(), this.filter(), this.query(), this.state.role() === 'ATTENDANT' ? 'Todas las sedes' : this.state.branch()));
@@ -59,6 +61,7 @@ export class Orders {
   }
 
   private async load(): Promise<void> {
+    this.refreshing.set(true);
     try {
       const orders: DemoOrder[] = [];
       for (let page = 1; ; page += 1) {
@@ -78,6 +81,8 @@ export class Orders {
       }
     } catch (error) {
       this.showError(error);
+    } finally {
+      this.refreshing.set(false);
     }
   }
 

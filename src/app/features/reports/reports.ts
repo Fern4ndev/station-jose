@@ -12,6 +12,7 @@ import type { StatCardModel } from '../../shared/components/ui-stat-card/ui-stat
 import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiToast } from '../../shared/components/ui-toast/ui-toast';
+import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { ReportChart } from './components/report-chart/report-chart';
 import { ReportMetrics } from './components/report-metrics/report-metrics';
 import { ReportSummaryPanel } from './components/report-summary/report-summary';
@@ -24,7 +25,7 @@ import {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReportChart, ReportMetrics, ReportSummaryPanel, UiIcon, UiPageHeading, UiToast],
+  imports: [ReportChart, ReportMetrics, ReportSummaryPanel, TableRefresh, UiIcon, UiPageHeading, UiToast],
   selector: 'app-reports',
   templateUrl: './reports.html',
 })
@@ -42,6 +43,7 @@ export class Reports {
   protected readonly dashboard = signal<DashboardResponse | null>(null);
   protected readonly orderRows = signal<readonly PurchaseOrderReportRow[]>([]);
   protected readonly attendanceRows = signal<readonly AttendanceReportRow[]>([]);
+  protected readonly refreshing = signal(false);
   protected readonly buckets = signal<readonly ReportBucket[]>([]);
   protected readonly badge = computed(() => this.periods.find((item) => item.value === this.period())?.label ?? '');
   protected readonly metrics = computed<readonly StatCardModel[]>(() => {
@@ -85,6 +87,7 @@ export class Reports {
   }
 
   private async load(): Promise<void> {
+    this.refreshing.set(true);
     try {
       const filters = this.filters();
       const branches = await firstValueFrom(this.catalog.branches());
@@ -107,6 +110,29 @@ export class Reports {
       })));
     } catch (error) {
       this.messages.add({ severity: 'error', summary: extractApiError(error, 'No se pudieron cargar los reportes.'), life: 4000 });
+    } finally {
+      this.refreshing.set(false);
+    }
+  }
+
+  protected async refresh(): Promise<void> {
+    if (this.refreshing()) return;
+    this.refreshing.set(true);
+    try {
+      const { date_from, date_to } = this.filters();
+      const branches = await firstValueFrom(this.catalog.branches());
+      const branch_id = branches.find((item) => item.name === this.branch())?.id;
+      if (this.kind() === 'orders') {
+        const report = await firstValueFrom(this.api.purchaseOrders({ date_from, date_to, branch_id }));
+        this.orderRows.set(report.items);
+      } else {
+        const report = await firstValueFrom(this.api.attendances({ date_from, date_to, branch_id }));
+        this.attendanceRows.set(report.items);
+      }
+    } catch (error) {
+      this.messages.add({ severity: 'error', summary: extractApiError(error, 'No se pudo actualizar la tabla.'), life: 4000 });
+    } finally {
+      this.refreshing.set(false);
     }
   }
 

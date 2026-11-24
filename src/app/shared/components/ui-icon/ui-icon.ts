@@ -18,7 +18,9 @@ export type UiIconName =
   | 'download'
   | 'eye'
   | 'edit'
-  | 'trash';
+  | 'trash'
+  | 'refresh'
+  | 'logout';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

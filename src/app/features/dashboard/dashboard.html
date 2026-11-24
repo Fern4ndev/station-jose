@@ -11,5 +11,5 @@
 
   <app-dashboard-metrics [metrics]="metrics()" />
 
-  <app-dashboard-activity [rows]="recent()" [scope]="scope()" (viewAll)="goAttendances()" />
+  <app-dashboard-activity [rows]="recent()" [scope]="scope()" [refreshing]="refreshing()" (refresh)="refresh()" (viewAll)="goAttendances()" />
 </div>

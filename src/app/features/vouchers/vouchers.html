@@ -5,6 +5,7 @@
     title="Vales"
     subtitle="Cada vale se registra con su primera atención y conserva el saldo pendiente."
   >
+    <app-table-refresh [loading]="refreshing()" (refresh)="refresh()" />
     <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] border-[#dce5e6] bg-[rgba(255,255,255,0.72)] text-[#53656a] hover:bg-white" (click)="goOrders()">
       Consultar órdenes
     </button>

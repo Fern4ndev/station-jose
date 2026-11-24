@@ -1,0 +1,10 @@
+<button
+  type="button"
+  class="inline-flex min-h-[39px] cursor-pointer items-center justify-center gap-[7px] rounded-[11px] border border-[#dce5e6] bg-white px-[12px] text-[11px] font-[620] text-[#53656a] transition-colors hover:bg-[#f2f8f7] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+  [disabled]="loading()"
+  [attr.aria-label]="loading() ? 'Actualizando tabla' : 'Actualizar tabla'"
+  (click)="refresh.emit()"
+>
+  <app-ui-icon name="refresh" [size]="15" class="inline-flex" [class.animate-spin]="loading()" />
+  <span>{{ loading() ? 'Actualizando…' : 'Actualizar' }}</span>
+</button>

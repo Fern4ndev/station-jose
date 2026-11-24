@@ -1,8 +1,11 @@
 <app-ui-panel title="Actividad reciente" [subtitle]="'Despachos registrados en ' + scope()">
-  <button panelAction type="button" class="inline-flex min-h-[30px] cursor-pointer items-center gap-[5px] border-0 bg-transparent px-[4px] text-[10px] font-[630] text-(--sanjose-accent) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" (click)="viewAll.emit()">
-    Ver actividad
-    <app-ui-icon name="arrow-right" [size]="13" />
-  </button>
+  <div panelAction class="flex items-center gap-[8px]">
+    <app-table-refresh [loading]="refreshing()" (refresh)="refresh.emit()" />
+    <button type="button" class="inline-flex min-h-[30px] cursor-pointer items-center gap-[5px] border-0 bg-transparent px-[4px] text-[10px] font-[630] text-(--sanjose-accent) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" (click)="viewAll.emit()">
+      Ver actividad
+      <app-ui-icon name="arrow-right" [size]="13" />
+    </button>
+  </div>
 
   <div class="w-full overflow-x-auto">
     <table class="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[rgba(238,247,244,0.5)] [&_tbody_tr:last-child>td]:border-b-0">

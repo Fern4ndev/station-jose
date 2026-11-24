@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  HostListener,
   computed,
   effect,
   inject,
@@ -30,6 +32,7 @@ import { AdminUiState } from '../../admin-ui-state';
 })
 export class Sidebar {
   private readonly auth = inject(AuthService);
+  private readonly element = inject(ElementRef<HTMLElement>);
   private readonly state = inject(AdminUiState);
   private readonly router = inject(Router);
 
@@ -57,6 +60,7 @@ export class Sidebar {
 
   /** Grupos cerrados por el usuario; el resto se considera desplegado. */
   private readonly collapsedGroups = signal<ReadonlySet<string>>(new Set());
+  protected readonly profileOpen = signal(false);
 
   private readonly url = toSignal(
     this.router.events.pipe(
@@ -107,5 +111,20 @@ export class Sidebar {
 
   protected onBranchChange(event: Event): void {
     this.state.setBranch((event.target as HTMLSelectElement).value);
+  }
+
+  protected logout(): void {
+    this.profileOpen.set(false);
+    this.auth.logout();
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    if (!this.element.nativeElement.contains(event.target as Node)) this.profileOpen.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    this.profileOpen.set(false);
   }
 }

@@ -29,6 +29,7 @@ export class Dashboard {
   private readonly catalog = inject(CatalogApi);
   private readonly messages = inject(MessageService);
   private readonly report = signal<DashboardResponse | null>(null);
+  protected readonly refreshing = signal(false);
 
   protected readonly role = this.state.role;
   protected readonly firstName = computed(() => this.state.user().name.split(' ')[0]);
@@ -58,7 +59,7 @@ export class Dashboard {
   protected readonly scope = computed(() => this.state.branch() === 'Todas las sedes' ? 'ambas sedes' : `la sede ${this.state.branch()}`);
 
   constructor() {
-    void this.operations.load().catch((error: unknown) => this.showError(error));
+    void this.refresh();
     if (this.role() !== 'ATTENDANT') {
       effect(() => {
         const branch = this.state.branch();
@@ -72,6 +73,18 @@ export class Dashboard {
 
   private showError(error: unknown): void {
     this.messages.add({ severity: 'error', summary: extractApiError(error), life: 4000 });
+  }
+
+  protected async refresh(): Promise<void> {
+    if (this.refreshing()) return;
+    this.refreshing.set(true);
+    try {
+      await this.operations.load();
+    } catch (error) {
+      this.showError(error);
+    } finally {
+      this.refreshing.set(false);
+    }
   }
 
   protected goReports(): void { void this.router.navigateByUrl('/reportes'); }

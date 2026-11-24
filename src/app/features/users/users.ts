@@ -10,6 +10,7 @@ import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
 import { UiToast } from '../../shared/components/ui-toast/ui-toast';
+import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { UserFormDialog } from './components/user-form-dialog/user-form-dialog';
 import { UsersTable } from './components/users-table/users-table';
 import { UsersToolbar } from './components/users-toolbar/users-toolbar';
@@ -22,7 +23,7 @@ import {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiIcon, UiPageHeading, UiPanel, UiToast, UserFormDialog, UsersTable, UsersToolbar],
+  imports: [TableRefresh, UiIcon, UiPageHeading, UiPanel, UiToast, UserFormDialog, UsersTable, UsersToolbar],
   selector: 'app-users',
   templateUrl: './users.html',
 })
@@ -36,6 +37,7 @@ export class Users {
   protected readonly query = signal('');
   protected readonly createOpen = signal(false);
   protected readonly saving = signal(false);
+  protected readonly refreshing = signal(false);
   protected readonly roles = ROLE_SUMMARY;
 
   protected readonly rows = computed(() => filterUsers(this.users(), this.query()));
@@ -49,6 +51,7 @@ export class Users {
   }
 
   private async load(): Promise<void> {
+    this.refreshing.set(true);
     try {
       const users: DemoUserRow[] = [];
       for (let page = 1; ; page += 1) {
@@ -59,8 +62,12 @@ export class Users {
       this.users.set(users);
     } catch (error) {
       this.showError(error);
+    } finally {
+      this.refreshing.set(false);
     }
   }
+
+  protected refresh(): void { void this.load(); }
 
   private toRow(user: UserOut): DemoUserRow {
     return {

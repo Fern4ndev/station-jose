@@ -38,6 +38,7 @@
   </div>
 
   <div class="mt-[13px] overflow-x-auto rounded-[12px] border border-[#e5eaea] bg-white p-[14px] text-[11px] text-[#52636a]">
+    <div class="mb-[12px] flex justify-end"><app-table-refresh [loading]="refreshing()" (refresh)="refresh()" /></div>
     @if (kind() === 'orders') {
       <table class="w-full border-collapse text-left">
         <thead><tr><th>Orden</th><th>Entidad</th><th>Sede</th><th>Combustible</th><th>Autorizado</th><th>Despachado</th><th>Saldo</th></tr></thead>
