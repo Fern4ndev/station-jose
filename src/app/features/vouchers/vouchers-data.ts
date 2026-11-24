@@ -14,6 +14,7 @@ export interface DemoVoucher {
   readonly fuel: string;
   readonly total: number;
   readonly used: number;
+  readonly branch?: string;
 }
 
 export interface VoucherDraft {
@@ -44,20 +45,20 @@ export const voucherStatus = (voucher: DemoVoucher): VoucherStatus => {
   return voucher.used === 0 ? 'Disponible' : 'Parcial';
 };
 
-export function filterVouchers(
-  vouchers: readonly DemoVoucher[],
+export function filterVouchers<T extends DemoVoucher>(
+  vouchers: readonly T[],
   filter: VoucherFilter,
   query: string,
   branch: string,
   orders: readonly DemoOrder[] = DEMO_ORDERS,
-): readonly DemoVoucher[] {
+): readonly T[] {
   const term = query.trim().toLowerCase();
   return vouchers.filter((voucher) => {
     const status = voucherStatus(voucher);
     const matchesStatus = filter === 'Todos' || filter === status;
     const matchesQuery = `${voucher.id} ${voucher.orderId} ${voucher.issuer}`.toLowerCase().includes(term);
     const order = orders.find((item) => item.id === voucher.orderId);
-    const matchesBranch = branch === 'Todas las sedes' || order?.branch === branch;
+    const matchesBranch = branch === 'Todas las sedes' || (voucher.branch ?? order?.branch) === branch;
     return matchesStatus && matchesQuery && matchesBranch;
   });
 }

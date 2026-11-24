@@ -9,6 +9,7 @@ import {
   type DemoVoucher,
   type VoucherStatus,
 } from '../../vouchers-data';
+import type { DispatchVoucher } from '../../../attendances/operations-store';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,13 +18,13 @@ import {
   templateUrl: './vouchers-table.html',
 })
 export class VouchersTable {
-  readonly rows = input.required<readonly DemoVoucher[]>();
+  readonly rows = input.required<readonly DispatchVoucher[]>();
   readonly canCorrect = input(false);
   readonly lockedVoucherIds = input<readonly string[]>([]);
 
-  readonly detail = output<DemoVoucher>();
-  readonly edit = output<DemoVoucher>();
-  readonly remove = output<DemoVoucher>();
+  readonly detail = output<DispatchVoucher>();
+  readonly edit = output<DispatchVoucher>();
+  readonly remove = output<DispatchVoucher>();
 
   protected served(voucher: DemoVoucher): string {
     return `${formatGallons(voucher.used)} / ${formatGallons(voucher.total)} gal`;

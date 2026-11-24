@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, model, output } from '@angular/core';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
-import type { DemoOrder } from '../../../orders/orders-data';
-import type { DemoVoucher } from '../../../vouchers/vouchers-data';
 import type { AttendanceRequest } from '../../attendances-data';
+import type { DispatchOrder, DispatchVoucher } from '../../operations-store';
 import { AttendanceForm } from '../attendance-form/attendance-form';
 
 /** Formulario de despacho dentro de un modal, disparado desde la vista de atenciones. */
@@ -14,8 +13,8 @@ import { AttendanceForm } from '../attendance-form/attendance-form';
 })
 export class AttendanceFormDialog {
   readonly visible = model(false);
-  readonly orders = input.required<readonly DemoOrder[]>();
-  readonly vouchers = input.required<readonly DemoVoucher[]>();
+  readonly orders = input.required<readonly DispatchOrder[]>();
+  readonly vouchers = input.required<readonly DispatchVoucher[]>();
   readonly branch = input('San José');
   readonly branchLocked = input(false);
   readonly resetToken = input(0);

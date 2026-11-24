@@ -24,18 +24,11 @@
       [lockedVoucherIds]="lockedIds()"
       (detail)="openDetail($event)"
       (edit)="openEdit($event)"
-      (remove)="askDelete($event)"
+      (remove)="askDelete()"
     />
   </app-ui-panel>
 
   <app-voucher-detail-dialog [(visible)]="detailOpen" [voucher]="selected()" />
   <app-voucher-edit-dialog [(visible)]="editOpen" [voucher]="selected()" (saved)="correct($event)" />
 
-  <app-ui-confirm-dialog
-    [(visible)]="deleteOpen"
-    title="Eliminar vale"
-    [message]="'Se eliminará el vale ' + (selected()?.id ?? '') + '. Esta acción no se puede deshacer.'"
-    confirmLabel="Eliminar"
-    (confirmed)="confirmDelete()"
-  />
 </div>

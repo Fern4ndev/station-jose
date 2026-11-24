@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* El mockup no forma parte de la aplicación. */
+@source not "../mockup.html";
+
 @theme {
   /* Escala de colores generada en armonía con #1F3975 */
   --color-primary-50: #f4f7fc;   /* Tono muy claro ideal para fondos y canvas */
@@ -28,6 +31,21 @@
   --sanjose-primary-dark: var(--color-primary-800);
   --sanjose-primary-deep: var(--color-primary-700);
   --sanjose-canvas: var(--color-primary-50);
+
+  --sanjose-ink: #10202a;
+  --sanjose-accent: #3a8176;
+  --sanjose-primary-action: #173c42;
+  --sanjose-primary-action-hover: #20545a;
+
+  --sanjose-app-bg: #f3f6f5;
+  --sanjose-app-aura: radial-gradient(ellipse at 68% 0%, rgba(119, 205, 190, 0.13), transparent 32rem);
+  --sanjose-panel: rgba(255, 255, 255, 0.79);
+  --sanjose-panel-border: #e5ebeb;
+  --sanjose-panel-shadow: 0 7px 23px rgba(31, 58, 60, 0.035);
+
+  --sanjose-sidebar-bg: var(--color-primary-200);
+  --sanjose-sidebar-shadow: 0 22px 60px rgba(31, 57, 117, 0.12);
+  --sanjose-sidebar-text: var(--color-primary-800);
 }
 
 body {

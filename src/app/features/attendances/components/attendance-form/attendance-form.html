@@ -4,7 +4,7 @@
     <select id="attendanceOrder" class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" [value]="orderId()" (change)="setOrder($event)">
       @for (order of orders(); track order.id) {
         <option [value]="order.id">
-          {{ order.id }} · {{ order.entity }} ({{ balance(order) }} disponibles)
+          {{ order.orderNumber }} · {{ order.fuel }} · {{ order.entity }} ({{ balance(order) }} disponibles)
         </option>
       } @empty {
         <option value="">Sin órdenes con saldo disponible</option>

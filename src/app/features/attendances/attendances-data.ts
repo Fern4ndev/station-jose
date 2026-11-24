@@ -17,6 +17,7 @@ export interface DemoAttendance {
   readonly time: string;
   readonly date: string;
   readonly status: AttendanceStatus;
+  readonly attendedAt?: string;
 }
 
 export interface AttendanceRequest {

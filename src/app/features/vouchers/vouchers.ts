@@ -1,21 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { VouchersApi } from '../../core/services/vouchers-api';
 import { AdminUiState } from '../../layouts/admin/admin-ui-state';
-import { UiConfirmDialog } from '../../shared/components/ui-confirm-dialog/ui-confirm-dialog';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
 import { UiToast } from '../../shared/components/ui-toast/ui-toast';
-import { DEMO_ATTENDANCES } from '../attendances/attendances-data';
-import { DEMO_ORDERS } from '../orders/orders-data';
+import { extractApiError } from '../../shared/utils/api-error';
+import { OperationsStore, type DispatchVoucher } from '../attendances/operations-store';
 import { VoucherDetailDialog } from './components/voucher-detail-dialog/voucher-detail-dialog';
 import { VoucherEditDialog } from './components/voucher-edit-dialog/voucher-edit-dialog';
 import { VouchersTable } from './components/vouchers-table/vouchers-table';
 import { VouchersToolbar } from './components/vouchers-toolbar/vouchers-toolbar';
 import {
-  DEMO_VOUCHERS,
   filterVouchers,
-  type DemoVoucher,
   type VoucherDraft,
   type VoucherFilter,
 } from './vouchers-data';
@@ -23,7 +21,6 @@ import {
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    UiConfirmDialog,
     UiPageHeading,
     UiPanel,
     UiToast,
@@ -39,67 +36,54 @@ export class Vouchers {
   private readonly router = inject(Router);
   private readonly state = inject(AdminUiState);
   private readonly messages = inject(MessageService);
+  private readonly api = inject(VouchersApi);
+  private readonly operations = inject(OperationsStore);
 
-  protected readonly vouchers = signal<readonly DemoVoucher[]>([...DEMO_VOUCHERS]);
+  protected readonly vouchers = this.operations.vouchers;
   protected readonly filter = signal<VoucherFilter>('Todos');
   protected readonly query = signal('');
 
   protected readonly detailOpen = signal(false);
   protected readonly editOpen = signal(false);
-  protected readonly deleteOpen = signal(false);
-  protected readonly selected = signal<DemoVoucher | null>(null);
+  protected readonly selected = signal<DispatchVoucher | null>(null);
 
   protected readonly canCorrect = computed(() => this.state.role() === 'ADMIN');
   protected readonly rows = computed(() =>
-    filterVouchers(this.vouchers(), this.filter(), this.query(), this.state.branch(), DEMO_ORDERS),
+    filterVouchers(this.vouchers(), this.filter(), this.query(), this.state.branch(), this.operations.orders()),
   );
-  protected readonly lockedIds = computed(() => DEMO_ATTENDANCES.map((item) => item.voucher));
+  protected readonly lockedIds = computed(() => this.vouchers().map((item) => item.id));
 
-  protected openDetail(voucher: DemoVoucher): void {
+  constructor() {
+    void this.operations.load().catch((error: unknown) => {
+      this.messages.add({ severity: 'error', summary: extractApiError(error, 'No se pudieron cargar los vales.'), life: 4000 });
+    });
+  }
+
+  protected openDetail(voucher: DispatchVoucher): void {
     this.selected.set(voucher);
     this.detailOpen.set(true);
   }
 
-  protected openEdit(voucher: DemoVoucher): void {
+  protected openEdit(voucher: DispatchVoucher): void {
     this.selected.set(voucher);
     this.editOpen.set(true);
   }
 
-  protected askDelete(voucher: DemoVoucher): void {
-    if (this.lockedIds().includes(voucher.id)) {
-      this.messages.add({
-        severity: 'warn',
-        summary: 'No se puede eliminar un vale con atenciones registradas.',
-        life: 2800,
-      });
-      return;
-    }
-    this.selected.set(voucher);
-    this.deleteOpen.set(true);
-  }
-
-  protected confirmDelete(): void {
-    const voucher = this.selected();
-    if (!voucher) {
-      return;
-    }
-    this.vouchers.update((vouchers) => vouchers.filter((item) => item.id !== voucher.id));
-    this.deleteOpen.set(false);
-    this.messages.add({ severity: 'success', summary: 'Vale eliminado.', life: 2800 });
+  protected askDelete(): void {
+    this.messages.add({ severity: 'warn', summary: 'Los vales con despachos registrados no se pueden eliminar.', life: 2800 });
   }
 
   protected correct(draft: VoucherDraft): void {
-    this.vouchers.update((vouchers) =>
-      vouchers.map((voucher) =>
-        voucher.id === draft.id
-          ? { ...voucher, issuer: draft.issuer, issuerType: draft.issuerType }
-          : voucher,
-      ),
-    );
-    this.messages.add({
-      severity: 'success',
-      summary: 'Datos descriptivos del vale actualizados.',
-      life: 2800,
+    const voucher = this.selected();
+    if (!voucher) return;
+    this.api.correctDescriptive(voucher.apiId, {
+      issuer_name: draft.issuer,
+      issuer_type: draft.issuerType,
+    }).subscribe({
+      next: () => {
+        void this.operations.load().then(() => this.messages.add({ severity: 'success', summary: 'Datos del vale actualizados.', life: 2800 })).catch((error: unknown) => this.messages.add({ severity: 'error', summary: extractApiError(error), life: 4000 }));
+      },
+      error: (error: unknown) => this.messages.add({ severity: 'error', summary: extractApiError(error), life: 4000 }),
     });
   }
 

@@ -1,11 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
-import { formatGallons, orderBalance, type DemoOrder } from '../../../orders/orders-data';
-import {
-  voucherBalance,
-  type DemoVoucher,
-  type VoucherIssuerType,
-} from '../../../vouchers/vouchers-data';
+import { formatGallons, orderBalance } from '../../../orders/orders-data';
+import { voucherBalance, type VoucherIssuerType } from '../../../vouchers/vouchers-data';
 import type { AttendanceRequest } from '../../attendances-data';
+import type { DispatchOrder, DispatchVoucher } from '../../operations-store';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -13,8 +10,8 @@ import type { AttendanceRequest } from '../../attendances-data';
   templateUrl: './attendance-form.html',
 })
 export class AttendanceForm {
-  readonly orders = input.required<readonly DemoOrder[]>();
-  readonly vouchers = input.required<readonly DemoVoucher[]>();
+  readonly orders = input.required<readonly DispatchOrder[]>();
+  readonly vouchers = input.required<readonly DispatchVoucher[]>();
   readonly branch = input('San José');
   readonly branchLocked = input(false);
   readonly resetToken = input(0);
@@ -53,7 +50,9 @@ export class AttendanceForm {
 
     effect(() => {
       const id = this.voucherId().trim().toLowerCase();
-      const existing = id ? this.vouchers().find((voucher) => voucher.id.toLowerCase() === id) : undefined;
+      const existing = id ? this.vouchers().find((voucher) =>
+        voucher.id.toLowerCase() === id && voucher.orderItemId === this.orderId(),
+      ) : undefined;
       if (existing) {
         this.issuer.set(existing.issuer);
         this.issuerType.set(existing.issuerType);
@@ -93,7 +92,7 @@ export class AttendanceForm {
     });
   }
 
-  protected balance(order: DemoOrder): string {
+  protected balance(order: DispatchOrder): string {
     return `${formatGallons(orderBalance(order))} gal`;
   }
 
@@ -147,6 +146,18 @@ export class AttendanceForm {
       this.error.set('Indica los galones realmente entregados.');
       return;
     }
+    const existing = this.vouchers().find((voucher) =>
+      voucher.orderItemId === order.id && voucher.id.toLowerCase() === voucherId.toLowerCase(),
+    );
+    if (gallons > orderBalance(order) || (existing && gallons > voucherBalance(existing))) {
+      this.error.set('El despacho supera el saldo disponible de la orden o del vale.');
+      return;
+    }
+    const authorized = Number(this.authorized());
+    if (!existing && (!Number.isFinite(authorized) || authorized < gallons || authorized > orderBalance(order))) {
+      this.error.set('Los galones autorizados deben cubrir el despacho sin superar el saldo de la orden.');
+      return;
+    }
 
     this.error.set('');
     this.register.emit({
@@ -154,7 +165,7 @@ export class AttendanceForm {
       voucherId,
       issuer: this.issuer().trim(),
       issuerType: this.issuerType(),
-      authorized: Number(this.authorized()),
+      authorized,
       gallons,
       branch: this.branchValue(),
     });
