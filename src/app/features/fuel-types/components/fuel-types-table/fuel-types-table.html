@@ -5,18 +5,17 @@
   >
     <thead>
       <tr>
-        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">CÓDIGO</th>
+        <th class="w-[56px] border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">N°</th>
         <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">NOMBRE</th>
         <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
-        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ÓRDENES</th>
         <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ACCIONES</th>
       </tr>
     </thead>
     <tbody>
       @for (row of pageRows(); track row.id) {
         <tr>
-          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
-            <span class="block font-[630] text-[#243941]">{{ row.code }}</span>
+          <td class="w-[56px] border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#8b989c]">
+            {{ rowNumber($index) }}
           </td>
           <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
             {{ row.name }}
@@ -27,9 +26,6 @@
             } @else {
               <app-ui-status-badge label="Inactivo" tone="gray" />
             }
-          </td>
-          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
-            {{ ordersLabel(row) }}
           </td>
           <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
             <div class="flex items-center gap-[6px]">
@@ -72,7 +68,7 @@
         </tr>
       } @empty {
         <tr>
-          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="5">
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="4">
             <div class="p-[36px_20px] text-center text-[11px] text-[#8b989c]">
               No hay combustibles que coincidan con la búsqueda.
             </div>

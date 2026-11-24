@@ -21,7 +21,18 @@ export class DashboardActivity {
   readonly viewAll = output<void>();
   protected readonly first = linkedSignal({ source: this.rows, computation: () => 0 });
   protected readonly pageSize = signal(10);
-  protected readonly pageRows = computed(() => this.rows().slice(this.first(), this.first() + this.pageSize()));
+  /** Del registro más antiguo al más reciente. */
+  protected readonly orderedRows = computed(() =>
+    [...this.rows()].sort((a, b) => (a.attendedAt ?? '').localeCompare(b.attendedAt ?? '')),
+  );
+  protected readonly pageRows = computed(() =>
+    this.orderedRows().slice(this.first(), this.first() + this.pageSize()),
+  );
+
+  /** Correlativo ascendente, estable entre páginas. */
+  protected rowNumber(index: number): number {
+    return this.first() + index + 1;
+  }
 
   protected onPage(event: { first?: number; rows?: number }): void {
     this.first.set(event.first ?? 0);

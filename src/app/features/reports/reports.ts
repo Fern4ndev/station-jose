@@ -74,9 +74,17 @@ export class Reports {
       return hour !== null && hour >= from && hour <= to;
     });
   });
-  protected readonly pagedOrderRows = computed(() => this.orderRows().slice(this.first(), this.first() + this.pageSize()));
-  protected readonly pagedAttendanceRows = computed(() => this.filteredAttendanceRows().slice(this.first(), this.first() + this.pageSize()));
+  /** El servidor entrega lo más reciente primero; las tablas se listan en forma ascendente. */
+  protected readonly orderedOrderRows = computed(() => [...this.orderRows()].reverse());
+  protected readonly orderedAttendanceRows = computed(() => [...this.filteredAttendanceRows()].reverse());
+  protected readonly pagedOrderRows = computed(() => this.orderedOrderRows().slice(this.first(), this.first() + this.pageSize()));
+  protected readonly pagedAttendanceRows = computed(() => this.orderedAttendanceRows().slice(this.first(), this.first() + this.pageSize()));
   protected readonly reportRowCount = computed(() => this.kind() === 'orders' ? this.orderRows().length : this.filteredAttendanceRows().length);
+
+  /** Correlativo ascendente, estable entre páginas. */
+  protected reportRowNumber(index: number): number {
+    return this.first() + index + 1;
+  }
   protected readonly refreshing = signal(false);
   protected readonly buckets = signal<readonly ReportBucket[]>([]);
   protected readonly visibleBuckets = computed(() => {

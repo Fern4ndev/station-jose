@@ -23,12 +23,13 @@ export class FuelTypesTable {
     this.rows().slice(this.first(), this.first() + this.pageSize()),
   );
 
+  /** Correlativo ascendente, estable entre páginas. */
+  protected rowNumber(index: number): number {
+    return this.first() + index + 1;
+  }
+
   protected onPage(event: { first?: number; rows?: number }): void {
     this.first.set(event.first ?? 0);
     this.pageSize.set(event.rows ?? 10);
-  }
-
-  protected ordersLabel(row: FuelTypeRow): string {
-    return row.ordersCount === 0 ? 'Sin órdenes' : String(row.ordersCount);
   }
 }

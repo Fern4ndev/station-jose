@@ -17,7 +17,16 @@ export class OrdersTable {
   readonly lockedOrderIds = input<readonly string[]>([]);
   protected readonly first = linkedSignal({ source: this.rows, computation: () => 0 });
   protected readonly pageSize = signal(10);
-  protected readonly pageRows = computed(() => this.rows().slice(this.first(), this.first() + this.pageSize()));
+  /** El servidor entrega lo más reciente primero; la tabla se lista en forma ascendente. */
+  protected readonly orderedRows = computed(() => [...this.rows()].reverse());
+  protected readonly pageRows = computed(() =>
+    this.orderedRows().slice(this.first(), this.first() + this.pageSize()),
+  );
+
+  /** Correlativo ascendente, estable entre páginas. */
+  protected rowNumber(index: number): number {
+    return this.first() + index + 1;
+  }
 
   protected onPage(event: { first?: number; rows?: number }): void {
     this.first.set(event.first ?? 0);

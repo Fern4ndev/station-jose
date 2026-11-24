@@ -11,6 +11,7 @@
     <table class="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[rgba(238,247,244,0.5)] [&_tbody_tr:last-child>td]:border-b-0">
       <thead>
         <tr>
+          <th class="w-[56px] border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">N°</th>
           <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">VALE / ORDEN</th>
           <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">GRIFERO</th>
           <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">SEDE</th>
@@ -21,6 +22,9 @@
       <tbody>
         @for (row of pageRows(); track row.id) {
           <tr>
+            <td class="w-[56px] border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#8b989c]">
+              {{ rowNumber($index) }}
+            </td>
             <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
               <span class="block text-[11px] font-[630] text-[#243941]">{{ row.voucher }}</span>
               <span class="block mt-[4px] text-[10px] text-[#98a2a5]">{{ row.orderId }}</span>
@@ -34,7 +38,7 @@
           </tr>
         } @empty {
           <tr>
-            <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="5">
+            <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="6">
               <div class="p-[36px_20px] text-center text-[11px] text-[#8b989c]">Sin despachos registrados hoy.</div>
             </td>
           </tr>

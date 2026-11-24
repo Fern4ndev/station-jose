@@ -1,6 +1,6 @@
 """Catalog use cases."""
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Session
 
@@ -38,8 +38,9 @@ class CatalogService:
         return [(fuel, self.fuel_types.count_order_items(db, fuel.id)) for fuel in fuels]
 
     def create_fuel_type(self, db: Session, data: FuelTypeCreate) -> FuelType:
-        self._ensure_unique(db, code=data.code, name=data.name)
-        fuel = FuelType(code=data.code, name=data.name, is_active=data.is_active)
+        self._ensure_unique(db, name=data.name)
+        fuel_id = uuid4()
+        fuel = FuelType(id=fuel_id, code=fuel_id.hex[:30].upper(), name=data.name, is_active=True)
         db.add(fuel)
         db.flush()
         return fuel

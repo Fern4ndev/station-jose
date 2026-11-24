@@ -6,8 +6,8 @@ import {
 } from './fuel-types-data';
 
 const rows: readonly FuelTypeRow[] = [
-  { id: '1', code: 'DIESEL-S50', name: 'Diésel S50', active: true, ordersCount: 3 },
-  { id: '2', code: 'GASOHOL-REGULAR', name: 'Gasohol Regular', active: false, ordersCount: 0 },
+  { id: '1', name: 'Diésel S50', active: true },
+  { id: '2', name: 'Gasohol Regular', active: false },
 ];
 
 describe('fuel type data', () => {
@@ -23,14 +23,12 @@ describe('fuel type data', () => {
       }),
     ).toEqual({
       id: '3',
-      code: 'GASOHOL-PREMIUM',
       name: 'Gasohol Premium',
       active: true,
-      ordersCount: 2,
     });
   });
 
-  it('filters by status and searches code or name', () => {
+  it('filters by status and searches by name', () => {
     expect(filterFuelTypes(rows, '', 'active')).toEqual([rows[0]]);
     expect(filterFuelTypes(rows, '', 'inactive')).toEqual([rows[1]]);
     expect(filterFuelTypes(rows, 'gasohol', 'all')).toEqual([rows[1]]);

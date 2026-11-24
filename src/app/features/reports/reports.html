@@ -61,20 +61,20 @@
     <div class="overflow-x-auto">
     @if (kind() === 'orders') {
       <table class="w-full min-w-[720px] border-collapse text-left [&_th]:border-y [&_th]:border-[#edf0f0] [&_th]:bg-[rgba(244,247,246,0.65)] [&_th]:px-[16px] [&_th]:py-[12px] [&_th]:text-[10px] [&_th]:font-[620] [&_th]:uppercase [&_th]:whitespace-nowrap [&_th]:text-[#839095] [&_td]:px-[16px] [&_td]:py-[14px] [&_td]:whitespace-nowrap [&_td]:align-middle">
-        <thead><tr><th>Orden</th><th>Entidad</th><th>Sede</th><th>Combustible</th><th>Autorizado</th><th>Despachado</th><th>Saldo</th></tr></thead>
+        <thead><tr><th class="w-[56px]">N°</th><th>Orden</th><th>Entidad</th><th>Sede</th><th>Combustible</th><th>Autorizado</th><th>Despachado</th><th>Saldo</th></tr></thead>
         <tbody>
           @for (row of pagedOrderRows(); track row.order_id + row.fuel_type_code) {
-            <tr class="border-t border-[#edf0f0]"><td>{{ row.order_number }}</td><td>{{ row.institution_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.authorized_gallons }}</td><td>{{ row.attended_gallons }}</td><td>{{ row.available_gallons }}</td></tr>
-          } @empty { <tr><td colspan="7">No hay órdenes en el período.</td></tr> }
+            <tr class="border-t border-[#edf0f0]"><td class="text-[#8b989c]">{{ reportRowNumber($index) }}</td><td>{{ row.order_number }}</td><td>{{ row.institution_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.authorized_gallons }}</td><td>{{ row.attended_gallons }}</td><td>{{ row.available_gallons }}</td></tr>
+          } @empty { <tr><td colspan="8">No hay órdenes en el período.</td></tr> }
         </tbody>
       </table>
     } @else {
       <table class="w-full min-w-[720px] border-collapse text-left [&_th]:border-y [&_th]:border-[#edf0f0] [&_th]:bg-[rgba(244,247,246,0.65)] [&_th]:px-[16px] [&_th]:py-[12px] [&_th]:text-[10px] [&_th]:font-[620] [&_th]:uppercase [&_th]:whitespace-nowrap [&_th]:text-[#839095] [&_td]:px-[16px] [&_td]:py-[14px] [&_td]:whitespace-nowrap [&_td]:align-middle">
-        <thead><tr><th>Fecha</th><th>Vale</th><th>Orden</th><th>Grifero</th><th>Sede</th><th>Combustible</th><th>Galones</th></tr></thead>
+        <thead><tr><th class="w-[56px]">N°</th><th>Fecha</th><th>Vale</th><th>Orden</th><th>Grifero</th><th>Sede</th><th>Combustible</th><th>Galones</th></tr></thead>
         <tbody>
           @for (row of pagedAttendanceRows(); track row.attendance_id + row.fuel_type_code) {
-            <tr class="border-t border-[#edf0f0]"><td>{{ row.attended_at }}</td><td>{{ row.voucher_number }}</td><td>{{ row.order_number }}</td><td>{{ row.performer_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.attended_gallons }}</td></tr>
-          } @empty { <tr><td colspan="7">No hay atenciones en el período.</td></tr> }
+            <tr class="border-t border-[#edf0f0]"><td class="text-[#8b989c]">{{ reportRowNumber($index) }}</td><td>{{ row.attended_at }}</td><td>{{ row.voucher_number }}</td><td>{{ row.order_number }}</td><td>{{ row.performer_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.attended_gallons }}</td></tr>
+          } @empty { <tr><td colspan="8">No hay atenciones en el período.</td></tr> }
         </tbody>
       </table>
     }

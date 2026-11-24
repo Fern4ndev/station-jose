@@ -13,12 +13,10 @@ export interface FuelTypeManageOut extends FuelTypeOut {
 }
 
 export interface FuelTypeCreate {
-  readonly code: string;
   readonly name: string;
-  readonly is_active?: boolean;
 }
 
-/** El código no se edita: sólo se actualiza el nombre. */
+/** El identificador técnico no se expone para edición; sólo cambia el nombre. */
 export interface FuelTypeUpdate {
   readonly name: string;
 }

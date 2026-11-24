@@ -5,26 +5,6 @@
 >
   <form id="fuelTypeForm" class="grid gap-[13px]" (submit)="onSubmit($event)" novalidate>
     <div class="grid gap-[6px]">
-      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="fuelTypeCode">Código</label>
-      <input
-        id="fuelTypeCode"
-        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[13px] text-[11px] text-[#30464d] uppercase placeholder:normal-case placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-        placeholder="Ej. DIESEL-S50"
-        maxlength="30"
-        [readonly]="isEditing()"
-        [value]="code()"
-        (input)="setCode($event)"
-      />
-      <span class="text-[9px] leading-[1.5] text-[#919da0]">
-        @if (isEditing()) {
-          El código no se puede modificar una vez registrado.
-        } @else {
-          Se guardará en mayúsculas; puedes usar guiones para separar palabras.
-        }
-      </span>
-    </div>
-
-    <div class="grid gap-[6px]">
       <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="fuelTypeName">Nombre</label>
       <input
         id="fuelTypeName"

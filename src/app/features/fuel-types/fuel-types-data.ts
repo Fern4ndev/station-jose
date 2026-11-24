@@ -10,23 +10,18 @@ export const FUEL_STATUS_FILTERS = [
 
 export interface FuelTypeRow {
   readonly id: string;
-  readonly code: string;
   readonly name: string;
   readonly active: boolean;
-  readonly ordersCount: number;
 }
 
 export interface FuelTypeDraft {
-  readonly code: string;
   readonly name: string;
 }
 
 export const toFuelTypeRow = (fuel: FuelTypeManageOut): FuelTypeRow => ({
   id: fuel.id,
-  code: fuel.code,
   name: fuel.name,
   active: fuel.is_active,
-  ordersCount: fuel.orders_count,
 });
 
 export const filterFuelTypes = (
@@ -38,7 +33,7 @@ export const filterFuelTypes = (
   return rows.filter((row) => {
     const matchesStatus =
       status === 'all' || (status === 'active' ? row.active : !row.active);
-    const matchesQuery = `${row.code} ${row.name}`.toLowerCase().includes(term);
+    const matchesQuery = row.name.toLowerCase().includes(term);
     return matchesStatus && matchesQuery;
   });
 };

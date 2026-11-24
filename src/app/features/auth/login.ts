@@ -1,13 +1,19 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { APP_ROUTES, SESSION_EXPIRED_REASON } from '../../core/constants/nav';
 import { isApiError } from '../../core/models/error';
 import { AuthService } from '../../core/services/auth/auth';
+import 'iconify-icon';
+
+/** Longitud mínima de contraseña aceptada por el formulario de acceso. */
+const PASSWORD_MIN_LENGTH = 6;
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   selector: 'app-login',
   templateUrl: './login.html',
 })
@@ -18,8 +24,37 @@ export class Login {
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    remember: [true],
+    password: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH)]],
+  });
+
+  /** Estado del formulario como señal para que la plantilla (OnPush) se actualice al validar. */
+  private readonly formStatus = toSignal(this.form.statusChanges, { initialValue: this.form.status });
+
+  protected readonly emailTouched = signal(false);
+  protected readonly passwordTouched = signal(false);
+
+  protected readonly formValid = computed(() => this.formStatus() === 'VALID');
+
+  protected readonly emailError = computed(() => {
+    this.formStatus();
+    const control = this.form.controls.email;
+    if (!this.emailTouched() || control.valid) {
+      return '';
+    }
+    return control.hasError('required')
+      ? 'Ingresa tu correo electrónico.'
+      : 'El correo electrónico no tiene un formato válido.';
+  });
+
+  protected readonly passwordError = computed(() => {
+    this.formStatus();
+    const control = this.form.controls.password;
+    if (!this.passwordTouched() || control.valid) {
+      return '';
+    }
+    return control.hasError('required')
+      ? 'Ingresa tu contraseña.'
+      : `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`;
   });
 
   protected readonly showPassword = signal(false);
@@ -44,14 +79,16 @@ export class Login {
     }
 
     this.form.markAllAsTouched();
+    this.emailTouched.set(true);
+    this.passwordTouched.set(true);
     if (this.form.invalid) {
       this.error.set(this.validationMessage());
       return;
     }
 
     this.error.set('');
-    const { email, password, remember } = this.form.getRawValue();
-    this.auth.login({ email, password, remember, returnUrl: this.returnUrl() }).subscribe({
+    const { email, password } = this.form.getRawValue();
+    this.auth.login({ email, password, remember: true, returnUrl: this.returnUrl() }).subscribe({
       error: (failure: unknown) =>
         this.error.set(
           isApiError(failure)
@@ -69,7 +106,7 @@ export class Login {
     if (email.hasError('email')) {
       return 'El correo electrónico no tiene un formato válido.';
     }
-    return 'La contraseña debe tener al menos 8 caracteres.';
+    return `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`;
   }
 
   /** Mensaje cuando el usuario llega redirigido por una sesión vencida. */

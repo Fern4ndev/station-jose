@@ -106,7 +106,7 @@ export class FuelTypes {
         await firstValueFrom(this.api.update(editing.id, { name: draft.name }));
         this.toast('Combustible actualizado.');
       } else {
-        await firstValueFrom(this.api.create({ code: draft.code, name: draft.name }));
+        await firstValueFrom(this.api.create({ name: draft.name }));
         this.toast('Combustible registrado.');
       }
       this.formOpen.set(false);

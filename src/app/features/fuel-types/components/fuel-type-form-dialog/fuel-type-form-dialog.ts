@@ -25,7 +25,6 @@ export class FuelTypeFormDialog {
 
   readonly saved = output<FuelTypeDraft>();
 
-  protected readonly code = signal('');
   protected readonly name = signal('');
   protected readonly localError = signal('');
 
@@ -41,14 +40,9 @@ export class FuelTypeFormDialog {
         return;
       }
       const current = this.editing();
-      this.code.set(current?.code ?? '');
       this.name.set(current?.name ?? '');
       this.localError.set('');
     });
-  }
-
-  protected setCode(event: Event): void {
-    this.code.set((event.target as HTMLInputElement).value);
   }
 
   protected setName(event: Event): void {
@@ -58,18 +52,13 @@ export class FuelTypeFormDialog {
   protected onSubmit(event: Event): void {
     event.preventDefault();
     const name = this.name().trim();
-    const code = this.code().trim();
 
     if (!name) {
       this.localError.set('Indica el nombre del combustible.');
       return;
     }
-    if (!this.isEditing() && !/^[A-Za-z0-9][A-Za-z0-9 _-]*$/.test(code)) {
-      this.localError.set('El código solo admite letras, números, guiones y guiones bajos.');
-      return;
-    }
 
     this.localError.set('');
-    this.saved.emit({ code, name });
+    this.saved.emit({ name });
   }
 }

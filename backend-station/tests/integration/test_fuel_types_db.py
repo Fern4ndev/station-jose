@@ -3,7 +3,7 @@
 import os
 from collections.abc import Generator
 from types import SimpleNamespace
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from app.core.dependencies import get_current_user
@@ -39,15 +39,15 @@ def client_db() -> Generator[TestClient, None, None]:
 
 def test_fuel_type_lifecycle(client_db: TestClient) -> None:
     suffix = uuid4().hex[:8].upper()
-    payload = {"code": f"test-fuel-{suffix}", "name": f"Combustible {suffix}"}
+    payload = {"name": f"Combustible {suffix}"}
 
     created = client_db.post("/api/v1/fuel-types", json=payload)
     assert created.status_code == 201
     fuel_id = created.json()["id"]
-    assert created.json()["code"] == f"TEST-FUEL-{suffix}"
+    assert created.json()["code"] == UUID(fuel_id).hex[:30].upper()
     assert created.json()["is_active"] is True
 
-    duplicate = client_db.post("/api/v1/fuel-types", json={**payload, "name": "Otro nombre"})
+    duplicate = client_db.post("/api/v1/fuel-types", json=payload)
     assert duplicate.status_code == 409
 
     renamed = client_db.patch(
@@ -75,7 +75,7 @@ def test_office_cannot_manage_fuel_types(client_db: TestClient) -> None:
     assert client_db.get("/api/v1/fuel-types/manage").status_code == 403
     assert (
         client_db.post(
-            "/api/v1/fuel-types", json={"code": "DIESEL-X", "name": "Diésel X"}
+            "/api/v1/fuel-types", json={"name": "Diésel X"}
         ).status_code
         == 403
     )
