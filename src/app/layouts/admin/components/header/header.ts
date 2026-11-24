@@ -1,4 +1,5 @@
 import {
+  CUSTOM_ELEMENTS_SCHEMA,
   ChangeDetectionStrategy,
   Component,
   input,
@@ -7,10 +8,12 @@ import {
 } from '@angular/core';
 import { UiIcon } from '../../../../shared/components/ui-icon/ui-icon';
 import { NotificationsBell } from '../notifications-bell/notifications-bell';
+import 'iconify-icon';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NotificationsBell, UiIcon],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   selector: 'app-header',
   templateUrl: './header.html',
 })

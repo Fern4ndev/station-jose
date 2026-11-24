@@ -1,19 +1,22 @@
 <div
   class="flex items-center justify-between gap-[14px] border-b border-[#edf0f0] p-[16px_20px] max-[760px]:flex-col max-[760px]:items-start"
 >
-  <span class="text-[11px] text-[#87949a] max-[760px]:text-[10px]">
-    <strong class="font-[620] text-[#263b43]">{{ total() }}</strong>
-    {{ total() === 1 ? 'cuenta' : 'cuentas' }} · {{ roleCount }}
-    {{ roleCount === 1 ? 'rol' : 'roles' }}
-  </span>
 
-  <input
-    id="userSearch"
-    class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[13px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] max-w-[250px] max-[760px]:w-full max-[760px]:max-w-none"
-    type="search"
-    placeholder="Buscar por nombre o correo"
-    aria-label="Buscar usuarios"
-    [value]="query()"
-    (input)="onQuery($event)"
-  />
+  <div class="relative w-full max-w-[250px] max-[760px]:max-w-none">
+    <iconify-icon
+      icon="mdi:magnify"
+      class="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2 text-[#87949a]"
+      height="16"
+      aria-hidden="true"
+    ></iconify-icon>
+    <input
+      id="userSearch"
+      class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white pl-[34px] pr-[13px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+      type="search"
+      placeholder="Buscar por nombre o correo"
+      aria-label="Buscar usuarios"
+      [value]="query()"
+      (input)="onQuery($event)"
+    />
+  </div>
 </div>

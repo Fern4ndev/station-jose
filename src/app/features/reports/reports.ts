@@ -15,7 +15,6 @@ import { formatGallons } from '../orders/orders-data';
 import type { StatCardModel } from '../../shared/components/ui-stat-card/ui-stat-card';
 import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
-import { UiToast } from '../../shared/components/ui-toast/ui-toast';
 import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { ReportChart } from './components/report-chart/report-chart';
 import { ReportMetrics } from './components/report-metrics/report-metrics';
@@ -29,7 +28,7 @@ import {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, SelectModule, DatePickerModule, TablePagination, ReportChart, ReportMetrics, ReportSummaryPanel, TableRefresh, UiIcon, UiPageHeading, UiToast],
+  imports: [FormsModule, SelectModule, DatePickerModule, TablePagination, ReportChart, ReportMetrics, ReportSummaryPanel, TableRefresh, UiIcon, UiPageHeading],
   selector: 'app-reports',
   templateUrl: './reports.html',
 })

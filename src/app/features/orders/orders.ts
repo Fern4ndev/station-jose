@@ -11,7 +11,6 @@ import { UiConfirmDialog } from '../../shared/components/ui-confirm-dialog/ui-co
 import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
-import { UiToast } from '../../shared/components/ui-toast/ui-toast';
 import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { extractApiError } from '../../shared/utils/api-error';
 import { OrderDetailDialog } from './components/order-detail-dialog/order-detail-dialog';
@@ -22,7 +21,7 @@ import { filterOrders, type DemoOrder, type OrderDraft, type OrderFilter } from 
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [OrderDetailDialog, OrderFormDialog, OrdersTable, OrdersToolbar, TableRefresh, UiConfirmDialog, UiIcon, UiPageHeading, UiPanel, UiToast],
+  imports: [OrderDetailDialog, OrderFormDialog, OrdersTable, OrdersToolbar, TableRefresh, UiConfirmDialog, UiIcon, UiPageHeading, UiPanel],
   selector: 'app-orders',
   templateUrl: './orders.html',
 })

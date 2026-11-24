@@ -1,11 +1,19 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import {
+  CUSTOM_ELEMENTS_SCHEMA,
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import type { VoucherFilter } from '../../vouchers-data';
+import 'iconify-icon';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, SelectModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   selector: 'app-vouchers-toolbar',
   templateUrl: './vouchers-toolbar.html',
 })

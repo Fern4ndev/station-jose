@@ -9,7 +9,6 @@ import { extractApiError } from '../../shared/utils/api-error';
 import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
-import { UiToast } from '../../shared/components/ui-toast/ui-toast';
 import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { UserFormDialog } from './components/user-form-dialog/user-form-dialog';
 import { UsersTable } from './components/users-table/users-table';
@@ -23,7 +22,7 @@ import {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TableRefresh, UiIcon, UiPageHeading, UiPanel, UiToast, UserFormDialog, UsersTable, UsersToolbar],
+  imports: [TableRefresh, UiIcon, UiPageHeading, UiPanel, UserFormDialog, UsersTable, UsersToolbar],
   selector: 'app-users',
   templateUrl: './users.html',
 })

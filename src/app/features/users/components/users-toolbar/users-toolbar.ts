@@ -1,8 +1,16 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import {
+  CUSTOM_ELEMENTS_SCHEMA,
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { USER_ROLES } from '../../users-data';
+import 'iconify-icon';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   selector: 'app-users-toolbar',
   templateUrl: './users-toolbar.html',
 })

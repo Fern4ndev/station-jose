@@ -8,7 +8,6 @@ import { UiConfirmDialog } from '../../shared/components/ui-confirm-dialog/ui-co
 import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
-import { UiToast } from '../../shared/components/ui-toast/ui-toast';
 import { FuelTypesTable } from './components/fuel-types-table/fuel-types-table';
 import { FuelTypesToolbar } from './components/fuel-types-toolbar/fuel-types-toolbar';
 import { FuelTypeFormDialog } from './components/fuel-type-form-dialog/fuel-type-form-dialog';
@@ -28,7 +27,6 @@ import {
     UiIcon,
     UiPageHeading,
     UiPanel,
-    UiToast,
     FuelTypeFormDialog,
     FuelTypesTable,
     FuelTypesToolbar,

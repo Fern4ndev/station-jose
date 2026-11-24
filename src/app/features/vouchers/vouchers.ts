@@ -5,7 +5,6 @@ import { VouchersApi } from '../../core/services/vouchers-api';
 import { AdminUiState } from '../../layouts/admin/admin-ui-state';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
-import { UiToast } from '../../shared/components/ui-toast/ui-toast';
 import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { extractApiError } from '../../shared/utils/api-error';
 import { OperationsStore, type DispatchVoucher } from '../attendances/operations-store';
@@ -24,7 +23,6 @@ import {
   imports: [
     UiPageHeading,
     UiPanel,
-    UiToast,
     TableRefresh,
     VoucherDetailDialog,
     VoucherEditDialog,

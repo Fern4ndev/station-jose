@@ -13,13 +13,21 @@
     />
   </label>
 
-  <input
-    id="orderSearch"
-    class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[13px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] max-[760px]:max-w-none max-[760px]:w-full max-w-[250px]"
-    type="search"
-    placeholder="Buscar por orden o entidad"
-    aria-label="Buscar órdenes por número o entidad"
-    [value]="query()"
-    (input)="onQuery($event)"
-  />
+  <div class="relative w-full max-w-[250px] max-[760px]:max-w-none">
+    <iconify-icon
+      icon="mdi:magnify"
+      class="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2 text-[#87949a]"
+      height="16"
+      aria-hidden="true"
+    ></iconify-icon>
+    <input
+      id="orderSearch"
+      class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white pl-[34px] pr-[13px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+      type="search"
+      placeholder="Buscar por orden o entidad"
+      aria-label="Buscar órdenes por número o entidad"
+      [value]="query()"
+      (input)="onQuery($event)"
+    />
+  </div>
 </div>

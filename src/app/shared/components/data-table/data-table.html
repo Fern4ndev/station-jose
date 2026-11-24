@@ -6,7 +6,7 @@
       <tr>
         @for (column of columns(); track column.key) {
           <th
-            class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]"
+            class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]"
             [style.width]="column.width ?? null"
             [class.text-right]="column.align === 'right'"
             [class.text-center]="column.align === 'center'"
@@ -22,7 +22,7 @@
         @for (skeleton of skeletons(); track skeleton) {
           <tr>
             @for (column of columns(); track column.key) {
-              <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
+              <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]">
                 <span
                   class="block h-[10px] w-full max-w-[110px] animate-pulse rounded-[4px] bg-[#e9eeee]"
                   aria-hidden="true"
@@ -36,7 +36,7 @@
           <tr>
             @for (column of columns(); track column.key) {
               <td
-                class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]"
+                class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]"
                 [class.text-right]="column.align === 'right'"
                 [class.text-center]="column.align === 'center'"
               >
@@ -54,7 +54,7 @@
         } @empty {
           <tr>
             <td
-              class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]"
+              class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]"
               [attr.colspan]="columnCount()"
             >
               <div class="p-[36px_20px] text-center text-[11px] text-[#8b989c]">

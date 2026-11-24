@@ -7,7 +7,6 @@ import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
 import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
 import { UiStatusBadge } from '../../shared/components/ui-status-badge/ui-status-badge';
-import { UiToast } from '../../shared/components/ui-toast/ui-toast';
 import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { extractApiError } from '../../shared/utils/api-error';
 import { formatGallons, orderBalance } from '../orders/orders-data';
@@ -27,7 +26,6 @@ import { OperationsStore } from './operations-store';
     UiPageHeading,
     UiPanel,
     UiStatusBadge,
-    UiToast,
     TableRefresh,
   ],
   selector: 'app-attendances',
