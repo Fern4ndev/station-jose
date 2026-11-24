@@ -1,0 +1,15 @@
+<div class="flex w-full items-center gap-[12px] overflow-x-auto border-t border-[#edf0f0] px-[12px] py-[8px]" [class.justify-end]="!label()" [class.justify-between]="!!label()">
+  @if (label()) {
+    <span class="shrink-0 text-[10px] text-[#8c999d]">{{ label() }}</span>
+  }
+  <p-paginator
+    [first]="first()"
+    [rows]="rows()"
+    [totalRecords]="totalRecords()"
+    [rowsPerPageOptions]="pageSizes()"
+    [alwaysShow]="true"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="{first}-{last} de {totalRecords}"
+    (onPageChange)="pageChange.emit($event)"
+  />
+</div>

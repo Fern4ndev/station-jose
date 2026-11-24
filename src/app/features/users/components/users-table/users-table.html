@@ -10,7 +10,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (user of rows(); track user.id) {
+      @for (user of pageRows(); track user.id) {
         <tr>
           <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
             <div class="flex items-center gap-[8px]">
@@ -59,3 +59,4 @@
     </tbody>
   </table>
 </div>
+<app-table-pagination [first]="first()" [rows]="pageSize()" [totalRecords]="rows().length" (pageChange)="onPage($event)" />

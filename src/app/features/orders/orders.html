@@ -28,6 +28,7 @@
 
     <app-orders-table
       [rows]="rows()"
+      [countLabel]="countText()"
       [canManage]="canManage()"
       [lockedOrderIds]="lockedIds()"
       (view)="openDetail($event)"
@@ -35,12 +36,6 @@
       (remove)="askDelete($event)"
     />
 
-    <div
-      panelFooter
-      class="flex items-center justify-between gap-[12px] p-[17px_18px_13px] max-[760px]:p-[15px_14px_12px]"
-    >
-      <p class="m-0 text-[9px] text-[#8c999d]">{{ countText() }}</p>
-    </div>
   </app-ui-panel>
 
   <app-order-form-dialog

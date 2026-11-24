@@ -55,7 +55,7 @@ export class Dashboard {
   });
   protected readonly recent = computed(() => this.operations.attendances().filter((item) =>
     this.state.branch() === 'Todas las sedes' || item.branch === this.state.branch()
-  ).slice(0, 4));
+  ));
   protected readonly scope = computed(() => this.state.branch() === 'Todas las sedes' ? 'ambas sedes' : `la sede ${this.state.branch()}`);
 
   constructor() {

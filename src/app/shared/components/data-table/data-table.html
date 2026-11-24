@@ -32,7 +32,7 @@
           </tr>
         }
       } @else {
-        @for (row of rows(); track $index) {
+        @for (row of pageRows(); track $index) {
           <tr>
             @for (column of columns(); track column.key) {
               <td
@@ -67,3 +67,4 @@
     </tbody>
   </table>
 </div>
+<app-table-pagination [first]="first()" [rows]="pageSize()" [totalRecords]="rows().length" (pageChange)="onPage($event)" />

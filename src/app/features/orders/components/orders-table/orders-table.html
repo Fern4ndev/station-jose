@@ -13,7 +13,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (order of rows(); track order.key ?? order.id) {
+      @for (order of pageRows(); track order.key ?? order.id) {
         <tr>
           <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
             <span class="block text-[11px] font-[630] text-[#243941]">{{ order.id }}</span>
@@ -92,3 +92,4 @@
     </tbody>
   </table>
 </div>
+<app-table-pagination [first]="first()" [rows]="pageSize()" [totalRecords]="rows().length" [label]="countLabel()" (pageChange)="onPage($event)" />

@@ -37,13 +37,14 @@
     <app-report-summary [summary]="summary()" />
   </div>
 
-  <div class="mt-[13px] overflow-x-auto rounded-[12px] border border-[#e5eaea] bg-white p-[14px] text-[11px] text-[#52636a]">
+  <div class="mt-[13px] rounded-[12px] border border-[#e5eaea] bg-white p-[14px] text-[11px] text-[#52636a]">
     <div class="mb-[12px] flex justify-end"><app-table-refresh [loading]="refreshing()" (refresh)="refresh()" /></div>
+    <div class="overflow-x-auto">
     @if (kind() === 'orders') {
       <table class="w-full border-collapse text-left">
         <thead><tr><th>Orden</th><th>Entidad</th><th>Sede</th><th>Combustible</th><th>Autorizado</th><th>Despachado</th><th>Saldo</th></tr></thead>
         <tbody>
-          @for (row of orderRows(); track row.order_id + row.fuel_type_code) {
+          @for (row of pagedOrderRows(); track row.order_id + row.fuel_type_code) {
             <tr class="border-t border-[#edf0f0]"><td>{{ row.order_number }}</td><td>{{ row.institution_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.authorized_gallons }}</td><td>{{ row.attended_gallons }}</td><td>{{ row.available_gallons }}</td></tr>
           } @empty { <tr><td colspan="7">No hay órdenes en el período.</td></tr> }
         </tbody>
@@ -52,11 +53,13 @@
       <table class="w-full border-collapse text-left">
         <thead><tr><th>Fecha</th><th>Vale</th><th>Orden</th><th>Grifero</th><th>Sede</th><th>Combustible</th><th>Galones</th></tr></thead>
         <tbody>
-          @for (row of attendanceRows(); track row.attendance_id + row.fuel_type_code) {
+          @for (row of pagedAttendanceRows(); track row.attendance_id + row.fuel_type_code) {
             <tr class="border-t border-[#edf0f0]"><td>{{ row.attended_at }}</td><td>{{ row.voucher_number }}</td><td>{{ row.order_number }}</td><td>{{ row.performer_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.attended_gallons }}</td></tr>
           } @empty { <tr><td colspan="7">No hay atenciones en el período.</td></tr> }
         </tbody>
       </table>
     }
+    </div>
+    <app-table-pagination [first]="first()" [rows]="pageSize()" [totalRecords]="reportRowCount()" (pageChange)="onPage($event)" />
   </div>
 </div>

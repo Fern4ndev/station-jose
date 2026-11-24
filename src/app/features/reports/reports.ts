@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
+import { TablePagination } from '../../shared/components/table-pagination/table-pagination';
 import { MessageService } from 'primeng/api';
 import { firstValueFrom } from 'rxjs';
 import { CatalogApi } from '../../core/services/catalog-api';
@@ -25,7 +26,7 @@ import {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReportChart, ReportMetrics, ReportSummaryPanel, TableRefresh, UiIcon, UiPageHeading, UiToast],
+  imports: [TablePagination, ReportChart, ReportMetrics, ReportSummaryPanel, TableRefresh, UiIcon, UiPageHeading, UiToast],
   selector: 'app-reports',
   templateUrl: './reports.html',
 })
@@ -43,6 +44,14 @@ export class Reports {
   protected readonly dashboard = signal<DashboardResponse | null>(null);
   protected readonly orderRows = signal<readonly PurchaseOrderReportRow[]>([]);
   protected readonly attendanceRows = signal<readonly AttendanceReportRow[]>([]);
+  protected readonly first = linkedSignal({
+    source: () => [this.kind(), this.period(), this.branch(), this.orderRows(), this.attendanceRows()] as const,
+    computation: () => 0,
+  });
+  protected readonly pageSize = signal(10);
+  protected readonly pagedOrderRows = computed(() => this.orderRows().slice(this.first(), this.first() + this.pageSize()));
+  protected readonly pagedAttendanceRows = computed(() => this.attendanceRows().slice(this.first(), this.first() + this.pageSize()));
+  protected readonly reportRowCount = computed(() => this.kind() === 'orders' ? this.orderRows().length : this.attendanceRows().length);
   protected readonly refreshing = signal(false);
   protected readonly buckets = signal<readonly ReportBucket[]>([]);
   protected readonly badge = computed(() => this.periods.find((item) => item.value === this.period())?.label ?? '');
@@ -134,6 +143,11 @@ export class Reports {
     } finally {
       this.refreshing.set(false);
     }
+  }
+
+  protected onPage(event: { first?: number; rows?: number }): void {
+    this.first.set(event.first ?? 0);
+    this.pageSize.set(event.rows ?? 10);
   }
 
   protected onPeriod(event: Event): void {

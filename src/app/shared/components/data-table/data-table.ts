@@ -5,7 +5,10 @@ import {
   computed,
   contentChildren,
   input,
+  linkedSignal,
+  signal,
 } from '@angular/core';
+import { TablePagination } from '../table-pagination/table-pagination';
 import type { TableColumn } from '../../../core/models/table-column';
 import { DataTableCell } from './data-table-cell.directive';
 
@@ -19,7 +22,7 @@ import { DataTableCell } from './data-table-cell.directive';
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, TablePagination],
   selector: 'app-data-table',
   templateUrl: './data-table.html',
 })
@@ -29,6 +32,14 @@ export class DataTable<T = Record<string, unknown>> {
   readonly loading = input(false);
   readonly emptyMessage = input('Sin registros para mostrar.');
   readonly skeletonRows = input(4);
+  protected readonly first = linkedSignal({ source: this.rows, computation: () => 0 });
+  protected readonly pageSize = signal(10);
+  protected readonly pageRows = computed(() => this.rows().slice(this.first(), this.first() + this.pageSize()));
+
+  protected onPage(event: { first?: number; rows?: number }): void {
+    this.first.set(event.first ?? 0);
+    this.pageSize.set(event.rows ?? 10);
+  }
 
   private readonly cellTemplates = contentChildren(DataTableCell);
 

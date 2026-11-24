@@ -1,18 +1,28 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output, signal } from '@angular/core';
+import { TablePagination } from '../../../../shared/components/table-pagination/table-pagination';
 import { UiIcon } from '../../../../shared/components/ui-icon/ui-icon';
 import { UiStatusBadge } from '../../../../shared/components/ui-status-badge/ui-status-badge';
 import { formatGallons, orderBalance, orderPercent, type DemoOrder } from '../../orders-data';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiIcon, UiStatusBadge],
+  imports: [TablePagination, UiIcon, UiStatusBadge],
   selector: 'app-orders-table',
   templateUrl: './orders-table.html',
 })
 export class OrdersTable {
   readonly rows = input.required<readonly DemoOrder[]>();
+  readonly countLabel = input<string | null>(null);
   readonly canManage = input(false);
   readonly lockedOrderIds = input<readonly string[]>([]);
+  protected readonly first = linkedSignal({ source: this.rows, computation: () => 0 });
+  protected readonly pageSize = signal(10);
+  protected readonly pageRows = computed(() => this.rows().slice(this.first(), this.first() + this.pageSize()));
+
+  protected onPage(event: { first?: number; rows?: number }): void {
+    this.first.set(event.first ?? 0);
+    this.pageSize.set(event.rows ?? 10);
+  }
 
   readonly view = output<DemoOrder>();
   readonly edit = output<DemoOrder>();

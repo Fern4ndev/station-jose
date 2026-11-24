@@ -19,7 +19,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (row of rows(); track row.id) {
+        @for (row of pageRows(); track row.id) {
           <tr>
             <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
               <span class="block text-[11px] font-[630] text-[#243941]">{{ row.voucher }}</span>
@@ -42,4 +42,5 @@
       </tbody>
     </table>
   </div>
+  <app-table-pagination [first]="first()" [rows]="pageSize()" [totalRecords]="rows().length" [pageSizes]="[5, 10, 25]" (pageChange)="onPage($event)" />
 </app-ui-panel>
