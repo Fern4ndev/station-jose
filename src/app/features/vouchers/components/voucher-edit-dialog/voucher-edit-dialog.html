@@ -11,15 +11,7 @@
 
     <div class="grid gap-[6px]">
       <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="editVoucherType">Tipo de emisor</label>
-      <select
-        id="editVoucherType"
-        class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-        [value]="issuerType()"
-        (change)="setIssuerType($event)"
-      >
-        <option value="INSTITUTION">Institución</option>
-        <option value="STATION">Estación</option>
-      </select>
+      <p-select inputId="editVoucherType" [options]="issuerTypes" optionLabel="label" optionValue="value" [ngModel]="issuerType()" (ngModelChange)="issuerType.set($event)" [ngModelOptions]="{standalone:true}" styleClass="w-full" size="small" />
     </div>
 
     <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">

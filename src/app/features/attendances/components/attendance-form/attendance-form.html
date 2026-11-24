@@ -1,15 +1,7 @@
 <form class="grid grid-cols-2 gap-[13px] max-[760px]:grid-cols-1" (submit)="onSubmit($event)" novalidate>
   <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
     <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceOrder">Orden de compra</label>
-    <select id="attendanceOrder" class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" [value]="orderId()" (change)="setOrder($event)">
-      @for (order of orders(); track order.id) {
-        <option [value]="order.id">
-          {{ order.orderNumber }} · {{ order.fuel }} · {{ order.entity }} ({{ balance(order) }} disponibles)
-        </option>
-      } @empty {
-        <option value="">Sin órdenes con saldo disponible</option>
-      }
-    </select>
+    <p-select inputId="attendanceOrder" [options]="orderOptions()" optionLabel="label" optionValue="value" [ngModel]="orderId()" (ngModelChange)="orderId.set($event)" [ngModelOptions]="{standalone:true}" placeholder="Sin órdenes con saldo disponible" styleClass="w-full" size="small" />
   </div>
 
   <div class="grid gap-[6px]">
@@ -26,16 +18,7 @@
 
   <div class="grid gap-[6px]">
     <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceIssuerType">Tipo de emisor</label>
-    <select
-      id="attendanceIssuerType"
-      class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-      [disabled]="locked()"
-      [value]="issuerType()"
-      (change)="setIssuerType($event)"
-    >
-      <option value="INSTITUTION">Institución</option>
-      <option value="STATION">Estación</option>
-    </select>
+    <p-select inputId="attendanceIssuerType" [options]="issuerTypes" optionLabel="label" optionValue="value" [disabled]="locked()" [ngModel]="issuerType()" (ngModelChange)="issuerType.set($event)" [ngModelOptions]="{standalone:true}" styleClass="w-full" size="small" />
   </div>
 
   <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
@@ -81,16 +64,7 @@
 
   <div class="grid gap-[6px]">
     <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceBranch">Sede de despacho</label>
-    <select
-      id="attendanceBranch"
-      class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-      [disabled]="branchLocked()"
-      [value]="branchValue()"
-      (change)="setBranch($event)"
-    >
-      <option value="San José">San José</option>
-      <option value="Santa Marta">Santa Marta</option>
-    </select>
+    <p-select inputId="attendanceBranch" [options]="branches" optionLabel="label" optionValue="value" [disabled]="branchLocked()" [ngModel]="branchValue()" (ngModelChange)="branchValue.set($event)" [ngModelOptions]="{standalone:true}" styleClass="w-full" size="small" />
   </div>
 
   <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">

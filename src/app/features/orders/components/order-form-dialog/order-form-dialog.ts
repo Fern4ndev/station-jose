@@ -1,4 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import type { BranchResponse, FuelTypeResponse } from '../../../../core/models/catalog';
 import { OcrApi } from '../../../../core/services/ocr-api';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
@@ -23,7 +26,7 @@ function lineAmount(gallons: string, price: string): string {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiDialog],
+  imports: [UiDialog, FormsModule, SelectModule, DatePickerModule],
   selector: 'app-order-form-dialog',
   templateUrl: './order-form-dialog.html',
 })
@@ -34,6 +37,8 @@ export class OrderFormDialog {
   readonly takenIds = input<readonly string[]>([]);
   readonly branches = input<readonly BranchResponse[]>([]);
   readonly fuels = input<readonly FuelTypeResponse[]>([]);
+  protected readonly branchOptions = computed(() => this.branches().map((item) => ({ value: item.id, label: item.name })));
+  protected readonly fuelOptions = computed(() => this.fuels().map((item) => ({ value: item.id, label: item.name })));
   readonly saving = input(false);
   readonly saved = output<OrderDraft>();
 
@@ -42,6 +47,10 @@ export class OrderFormDialog {
   protected readonly number = signal('');
   protected readonly siaf = signal('');
   protected readonly date = signal(todayIso());
+  protected readonly dateValue = computed(() => {
+    const value = new Date(`${this.date()}T00:00:00`);
+    return Number.isNaN(value.getTime()) ? null : value;
+  });
   protected readonly supplier = signal('');
   protected readonly supplierDetails = signal('');
   protected readonly executingUnit = signal('');
@@ -83,6 +92,15 @@ export class OrderFormDialog {
   protected setLine(index: number, field: keyof DraftLine, event: Event): void {
     const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
     this.lines.update((lines) => lines.map((line, at) => at === index ? { ...line, [field]: value } : line));
+  }
+
+  protected onDate(value: Date | null): void {
+    if (!value) return;
+    this.date.set(todayIso(value));
+  }
+
+  protected setFuel(index: number, value: string): void {
+    this.lines.update((lines) => lines.map((line, at) => at === index ? { ...line, fuel_type_id: value } : line));
   }
 
   protected addLine(): void {

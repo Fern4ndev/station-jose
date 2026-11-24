@@ -10,6 +10,8 @@ export type UserRole = 'ADMIN' | 'OFFICE' | 'ATTENDANT';
  */
 export type Permission =
   | 'users.manage'
+  | 'fuel_types.read'
+  | 'fuel_types.manage'
   | 'purchase_orders.read'
   | 'purchase_orders.create'
   | 'purchase_orders.update'

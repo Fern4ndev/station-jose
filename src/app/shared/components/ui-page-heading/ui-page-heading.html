@@ -1,19 +1,19 @@
 <div
-  class="my-[10px_0_22px] flex items-end justify-between gap-[18px] max-[760px]:my-[12px_0_17px] max-[760px]:flex-col max-[760px]:items-start"
+  class="mb-[18px] flex items-end justify-between gap-[20px] max-[760px]:mb-[12px] max-[760px]:flex-col max-[760px]:items-start"
 >
   <div>
     <h1 class="m-0 text-[clamp(24px,_3vw,_31px)] font-[650] leading-[1.08] tracking-[-0.055em] text-[#13262e] max-[760px]:text-[25px]">
       {{ title() }}
     </h1>
     @if (subtitle()) {
-      <p class="m-0 mt-[8px] text-[12px] leading-[1.5] text-[#77868b] max-[760px]:max-w-[310px] max-[760px]:text-[11px]">
+      <p class="m-0 mt-[10px] text-[12px] leading-[1.5] text-[#77868b] max-[760px]:max-w-[310px] max-[760px]:text-[11px]">
         {{ subtitle() }}
       </p>
     }
   </div>
 
   <div
-    class="flex items-center gap-[8px] [@media(max-width:420px)]:w-full [@media(max-width:420px)]:[&>button]:flex-1"
+    class="flex flex-wrap items-center gap-[8px] [@media(max-width:420px)]:w-full [@media(max-width:420px)]:[&>button]:flex-1"
   >
     <ng-content />
   </div>

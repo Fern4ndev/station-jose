@@ -11,6 +11,6 @@ export class CatalogApi extends BaseApi {
   }
 
   fuelTypes(): Observable<readonly FuelTypeResponse[]> {
-    return this.get<readonly FuelTypeResponse[]>(API_ENDPOINTS.fuelTypes);
+    return this.get<readonly FuelTypeResponse[]>(API_ENDPOINTS.fuelTypes.base);
   }
 }

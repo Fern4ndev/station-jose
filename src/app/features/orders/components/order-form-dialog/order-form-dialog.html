@@ -7,13 +7,10 @@
       <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="siaf()" (input)="set('siaf', $event)" />
     </label>
     <label class="grid gap-[6px] text-[11px] text-[#52646a]">Fecha de emisión
-      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" type="date" [value]="date()" (input)="set('date', $event)" />
+      <p-datepicker [ngModel]="dateValue()" (ngModelChange)="onDate($event)" [ngModelOptions]="{standalone:true}" dateFormat="dd/mm/yy" [showIcon]="true" [readonlyInput]="true" inputId="orderIssueDate" styleClass="w-full" />
     </label>
     <label class="grid gap-[6px] text-[11px] text-[#52646a]">Sede proveedora
-      <select class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="branch()" (change)="set('branch', $event)">
-        <option value="">Selecciona una sede</option>
-        @for (item of branches(); track item.id) { <option [value]="item.id">{{ item.name }}</option> }
-      </select>
+      <p-select [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="branch()" (ngModelChange)="branch.set($event)" [ngModelOptions]="{standalone:true}" placeholder="Selecciona una sede" styleClass="w-full" size="small" />
     </label>
     <label class="grid gap-[6px] text-[11px] text-[#52646a]">Entidad / institución
       <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="entity()" (input)="set('entity', $event)" />
@@ -35,10 +32,7 @@
       @for (line of lines(); track $index; let index = $index) {
         <div class="grid grid-cols-[2fr_1fr_1fr_auto] gap-[8px] max-[760px]:grid-cols-2">
           <label class="grid gap-[4px] text-[10px] text-[#52646a]">Combustible
-            <select class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[9px]" [value]="line.fuel_type_id" (change)="setLine(index, 'fuel_type_id', $event)">
-              <option value="">Selecciona</option>
-              @for (fuel of fuels(); track fuel.id) { <option [value]="fuel.id">{{ fuel.name }}</option> }
-            </select>
+            <p-select [options]="fuelOptions()" optionLabel="label" optionValue="value" [ngModel]="line.fuel_type_id" (ngModelChange)="setFuel(index, $event)" [ngModelOptions]="{standalone:true}" placeholder="Selecciona" styleClass="w-full" size="small" />
           </label>
           <label class="grid gap-[4px] text-[10px] text-[#52646a]">Galones
             <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[9px]" type="number" min="0.001" step="0.001" [value]="line.gallons" (input)="setLine(index, 'gallons', $event)" />

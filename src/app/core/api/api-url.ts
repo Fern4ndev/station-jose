@@ -95,7 +95,13 @@ export const API_ENDPOINTS = {
     status: (userId: string) => `/users/${encodeURIComponent(userId)}/status`,
   },
   branches: '/branches',
-  fuelTypes: '/fuel-types',
+  fuelTypes: {
+    base: '/fuel-types',
+    manage: '/fuel-types/manage',
+    byId: (fuelTypeId: string) => `/fuel-types/${encodeURIComponent(fuelTypeId)}`,
+    status: (fuelTypeId: string) =>
+      `/fuel-types/${encodeURIComponent(fuelTypeId)}/status`,
+  },
   purchaseOrders: {
     base: '/purchase-orders',
     byId: (orderId: string) => `/purchase-orders/${encodeURIComponent(orderId)}`,

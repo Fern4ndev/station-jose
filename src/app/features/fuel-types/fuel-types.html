@@ -1,0 +1,51 @@
+<app-ui-toast />
+
+<div class="animate-[fadeIn_230ms_ease_both]">
+  <app-ui-page-heading
+    title="Combustibles"
+    subtitle="Administra el catálogo que estará disponible al registrar órdenes de compra."
+  >
+    <app-table-refresh [loading]="refreshing()" (refresh)="refresh()" />
+    <button
+      type="button"
+      class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent bg-(--sanjose-primary-action) px-[16px] text-[11px] font-[620] whitespace-nowrap text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] transition-[background,box-shadow] hover:bg-(--sanjose-primary-action-hover) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+      (click)="openNew()"
+    >
+      <app-ui-icon name="plus" [size]="14" [strokeWidth]="1.8" />
+      Nuevo combustible
+    </button>
+  </app-ui-page-heading>
+
+  <app-ui-panel>
+    <app-fuel-types-toolbar
+      [total]="visibleRows().length"
+      [query]="query()"
+      [status]="status()"
+      (queryChange)="query.set($event)"
+      (statusChange)="status.set($event)"
+    />
+
+    <app-fuel-types-table
+      [rows]="visibleRows()"
+      [busyId]="busyId()"
+      (edit)="openEdit($event)"
+      (toggle)="requestToggle($event)"
+    />
+  </app-ui-panel>
+
+  <app-fuel-type-form-dialog
+    [(visible)]="formOpen"
+    [editing]="editing()"
+    [saving]="saving()"
+    [error]="formError()"
+    (saved)="save($event)"
+  />
+
+  <app-ui-confirm-dialog
+    [(visible)]="confirmOpen"
+    title="Desactivar combustible"
+    [message]="confirmMessage()"
+    confirmLabel="Desactivar"
+    (confirmed)="confirmToggle()"
+  />
+</div>

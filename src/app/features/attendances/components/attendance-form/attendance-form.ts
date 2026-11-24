@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 import { formatGallons, orderBalance } from '../../../orders/orders-data';
 import { voucherBalance, type VoucherIssuerType } from '../../../vouchers/vouchers-data';
 import type { AttendanceRequest } from '../../attendances-data';
@@ -6,6 +8,7 @@ import type { DispatchOrder, DispatchVoucher } from '../../operations-store';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, SelectModule],
   selector: 'app-attendance-form',
   templateUrl: './attendance-form.html',
 })
@@ -39,6 +42,12 @@ export class AttendanceForm {
     const order = this.selectedOrder();
     return order ? `${formatGallons(orderBalance(order))} gal` : '— gal';
   });
+  protected readonly orderOptions = computed(() => this.orders().map((order) => ({
+    value: order.id,
+    label: `${order.orderNumber} · ${order.fuel} · ${order.entity} (${this.balance(order)} disponibles)`,
+  })));
+  protected readonly issuerTypes = [{ value: 'INSTITUTION', label: 'Institución' }, { value: 'STATION', label: 'Estación' }];
+  protected readonly branches = [{ value: 'San José', label: 'San José' }, { value: 'Santa Marta', label: 'Santa Marta' }];
 
   constructor() {
     effect(() => {
@@ -99,10 +108,6 @@ export class AttendanceForm {
     return `${formatGallons(orderBalance(order))} gal`;
   }
 
-  protected setOrder(event: Event): void {
-    this.orderId.set((event.target as HTMLSelectElement).value);
-  }
-
   protected setVoucher(event: Event): void {
     this.voucherId.set((event.target as HTMLInputElement).value);
   }
@@ -111,20 +116,12 @@ export class AttendanceForm {
     this.issuer.set((event.target as HTMLInputElement).value);
   }
 
-  protected setIssuerType(event: Event): void {
-    this.issuerType.set((event.target as HTMLSelectElement).value as VoucherIssuerType);
-  }
-
   protected setAuthorized(event: Event): void {
     this.authorized.set((event.target as HTMLInputElement).value);
   }
 
   protected setGallons(event: Event): void {
     this.gallons.set((event.target as HTMLInputElement).value);
-  }
-
-  protected setBranch(event: Event): void {
-    this.branchValue.set((event.target as HTMLSelectElement).value);
   }
 
   protected onSubmit(event: Event): void {

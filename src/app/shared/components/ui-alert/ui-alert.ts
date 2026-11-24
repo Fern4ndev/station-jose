@@ -15,7 +15,7 @@ const TONE_CLASSES: Readonly<Record<AlertTone, string>> = {
   selector: 'app-ui-alert',
   template: `
     <p
-      class="m-0 rounded-[10px] border px-[11px] py-[9px] text-[10px] leading-[1.5]"
+      class="m-0 rounded-[10px] border px-[13px] py-[11px] text-[10px] leading-[1.5]"
       [class]="toneClasses()"
       [attr.role]="tone() === 'error' ? 'alert' : 'status'"
       [attr.aria-live]="tone() === 'error' ? 'assertive' : 'polite'"

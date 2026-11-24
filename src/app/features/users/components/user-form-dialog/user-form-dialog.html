@@ -42,27 +42,13 @@
 
     <div class="grid gap-[6px]">
       <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserRole">Rol</label>
-      <select id="newUserRole" class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" [value]="role()" (change)="setRole($event)">
-        @for (option of roles; track option.value) {
-          <option [value]="option.value">{{ option.label }}</option>
-        }
-      </select>
+      <p-select inputId="newUserRole" [options]="roleOptions" optionLabel="label" optionValue="value" [ngModel]="role()" (ngModelChange)="role.set($event)" [ngModelOptions]="{standalone:true}" styleClass="w-full" size="small" />
     </div>
 
     @if (showBranch()) {
       <div class="grid gap-[6px]">
         <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserBranch">Sede</label>
-        <select
-          id="newUserBranch"
-          class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-          [value]="branch()"
-          (change)="setBranch($event)"
-        >
-          <option value="">Selecciona una sede</option>
-          @for (option of branches(); track option.id) {
-            <option [value]="option.id">{{ option.name }}</option>
-          }
-        </select>
+        <p-select inputId="newUserBranch" [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="branch()" (ngModelChange)="branch.set($event)" [ngModelOptions]="{standalone:true}" placeholder="Selecciona una sede" styleClass="w-full" size="small" />
         <span class="text-[9px] leading-[1.5] text-[#919da0]">No aplica al personal de oficina ni al administrador.</span>
       </div>
     }

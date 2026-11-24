@@ -2,8 +2,8 @@
   class="min-w-0 rounded-[18px] border border-(--sanjose-panel-border) bg-(--sanjose-panel) shadow-(--sanjose-panel-shadow) max-[760px]:rounded-[15px]"
 >
   @if (title() || subtitle()) {
-    <div class="flex items-center justify-between gap-[12px] p-[17px_18px_13px] max-[760px]:p-[15px_14px_12px]">
-      <div>
+    <div class="flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[10px] p-[18px_20px_15px] max-[760px]:p-[16px_16px_13px]">
+      <div class="min-w-0 flex-1">
         @if (title()) {
           <h3 class="m-0 text-[12px] font-[650] tracking-[-0.02em] text-[#22373e]">{{ title() }}</h3>
         }

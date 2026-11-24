@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, effect, input, model, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
 import type { DemoVoucher, VoucherDraft, VoucherIssuerType } from '../../vouchers-data';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiDialog],
+  imports: [UiDialog, FormsModule, SelectModule],
   selector: 'app-voucher-edit-dialog',
   templateUrl: './voucher-edit-dialog.html',
 })
@@ -16,6 +18,7 @@ export class VoucherEditDialog {
 
   protected readonly issuer = signal('');
   protected readonly issuerType = signal<VoucherIssuerType>('INSTITUTION');
+  protected readonly issuerTypes = [{ value: 'INSTITUTION', label: 'Institución' }, { value: 'STATION', label: 'Estación' }];
   protected readonly error = signal('');
 
   constructor() {
@@ -32,10 +35,6 @@ export class VoucherEditDialog {
 
   protected setIssuer(event: Event): void {
     this.issuer.set((event.target as HTMLInputElement).value);
-  }
-
-  protected setIssuerType(event: Event): void {
-    this.issuerType.set((event.target as HTMLSelectElement).value as VoucherIssuerType);
   }
 
   protected onSubmit(event: Event): void {

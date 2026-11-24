@@ -1,0 +1,91 @@
+<div class="w-full overflow-x-auto">
+  <table
+    class="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[rgba(238,247,244,0.5)] [&_tbody_tr:last-child>td]:border-b-0"
+    aria-label="Catálogo de combustibles"
+  >
+    <thead>
+      <tr>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">CÓDIGO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">NOMBRE</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ÓRDENES</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ACCIONES</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of pageRows(); track row.id) {
+        <tr>
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
+            <span class="block font-[630] text-[#243941]">{{ row.code }}</span>
+          </td>
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
+            {{ row.name }}
+          </td>
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
+            @if (row.active) {
+              <app-ui-status-badge label="Activo" tone="green" />
+            } @else {
+              <app-ui-status-badge label="Inactivo" tone="gray" />
+            }
+          </td>
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
+            {{ ordersLabel(row) }}
+          </td>
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
+            <div class="flex items-center gap-[6px]">
+              <button
+                type="button"
+                class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
+                title="Editar combustible"
+                [attr.aria-label]="'Editar ' + row.name"
+                [disabled]="busyId() === row.id"
+                (click)="edit.emit(row)"
+              >
+                <app-ui-icon name="edit" [size]="14" />
+              </button>
+
+              @if (row.active) {
+                <button
+                  type="button"
+                  class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#e3c7a8] enabled:hover:bg-[#fdf8f1] enabled:hover:text-[#a76e24] disabled:cursor-not-allowed disabled:opacity-45"
+                  title="Desactivar combustible"
+                  [attr.aria-label]="'Desactivar ' + row.name"
+                  [disabled]="busyId() === row.id"
+                  (click)="toggle.emit(row)"
+                >
+                  <app-ui-icon name="close" [size]="14" />
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
+                  title="Activar combustible"
+                  [attr.aria-label]="'Activar ' + row.name"
+                  [disabled]="busyId() === row.id"
+                  (click)="toggle.emit(row)"
+                >
+                  <app-ui-icon name="check" [size]="14" />
+                </button>
+              }
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="5">
+            <div class="p-[36px_20px] text-center text-[11px] text-[#8b989c]">
+              No hay combustibles que coincidan con la búsqueda.
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+<app-table-pagination
+  [first]="first()"
+  [rows]="pageSize()"
+  [totalRecords]="rows().length"
+  [label]="rows().length === 1 ? '1 combustible' : rows().length + ' combustibles'"
+  (pageChange)="onPage($event)"
+/>

@@ -13,6 +13,8 @@ PERMISSIONS_BY_ROLE: dict[UserRole, frozenset[str]] = {
     UserRole.ADMIN: frozenset(
         {
             "users.manage",
+            "fuel_types.read",
+            "fuel_types.manage",
             "purchase_orders.read",
             "purchase_orders.create",
             "purchase_orders.update",

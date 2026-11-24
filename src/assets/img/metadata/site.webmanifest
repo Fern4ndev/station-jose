@@ -1,0 +1,25 @@
+{
+  "name": "Estación de Servicio San José",
+  "short_name": "San José",
+  "description": "Sistema de control de órdenes de compra y vales de combustible de la Estación de Servicio San José.",
+  "lang": "es-PE",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#1F3975",
+  "background_color": "#F4F7FC",
+  "display": "standalone",
+  "orientation": "any"
+}

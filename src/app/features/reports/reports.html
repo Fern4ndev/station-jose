@@ -5,22 +5,6 @@
     title="Reportes"
     subtitle="Consulta actividad y saldos por período y sede."
   >
-    <select class="min-h-[39px] rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px]" aria-label="Tipo de reporte" [value]="kind()" (change)="kind.set($any($event.target).value)">
-      <option value="orders">Órdenes</option>
-      <option value="attendances">Atenciones</option>
-    </select>
-    <select
-      id="reportPeriod"
-      class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] !w-auto"
-      aria-label="Período del reporte"
-      [value]="period()"
-      (change)="onPeriod($event)"
-    >
-      @for (option of periods; track option.value) {
-        <option [value]="option.value">{{ option.label }}</option>
-      }
-    </select>
-
     <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)" (click)="exportReport('pdf')">
       <app-ui-icon name="download" [size]="14" />
       PDF
@@ -30,18 +14,53 @@
 
   <app-report-metrics [metrics]="metrics()" />
 
+  <section class="mb-[16px] rounded-[12px] border border-[#e5eaea] bg-white p-[18px]" aria-label="Filtros de reportes">
+    <div class="mb-[10px] flex flex-wrap items-center justify-between gap-[8px]">
+      <div class="flex flex-wrap items-baseline gap-[8px]">
+        <h2 class="m-0 text-[11px] font-[650] text-[#22373e]">Filtros</h2>
+        <span class="text-[10px] text-[#8c999d]">El rango de horas filtra el gráfico y el detalle de atenciones.</span>
+      </div>
+      @if (hourFrom() !== 0 || hourTo() !== 23) {
+        <button type="button" class="min-h-[26px] cursor-pointer rounded-[8px] border border-[#e2e8e8] bg-white px-[9px] text-[10px] text-[#607076] hover:bg-[#f7fbfa] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" (click)="resetHours()">Limpiar horas</button>
+      }
+    </div>
+    <div class="grid grid-cols-[repeat(7,minmax(0,1fr))] gap-[12px] max-[1150px]:grid-cols-[repeat(4,minmax(0,1fr))] max-[760px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[760px]:gap-[8px]">
+      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Reporte
+        <p-select [options]="kinds" optionLabel="label" optionValue="value" [ngModel]="kind()" (ngModelChange)="kind.set($event)" ariaLabel="Tipo de reporte" size="small" styleClass="w-full" />
+      </label>
+      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Período
+        <p-select [options]="periods" optionLabel="label" optionValue="value" [ngModel]="period()" (ngModelChange)="onPeriod($event)" ariaLabel="Período del reporte" size="small" styleClass="w-full" />
+      </label>
+      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Agrupar
+        <p-select [options]="groupings" optionLabel="label" optionValue="value" [ngModel]="grouping()" (ngModelChange)="grouping.set($event)" ariaLabel="Agrupar por" size="small" styleClass="w-full" />
+      </label>
+      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Desde
+        <p-datepicker [ngModel]="from()" (ngModelChange)="onFrom($event)" dateFormat="dd/mm/yy" [maxDate]="to()" [showIcon]="true" [readonlyInput]="true" inputId="reportFrom" styleClass="w-full" />
+      </label>
+      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Hasta
+        <p-datepicker [ngModel]="to()" (ngModelChange)="onTo($event)" dateFormat="dd/mm/yy" [minDate]="from()" [maxDate]="today" [showIcon]="true" [readonlyInput]="true" inputId="reportTo" styleClass="w-full" />
+      </label>
+      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Hora desde
+        <p-select [options]="hourOptions" optionLabel="label" optionValue="value" [ngModel]="hourFrom()" (ngModelChange)="onHourFrom($event)" ariaLabel="Hora desde" size="small" styleClass="w-full" />
+      </label>
+      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Hora hasta
+        <p-select [options]="hourOptions" optionLabel="label" optionValue="value" [ngModel]="hourTo()" (ngModelChange)="onHourTo($event)" ariaLabel="Hora hasta" size="small" styleClass="w-full" />
+      </label>
+    </div>
+  </section>
+
   <div
-    class="grid grid-cols-[minmax(0,1.45fr)_minmax(240px,0.75fr)] gap-[13px] max-[760px]:grid-cols-[1fr] max-[760px]:gap-[10px]"
+    class="grid grid-cols-[minmax(0,1.45fr)_minmax(240px,0.75fr)] gap-[16px] max-[760px]:grid-cols-[1fr] max-[760px]:gap-[10px]"
   >
-    <app-report-chart [buckets]="buckets()" [badge]="badge()" />
+    <app-report-chart [buckets]="visibleBuckets()" [badge]="badge()" />
     <app-report-summary [summary]="summary()" />
   </div>
 
-  <div class="mt-[13px] rounded-[12px] border border-[#e5eaea] bg-white p-[14px] text-[11px] text-[#52636a]">
+  <div class="mt-[16px] rounded-[12px] border border-[#e5eaea] bg-white p-[18px] text-[11px] text-[#52636a]">
     <div class="mb-[12px] flex justify-end"><app-table-refresh [loading]="refreshing()" (refresh)="refresh()" /></div>
     <div class="overflow-x-auto">
     @if (kind() === 'orders') {
-      <table class="w-full border-collapse text-left">
+      <table class="w-full min-w-[720px] border-collapse text-left [&_th]:border-y [&_th]:border-[#edf0f0] [&_th]:bg-[rgba(244,247,246,0.65)] [&_th]:px-[16px] [&_th]:py-[12px] [&_th]:text-[10px] [&_th]:font-[620] [&_th]:uppercase [&_th]:whitespace-nowrap [&_th]:text-[#839095] [&_td]:px-[16px] [&_td]:py-[14px] [&_td]:whitespace-nowrap [&_td]:align-middle">
         <thead><tr><th>Orden</th><th>Entidad</th><th>Sede</th><th>Combustible</th><th>Autorizado</th><th>Despachado</th><th>Saldo</th></tr></thead>
         <tbody>
           @for (row of pagedOrderRows(); track row.order_id + row.fuel_type_code) {
@@ -50,7 +69,7 @@
         </tbody>
       </table>
     } @else {
-      <table class="w-full border-collapse text-left">
+      <table class="w-full min-w-[720px] border-collapse text-left [&_th]:border-y [&_th]:border-[#edf0f0] [&_th]:bg-[rgba(244,247,246,0.65)] [&_th]:px-[16px] [&_th]:py-[12px] [&_th]:text-[10px] [&_th]:font-[620] [&_th]:uppercase [&_th]:whitespace-nowrap [&_th]:text-[#839095] [&_td]:px-[16px] [&_td]:py-[14px] [&_td]:whitespace-nowrap [&_td]:align-middle">
         <thead><tr><th>Fecha</th><th>Vale</th><th>Orden</th><th>Grifero</th><th>Sede</th><th>Combustible</th><th>Galones</th></tr></thead>
         <tbody>
           @for (row of pagedAttendanceRows(); track row.attendance_id + row.fuel_type_code) {

@@ -11,6 +11,8 @@ import {
   signal,
 } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import {
@@ -26,7 +28,7 @@ import { AdminUiState } from '../../admin-ui-state';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive, UiIcon],
+  imports: [RouterLink, RouterLinkActive, UiIcon, FormsModule, SelectModule],
   selector: 'app-sidebar',
   templateUrl: './sidebar.html',
 })
@@ -56,6 +58,7 @@ export class Sidebar {
   protected readonly user = this.state.user;
   protected readonly branch = this.state.branch;
   protected readonly branches = this.state.branches;
+  protected readonly branchOptions = computed(() => this.branches().map((item) => ({ value: item, label: item })));
   protected readonly branchLocked = this.state.branchLocked;
 
   /** Grupos cerrados por el usuario; el resto se considera desplegado. */
@@ -109,8 +112,8 @@ export class Sidebar {
     });
   }
 
-  protected onBranchChange(event: Event): void {
-    this.state.setBranch((event.target as HTMLSelectElement).value);
+  protected onBranchChange(value: string): void {
+    this.state.setBranch(value);
   }
 
   protected logout(): void {

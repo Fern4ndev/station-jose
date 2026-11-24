@@ -8,6 +8,8 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
 import type { BranchResponse } from '../../../../core/models/catalog';
 import {
@@ -18,7 +20,7 @@ import {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiDialog],
+  imports: [UiDialog, FormsModule, SelectModule],
   selector: 'app-user-form-dialog',
   templateUrl: './user-form-dialog.html',
 })
@@ -30,6 +32,8 @@ export class UserFormDialog {
   readonly saved = output<UserDraft>();
 
   protected readonly roles = USER_ROLES;
+  protected readonly roleOptions = [...USER_ROLES];
+  protected readonly branchOptions = computed(() => this.branches().map((item) => ({ value: item.id, label: item.name })));
 
   protected readonly name = signal('');
   protected readonly dni = signal('');
@@ -66,14 +70,6 @@ export class UserFormDialog {
 
   protected setEmail(event: Event): void {
     this.email.set((event.target as HTMLInputElement).value);
-  }
-
-  protected setRole(event: Event): void {
-    this.role.set((event.target as HTMLSelectElement).value as UserRoleValue);
-  }
-
-  protected setBranch(event: Event): void {
-    this.branch.set((event.target as HTMLSelectElement).value);
   }
 
   protected setPassword(event: Event): void {

@@ -7,6 +7,7 @@ export type UiIconName =
   | 'attendances'
   | 'reports'
   | 'users'
+  | 'fuel'
   | 'search'
   | 'bell'
   | 'user'

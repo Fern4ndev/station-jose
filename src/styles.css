@@ -196,7 +196,7 @@ button {
 }
 
 .sanjose-th {
-  padding: 10px 13px;
+  padding: 12px 16px;
   border-top: 1px solid #edf0f0;
   border-bottom: 1px solid #edf0f0;
   background: rgba(244, 247, 246, 0.65);
@@ -207,7 +207,7 @@ button {
 }
 
 .sanjose-td {
-  padding: 12px 13px;
+  padding: 14px 16px;
   border-bottom: 1px solid #eff2f2;
   color: #52636a;
   font-size: 11px;
@@ -293,7 +293,7 @@ button {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 0 13px;
+  padding: 0 16px;
   border: 1px solid transparent;
   border-radius: 11px;
   font-size: 11px;
@@ -377,7 +377,7 @@ button {
 .sanjose-select {
   min-height: 39px;
   width: 100%;
-  padding: 0 11px;
+  padding: 0 13px;
   border: 1px solid #dce5e5;
   border-radius: 10px;
   background: #ffffff;
@@ -424,13 +424,13 @@ button {
 }
 
 .sanjose-dialog .p-dialog-header {
-  padding: 20px 21px 16px !important;
+  padding: 22px 24px 18px !important;
   border-bottom: 1px solid #edf0f0;
   background: #fdfefe;
 }
 
 .sanjose-dialog .p-dialog-content {
-  padding: 18px 21px !important;
+  padding: 20px 24px !important;
   background: #fdfefe;
 }
 
@@ -438,7 +438,7 @@ button {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 14px 21px 18px !important;
+  padding: 16px 24px 20px !important;
   border-top: 1px solid #edf0f0;
   background: #fbfcfc;
 }
@@ -474,7 +474,7 @@ button {
 .sanjose-toast.p-toast .p-toast-message-content {
   align-items: center;
   gap: 9px;
-  padding: 12px 15px;
+  padding: 13px 16px;
 }
 
 .sanjose-toast.p-toast .p-toast-message-text,
@@ -496,5 +496,62 @@ button {
 
   .sanjose-form-grid .sanjose-field.full {
     grid-column: auto;
+  }
+}
+
+.sanjose-compact-paginator.p-paginator {
+  padding: 0;
+  font-size: 11px;
+  background: transparent;
+  gap: 1px;
+}
+
+.sanjose-compact-paginator .p-paginator-content { gap: 1px; }
+.sanjose-compact-paginator .p-paginator-page,
+.sanjose-compact-paginator .p-paginator-prev,
+.sanjose-compact-paginator .p-paginator-next {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1;
+}
+.sanjose-compact-paginator .p-paginator-current {
+  margin-right: 6px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.sanjose-compact-paginator .p-paginator-pages { gap: 1px; }
+.sanjose-compact-paginator .p-paginator-page.p-paginator-page-selected {
+  font-weight: 650;
+}
+
+/* Tipografía de los controles PrimeNG alineada con el contenido general (Inter 11px) */
+.p-select,
+.p-select .p-select-label,
+.p-select .p-select-dropdown,
+.p-select-overlay .p-select-option,
+.p-select-overlay .p-select-filter,
+.p-select-overlay .p-select-empty-message,
+.p-datepicker .p-datepicker-input,
+.p-datepicker-panel,
+.p-datepicker-panel .p-datepicker-header,
+.p-datepicker-panel .p-datepicker-title,
+.p-datepicker-panel .p-datepicker-weekday-cell,
+.p-datepicker-panel .p-datepicker-day,
+.p-datepicker-panel .p-datepicker-month,
+.p-datepicker-panel .p-datepicker-year {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

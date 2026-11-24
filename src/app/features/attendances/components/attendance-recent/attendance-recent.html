@@ -1,7 +1,7 @@
-<div class="grid gap-0 p-[0_16px_6px]">
+<div class="grid gap-0 p-[0_20px_8px]">
   @for (row of rows(); track row.id) {
     <div
-      class="grid grid-cols-[33px_minmax(0,_1fr)_auto] items-center gap-[10px] border-t border-[#edf0f0] p-[12px_2px]"
+      class="grid grid-cols-[33px_minmax(0,_1fr)_auto] items-center gap-[10px] border-t border-[#edf0f0] p-[14px_4px]"
     >
       <span class="grid h-[32px] w-[32px] place-items-center rounded-[11px] bg-[#fbf3e6] text-[#a8752e]">
         <app-ui-icon name="vouchers" [size]="15" />
@@ -13,7 +13,7 @@
       <app-ui-status-badge [label]="row.status" tone="green" />
     </div>
   } @empty {
-    <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">
+    <div class="p-[36px_20px] text-center text-[11px] text-[#8b989c]">
       Todavía no hay despachos registrados hoy.
     </div>
   }

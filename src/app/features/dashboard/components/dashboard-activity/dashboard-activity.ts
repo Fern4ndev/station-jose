@@ -20,12 +20,12 @@ export class DashboardActivity {
   readonly refresh = output<void>();
   readonly viewAll = output<void>();
   protected readonly first = linkedSignal({ source: this.rows, computation: () => 0 });
-  protected readonly pageSize = signal(5);
+  protected readonly pageSize = signal(10);
   protected readonly pageRows = computed(() => this.rows().slice(this.first(), this.first() + this.pageSize()));
 
   protected onPage(event: { first?: number; rows?: number }): void {
     this.first.set(event.first ?? 0);
-    this.pageSize.set(event.rows ?? 5);
+    this.pageSize.set(event.rows ?? 10);
   }
 
   protected gallons(value: number): string {

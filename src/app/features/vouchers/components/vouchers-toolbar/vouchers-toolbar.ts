@@ -1,8 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 import type { VoucherFilter } from '../../vouchers-data';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, SelectModule],
   selector: 'app-vouchers-toolbar',
   templateUrl: './vouchers-toolbar.html',
 })
@@ -13,7 +16,7 @@ export class VouchersToolbar {
   readonly filterChange = output<VoucherFilter>();
   readonly queryChange = output<string>();
 
-  protected readonly filters: readonly { value: VoucherFilter; label: string }[] = [
+  protected readonly filters: { value: VoucherFilter; label: string }[] = [
     { value: 'Todos', label: 'Todos' },
     { value: 'Disponible', label: 'Disponibles' },
     { value: 'Parcial', label: 'Parciales' },

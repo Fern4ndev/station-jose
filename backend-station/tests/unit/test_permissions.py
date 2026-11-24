@@ -7,6 +7,12 @@ def test_admin_has_user_management_permission() -> None:
     assert "users.manage" in permissions_for_role(UserRole.ADMIN)
 
 
+def test_only_admin_manages_the_fuel_catalog() -> None:
+    assert "fuel_types.manage" in permissions_for_role(UserRole.ADMIN)
+    assert "fuel_types.manage" not in permissions_for_role(UserRole.OFFICE)
+    assert "fuel_types.manage" not in permissions_for_role(UserRole.ATTENDANT)
+
+
 def test_attendant_cannot_manage_users_or_reports() -> None:
     permissions = permissions_for_role(UserRole.ATTENDANT)
 

@@ -137,7 +137,15 @@ describe('auth guards', () => {
   });
 
   it('navForRole expone solo las secciones de cada rol real', () => {
-    expect(pathsFor('ADMIN')).toEqual(['/', '/ordenes', '/vales', '/atenciones', '/reportes', '/usuarios']);
+    expect(pathsFor('ADMIN')).toEqual([
+      '/',
+      '/ordenes',
+      '/vales',
+      '/atenciones',
+      '/reportes',
+      '/combustibles',
+      '/usuarios',
+    ]);
     expect(pathsFor('OFFICE')).toEqual(['/', '/ordenes', '/vales', '/atenciones', '/reportes']);
     expect(pathsFor('ATTENDANT')).toEqual(['/', '/ordenes', '/vales', '/atenciones']);
     expect(navForRole(undefined)).toEqual([]);
@@ -145,6 +153,7 @@ describe('auth guards', () => {
 
   it('rolesForRoute coincide con los roles declarados en NAV', () => {
     expect(rolesForRoute('/usuarios')).toEqual(['ADMIN']);
+    expect(rolesForRoute('/combustibles')).toEqual(['ADMIN']);
     expect(rolesForRoute('/reportes')).toEqual(['ADMIN', 'OFFICE']);
     expect(rolesForRoute('/ordenes')).toEqual(['ADMIN', 'OFFICE', 'ATTENDANT']);
 

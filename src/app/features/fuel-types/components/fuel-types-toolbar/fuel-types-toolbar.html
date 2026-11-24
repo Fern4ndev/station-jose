@@ -1,0 +1,34 @@
+<div
+  class="flex items-center justify-between gap-[14px] border-b border-[#edf0f0] p-[16px_20px] max-[760px]:flex-col max-[760px]:items-start"
+>
+  <div class="flex flex-wrap items-center gap-[16px]">
+    <span class="text-[11px] text-[#87949a]">
+      <strong class="font-[620] text-[#263b43]">{{ total() }}</strong>
+      {{ total() === 1 ? 'combustible' : 'combustibles' }}
+    </span>
+
+    <label class="flex items-center gap-[7px] text-[11px] text-[#52636a]">
+      <span class="whitespace-nowrap">Estado</span>
+      <p-select
+        [options]="filters"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="status()"
+        (ngModelChange)="onStatus($event)"
+        ariaLabel="Filtrar combustibles por estado"
+        size="small"
+        styleClass="w-[140px]"
+      />
+    </label>
+  </div>
+
+  <input
+    id="fuelTypeSearch"
+    class="min-h-[39px] w-full max-w-[280px] rounded-[10px] border border-[#dce5e5] bg-white px-[13px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] max-[760px]:max-w-none"
+    type="search"
+    placeholder="Buscar por código o nombre"
+    aria-label="Buscar combustibles por código o nombre"
+    [value]="query()"
+    (input)="onQuery($event)"
+  />
+</div>

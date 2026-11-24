@@ -37,6 +37,7 @@ export const APP_ROUTES = {
   vouchers: '/vales',
   attendances: '/atenciones',
   reports: '/reportes',
+  fuelTypes: '/combustibles',
   users: '/usuarios',
 } as const;
 
@@ -54,6 +55,8 @@ export const ROLE_LABELS: Readonly<Record<UserRole, string>> = {
 /** Permisos agrupados por módulo, para construir menús o botones. */
 export const PERMISSIONS = {
   usersManage: 'users.manage',
+  fuelTypesRead: 'fuel_types.read',
+  fuelTypesManage: 'fuel_types.manage',
   ordersRead: 'purchase_orders.read',
   ordersCreate: 'purchase_orders.create',
   ordersUpdate: 'purchase_orders.update',
@@ -120,6 +123,13 @@ export const NAV: readonly NavEntry[] = [
         icon: 'reports',
         path: `${ADMIN_PREFIX}/reportes`,
         roles: ['ADMIN', 'OFFICE'],
+      },
+      {
+        id: 'fuel-types',
+        label: 'Combustibles',
+        icon: 'fuel',
+        path: `${ADMIN_PREFIX}/combustibles`,
+        roles: ['ADMIN'],
       },
       {
         id: 'users',

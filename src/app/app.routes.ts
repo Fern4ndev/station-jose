@@ -46,6 +46,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/reports/reports').then((m) => m.Reports),
       },
       {
+        path: 'combustibles',
+        canActivate: [navGuard('/combustibles')],
+        loadComponent: () =>
+          import('./features/fuel-types/fuel-types').then((m) => m.FuelTypes),
+      },
+      {
         path: 'usuarios',
         canActivate: [navGuard('/usuarios')],
         loadComponent: () => import('./features/users/users').then((m) => m.Users),

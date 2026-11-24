@@ -18,6 +18,5 @@ export class TablePagination {
   readonly rows = input(10);
   readonly totalRecords = input(0);
   readonly label = input<string | null>(null);
-  readonly pageSizes = input<number[]>([10, 25, 50]);
   readonly pageChange = output<TablePageChange>();
 }

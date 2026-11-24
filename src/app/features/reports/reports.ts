@@ -1,4 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { TablePagination } from '../../shared/components/table-pagination/table-pagination';
 import { MessageService } from 'primeng/api';
 import { firstValueFrom } from 'rxjs';
@@ -26,34 +29,65 @@ import {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TablePagination, ReportChart, ReportMetrics, ReportSummaryPanel, TableRefresh, UiIcon, UiPageHeading, UiToast],
+  imports: [FormsModule, SelectModule, DatePickerModule, TablePagination, ReportChart, ReportMetrics, ReportSummaryPanel, TableRefresh, UiIcon, UiPageHeading, UiToast],
   selector: 'app-reports',
   templateUrl: './reports.html',
 })
 export class Reports {
+  private loadVersion = 0;
   private readonly state = inject(AdminUiState);
   private readonly messages = inject(MessageService);
   private readonly api = inject(ReportsApi);
   private readonly catalog = inject(CatalogApi);
 
-  protected readonly periods = REPORT_PERIODS;
+  protected readonly periods = [...REPORT_PERIODS];
   protected readonly period = signal<ReportPeriod>('7d');
   protected readonly kind = signal<'orders' | 'attendances'>('orders');
+  protected readonly kinds = [{ value: 'orders', label: 'Órdenes' }, { value: 'attendances', label: 'Atenciones' }];
+  protected readonly groupings = [{ value: 'hour', label: 'Por hora' }, { value: 'day', label: 'Por día' }, { value: 'week', label: 'Por semana' }, { value: 'month', label: 'Por mes' }];
+  protected readonly grouping = signal<'hour' | 'day' | 'week' | 'month'>('day');
+  protected readonly today = new Date();
+  protected readonly from = signal(this.startOfPeriod('7d'));
+  protected readonly to = signal(new Date());
+  protected readonly hourOptions = Array.from({ length: 24 }, (_, hour) => ({
+    value: hour,
+    label: `${String(hour).padStart(2, '0')}:00`,
+  }));
+  protected readonly hourFrom = signal(0);
+  protected readonly hourTo = signal(23);
   protected readonly branch = this.state.branch;
 
   protected readonly dashboard = signal<DashboardResponse | null>(null);
   protected readonly orderRows = signal<readonly PurchaseOrderReportRow[]>([]);
   protected readonly attendanceRows = signal<readonly AttendanceReportRow[]>([]);
   protected readonly first = linkedSignal({
-    source: () => [this.kind(), this.period(), this.branch(), this.orderRows(), this.attendanceRows()] as const,
+    source: () => [this.kind(), this.from(), this.to(), this.hourFrom(), this.hourTo(), this.branch(), this.orderRows(), this.attendanceRows()] as const,
     computation: () => 0,
   });
   protected readonly pageSize = signal(10);
+  protected readonly filteredAttendanceRows = computed(() => {
+    const from = this.hourFrom();
+    const to = this.hourTo();
+    if (from === 0 && to === 23) return this.attendanceRows();
+    return this.attendanceRows().filter((row) => {
+      const hour = this.hourOf(row.attended_at);
+      return hour !== null && hour >= from && hour <= to;
+    });
+  });
   protected readonly pagedOrderRows = computed(() => this.orderRows().slice(this.first(), this.first() + this.pageSize()));
-  protected readonly pagedAttendanceRows = computed(() => this.attendanceRows().slice(this.first(), this.first() + this.pageSize()));
-  protected readonly reportRowCount = computed(() => this.kind() === 'orders' ? this.orderRows().length : this.attendanceRows().length);
+  protected readonly pagedAttendanceRows = computed(() => this.filteredAttendanceRows().slice(this.first(), this.first() + this.pageSize()));
+  protected readonly reportRowCount = computed(() => this.kind() === 'orders' ? this.orderRows().length : this.filteredAttendanceRows().length);
   protected readonly refreshing = signal(false);
   protected readonly buckets = signal<readonly ReportBucket[]>([]);
+  protected readonly visibleBuckets = computed(() => {
+    const from = this.hourFrom();
+    const to = this.hourTo();
+    if (this.grouping() !== 'hour' || (from === 0 && to === 23)) return this.buckets();
+    return this.buckets().filter((bucket) => {
+      const hour = this.hourOf(bucket.label);
+      return hour !== null && hour >= from && hour <= to;
+    });
+  });
   protected readonly badge = computed(() => this.periods.find((item) => item.value === this.period())?.label ?? '');
   protected readonly metrics = computed<readonly StatCardModel[]>(() => {
     const data = this.dashboard();
@@ -80,22 +114,33 @@ export class Reports {
   constructor() {
     effect(() => {
       this.branch();
-      this.period();
+      this.from();
+      this.to();
+      this.grouping();
       void this.load();
     });
   }
 
-  private filters(): { date_from: string; date_to: string; group_by: 'day' | 'week' | 'month' } {
+  private startOfPeriod(period: ReportPeriod): Date {
     const now = new Date();
     const from = new Date(now);
-    const group_by = this.period() === 'year' ? 'month' : this.period() === 'month' ? 'week' : 'day';
-    if (this.period() === '7d') from.setDate(now.getDate() - 6);
-    else if (this.period() === 'month') from.setDate(1);
-    else from.setMonth(0, 1);
-    return { date_from: todayIso(from), date_to: todayIso(now), group_by };
+    if (period === '7d') from.setDate(now.getDate() - 6);
+    else if (period === 'month') from.setDate(1);
+    else if (period === 'year') from.setMonth(0, 1);
+    return from;
+  }
+
+  private hourOf(value: string): number | null {
+    const match = /[T ](\d{2}):/.exec(value);
+    return match ? Number(match[1]) : null;
+  }
+
+  private filters(): { date_from: string; date_to: string; group_by: 'hour' | 'day' | 'week' | 'month' } {
+    return { date_from: todayIso(this.from()), date_to: todayIso(this.to()), group_by: this.grouping() };
   }
 
   private async load(): Promise<void> {
+    const version = ++this.loadVersion;
     this.refreshing.set(true);
     try {
       const filters = this.filters();
@@ -108,6 +153,7 @@ export class Reports {
         firstValueFrom(this.api.attendances({ date_from: filters.date_from, date_to: filters.date_to, branch_id: selected?.id })),
         ...visible.map((branch) => firstValueFrom(this.api.dashboard({ ...filters, branch_id: branch.id }))),
       ]);
+      if (version !== this.loadVersion) return;
       this.dashboard.set(summary);
       this.orderRows.set(orderReport.items);
       this.attendanceRows.set(attendanceReport.items);
@@ -118,9 +164,9 @@ export class Reports {
         santaMarta: Number(series[visible.findIndex((item) => item.name === 'Santa Marta')]?.by_period.find((item) => item.period === period)?.attended_gallons ?? 0),
       })));
     } catch (error) {
-      this.messages.add({ severity: 'error', summary: extractApiError(error, 'No se pudieron cargar los reportes.'), life: 4000 });
+      if (version === this.loadVersion) this.messages.add({ severity: 'error', summary: extractApiError(error, 'No se pudieron cargar los reportes.'), life: 4000 });
     } finally {
-      this.refreshing.set(false);
+      if (version === this.loadVersion) this.refreshing.set(false);
     }
   }
 
@@ -150,11 +196,41 @@ export class Reports {
     this.pageSize.set(event.rows ?? 10);
   }
 
-  protected onPeriod(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as ReportPeriod;
+  protected onPeriod(value: ReportPeriod): void {
     this.period.set(value);
-    const label = this.periods.find((option) => option.value === value)?.label ?? value;
-    this.messages.add({ severity: 'info', summary: `Período seleccionado: ${label}.`, life: 2600 });
+    if (value === 'custom') return;
+    this.from.set(this.startOfPeriod(value));
+    this.to.set(new Date());
+    this.grouping.set(value === 'year' ? 'month' : value === 'month' ? 'week' : 'day');
+  }
+
+  protected onFrom(value: Date | null): void {
+    if (!value) return;
+    this.period.set('custom');
+    this.from.set(value);
+    if (value > this.to()) this.to.set(value);
+  }
+
+  protected onTo(value: Date | null): void {
+    if (!value) return;
+    this.period.set('custom');
+    this.to.set(value);
+    if (value < this.from()) this.from.set(value);
+  }
+
+  protected onHourFrom(value: number): void {
+    this.hourFrom.set(value);
+    if (value > this.hourTo()) this.hourTo.set(value);
+  }
+
+  protected onHourTo(value: number): void {
+    this.hourTo.set(value);
+    if (value < this.hourFrom()) this.hourFrom.set(value);
+  }
+
+  protected resetHours(): void {
+    this.hourFrom.set(0);
+    this.hourTo.set(23);
   }
 
   protected exportReport(format: 'pdf' | 'xlsx'): void {

@@ -2,17 +2,17 @@
   <table class="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[rgba(238,247,244,0.5)] [&_tbody_tr:last-child>td]:border-b-0">
     <thead>
       <tr>
-        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">USUARIO</th>
-        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ROL</th>
-        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">SEDE</th>
-        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
-        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ACCESO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">USUARIO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ROL</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">SEDE</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[16px] py-[12px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ACCESO</th>
       </tr>
     </thead>
     <tbody>
       @for (user of pageRows(); track user.id) {
         <tr>
-          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
             <div class="flex items-center gap-[8px]">
               <span
                 class="grid h-[27px] w-[27px] flex-none place-items-center rounded-[9px] bg-[#e8f1ec] text-[9px] font-[700] text-[#49796a]"
@@ -26,16 +26,16 @@
               </span>
             </div>
           </td>
-          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ user.role }}</td>
-          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ user.branch }}</td>
-          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">{{ user.role }}</td>
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">{{ user.branch }}</td>
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
             @if (user.active) {
               <app-ui-status-badge label="Activo" tone="green" />
             } @else {
               <app-ui-status-badge label="Deshabilitado" tone="gray" />
             }
           </td>
-          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]">
             <button
               type="button"
               class="relative h-[20px] w-[34px] cursor-pointer rounded-full border-0 bg-[#cbd4d4] p-0 transition-colors after:absolute after:top-[3px] after:left-[3px] after:h-[14px] after:w-[14px] after:rounded-full after:bg-white after:shadow-[0_1px_3px_rgba(0,0,0,0.15)] after:transition-transform after:content-[''] data-[on]:bg-[#51b89e] data-[on]:after:translate-x-[14px] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] motion-reduce:transition-none motion-reduce:after:transition-none"
@@ -49,8 +49,8 @@
         </tr>
       } @empty {
         <tr>
-          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="5">
-            <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">
+          <td class="border-b border-[#eff2f2] px-[16px] py-[14px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="5">
+            <div class="p-[36px_20px] text-center text-[11px] text-[#8b989c]">
               No hay usuarios que coincidan con la búsqueda.
             </div>
           </td>

@@ -1,5 +1,5 @@
 <div
-  class="grid min-h-screen w-full grid-cols-[252px_minmax(0,_1fr)] gap-[14px] p-[14px] max-[1050px]:grid-cols-[220px_minmax(0,_1fr)] max-[1050px]:gap-[10px] max-[1050px]:p-[10px] max-[760px]:block max-[760px]:p-[8px]"
+  class="grid min-h-screen w-full grid-cols-[252px_minmax(0,_1fr)] gap-[18px] p-[18px] max-[1050px]:grid-cols-[220px_minmax(0,_1fr)] max-[1050px]:gap-[12px] max-[1050px]:p-[12px] max-[760px]:block max-[760px]:p-[10px]"
   [style.grid-template-columns]="sidebarCollapsed() ? '76px minmax(0, 1fr)' : null"
 >
   <app-sidebar
@@ -17,7 +17,7 @@
     ></div>
   }
 
-  <main class="min-w-0 p-[0_17px_38px] max-[1050px]:px-[8px] max-[760px]:p-[0_5px_28px]">
+  <main class="min-w-0 p-[0_20px_44px] max-[1050px]:px-[10px] max-[760px]:p-[0_8px_32px]">
     <app-header
       [pageLabel]="pageLabel()"
       [mobileOpen]="mobileMenuOpen()"
@@ -26,7 +26,7 @@
 
     <router-outlet />
 
-    <footer class="flex justify-between gap-[12px] p-[20px_2px_0] text-[9px] text-[#9aa5a7]">
+    <footer class="flex justify-between gap-[12px] p-[24px_4px_0] text-[9px] text-[#9aa5a7]">
       <span>Estación de Servicio San José</span>
       <span>Los datos mostrados son de demostración</span>
     </footer>

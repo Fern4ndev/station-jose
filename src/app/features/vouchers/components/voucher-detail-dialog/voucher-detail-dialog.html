@@ -4,9 +4,9 @@
   [description]="(voucher()?.issuer ?? '') + ' · ' + (voucher()?.orderId ?? '')"
 >
   @if (voucher(); as detail) {
-    <div class="grid gap-[16px]">
+    <div class="grid gap-[18px]">
       @for (line of detail.lines ?? []; track line.id) {
-        <div class="grid gap-[5px] rounded-[10px] border border-[#e5eaea] p-[10px] text-[10px] text-[#52636a]">
+        <div class="grid gap-[5px] rounded-[10px] border border-[#e5eaea] p-[13px] text-[10px] text-[#52636a]">
           <strong class="text-[11px] text-[#263d44]">{{ line.fuel }}</strong>
           <span>Autorizado: {{ gallons(line.authorized) }}</span>
           <span>Atendido: {{ gallons(line.attended) }}</span>
@@ -15,7 +15,7 @@
       }
 
       <div
-        class="flex items-center justify-between gap-[12px] rounded-[12px] border border-[#dceee8] bg-[#f2faf6] p-[13px_14px] text-[10px] text-[#386e61]"
+        class="flex items-center justify-between gap-[12px] rounded-[12px] border border-[#dceee8] bg-[#f2faf6] p-[15px_16px] text-[10px] text-[#386e61]"
       >
         <span>Saldo restante del vale</span>
         <strong class="text-[14px] tracking-[-0.03em] text-[#225d50]">{{ balance() }}</strong>

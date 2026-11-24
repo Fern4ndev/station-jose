@@ -1,32 +1,17 @@
 <app-ui-panel title="Galones despachados" subtitle="Actividad por sede">
   <app-ui-status-badge panelAction [label]="badge()" tone="green" />
-
-  <div class="p-[5px_18px_15px]">
-    <div
-      class="border-b border-[#e8eded] bg-[linear-gradient(to_bottom,transparent_24%,#edf1f0_24%,#edf1f0_24.7%,transparent_24.7%),linear-gradient(to_bottom,transparent_49%,#edf1f0_49%,#edf1f0_49.7%,transparent_49.7%),linear-gradient(to_bottom,transparent_74%,#edf1f0_74%,#edf1f0_74.7%,transparent_74.7%)] flex h-[205px] items-end gap-[15px] px-[4px] pt-[18px] pb-[28px]"
-      role="img"
-      [attr.aria-label]="'Gráfico de galones despachados por sede, ' + badge()"
-    >
-      @for (bucket of buckets(); track bucket.label) {
-        <div class="relative flex h-full flex-1 items-end justify-center gap-[4px]">
-          <i
-            class="block min-h-[4px] w-[min(17px,32%)] rounded-t-[6px] rounded-b-[2px] bg-[linear-gradient(180deg,#5fc7ae,#45a894)] transition-[height] duration-[220ms] motion-reduce:transition-none"
-            [style.height.%]="height(bucket.sanJose)"
-            [attr.title]="'San José · ' + bucket.label + ': ' + bucket.sanJose + ' gal'"
-          ></i>
-          <i
-            class="block min-h-[4px] w-[min(17px,32%)] rounded-t-[6px] rounded-b-[2px] bg-[linear-gradient(180deg,#5fc7ae,#45a894)] transition-[height] duration-[220ms] motion-reduce:transition-none bg-[linear-gradient(180deg,#a8d7ce,#7ab8ad)]"
-            [style.height.%]="height(bucket.santaMarta)"
-            [attr.title]="'Santa Marta · ' + bucket.label + ': ' + bucket.santaMarta + ' gal'"
-          ></i>
-          <span>{{ bucket.label }}</span>
-        </div>
-      }
-    </div>
-
-    <div class="flex gap-[15px] pt-[12px] text-[9px] text-[#78878b]">
-      <span><i class="mr-[5px] inline-block h-[7px] w-[7px] rounded-[2px] bg-[#50b49f]"></i>San José</span>
-      <span><i class="mr-[5px] inline-block h-[7px] w-[7px] rounded-[2px] bg-[#50b49f] bg-[#9dcfc4]"></i>Santa Marta</span>
-    </div>
+  <div class="p-[8px_20px_18px]">
+    @if (buckets().length) {
+      <div class="h-[250px] w-full" role="img" [attr.aria-label]="'Gráfico de galones despachados por sede, ' + badge()">
+        <p-chart type="bar" [data]="chartData()" [options]="chartOptions" height="250px" />
+      </div>
+      <table class="sr-only">
+        <caption>Galones despachados por sede y período</caption>
+        <thead><tr><th>Período</th><th>San José</th><th>Santa Marta</th></tr></thead>
+        <tbody>@for (bucket of buckets(); track bucket.label) { <tr><td>{{ bucket.label }}</td><td>{{ bucket.sanJose }}</td><td>{{ bucket.santaMarta }}</td></tr> }</tbody>
+      </table>
+    } @else {
+      <p class="flex h-[250px] items-center justify-center text-[11px] text-[#65777b]">No hay datos para el rango seleccionado.</p>
+    }
   </div>
 </app-ui-panel>

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { TablePagination } from './table-pagination';
 
 describe('TablePagination', () => {
-  it.each([0, 3])('permanece visible con %i registros y se alinea al extremo derecho', async (total) => {
+  it.each([0, 3, 23])('permanece visible con %i registros y se alinea al extremo derecho', async (total) => {
     await TestBed.configureTestingModule({
       imports: [TablePagination],
       providers: [providePrimeNG()],
@@ -19,5 +19,9 @@ describe('TablePagination', () => {
     expect(host.querySelector('.justify-end p-paginator')).toBeTruthy();
     expect(host.querySelector('p-paginator button')).toBeTruthy();
     expect(host.textContent).toContain(`de ${total}`);
+    expect(host.querySelector('.p-paginator-first')).toBeNull();
+    expect(host.querySelector('.p-paginator-last')).toBeNull();
+    expect(host.querySelector('p-paginator p-select')).toBeNull();
+    if (total === 23) expect(host.textContent).toContain('1-10 de 23');
   });
 });
