@@ -3,23 +3,23 @@
   title="Agregar usuario"
   description="Asigna uno de los roles predefinidos. La oficina administra ambas sedes."
 >
-  <form id="userForm" class="sanjose-form-grid" (submit)="onSubmit($event)" novalidate>
-    <div class="sanjose-field">
-      <label class="sanjose-label" for="newUserName">Nombre completo</label>
+  <form id="userForm" class="grid grid-cols-2 gap-[13px] max-[760px]:grid-cols-1" (submit)="onSubmit($event)" novalidate>
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserName">Nombre completo</label>
       <input
         id="newUserName"
-        class="sanjose-input"
+        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
         placeholder="Nombre y apellidos"
         [value]="name()"
         (input)="setName($event)"
       />
     </div>
 
-    <div class="sanjose-field">
-      <label class="sanjose-label" for="newUserDni">DNI</label>
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserDni">DNI</label>
       <input
         id="newUserDni"
-        class="sanjose-input"
+        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
         inputmode="numeric"
         maxlength="8"
         placeholder="Número de documento"
@@ -28,11 +28,11 @@
       />
     </div>
 
-    <div class="sanjose-field full">
-      <label class="sanjose-label" for="newUserEmail">Correo electrónico</label>
+    <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserEmail">Correo electrónico</label>
       <input
         id="newUserEmail"
-        class="sanjose-input"
+        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
         type="email"
         placeholder="nombre@estacion.pe"
         [value]="email()"
@@ -40,9 +40,9 @@
       />
     </div>
 
-    <div class="sanjose-field">
-      <label class="sanjose-label" for="newUserRole">Rol</label>
-      <select id="newUserRole" class="sanjose-select" [value]="role()" (change)="setRole($event)">
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserRole">Rol</label>
+      <select id="newUserRole" class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" [value]="role()" (change)="setRole($event)">
         @for (option of roles; track option.value) {
           <option [value]="option.value">{{ option.label }}</option>
         }
@@ -50,11 +50,11 @@
     </div>
 
     @if (showBranch()) {
-      <div class="sanjose-field">
-        <label class="sanjose-label" for="newUserBranch">Sede</label>
+      <div class="grid gap-[6px]">
+        <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserBranch">Sede</label>
         <select
           id="newUserBranch"
-          class="sanjose-select"
+          class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
           [value]="branch()"
           (change)="setBranch($event)"
         >
@@ -62,26 +62,26 @@
             <option [value]="option">{{ option }}</option>
           }
         </select>
-        <span class="sanjose-hint">No aplica al personal de oficina ni al administrador.</span>
+        <span class="text-[9px] leading-[1.5] text-[#919da0]">No aplica al personal de oficina ni al administrador.</span>
       </div>
     }
 
-    <p class="sanjose-hint m-0 [grid-column:1_/-1]">
+    <p class="text-[9px] leading-[1.5] text-[#919da0] m-0 [grid-column:1_/-1]">
       La cuenta requiere una clave temporal segura al integrarse con el backend.
     </p>
 
     @if (error()) {
-      <p class="sanjose-hint sanjose-hint--error m-0 [grid-column:1_/-1]" role="alert">
+      <p class="text-[9px] leading-[1.5] text-[#919da0] text-[#a55a2c] m-0 [grid-column:1_/-1]" role="alert">
         {{ error() }}
       </p>
     }
   </form>
 
   <div dialogFooter class="flex justify-end gap-[8px]">
-    <button type="button" class="sanjose-button sanjose-button--secondary" (click)="visible.set(false)">
+    <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] border-[#dce5e6] bg-[rgba(255,255,255,0.72)] text-[#53656a] hover:bg-white" (click)="visible.set(false)">
       Cancelar
     </button>
-    <button type="submit" form="userForm" class="sanjose-button sanjose-button--primary">
+    <button type="submit" form="userForm" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)">
       Crear usuario
     </button>
   </div>

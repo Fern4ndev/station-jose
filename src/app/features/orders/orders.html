@@ -6,11 +6,11 @@
     subtitle="Consulta autorizaciones y saldo disponible por combustible."
   >
     @if (canManage()) {
-      <button type="button" class="sanjose-button sanjose-button--secondary" (click)="openNew()">
+      <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] border-[#dce5e6] bg-[rgba(255,255,255,0.72)] text-[#53656a] hover:bg-white" (click)="openNew()">
         <app-ui-icon name="orders" [size]="14" />
         Importar PDF
       </button>
-      <button type="button" class="sanjose-button sanjose-button--primary" (click)="openNew()">
+      <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)" (click)="openNew()">
         <app-ui-icon name="plus" [size]="14" />
         Nueva orden
       </button>
@@ -39,7 +39,7 @@
       class="flex items-center justify-between gap-[12px] p-[17px_18px_13px] max-[760px]:p-[15px_14px_12px]"
     >
       <p class="m-0 text-[9px] text-[#8c999d]">{{ countText() }}</p>
-      <button type="button" class="sanjose-text-button" (click)="loadMore()">Cargar más</button>
+      <button type="button" class="inline-flex min-h-[30px] cursor-pointer items-center gap-[5px] border-0 bg-transparent px-[4px] text-[10px] font-[630] text-(--sanjose-accent) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" (click)="loadMore()">Cargar más</button>
     </div>
   </app-ui-panel>
 

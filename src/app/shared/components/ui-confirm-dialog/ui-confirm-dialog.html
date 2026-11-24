@@ -2,10 +2,18 @@
   <p class="m-0 text-[11px] leading-[1.6] text-[#54666c]">{{ message() }}</p>
 
   <div dialogFooter class="flex justify-end gap-[8px]">
-    <button type="button" class="sanjose-button sanjose-button--secondary" (click)="visible.set(false)">
+    <button
+      type="button"
+      class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-[#dce5e6] bg-[rgba(255,255,255,0.72)] px-[13px] text-[11px] font-[620] whitespace-nowrap text-[#53656a] transition-[background,box-shadow] hover:bg-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+      (click)="visible.set(false)"
+    >
       {{ cancelLabel() }}
     </button>
-    <button type="button" class="sanjose-button sanjose-button--primary" (click)="confirmed.emit()">
+    <button
+      type="button"
+      class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent bg-(--sanjose-primary-action) px-[13px] text-[11px] font-[620] whitespace-nowrap text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] transition-[background,box-shadow] hover:bg-(--sanjose-primary-action-hover) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+      (click)="confirmed.emit()"
+    >
       {{ confirmLabel() }}
     </button>
   </div>

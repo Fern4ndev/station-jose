@@ -7,7 +7,6 @@ import type { ReportBucket } from '../../reports-data';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UiPanel, UiStatusBadge],
   selector: 'app-report-chart',
-  styleUrls: ['./report-chart.css'],
   templateUrl: './report-chart.html',
 })
 export class ReportChart {

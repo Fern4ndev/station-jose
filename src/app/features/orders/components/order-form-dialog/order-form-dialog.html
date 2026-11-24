@@ -1,21 +1,21 @@
 <app-ui-dialog [(visible)]="visible" [title]="title()" [description]="description()">
-  <form id="orderForm" class="sanjose-form-grid" (submit)="onSubmit($event)" novalidate>
-    <div class="sanjose-field full">
-      <label class="sanjose-label" for="newOrderEntity">Entidad / institución</label>
+  <form id="orderForm" class="grid grid-cols-2 gap-[13px] max-[760px]:grid-cols-1" (submit)="onSubmit($event)" novalidate>
+    <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderEntity">Entidad / institución</label>
       <input
         id="newOrderEntity"
-        class="sanjose-input"
+        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
         placeholder="Nombre de la institución"
         [value]="entity()"
         (input)="setEntity($event)"
       />
     </div>
 
-    <div class="sanjose-field">
-      <label class="sanjose-label" for="newOrderNumber">Número de orden</label>
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderNumber">Número de orden</label>
       <input
         id="newOrderNumber"
-        class="sanjose-input"
+        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
         placeholder="OC-2026-0049"
         [readonly]="isEditing()"
         [value]="number()"
@@ -23,14 +23,14 @@
       />
     </div>
 
-    <div class="sanjose-field">
-      <label class="sanjose-label" for="newOrderDate">Fecha de emisión</label>
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderDate">Fecha de emisión</label>
       @if (isEditing()) {
-        <input id="newOrderDate" class="sanjose-input" readonly [value]="order()?.date ?? ''" />
+        <input id="newOrderDate" class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" readonly [value]="order()?.date ?? ''" />
       } @else {
         <input
           id="newOrderDate"
-          class="sanjose-input"
+          class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
           type="date"
           [value]="date()"
           (input)="setDate($event)"
@@ -38,20 +38,20 @@
       }
     </div>
 
-    <div class="sanjose-field">
-      <label class="sanjose-label" for="newOrderFuel">Combustible</label>
-      <select id="newOrderFuel" class="sanjose-select" [value]="fuel()" (change)="setFuel($event)">
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderFuel">Combustible</label>
+      <select id="newOrderFuel" class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" [value]="fuel()" (change)="setFuel($event)">
         @for (option of fuels; track option) {
           <option [value]="option">{{ option }}</option>
         }
       </select>
     </div>
 
-    <div class="sanjose-field">
-      <label class="sanjose-label" for="newOrderGallons">Galones autorizados</label>
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderGallons">Galones autorizados</label>
       <input
         id="newOrderGallons"
-        class="sanjose-input"
+        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
         type="number"
         min="0.001"
         step="0.001"
@@ -59,12 +59,12 @@
         [value]="total()"
         (input)="setTotal($event)"
       />
-      <span class="sanjose-hint">{{ usedHint() }}</span>
+      <span class="text-[9px] leading-[1.5] text-[#919da0]">{{ usedHint() }}</span>
     </div>
 
-    <div class="sanjose-field full">
-      <label class="sanjose-label" for="newOrderBranch">Sede proveedora</label>
-      <select id="newOrderBranch" class="sanjose-select" [value]="branch()" (change)="setBranch($event)">
+    <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newOrderBranch">Sede proveedora</label>
+      <select id="newOrderBranch" class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" [value]="branch()" (change)="setBranch($event)">
         @for (option of branches; track option) {
           <option [value]="option">{{ option }}</option>
         }
@@ -72,8 +72,8 @@
     </div>
 
     @if (!isEditing()) {
-      <div class="sanjose-field full">
-        <span class="sanjose-label">Documento de origen (opcional)</span>
+      <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+        <span class="mb-0 block text-[10px] font-[620] text-[#52646a]">Documento de origen (opcional)</span>
         <label
           class="grid min-h-[85px] place-items-center gap-[5px] rounded-[12px] border border-dashed border-[#bbd5d0] bg-[#f7fbfa] p-[12px] text-center text-[11px] text-[#53746f]"
           for="orderPdf"
@@ -93,15 +93,15 @@
     }
 
     @if (error()) {
-      <p class="sanjose-hint sanjose-hint--error m-0" role="alert">{{ error() }}</p>
+      <p class="text-[9px] leading-[1.5] text-[#919da0] text-[#a55a2c] m-0" role="alert">{{ error() }}</p>
     }
   </form>
 
   <div dialogFooter class="flex justify-end gap-[8px]">
-    <button type="button" class="sanjose-button sanjose-button--secondary" (click)="visible.set(false)">
+    <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] border-[#dce5e6] bg-[rgba(255,255,255,0.72)] text-[#53656a] hover:bg-white" (click)="visible.set(false)">
       Cancelar
     </button>
-    <button type="submit" form="orderForm" class="sanjose-button sanjose-button--primary">
+    <button type="submit" form="orderForm" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)">
       {{ isEditing() ? 'Guardar cambios' : 'Guardar orden' }}
     </button>
   </div>

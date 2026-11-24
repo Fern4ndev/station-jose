@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
       <p class="m-0 text-[12px] leading-[1.6] text-[#54666c]">
         La ruta que buscas no existe o fue movida a otra sección del panel.
       </p>
-      <a class="sanjose-button sanjose-button--primary mt-[6px]" routerLink="/">Volver al panel</a>
+      <a class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover) mt-[6px]" routerLink="/">Volver al panel</a>
     </section>
   `,
 })

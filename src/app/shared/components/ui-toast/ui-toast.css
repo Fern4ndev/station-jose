@@ -1,0 +1,27 @@
+.sanjose-toast.p-toast .p-toast-message {
+  min-height: 44px;
+  border: 1px solid rgba(219, 239, 232, 0.8);
+  border-radius: 14px;
+  background: rgba(19, 51, 56, 0.95);
+  box-shadow: 0 14px 35px rgba(12, 41, 43, 0.24);
+  color: #f2fbf7;
+  backdrop-filter: blur(20px);
+}
+
+.sanjose-toast.p-toast .p-toast-message-content {
+  align-items: center;
+  gap: 9px;
+  padding: 12px 15px;
+}
+
+.sanjose-toast.p-toast .p-toast-message-text,
+.sanjose-toast.p-toast .p-toast-summary {
+  color: #f2fbf7;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.sanjose-toast.p-toast .p-toast-icon-close,
+.sanjose-toast.p-toast .p-toast-icon {
+  color: #a7efd7;
+}

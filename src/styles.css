@@ -19,11 +19,13 @@
   --color-secondary: #6b7280;
   --color-surface: #ffffff;
   --color-canvas: #f4f7fc;
-
-  /* Degradado con tonos más luminosos derivados de #1F3975 */
-  --background-image-admin-pill: radial-gradient(circle at 20% 20%, #6c8fd0 0%, #2a4c93 50%, #1f3975 100%);
 }
 
+/*
+ * Tokens de diseño del sistema visual San José. Son la única fuente de verdad
+ * de color y superficie: los componentes los consumen desde utilidades de
+ * Tailwind con sintaxis `bg-(--token)` / `text-(--token)`.
+ */
 :root {
   /* Se priorizan los tonos claros (500/600) para una interfaz aireada y moderna, dejando #1F3975 en deep */
   --sanjose-primary: var(--color-primary-600);
@@ -31,6 +33,25 @@
   --sanjose-primary-dark: var(--color-primary-800);
   --sanjose-primary-deep: var(--color-primary-700);
   --sanjose-canvas: var(--color-primary-50);
+
+  --sanjose-ink: #10202a;
+  --sanjose-ink-soft: #22373e;
+  --sanjose-mint: #39c6ae;
+  --sanjose-fuel: #e9a64a;
+  --sanjose-accent: #3a8176;
+  --sanjose-primary-action: #173c42;
+  --sanjose-primary-action-hover: #20545a;
+
+  --sanjose-app-bg: #f3f6f5;
+  --sanjose-app-aura: radial-gradient(ellipse at 68% 0%, rgba(119, 205, 190, 0.13), transparent 32rem);
+
+  --sanjose-panel: rgba(255, 255, 255, 0.79);
+  --sanjose-panel-border: #e5ebeb;
+  --sanjose-panel-shadow: 0 7px 23px rgba(31, 58, 60, 0.035);
+
+  --sanjose-sidebar-bg: var(--color-primary-200);
+  --sanjose-sidebar-shadow: 0 22px 60px rgba(31, 57, 117, 0.12);
+  --sanjose-sidebar-text: var(--color-primary-800);
 }
 
 body {
@@ -42,10 +63,6 @@ body {
 
 button {
   cursor: pointer;
-}
-
-.bg-admin-pill {
-  background-image: var(--background-image-admin-pill);
 }
 
 ::-webkit-scrollbar {
@@ -80,409 +97,13 @@ button {
   }
 }
 
-.auth-aura {
-  position: relative;
-  overflow: hidden;
-  min-height: 100vh;
-}
-
-.auth-aura::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  mix-blend-mode: overlay;
-  opacity: 0.16;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 200 200'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.99' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.181 0.608 0.061 0 0.075 0.181 0.608 0.061 0 0.075 0.181 0.608 0.061 0 0.075 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
-}
-
-.auth-aura-layer-1,
-.auth-aura-layer-2 {
-  position: absolute;
-  inset: 0;
-  mix-blend-mode: multiply;
-  transform: translateZ(0);
-  will-change: transform;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Capas de aura suavizadas con los tonos claros de #1F3975 para evitar sombras pesadas */
-.auth-aura-layer-1 {
-  background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(108, 143, 208, 0.14) 30%, rgb(255, 255, 255) 20%, rgba(42, 76, 147, 0.45) 70%, rgba(31, 57, 117, 0.65) 100%);
-  filter: blur(75px);
-}
-
-.auth-aura-layer-2 {
-  background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(202, 216, 239, 0.28) 35%, rgb(255, 255, 255) 70%, rgba(31, 57, 117, 0.55) 80%, rgba(42, 76, 147, 0.65) 100%);
-  filter: blur(125px);
-}
-
-@media (min-width: 768px) {
-  .auth-aura-layer-1 {
-    filter: blur(108px);
-  }
-
-  .auth-aura-layer-2 {
-    filter: blur(180px);
-  }
-}
-
-/* ==========================================================================
-   Sistema visual San José (consumido por los componentes compartidos).
-   Los tokens viven en shared/components/ui-theme/ui-theme.css.
-   ========================================================================== */
-
-.app-shell {
-  background-color: var(--sanjose-app-bg);
-  background-image: var(--sanjose-app-aura);
-  color: var(--sanjose-ink);
-}
-
-.sanjose-panel {
-  min-width: 0;
-  border: 1px solid var(--sanjose-panel-border);
-  border-radius: 18px;
-  background: var(--sanjose-panel);
-  box-shadow: var(--sanjose-panel-shadow);
-}
-
-.sanjose-sidebar-surface {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: var(--sanjose-sidebar-bg);
-  box-shadow: var(--sanjose-sidebar-shadow);
-}
-
-.sanjose-icon-button {
-  display: grid;
-  width: 39px;
-  height: 39px;
-  flex: none;
-  place-items: center;
-  border: 1px solid #dfe6e7;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.73);
-  color: #51646a;
-  transition: background 160ms ease;
-  cursor: pointer;
-}
-
-.sanjose-icon-button:hover {
-  background: #ffffff;
-}
-
-.sanjose-icon-button:focus-visible {
-  outline: 3px solid rgba(57, 198, 174, 0.72);
-  outline-offset: 3px;
-}
-
-.sanjose-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.sanjose-th {
-  padding: 10px 13px;
-  border-top: 1px solid #edf0f0;
-  border-bottom: 1px solid #edf0f0;
-  background: rgba(244, 247, 246, 0.65);
-  color: #839095;
-  font-size: 10px;
-  font-weight: 620;
-  white-space: nowrap;
-}
-
-.sanjose-td {
-  padding: 12px 13px;
-  border-bottom: 1px solid #eff2f2;
-  color: #52636a;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.sanjose-table tbody tr:last-child .sanjose-td {
-  border-bottom: 0;
-}
-
-.sanjose-table tbody tr:hover {
-  background: rgba(238, 247, 244, 0.5);
-}
-
-.sanjose-cell-primary {
-  display: block;
-  color: #243941;
-  font-size: 11px;
-  font-weight: 630;
-}
-
-.sanjose-cell-secondary {
-  display: block;
-  margin-top: 4px;
-  color: #98a2a5;
-  font-size: 10px;
-}
-
-.sanjose-text-button {
-  display: inline-flex;
-  min-height: 30px;
-  align-items: center;
-  gap: 5px;
-  padding: 0 4px;
-  border: 0;
-  background: transparent;
-  color: var(--sanjose-accent);
-  font-size: 10px;
-  font-weight: 630;
-  cursor: pointer;
-}
-
-.sanjose-text-button:focus-visible {
-  outline: 3px solid rgba(57, 198, 174, 0.72);
-  outline-offset: 3px;
-}
-
-.sanjose-icon-action {
-  display: grid;
-  width: 31px;
-  height: 31px;
-  place-items: center;
-  border: 1px solid #e5eaea;
-  border-radius: 9px;
-  background: #ffffff;
-  color: #5d7477;
-  transition:
-    border-color 160ms ease,
-    color 160ms ease,
-    background 160ms ease;
-  cursor: pointer;
-}
-
-.sanjose-icon-action:hover:not(:disabled) {
-  border-color: #a9d8cd;
-  background: #fbfdfc;
-  color: #287e6e;
-}
-
-.sanjose-icon-action:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.sanjose-icon-action:focus-visible {
-  outline: 3px solid rgba(57, 198, 174, 0.72);
-  outline-offset: 3px;
-}
-
-.sanjose-button {
-  display: inline-flex;
-  min-height: 39px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 13px;
-  border: 1px solid transparent;
-  border-radius: 11px;
-  font-size: 11px;
-  font-weight: 620;
-  white-space: nowrap;
-  transition:
-    background 160ms ease,
-    box-shadow 160ms ease;
-  cursor: pointer;
-}
-
-.sanjose-button:focus-visible {
-  outline: 3px solid rgba(57, 198, 174, 0.72);
-  outline-offset: 3px;
-}
-
-.sanjose-button--secondary {
-  border-color: #dce5e6;
-  background: rgba(255, 255, 255, 0.72);
-  color: #53656a;
-}
-
-.sanjose-button--secondary:hover {
-  background: #ffffff;
-}
-
-.sanjose-button--primary {
-  background: var(--sanjose-primary-action);
-  color: #ffffff;
-  box-shadow: 0 5px 12px rgba(23, 60, 66, 0.13);
-}
-
-.sanjose-button--primary:hover {
-  background: var(--sanjose-primary-action-hover);
-}
-
-.sanjose-chip {
-  min-height: 30px;
-  padding: 0 10px;
-  border: 1px solid #e2e8e8;
-  border-radius: 9px;
-  background: #ffffff;
-  color: #607076;
-  font-size: 10px;
-  cursor: pointer;
-}
-
-.sanjose-chip.selected {
-  border-color: #b8ddd3;
-  background: #ecf8f4;
-  color: #2c796d;
-}
-
-.sanjose-chip:focus-visible {
-  outline: 3px solid rgba(57, 198, 174, 0.72);
-  outline-offset: 3px;
-}
-
-.sanjose-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 13px;
-}
-
-.sanjose-field {
-  display: grid;
-  gap: 6px;
-}
-
-.sanjose-field.full {
-  grid-column: 1 / -1;
-}
-
-.sanjose-label {
-  color: #52646a;
-  font-size: 10px;
-  font-weight: 620;
-}
-
-.sanjose-input,
-.sanjose-select {
-  min-height: 39px;
-  width: 100%;
-  padding: 0 11px;
-  border: 1px solid #dce5e5;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #30464d;
-  font-size: 11px;
-}
-
-.sanjose-select {
-  appearance: auto;
-}
-
-.sanjose-input::placeholder {
-  color: #a5b1b4;
-}
-
-.sanjose-input[readonly] {
-  background: #f7fafa;
-  color: #5f6f73;
-}
-
-.sanjose-input:focus-visible,
-.sanjose-select:focus-visible {
-  outline: 3px solid rgba(57, 198, 174, 0.72);
-  outline-offset: 3px;
-}
-
-.sanjose-hint {
-  color: #919da0;
-  font-size: 9px;
-  line-height: 1.5;
-}
-
-.sanjose-hint--error {
-  color: #a55a2c;
-}
-
-.sanjose-dialog.p-dialog {
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
-  border-radius: 20px !important;
-  background: #fdfefe !important;
-  box-shadow: 0 28px 90px rgba(9, 32, 38, 0.28) !important;
-  overflow: hidden;
-  color: var(--sanjose-ink);
-}
-
-.sanjose-dialog .p-dialog-header {
-  padding: 20px 21px 16px !important;
-  border-bottom: 1px solid #edf0f0;
-  background: #fdfefe;
-}
-
-.sanjose-dialog .p-dialog-content {
-  padding: 18px 21px !important;
-  background: #fdfefe;
-}
-
-.sanjose-dialog .p-dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 14px 21px 18px !important;
-  border-top: 1px solid #edf0f0;
-  background: #fbfcfc;
-}
-
-.sanjose-dialog-mask.p-dialog-mask {
-  background: rgba(13, 35, 40, 0.38) !important;
-  backdrop-filter: blur(6px);
-}
-
-.sanjose-dialog-close.p-button {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  flex: none;
-  place-items: center;
-  border: 1px solid #dfe6e7 !important;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.73) !important;
-  color: #51646a !important;
-  box-shadow: none !important;
-}
-
-.sanjose-toast.p-toast .p-toast-message {
-  min-height: 44px;
-  border: 1px solid rgba(219, 239, 232, 0.8);
-  border-radius: 14px;
-  background: rgba(19, 51, 56, 0.95);
-  box-shadow: 0 14px 35px rgba(12, 41, 43, 0.24);
-  color: #f2fbf7;
-  backdrop-filter: blur(20px);
-}
-
-.sanjose-toast.p-toast .p-toast-message-content {
-  align-items: center;
-  gap: 9px;
-  padding: 12px 15px;
-}
-
-.sanjose-toast.p-toast .p-toast-message-text,
-.sanjose-toast.p-toast .p-toast-summary {
-  color: #f2fbf7;
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.sanjose-toast.p-toast .p-toast-icon-close,
-.sanjose-toast.p-toast .p-toast-icon {
-  color: #a7efd7;
-}
-
-@media (max-width: 760px) {
-  .sanjose-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .sanjose-form-grid .sanjose-field.full {
-    grid-column: auto;
+@media (prefers-reduced-motion: reduce) {
+  #app-content *,
+  #app-content *::before,
+  #app-content *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

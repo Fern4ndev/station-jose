@@ -1,44 +1,44 @@
 <div class="w-full overflow-x-auto">
-  <table class="sanjose-table">
+  <table class="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[rgba(238,247,244,0.5)] [&_tbody_tr:last-child>td]:border-b-0">
     <thead>
       <tr>
-        <th class="sanjose-th">ORDEN / ENTIDAD</th>
-        <th class="sanjose-th">SEDE</th>
-        <th class="sanjose-th">EMITIDA</th>
-        <th class="sanjose-th">COMBUSTIBLE</th>
-        <th class="sanjose-th">AUTORIZADO</th>
-        <th class="sanjose-th">DISPONIBLE</th>
-        <th class="sanjose-th">ESTADO</th>
-        <th class="sanjose-th">ACCIONES</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ORDEN / ENTIDAD</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">SEDE</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">EMITIDA</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">COMBUSTIBLE</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">AUTORIZADO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">DISPONIBLE</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ACCIONES</th>
       </tr>
     </thead>
     <tbody>
       @for (order of rows(); track order.id) {
         <tr>
-          <td class="sanjose-td">
-            <span class="sanjose-cell-primary">{{ order.id }}</span>
-            <span class="sanjose-cell-secondary">{{ order.entity }}</span>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+            <span class="block text-[11px] font-[630] text-[#243941]">{{ order.id }}</span>
+            <span class="block mt-[4px] text-[10px] text-[#98a2a5]">{{ order.entity }}</span>
           </td>
-          <td class="sanjose-td">{{ order.branch }}</td>
-          <td class="sanjose-td">{{ order.date }}</td>
-          <td class="sanjose-td">{{ order.fuel }}</td>
-          <td class="sanjose-td">{{ total(order) }}</td>
-          <td class="sanjose-td">
-            <span class="sanjose-cell-primary">{{ balance(order) }}</span>
-            <span class="sanjose-cell-secondary">{{ percent(order) }}</span>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ order.branch }}</td>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ order.date }}</td>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ order.fuel }}</td>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ total(order) }}</td>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+            <span class="block text-[11px] font-[630] text-[#243941]">{{ balance(order) }}</span>
+            <span class="block mt-[4px] text-[10px] text-[#98a2a5]">{{ percent(order) }}</span>
           </td>
-          <td class="sanjose-td">
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
             @if (hasBalance(order)) {
               <app-ui-status-badge label="Con saldo" tone="green" />
             } @else {
               <app-ui-status-badge label="Agotada" tone="amber" />
             }
           </td>
-          <td class="sanjose-td">
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
             <div class="flex items-center gap-[6px]">
               <button
                 type="button"
-                class="sanjose-icon-action"
+                class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
                 title="Ver orden"
                 [attr.aria-label]="'Ver orden ' + order.id"
                 (click)="view.emit(order)"
@@ -48,7 +48,7 @@
               @if (canManage()) {
                 <button
                   type="button"
-                  class="sanjose-icon-action"
+                  class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
                   title="Editar orden"
                   [attr.aria-label]="'Editar orden ' + order.id"
                   (click)="edit.emit(order)"
@@ -58,7 +58,7 @@
                 @if (lockedOrderIds().includes(order.id)) {
                   <button
                     type="button"
-                    class="sanjose-icon-action"
+                    class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
                     disabled
                     title="No se puede eliminar porque tiene vales asociados"
                     [attr.aria-label]="'No se puede eliminar la orden ' + order.id + ' porque tiene vales asociados'"
@@ -68,7 +68,7 @@
                 } @else {
                   <button
                     type="button"
-                    class="sanjose-icon-action"
+                    class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
                     title="Eliminar orden"
                     [attr.aria-label]="'Eliminar orden ' + order.id"
                     (click)="remove.emit(order)"
@@ -82,7 +82,7 @@
         </tr>
       } @empty {
         <tr>
-          <td class="sanjose-td" colspan="8">
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="8">
             <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">
               No hay órdenes que coincidan con la búsqueda.
             </div>

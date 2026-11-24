@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  input,
+  model,
+} from '@angular/core';
 import { Dialog } from 'primeng/dialog';
 
 /**
@@ -7,8 +13,11 @@ import { Dialog } from 'primeng/dialog';
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // El diálogo se monta en `body`: sus clases deben vivir sin encapsulación.
+  encapsulation: ViewEncapsulation.None,
   imports: [Dialog],
   selector: 'app-ui-dialog',
+  styleUrl: './ui-dialog.css',
   templateUrl: './ui-dialog.html',
 })
 export class UiDialog {

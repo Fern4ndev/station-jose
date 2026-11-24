@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { cleanParams } from '../../shared/utils/query-params';
 
 export function apiUrl(path = ''): string {
   return `${environment.apiUrl}${path}`;
@@ -24,8 +25,7 @@ export interface ListParams {
 
 export function toParams(params?: ListParams): HttpParams {
   let http = new HttpParams();
-  for (const [key, value] of Object.entries(params ?? {})) {
-    if (value === null || value === undefined || value === '') continue;
+  for (const [key, value] of Object.entries(cleanParams(params))) {
     http = http.set(key, String(value));
   }
   return http;

@@ -1,37 +1,37 @@
 <app-ui-panel title="Actividad reciente" [subtitle]="'Despachos registrados en ' + scope()">
-  <button panelAction type="button" class="sanjose-text-button" (click)="viewAll.emit()">
+  <button panelAction type="button" class="inline-flex min-h-[30px] cursor-pointer items-center gap-[5px] border-0 bg-transparent px-[4px] text-[10px] font-[630] text-(--sanjose-accent) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" (click)="viewAll.emit()">
     Ver actividad
     <app-ui-icon name="arrow-right" [size]="13" />
   </button>
 
   <div class="w-full overflow-x-auto">
-    <table class="sanjose-table">
+    <table class="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[rgba(238,247,244,0.5)] [&_tbody_tr:last-child>td]:border-b-0">
       <thead>
         <tr>
-          <th class="sanjose-th">VALE / ORDEN</th>
-          <th class="sanjose-th">GRIFERO</th>
-          <th class="sanjose-th">SEDE</th>
-          <th class="sanjose-th">DESPACHADO</th>
-          <th class="sanjose-th">ESTADO</th>
+          <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">VALE / ORDEN</th>
+          <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">GRIFERO</th>
+          <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">SEDE</th>
+          <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">DESPACHADO</th>
+          <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
         </tr>
       </thead>
       <tbody>
         @for (row of rows(); track row.id) {
           <tr>
-            <td class="sanjose-td">
-              <span class="sanjose-cell-primary">{{ row.voucher }}</span>
-              <span class="sanjose-cell-secondary">{{ row.orderId }}</span>
+            <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+              <span class="block text-[11px] font-[630] text-[#243941]">{{ row.voucher }}</span>
+              <span class="block mt-[4px] text-[10px] text-[#98a2a5]">{{ row.orderId }}</span>
             </td>
-            <td class="sanjose-td">{{ row.attendant.split(' ')[0] }}</td>
-            <td class="sanjose-td">{{ row.branch }}</td>
-            <td class="sanjose-td">{{ gallons(row.gallons) }}</td>
-            <td class="sanjose-td">
+            <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ row.attendant.split(' ')[0] }}</td>
+            <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ row.branch }}</td>
+            <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ gallons(row.gallons) }}</td>
+            <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
               <app-ui-status-badge [label]="row.status" tone="green" />
             </td>
           </tr>
         } @empty {
           <tr>
-            <td class="sanjose-td" colspan="5">
+            <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="5">
               <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">Sin despachos registrados hoy.</div>
             </td>
           </tr>

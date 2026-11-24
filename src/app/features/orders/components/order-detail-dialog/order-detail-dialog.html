@@ -33,14 +33,14 @@
         <strong class="text-[14px] tracking-[-0.03em] text-[#225d50]">{{ balance() }}</strong>
       </div>
 
-      <p class="sanjose-hint m-0">
+      <p class="text-[9px] leading-[1.5] text-[#919da0] m-0">
         El saldo es compartido entre San José y Santa Marta y se calcula con las atenciones confirmadas.
       </p>
     </div>
   }
 
   <div dialogFooter class="flex justify-end gap-[8px]">
-    <button type="button" class="sanjose-button sanjose-button--primary" (click)="visible.set(false)">
+    <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)" (click)="visible.set(false)">
       Cerrar
     </button>
   </div>

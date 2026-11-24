@@ -26,7 +26,6 @@ import { AdminUiState } from '../../admin-ui-state';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, UiIcon],
   selector: 'app-sidebar',
-  styleUrl: './sidebar.css',
   templateUrl: './sidebar.html',
 })
 export class Sidebar {

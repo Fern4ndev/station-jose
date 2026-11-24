@@ -3,17 +3,17 @@
   title="Corregir datos del vale"
   description="Solo se actualizan datos descriptivos; el historial de atenciones no cambia."
 >
-  <form id="voucherForm" class="sanjose-form-grid" (submit)="onSubmit($event)" novalidate>
-    <div class="sanjose-field">
-      <label class="sanjose-label" for="editVoucherNumber">Número de vale</label>
-      <input id="editVoucherNumber" class="sanjose-input" readonly [value]="voucher()?.id ?? ''" />
+  <form id="voucherForm" class="grid grid-cols-2 gap-[13px] max-[760px]:grid-cols-1" (submit)="onSubmit($event)" novalidate>
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="editVoucherNumber">Número de vale</label>
+      <input id="editVoucherNumber" class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" readonly [value]="voucher()?.id ?? ''" />
     </div>
 
-    <div class="sanjose-field">
-      <label class="sanjose-label" for="editVoucherType">Tipo de emisor</label>
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="editVoucherType">Tipo de emisor</label>
       <select
         id="editVoucherType"
-        class="sanjose-select"
+        class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
         [value]="issuerType()"
         (change)="setIssuerType($event)"
       >
@@ -22,28 +22,28 @@
       </select>
     </div>
 
-    <div class="sanjose-field full">
-      <label class="sanjose-label" for="editVoucherIssuer">Nombre del emisor</label>
+    <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="editVoucherIssuer">Nombre del emisor</label>
       <input
         id="editVoucherIssuer"
-        class="sanjose-input"
+        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
         placeholder="Nombre según vale físico"
         [value]="issuer()"
         (input)="setIssuer($event)"
       />
-      <span class="sanjose-hint">El número de vale y los galones atendidos no se pueden corregir aquí.</span>
+      <span class="text-[9px] leading-[1.5] text-[#919da0]">El número de vale y los galones atendidos no se pueden corregir aquí.</span>
     </div>
 
     @if (error()) {
-      <p class="sanjose-hint sanjose-hint--error m-0" role="alert">{{ error() }}</p>
+      <p class="text-[9px] leading-[1.5] text-[#919da0] text-[#a55a2c] m-0" role="alert">{{ error() }}</p>
     }
   </form>
 
   <div dialogFooter class="flex justify-end gap-[8px]">
-    <button type="button" class="sanjose-button sanjose-button--secondary" (click)="visible.set(false)">
+    <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] border-[#dce5e6] bg-[rgba(255,255,255,0.72)] text-[#53656a] hover:bg-white" (click)="visible.set(false)">
       Cancelar
     </button>
-    <button type="submit" form="voucherForm" class="sanjose-button sanjose-button--primary">
+    <button type="submit" form="voucherForm" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)">
       Guardar corrección
     </button>
   </div>

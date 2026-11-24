@@ -1,7 +1,7 @@
-<form class="sanjose-form-grid" (submit)="onSubmit($event)" novalidate>
-  <div class="sanjose-field full">
-    <label class="sanjose-label" for="attendanceOrder">Orden de compra</label>
-    <select id="attendanceOrder" class="sanjose-select" [value]="orderId()" (change)="setOrder($event)">
+<form class="grid grid-cols-2 gap-[13px] max-[760px]:grid-cols-1" (submit)="onSubmit($event)" novalidate>
+  <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+    <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceOrder">Orden de compra</label>
+    <select id="attendanceOrder" class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" [value]="orderId()" (change)="setOrder($event)">
       @for (order of orders(); track order.id) {
         <option [value]="order.id">
           {{ order.id }} · {{ order.entity }} ({{ balance(order) }} disponibles)
@@ -12,23 +12,23 @@
     </select>
   </div>
 
-  <div class="sanjose-field">
-    <label class="sanjose-label" for="attendanceVoucher">Número de vale</label>
+  <div class="grid gap-[6px]">
+    <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceVoucher">Número de vale</label>
     <input
       id="attendanceVoucher"
-      class="sanjose-input"
+      class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
       placeholder="Ej. VM-2026-0142"
       [value]="voucherId()"
       (input)="setVoucher($event)"
     />
-    <span class="sanjose-hint" id="attendanceVoucherHint">{{ hint() }}</span>
+    <span class="text-[9px] leading-[1.5] text-[#919da0]" id="attendanceVoucherHint">{{ hint() }}</span>
   </div>
 
-  <div class="sanjose-field">
-    <label class="sanjose-label" for="attendanceIssuerType">Tipo de emisor</label>
+  <div class="grid gap-[6px]">
+    <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceIssuerType">Tipo de emisor</label>
     <select
       id="attendanceIssuerType"
-      class="sanjose-select"
+      class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
       [disabled]="locked()"
       [value]="issuerType()"
       (change)="setIssuerType($event)"
@@ -38,11 +38,11 @@
     </select>
   </div>
 
-  <div class="sanjose-field full">
-    <label class="sanjose-label" for="attendanceIssuer">Nombre del emisor</label>
+  <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+    <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceIssuer">Nombre del emisor</label>
     <input
       id="attendanceIssuer"
-      class="sanjose-input"
+      class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
       placeholder="Nombre según vale físico"
       [readonly]="locked()"
       [value]="issuer()"
@@ -50,11 +50,11 @@
     />
   </div>
 
-  <div class="sanjose-field">
-    <label class="sanjose-label" for="attendanceAuthorized">Galones autorizados en el vale</label>
+  <div class="grid gap-[6px]">
+    <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceAuthorized">Galones autorizados en el vale</label>
     <input
       id="attendanceAuthorized"
-      class="sanjose-input"
+      class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
       type="number"
       min="0.001"
       step="0.001"
@@ -65,11 +65,11 @@
     />
   </div>
 
-  <div class="sanjose-field">
-    <label class="sanjose-label" for="attendanceGallons">Galones entregados hoy</label>
+  <div class="grid gap-[6px]">
+    <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceGallons">Galones entregados hoy</label>
     <input
       id="attendanceGallons"
-      class="sanjose-input"
+      class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
       type="number"
       min="0.001"
       step="0.001"
@@ -79,11 +79,11 @@
     />
   </div>
 
-  <div class="sanjose-field">
-    <label class="sanjose-label" for="attendanceBranch">Sede de despacho</label>
+  <div class="grid gap-[6px]">
+    <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceBranch">Sede de despacho</label>
     <select
       id="attendanceBranch"
-      class="sanjose-select"
+      class="min-h-[39px] w-full appearance-auto rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
       [disabled]="branchLocked()"
       [value]="branchValue()"
       (change)="setBranch($event)"
@@ -93,31 +93,31 @@
     </select>
   </div>
 
-  <div class="sanjose-field full">
-    <span class="sanjose-label">Saldo de la orden</span>
+  <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+    <span class="mb-0 block text-[10px] font-[620] text-[#52646a]">Saldo de la orden</span>
     <div
       class="flex items-center justify-between gap-[12px] rounded-[12px] border border-[#dceee8] bg-[#f2faf6] p-[13px_14px] text-[10px] text-[#386e61]"
     >
       <span>
         Disponible antes del despacho
-        <span class="sanjose-hint">{{ selectedOrder()?.fuel ?? '' }}</span>
+        <span class="text-[9px] leading-[1.5] text-[#919da0]">{{ selectedOrder()?.fuel ?? '' }}</span>
       </span>
       <strong class="text-[14px] tracking-[-0.03em] text-[#225d50]">{{ orderBalanceLabel() }}</strong>
     </div>
   </div>
 
-  <div class="sanjose-field full">
-    <p class="sanjose-hint m-0">
+  <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+    <p class="text-[9px] leading-[1.5] text-[#919da0] m-0">
       El sistema registra la atención con tu usuario y la hora del servidor. Si el vale ya existe, se conserva su
       saldo y su historial.
     </p>
   </div>
 
   @if (error()) {
-    <p class="sanjose-hint sanjose-hint--error m-0" role="alert">{{ error() }}</p>
+    <p class="text-[9px] leading-[1.5] text-[#919da0] text-[#a55a2c] m-0" role="alert">{{ error() }}</p>
   }
 
-  <div class="sanjose-field full">
-    <button type="submit" class="sanjose-button sanjose-button--primary w-full">Confirmar despacho</button>
+  <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+    <button type="submit" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover) w-full">Confirmar despacho</button>
   </div>
 </form>

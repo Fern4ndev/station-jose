@@ -6,7 +6,6 @@ import { userInitials, type DemoUserRow } from '../../users-data';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UiStatusBadge],
   selector: 'app-users-table',
-  styleUrl: './users-table.css',
   templateUrl: './users-table.html',
 })
 export class UsersTable {

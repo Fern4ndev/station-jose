@@ -5,8 +5,8 @@
     @for (option of filters; track option) {
       <button
         type="button"
-        class="sanjose-chip"
-        [class.selected]="option === filter()"
+        class="min-h-[30px] cursor-pointer rounded-[9px] border border-[#e2e8e8] bg-white px-[10px] text-[10px] text-[#607076] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] data-[selected]:border-[#b8ddd3] data-[selected]:bg-[#ecf8f4] data-[selected]:text-[#2c796d]"
+        [attr.data-selected]="option === filter() || null"
         [attr.aria-pressed]="option === filter()"
         (click)="filterChange.emit(option)"
       >
@@ -17,7 +17,7 @@
 
   <input
     id="orderSearch"
-    class="sanjose-input max-[760px]:max-w-none max-[760px]:w-full max-w-[250px]"
+    class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] max-[760px]:max-w-none max-[760px]:w-full max-w-[250px]"
     type="search"
     placeholder="Buscar por orden o entidad"
     aria-label="Buscar órdenes por número o entidad"

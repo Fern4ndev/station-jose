@@ -1,0 +1,46 @@
+.sanjose-dialog.p-dialog {
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  border-radius: 20px !important;
+  background: #fdfefe !important;
+  box-shadow: 0 28px 90px rgba(9, 32, 38, 0.28) !important;
+  overflow: hidden;
+  color: var(--sanjose-ink);
+}
+
+.sanjose-dialog .p-dialog-header {
+  padding: 20px 21px 16px !important;
+  border-bottom: 1px solid #edf0f0;
+  background: #fdfefe;
+}
+
+.sanjose-dialog .p-dialog-content {
+  padding: 18px 21px !important;
+  background: #fdfefe;
+}
+
+.sanjose-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 21px 18px !important;
+  border-top: 1px solid #edf0f0;
+  background: #fbfcfc;
+}
+
+.sanjose-dialog-mask.p-dialog-mask {
+  background: rgba(13, 35, 40, 0.38) !important;
+  backdrop-filter: blur(6px);
+}
+
+.sanjose-dialog-close.p-button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #dfe6e7 !important;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.73) !important;
+  color: #51646a !important;
+  box-shadow: none !important;
+}

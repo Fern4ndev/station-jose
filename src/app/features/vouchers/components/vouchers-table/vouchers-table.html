@@ -1,40 +1,40 @@
 <div class="w-full overflow-x-auto">
-  <table class="sanjose-table">
+  <table class="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[rgba(238,247,244,0.5)] [&_tbody_tr:last-child>td]:border-b-0">
     <thead>
       <tr>
-        <th class="sanjose-th">N.º DE VALE</th>
-        <th class="sanjose-th">ORDEN / EMISOR</th>
-        <th class="sanjose-th">COMBUSTIBLE</th>
-        <th class="sanjose-th">ATENDIDO</th>
-        <th class="sanjose-th">SALDO DEL VALE</th>
-        <th class="sanjose-th">ESTADO</th>
-        <th class="sanjose-th">ACCIONES</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">N.º DE VALE</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ORDEN / EMISOR</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">COMBUSTIBLE</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ATENDIDO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">SALDO DEL VALE</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ACCIONES</th>
       </tr>
     </thead>
     <tbody>
       @for (voucher of rows(); track voucher.id) {
         <tr>
-          <td class="sanjose-td">
-            <span class="sanjose-cell-primary">{{ voucher.id }}</span>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+            <span class="block text-[11px] font-[630] text-[#243941]">{{ voucher.id }}</span>
           </td>
-          <td class="sanjose-td">
-            <span class="sanjose-cell-primary">{{ voucher.orderId }}</span>
-            <span class="sanjose-cell-secondary">{{ voucher.issuer }}</span>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+            <span class="block text-[11px] font-[630] text-[#243941]">{{ voucher.orderId }}</span>
+            <span class="block mt-[4px] text-[10px] text-[#98a2a5]">{{ voucher.issuer }}</span>
           </td>
-          <td class="sanjose-td">{{ voucher.fuel }}</td>
-          <td class="sanjose-td">{{ served(voucher) }}</td>
-          <td class="sanjose-td">
-            <span class="sanjose-cell-primary">{{ balance(voucher) }}</span>
-            <span class="sanjose-cell-secondary">{{ remaining(voucher) }}</span>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ voucher.fuel }}</td>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">{{ served(voucher) }}</td>
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+            <span class="block text-[11px] font-[630] text-[#243941]">{{ balance(voucher) }}</span>
+            <span class="block mt-[4px] text-[10px] text-[#98a2a5]">{{ remaining(voucher) }}</span>
           </td>
-          <td class="sanjose-td">
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
             <app-ui-status-badge [label]="status(voucher)" [tone]="tone(voucher)" />
           </td>
-          <td class="sanjose-td">
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
             <div class="flex items-center gap-[6px]">
               <button
                 type="button"
-                class="sanjose-icon-action"
+                class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
                 title="Ver saldo del vale"
                 [attr.aria-label]="'Ver saldo del vale ' + voucher.id"
                 (click)="detail.emit(voucher)"
@@ -44,7 +44,7 @@
               @if (canCorrect()) {
                 <button
                   type="button"
-                  class="sanjose-icon-action"
+                  class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
                   title="Corregir datos del vale"
                   [attr.aria-label]="'Corregir datos del vale ' + voucher.id"
                   (click)="edit.emit(voucher)"
@@ -54,7 +54,7 @@
                 @if (lockedVoucherIds().includes(voucher.id)) {
                   <button
                     type="button"
-                    class="sanjose-icon-action"
+                    class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
                     disabled
                     title="No se puede eliminar un vale con atenciones registradas"
                     [attr.aria-label]="'No se puede eliminar el vale ' + voucher.id + ' porque tiene atenciones registradas'"
@@ -64,7 +64,7 @@
                 } @else {
                   <button
                     type="button"
-                    class="sanjose-icon-action"
+                    class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] enabled:hover:border-[#a9d8cd] enabled:hover:bg-[#fbfdfc] enabled:hover:text-[#287e6e] disabled:cursor-not-allowed disabled:opacity-45"
                     title="Eliminar vale"
                     [attr.aria-label]="'Eliminar vale ' + voucher.id"
                     (click)="remove.emit(voucher)"
@@ -78,7 +78,7 @@
         </tr>
       } @empty {
         <tr>
-          <td class="sanjose-td" colspan="7">
+          <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="7">
             <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">
               No hay vales que coincidan con la búsqueda.
             </div>

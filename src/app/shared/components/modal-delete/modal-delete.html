@@ -1,0 +1,15 @@
+<app-ui-dialog [(visible)]="visible" [title]="title()">
+  <p class="m-0 text-[11px] leading-[1.6] text-[#54666c]">
+    Se eliminará <strong class="font-[650] text-[#263b43]">{{ recordName() }}</strong>.
+    {{ description() }}
+  </p>
+
+  <div dialogFooter class="flex justify-end gap-[8px]">
+    <app-ui-button variant="secondary" [disabled]="loading()" (click)="visible.set(false)">
+      Cancelar
+    </app-ui-button>
+    <app-ui-button variant="danger" [loading]="loading()" (click)="confirmed.emit()">
+      {{ confirmLabel() }}
+    </app-ui-button>
+  </div>
+</app-ui-dialog>

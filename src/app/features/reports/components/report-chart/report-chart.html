@@ -3,19 +3,19 @@
 
   <div class="p-[5px_18px_15px]">
     <div
-      class="chart flex h-[205px] items-end gap-[15px] px-[4px] pt-[18px] pb-[28px]"
+      class="border-b border-[#e8eded] bg-[linear-gradient(to_bottom,transparent_24%,#edf1f0_24%,#edf1f0_24.7%,transparent_24.7%),linear-gradient(to_bottom,transparent_49%,#edf1f0_49%,#edf1f0_49.7%,transparent_49.7%),linear-gradient(to_bottom,transparent_74%,#edf1f0_74%,#edf1f0_74.7%,transparent_74.7%)] flex h-[205px] items-end gap-[15px] px-[4px] pt-[18px] pb-[28px]"
       role="img"
       [attr.aria-label]="'Gráfico de galones despachados por sede, ' + badge()"
     >
       @for (bucket of buckets(); track bucket.label) {
         <div class="relative flex h-full flex-1 items-end justify-center gap-[4px]">
           <i
-            class="bar"
+            class="block min-h-[4px] w-[min(17px,32%)] rounded-t-[6px] rounded-b-[2px] bg-[linear-gradient(180deg,#5fc7ae,#45a894)] transition-[height] duration-[220ms] motion-reduce:transition-none"
             [style.height.%]="height(bucket.sanJose)"
             [attr.title]="'San José · ' + bucket.label + ': ' + bucket.sanJose + ' gal'"
           ></i>
           <i
-            class="bar bar--secondary"
+            class="block min-h-[4px] w-[min(17px,32%)] rounded-t-[6px] rounded-b-[2px] bg-[linear-gradient(180deg,#5fc7ae,#45a894)] transition-[height] duration-[220ms] motion-reduce:transition-none bg-[linear-gradient(180deg,#a8d7ce,#7ab8ad)]"
             [style.height.%]="height(bucket.santaMarta)"
             [attr.title]="'Santa Marta · ' + bucket.label + ': ' + bucket.santaMarta + ' gal'"
           ></i>
@@ -25,8 +25,8 @@
     </div>
 
     <div class="flex gap-[15px] pt-[12px] text-[9px] text-[#78878b]">
-      <span><i class="swatch"></i>San José</span>
-      <span><i class="swatch swatch--secondary"></i>Santa Marta</span>
+      <span><i class="mr-[5px] inline-block h-[7px] w-[7px] rounded-[2px] bg-[#50b49f]"></i>San José</span>
+      <span><i class="mr-[5px] inline-block h-[7px] w-[7px] rounded-[2px] bg-[#50b49f] bg-[#9dcfc4]"></i>Santa Marta</span>
     </div>
   </div>
 </app-ui-panel>

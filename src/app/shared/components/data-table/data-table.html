@@ -1,0 +1,69 @@
+<div class="w-full overflow-x-auto">
+  <table
+    class="w-full border-collapse text-left [&_tbody_tr:hover]:bg-[rgba(238,247,244,0.5)] [&_tbody_tr:last-child>td]:border-b-0"
+  >
+    <thead>
+      <tr>
+        @for (column of columns(); track column.key) {
+          <th
+            class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[13px] py-[10px] text-[10px] font-[620] whitespace-nowrap text-[#839095]"
+            [style.width]="column.width ?? null"
+            [class.text-right]="column.align === 'right'"
+            [class.text-center]="column.align === 'center'"
+            scope="col"
+          >
+            {{ column.header }}
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @if (loading()) {
+        @for (skeleton of skeletons(); track skeleton) {
+          <tr>
+            @for (column of columns(); track column.key) {
+              <td class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]">
+                <span
+                  class="block h-[10px] w-full max-w-[110px] animate-pulse rounded-[4px] bg-[#e9eeee]"
+                  aria-hidden="true"
+                ></span>
+              </td>
+            }
+          </tr>
+        }
+      } @else {
+        @for (row of rows(); track $index) {
+          <tr>
+            @for (column of columns(); track column.key) {
+              <td
+                class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]"
+                [class.text-right]="column.align === 'right'"
+                [class.text-center]="column.align === 'center'"
+              >
+                @if (templateFor(column.key); as cell) {
+                  <ng-container
+                    [ngTemplateOutlet]="cell"
+                    [ngTemplateOutletContext]="{ $implicit: row, value: row }"
+                  />
+                } @else {
+                  {{ valueOf(row, column) }}
+                }
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td
+              class="border-b border-[#eff2f2] px-[13px] py-[12px] text-[11px] whitespace-nowrap text-[#52636a]"
+              [attr.colspan]="columnCount()"
+            >
+              <div class="p-[30px_16px] text-center text-[11px] text-[#8b989c]">
+                {{ emptyMessage() }}
+              </div>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

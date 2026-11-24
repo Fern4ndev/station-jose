@@ -1,8 +1,8 @@
 <aside
   id="sidebar"
-  class="sanjose-sidebar sanjose-sidebar-surface sticky z-[20] flex flex-col overflow-hidden rounded-[24px] p-[23px_15px_15px]"
-  [class.open]="mobileOpen()"
-  [class.is-collapsed]="collapsed()"
+  class="sticky top-[14px] h-[calc(100vh-28px)] min-h-[670px] text-(--sanjose-sidebar-text) data-[collapsed]:px-[9px] max-[1050px]:top-[10px] max-[1050px]:h-[calc(100vh-20px)] max-[760px]:fixed max-[760px]:inset-y-[8px] max-[760px]:left-[8px] max-[760px]:h-auto max-[760px]:min-h-0 max-[760px]:w-[min(285px,calc(100vw-24px))] max-[760px]:translate-x-[calc(-100%-14px)] max-[760px]:transition-none max-[760px]:data-[open]:translate-x-0 border border-(--color-primary-300) bg-(--sanjose-sidebar-bg) z-[20] flex flex-col overflow-hidden rounded-[24px] p-[23px_15px_15px] shadow-(--sanjose-sidebar-shadow)"
+  [attr.data-open]="mobileOpen() || null"
+  [attr.data-collapsed]="collapsed() || null"
   aria-label="Navegación principal"
 >
   <div
@@ -11,7 +11,7 @@
     [class.px-0]="collapsed()"
   >
     <div
-      class="grid h-[40px] w-[40px] flex-none place-items-center rounded-[14px] border border-[rgba(255,255,255,0.28)] bg-[linear-gradient(145deg,rgba(75,204,180,0.31),rgba(73,118,127,0.2))] text-[#8be4d2] shadow-[inset_0_1px_rgba(255,255,255,0.21)]"
+      class="grid h-[40px] w-[40px] flex-none place-items-center rounded-[14px] border border-(--color-primary-300) bg-(--color-primary-100) text-(--color-primary-700)"
       aria-hidden="true"
     >
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
@@ -39,19 +39,19 @@
     @if (!collapsed()) {
       <div>
         <div class="text-[15px] font-[680] tracking-[-0.035em]">San José</div>
-        <div class="mt-[3px] text-[10px] tracking-[0.02em] text-[#9db5b8]">Control de combustible</div>
+        <div class="mt-[3px] text-[10px] tracking-[0.02em] text-(--color-primary-700)">Control de combustible</div>
       </div>
     }
   </div>
 
   @if (!collapsed()) {
     <label
-      class="mb-[24px] flex min-h-[45px] items-center justify-between rounded-[13px] border border-[rgba(218,243,237,0.13)] bg-[rgba(235,250,246,0.075)] p-[0_11px] text-[#e7f2ef]"
+      class="mb-[24px] flex min-h-[45px] items-center justify-between rounded-[13px] border border-(--color-primary-300) bg-(--color-primary-100) p-[0_11px] text-(--color-primary-800)"
     >
-      <span class="text-[11px] text-[#a7c0c0]">Sede activa</span>
+      <span class="text-[11px] text-(--color-primary-700)">Sede activa</span>
       <select
         id="branchFilter"
-        class="sanjose-branch-select w-[111px] border-0 bg-transparent text-[11px] font-[600] text-inherit outline-none focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+        class="w-[111px] cursor-pointer border-0 bg-transparent text-[11px] font-[600] text-inherit outline-none [&>option]:text-[#10202a] disabled:cursor-not-allowed disabled:opacity-75 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-(--color-primary-700)"
         aria-label="Filtrar por sede"
         [value]="branch()"
         [disabled]="branchLocked()"
@@ -65,13 +65,13 @@
   }
 
   @for (group of groups(); track group.id) {
-    <div class="sanjose-nav-group" [routerLinkActive]="'is-active'">
+    <div class="group" [routerLinkActive]="'is-active'">
     @if (collapsed()) {
-      <div class="mx-[6px] my-[8px] h-[1px] bg-[rgba(230,245,241,0.11)]" aria-hidden="true"></div>
+      <div class="mx-[6px] my-[8px] h-[1px] bg-(--color-primary-300)" aria-hidden="true"></div>
     } @else {
       <button
         type="button"
-        class="sanjose-group-toggle"
+        class="flex w-full cursor-pointer items-center justify-between gap-[8px] border-0 bg-transparent px-[11px] pb-[9px] text-left text-[10px] font-[650] tracking-[0.12em] uppercase text-(--color-primary-700) transition-colors hover:text-(--color-primary-900) group-[.is-active]:text-(--color-primary-900) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-(--color-primary-700)"
         [attr.aria-expanded]="isExpanded(group)"
         (click)="toggleGroup(group)"
       >
@@ -100,10 +100,12 @@
       <nav class="mb-[14px] grid gap-[4px]" [attr.aria-label]="group.label">
         @for (item of group.children; track item.id) {
           <a
-            class="sanjose-nav-link"
+            class="flex w-full min-h-[43px] cursor-pointer items-center gap-[12px] rounded-[13px] border border-transparent bg-transparent px-[11px] text-left text-[12px] font-[540] text-(--color-primary-800) no-underline transition-[background,color,border-color] duration-[180ms] hover:bg-(--color-primary-100) hover:text-(--color-primary-900) aria-[current=page]:border-(--color-primary-300) aria-[current=page]:bg-white aria-[current=page]:text-(--color-primary-800) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-(--color-primary-700)"
             [routerLink]="item.path"
-            routerLinkActive="active"
+            routerLinkActive
             ariaCurrentWhenActive="page"
+            [class.justify-center]="collapsed()"
+            [class.px-0]="collapsed()"
             [routerLinkActiveOptions]="{ exact: item.path === '/' }"
             [attr.title]="collapsed() ? item.label : null"
             [attr.aria-label]="collapsed() ? item.label : null"
@@ -121,16 +123,12 @@
   }
 
   @if (links().length) {
-    <nav
-      class="sanjose-nav-group mb-[14px] grid gap-[4px]"
-      [routerLinkActive]="'is-active'"
-      aria-label="Accesos directos"
-    >
+    <nav class="mb-[14px] grid gap-[4px]" aria-label="Accesos directos">
       @for (item of links(); track item.id) {
         <a
-          class="sanjose-nav-link"
+          class="flex w-full min-h-[43px] cursor-pointer items-center gap-[12px] rounded-[13px] border border-transparent bg-transparent px-[11px] text-left text-[12px] font-[540] text-(--color-primary-800) no-underline transition-[background,color,border-color] duration-[180ms] hover:bg-(--color-primary-100) hover:text-(--color-primary-900) aria-[current=page]:border-(--color-primary-300) aria-[current=page]:bg-white aria-[current=page]:text-(--color-primary-800) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-(--color-primary-700)"
           [routerLink]="item.path"
-          routerLinkActive="active"
+          routerLinkActive
           ariaCurrentWhenActive="page"
           [routerLinkActiveOptions]="{ exact: item.path === '/' }"
           [attr.title]="collapsed() ? item.label : null"
@@ -149,23 +147,11 @@
   <div class="flex-1"></div>
 
   @if (!collapsed()) {
-    <div
-      class="mb-[14px] flex items-start gap-[10px] rounded-[14px] border border-[rgba(224,245,240,0.11)] bg-[rgba(238,250,247,0.055)] p-[13px_12px]"
-    >
-      <span
-        class="mt-[4px] h-[7px] w-[7px] flex-none rounded-[50%] bg-[#64d9ae] shadow-[0_0_0_4px_rgba(100,217,174,0.13)]"
-        aria-hidden="true"
-      ></span>
-      <div>
-        <strong class="block text-[11px] font-[600]">Dos sedes conectadas</strong>
-        <small class="mt-[4px] block text-[10px] text-[#9cb2b5]">Los saldos se comparten en línea</small>
-      </div>
-    </div>
   }
 
   <button
     type="button"
-    class="sanjose-collapse-toggle"
+    class="flex min-h-[34px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[11px] border border-(--color-primary-300) bg-(--color-primary-100) px-[9px] text-[10px] font-[600] text-(--color-primary-800) transition-[background,color] hover:bg-white hover:text-(--color-primary-900) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-(--color-primary-700) max-[760px]:hidden"
     [attr.aria-expanded]="!collapsed()"
     aria-controls="sidebar"
     [attr.aria-label]="collapsed() ? 'Expandir menú' : 'Contraer menú'"
@@ -195,7 +181,7 @@
   </button>
 
   <div
-    class="flex items-center gap-[10px] border-t border-[rgba(230,245,241,0.11)] p-[12px_8px_4px]"
+    class="flex items-center gap-[10px] border-t border-(--color-primary-300) p-[12px_8px_4px]"
     [class.justify-center]="collapsed()"
   >
     <div
@@ -205,8 +191,8 @@
     </div>
     @if (!collapsed()) {
       <div>
-        <div class="text-[11px] font-[630] text-[#f4faf8]">{{ user().name }}</div>
-        <div class="mt-[3px] text-[10px] text-[#a4b9ba]">{{ user().label }}</div>
+        <div class="text-[11px] font-[630] text-(--color-primary-900)">{{ user().name }}</div>
+        <div class="mt-[3px] text-[10px] text-(--color-primary-700)">{{ user().label }}</div>
       </div>
     }
   </div>
