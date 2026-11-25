@@ -12,19 +12,13 @@
     <label class="grid gap-[6px] text-[11px] text-[#52646a]">Sede proveedora
       <p-select [options]="branchOptions()" optionLabel="label" optionValue="value" [ngModel]="branch()" (ngModelChange)="branch.set($event)" [ngModelOptions]="{standalone:true}" placeholder="Selecciona una sede" styleClass="w-full" size="small" />
     </label>
-    <label class="grid gap-[6px] text-[11px] text-[#52646a]">Entidad / institución
-      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="entity()" (input)="set('entity', $event)" />
-    </label>
-    <label class="grid gap-[6px] text-[11px] text-[#52646a]">Proveedor
-      <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="supplier()" (input)="set('supplier', $event)" />
-    </label>
     <label class="grid gap-[6px] text-[11px] text-[#52646a]">Unidad ejecutora
       <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="executingUnit()" (input)="set('executingUnit', $event)" />
     </label>
     <label class="grid gap-[6px] text-[11px] text-[#52646a]">RUC de unidad ejecutora
       <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="ruc()" (input)="set('ruc', $event)" />
     </label>
-    <label class="grid gap-[6px] text-[11px] text-[#52646a] col-span-full">Detalles del proveedor (opcional)
+    <label class="grid gap-[6px] text-[11px] text-[#52646a] col-span-full">Nota (opcional)
       <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [value]="supplierDetails()" (input)="set('supplierDetails', $event)" />
     </label>
     <div class="col-span-full grid gap-[10px]">

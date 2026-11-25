@@ -13,6 +13,10 @@
         <span>Fecha de emisión</span>
         <strong class="text-[11px] font-[650] text-[#263d44]">{{ detail.date }}</strong>
       </div>
+      <div class="grid gap-[5px] rounded-[10px] border border-[#e5eaea] p-[13px] text-[10px] text-[#52636a]">
+        <strong class="text-[11px] text-[#263d44]">Nota</strong>
+        <span>{{ detail.note || 'Sin nota' }}</span>
+      </div>
       @for (line of detail.source?.items ?? []; track line.id) {
         <div class="grid gap-[5px] rounded-[10px] border border-[#e5eaea] p-[13px] text-[10px] text-[#52636a]">
           <strong class="text-[11px] text-[#263d44]">{{ line.fuel_type.name }}</strong>

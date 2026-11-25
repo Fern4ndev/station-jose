@@ -43,7 +43,6 @@ export class OrderFormDialog {
   readonly saved = output<OrderDraft>();
 
   protected readonly title = computed(() => this.order() ? 'Modificar orden' : 'Registrar orden de compra');
-  protected readonly entity = signal('');
   protected readonly number = signal('');
   protected readonly siaf = signal('');
   protected readonly date = signal(todayIso());
@@ -51,7 +50,6 @@ export class OrderFormDialog {
     const value = new Date(`${this.date()}T00:00:00`);
     return Number.isNaN(value.getTime()) ? null : value;
   });
-  protected readonly supplier = signal('');
   protected readonly supplierDetails = signal('');
   protected readonly executingUnit = signal('');
   protected readonly ruc = signal('');
@@ -65,13 +63,11 @@ export class OrderFormDialog {
     effect(() => {
       if (!this.visible()) return;
       const source = this.order()?.source;
-      this.entity.set(source?.institution_name ?? '');
       this.number.set(source?.order_number ?? '');
       this.siaf.set(source?.siaf_number ?? '');
       this.date.set(source?.issue_date ?? todayIso());
-      this.supplier.set(source?.supplier_name ?? '');
       this.supplierDetails.set(source?.supplier_details ?? '');
-      this.executingUnit.set(source?.executing_unit ?? '');
+      this.executingUnit.set(source?.executing_unit ?? source?.institution_name ?? '');
       this.ruc.set(source?.executing_unit_ruc ?? '');
       this.branch.set(source?.branch.id ?? '');
       this.lines.set(source?.items.map((item) => ({
@@ -84,7 +80,7 @@ export class OrderFormDialog {
     });
   }
 
-  protected set(field: 'entity' | 'number' | 'siaf' | 'date' | 'supplier' | 'supplierDetails' | 'executingUnit' | 'ruc' | 'branch', event: Event): void {
+  protected set(field: 'number' | 'siaf' | 'date' | 'supplierDetails' | 'executingUnit' | 'ruc' | 'branch', event: Event): void {
     const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
     this[field].set(value);
   }
@@ -122,9 +118,16 @@ export class OrderFormDialog {
         if (fields.order_number) this.number.set(fields.order_number);
         if (fields.siaf_number) this.siaf.set(fields.siaf_number);
         if (fields.issue_date) this.date.set(fields.issue_date.slice(0, 10));
-        if (fields.institution_name) this.entity.set(fields.institution_name);
-        if (fields.supplier_name) this.supplier.set(fields.supplier_name);
-        if (fields.executing_unit) this.executingUnit.set(fields.executing_unit);
+        if (fields.executing_unit || fields.institution_name) {
+          this.executingUnit.set(fields.executing_unit ?? fields.institution_name ?? '');
+        }
+        if (fields.supplier_name) {
+          const supplier = fields.supplier_name.toLocaleLowerCase('es-PE');
+          const matchedBranch = this.branches().find((item) =>
+            supplier.includes(item.name.toLocaleLowerCase('es-PE')),
+          );
+          if (matchedBranch) this.branch.set(matchedBranch.id);
+        }
         if (fields.executing_unit_ruc) this.ruc.set(fields.executing_unit_ruc);
         if (fields.lines?.length) {
           this.lines.set(fields.lines.map((line) => ({
@@ -146,12 +149,13 @@ export class OrderFormDialog {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
-    const required = [this.entity(), this.number(), this.siaf(), this.date(), this.supplier(), this.executingUnit(), this.ruc(), this.branch()];
+    const required = [this.number(), this.siaf(), this.date(), this.executingUnit(), this.ruc(), this.branch()];
     if (required.some((value) => !value.trim())) {
       this.error.set('Completa todos los datos obligatorios de la orden.');
       return;
     }
-    if (!this.branches().some((item) => item.id === this.branch())) {
+    const selectedBranch = this.branches().find((item) => item.id === this.branch());
+    if (!selectedBranch) {
       this.error.set('Selecciona una sede válida.');
       return;
     }
@@ -174,8 +178,8 @@ export class OrderFormDialog {
       order_number: this.number().trim(),
       siaf_number: this.siaf().trim(),
       issue_date: this.date(),
-      institution_name: this.entity().trim(),
-      supplier_name: this.supplier().trim(),
+      institution_name: this.executingUnit().trim(),
+      supplier_name: selectedBranch.name,
       supplier_details: this.supplierDetails().trim() || null,
       executing_unit: this.executingUnit().trim(),
       executing_unit_ruc: this.ruc().trim(),

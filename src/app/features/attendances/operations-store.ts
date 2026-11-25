@@ -53,6 +53,7 @@ export class OperationsStore {
         date: order.issue_date,
         branch: order.branch.name,
         fuel: item.fuel_type.name,
+        note: order.supplier_details?.trim() ?? '',
         total: Number(item.authorized_gallons),
         used: Number(item.attended_gallons),
       })),

@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { MessageService } from 'primeng/api';
 import { firstValueFrom } from 'rxjs';
 import type { BranchResponse, FuelTypeResponse } from '../../core/models/catalog';
-import type { PurchaseOrderDetail } from '../../core/models/purchase-order';
 import { CatalogApi } from '../../core/services/catalog-api';
 import { PurchaseOrdersApi } from '../../core/services/purchase-orders-api';
 import { VouchersApi } from '../../core/services/vouchers-api';
@@ -17,7 +16,7 @@ import { OrderDetailDialog } from './components/order-detail-dialog/order-detail
 import { OrderFormDialog } from './components/order-form-dialog/order-form-dialog';
 import { OrdersTable } from './components/orders-table/orders-table';
 import { OrdersToolbar } from './components/orders-toolbar/orders-toolbar';
-import { filterOrders, type DemoOrder, type OrderDraft, type OrderFilter } from './orders-data';
+import { filterOrders, toOrderRows, type DemoOrder, type OrderDraft, type OrderFilter } from './orders-data';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,7 +64,7 @@ export class Orders {
       const orders: DemoOrder[] = [];
       for (let page = 1; ; page += 1) {
         const response = await firstValueFrom(this.api.list({ page, page_size: 100 }));
-        orders.push(...response.items.flatMap((source) => this.toRows(source)));
+        orders.push(...response.items.flatMap(toOrderRows));
         if (page >= response.pagination.pages) break;
       }
       this.orders.set(orders);
@@ -83,21 +82,6 @@ export class Orders {
     } finally {
       this.refreshing.set(false);
     }
-  }
-
-  private toRows(source: PurchaseOrderDetail): DemoOrder[] {
-    return source.items.map((item) => ({
-      id: source.order_number,
-      key: item.id,
-      apiId: source.id,
-      source,
-      entity: source.institution_name,
-      date: source.issue_date,
-      branch: source.branch.name,
-      fuel: item.fuel_type.name,
-      total: Number(item.authorized_gallons),
-      used: Number(item.attended_gallons),
-    }));
   }
 
   private showError(error: unknown): void {

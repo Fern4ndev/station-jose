@@ -6,6 +6,7 @@ export interface DemoOrder {
   readonly date: string;
   readonly branch: string;
   readonly fuel: string;
+  readonly note: string;
   readonly total: number;
   readonly used: number;
   readonly apiId?: string;
@@ -33,6 +34,23 @@ export const formatGallons = (value: number): string =>
 export const orderPercent = (order: DemoOrder): number =>
   order.total === 0 ? 0 : Math.round((orderBalance(order) / order.total) * 100);
 
+/** Adapta una orden de la API a las filas que consume la tabla. */
+export function toOrderRows(source: PurchaseOrderDetail): DemoOrder[] {
+  return [{
+    id: source.order_number,
+    key: source.id,
+    apiId: source.id,
+    source,
+    entity: source.executing_unit,
+    date: source.issue_date,
+    branch: source.branch.name,
+    fuel: source.items.map((item) => item.fuel_type.name).join(', '),
+    note: source.supplier_details?.trim() ?? '',
+    total: source.items.reduce((sum, item) => sum + Number(item.authorized_gallons), 0),
+    used: source.items.reduce((sum, item) => sum + Number(item.attended_gallons), 0),
+  }];
+}
+
 export function filterOrders(
   orders: readonly DemoOrder[],
   filter: OrderFilter,
@@ -41,7 +59,7 @@ export function filterOrders(
 ): readonly DemoOrder[] {
   const term = query.trim().toLowerCase();
   return orders.filter((order) => {
-    const matchesQuery = `${order.id} ${order.entity} ${order.fuel}`.toLowerCase().includes(term);
+    const matchesQuery = `${order.id} ${order.entity} ${order.fuel} ${order.note}`.toLowerCase().includes(term);
     const inBranch = matchesBranch(order.branch, branch);
     const balance = orderBalance(order);
     const matchesStatus =
