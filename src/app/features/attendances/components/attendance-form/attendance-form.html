@@ -1,7 +1,36 @@
 <form class="grid grid-cols-2 gap-[13px] max-[760px]:grid-cols-1" (submit)="onSubmit($event)" novalidate>
   <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+    <label id="attendanceInstitutionLabel" class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceInstitution">Institución</label>
+    <p-autocomplete
+      inputId="attendanceInstitution"
+      [suggestions]="institutionSuggestions()"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="institutionRuc()"
+      (ngModelChange)="institutionRuc.set($event ?? '')"
+      [ngModelOptions]="{standalone:true}"
+      (completeMethod)="searchInstitutions($event)"
+      [minQueryLength]="1"
+      [forceSelection]="true"
+      [showEmptyMessage]="true"
+      ariaLabelledBy="attendanceInstitutionLabel"
+      placeholder="Escribe el nombre o RUC"
+      emptyMessage="No hay coincidencias con órdenes disponibles"
+      styleClass="w-full"
+      panelStyleClass="text-[11px]"
+      [inputStyle]="{ height: '39px', minHeight: '39px', padding: '0 11px', fontSize: '11px', lineHeight: '16.5px', borderRadius: '10px' }"
+      inputStyleClass="w-full border border-[#dce5e5] bg-white text-[#30464d] placeholder:text-[#a5b1b4] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+    />
+  </div>
+
+  <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
     <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceOrder">Orden de compra</label>
-    <p-select inputId="attendanceOrder" [options]="orderOptions()" optionLabel="label" optionValue="value" [ngModel]="orderId()" (ngModelChange)="orderId.set($event)" [ngModelOptions]="{standalone:true}" placeholder="Sin órdenes con saldo disponible" styleClass="w-full" size="small" />
+    <p-select inputId="attendanceOrder" [options]="purchaseOrderOptions()" optionLabel="label" optionValue="value" [disabled]="!institutionRuc()" [ngModel]="purchaseOrderId()" (ngModelChange)="purchaseOrderId.set($event)" [ngModelOptions]="{standalone:true}" placeholder="Selecciona una orden de la institución" emptyMessage="La institución no tiene órdenes con saldo" styleClass="w-full" size="small" />
+  </div>
+
+  <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+    <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="attendanceFuelLine">Combustible de la orden</label>
+    <p-select inputId="attendanceFuelLine" [options]="fuelLineOptions()" optionLabel="label" optionValue="value" [disabled]="!purchaseOrderId()" [ngModel]="orderId()" (ngModelChange)="orderId.set($event)" [ngModelOptions]="{standalone:true}" placeholder="Selecciona el combustible" emptyMessage="La orden no tiene combustibles con saldo" styleClass="w-full" size="small" />
   </div>
 
   <div class="grid gap-[6px]">

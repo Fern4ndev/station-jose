@@ -46,7 +46,6 @@ class PurchaseOrderService:
             raise ResourceNotFoundError("La sede no existe o está inactiva.")
         fuel_types = self.orders.get_fuel_types(db, (item.fuel_type_id for item in data.items))
         self._validate_fuel_types(data, fuel_types)
-
         order = PurchaseOrder(
             id=uuid4(),
             order_number=data.order_number.strip(),
@@ -55,8 +54,8 @@ class PurchaseOrderService:
             institution_name=data.institution_name.strip(),
             supplier_name=data.supplier_name.strip(),
             supplier_details=data.supplier_details,
-            executing_unit=data.executing_unit.strip(),
-            executing_unit_ruc=data.executing_unit_ruc.strip(),
+            executing_unit=data.institution_name.strip(),
+            executing_unit_ruc=data.institution_ruc.strip(),
             branch_id=data.branch_id,
         )
         order.items = [
@@ -131,14 +130,16 @@ class PurchaseOrderService:
             if branch is None or not branch.is_active:
                 raise ResourceNotFoundError("La sede no existe o está inactiva.")
             order.branch_id = data.branch_id
+        if data.institution_name is not None:
+            order.institution_name = data.institution_name.strip()
+            order.executing_unit = data.institution_name.strip()
+        if data.institution_ruc is not None:
+            order.executing_unit_ruc = data.institution_ruc.strip()
         for field in (
             "siaf_number",
             "issue_date",
-            "institution_name",
             "supplier_name",
             "supplier_details",
-            "executing_unit",
-            "executing_unit_ruc",
         ):
             value = getattr(data, field)
             if value is not None:

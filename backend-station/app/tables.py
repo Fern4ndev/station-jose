@@ -135,6 +135,7 @@ class PurchaseOrder(Base):
     __table_args__ = (
         Index("ix_purchase_orders_issue_date", "issue_date"),
         Index("ix_purchase_orders_institution_name", "institution_name"),
+        Index("ix_purchase_orders_executing_unit_ruc", "executing_unit_ruc"),
     )
 
     id: Mapped[UUID] = mapped_column(UUIDType, primary_key=True, default=uuid4)

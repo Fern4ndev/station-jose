@@ -51,8 +51,8 @@ export class OrderFormDialog {
     return Number.isNaN(value.getTime()) ? null : value;
   });
   protected readonly supplierDetails = signal('');
-  protected readonly executingUnit = signal('');
-  protected readonly ruc = signal('');
+  protected readonly institutionName = signal('');
+  protected readonly institutionRuc = signal('');
   protected readonly branch = signal('');
   protected readonly lines = signal<readonly DraftLine[]>([{ fuel_type_id: '', gallons: '', unit_price: '' }]);
   protected readonly error = signal('');
@@ -67,8 +67,8 @@ export class OrderFormDialog {
       this.siaf.set(source?.siaf_number ?? '');
       this.date.set(source?.issue_date ?? todayIso());
       this.supplierDetails.set(source?.supplier_details ?? '');
-      this.executingUnit.set(source?.executing_unit ?? source?.institution_name ?? '');
-      this.ruc.set(source?.executing_unit_ruc ?? '');
+      this.institutionName.set(source?.institution_name ?? source?.executing_unit ?? '');
+      this.institutionRuc.set(source?.executing_unit_ruc ?? '');
       this.branch.set(source?.branch.id ?? '');
       this.lines.set(source?.items.map((item) => ({
         fuel_type_id: item.fuel_type.id,
@@ -80,7 +80,7 @@ export class OrderFormDialog {
     });
   }
 
-  protected set(field: 'number' | 'siaf' | 'date' | 'supplierDetails' | 'executingUnit' | 'ruc' | 'branch', event: Event): void {
+  protected set(field: 'number' | 'siaf' | 'date' | 'supplierDetails' | 'institutionName' | 'institutionRuc' | 'branch', event: Event): void {
     const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
     this[field].set(value);
   }
@@ -118,9 +118,9 @@ export class OrderFormDialog {
         if (fields.order_number) this.number.set(fields.order_number);
         if (fields.siaf_number) this.siaf.set(fields.siaf_number);
         if (fields.issue_date) this.date.set(fields.issue_date.slice(0, 10));
-        if (fields.executing_unit || fields.institution_name) {
-          this.executingUnit.set(fields.executing_unit ?? fields.institution_name ?? '');
-        }
+        const extractedName = fields.institution_name ?? fields.executing_unit;
+        if (extractedName) this.institutionName.set(extractedName);
+        if (fields.executing_unit_ruc) this.institutionRuc.set(fields.executing_unit_ruc);
         if (fields.supplier_name) {
           const supplier = fields.supplier_name.toLocaleLowerCase('es-PE');
           const matchedBranch = this.branches().find((item) =>
@@ -128,7 +128,6 @@ export class OrderFormDialog {
           );
           if (matchedBranch) this.branch.set(matchedBranch.id);
         }
-        if (fields.executing_unit_ruc) this.ruc.set(fields.executing_unit_ruc);
         if (fields.lines?.length) {
           this.lines.set(fields.lines.map((line) => ({
             fuel_type_id: this.fuels().find((fuel) => line.fuel_description?.toLowerCase().includes(fuel.name.toLowerCase()))?.id ?? '',
@@ -149,7 +148,7 @@ export class OrderFormDialog {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
-    const required = [this.number(), this.siaf(), this.date(), this.executingUnit(), this.ruc(), this.branch()];
+    const required = [this.number(), this.siaf(), this.date(), this.institutionName(), this.institutionRuc(), this.branch()];
     if (required.some((value) => !value.trim())) {
       this.error.set('Completa todos los datos obligatorios de la orden.');
       return;
@@ -157,6 +156,10 @@ export class OrderFormDialog {
     const selectedBranch = this.branches().find((item) => item.id === this.branch());
     if (!selectedBranch) {
       this.error.set('Selecciona una sede válida.');
+      return;
+    }
+    if (!/^\d{11}$/.test(this.institutionRuc().trim())) {
+      this.error.set('El RUC de la institución debe contener 11 dígitos.');
       return;
     }
     if (!this.order() && this.takenIds().some((id) => id.toLowerCase() === this.number().trim().toLowerCase())) {
@@ -178,11 +181,10 @@ export class OrderFormDialog {
       order_number: this.number().trim(),
       siaf_number: this.siaf().trim(),
       issue_date: this.date(),
-      institution_name: this.executingUnit().trim(),
+      institution_name: this.institutionName().trim(),
+      institution_ruc: this.institutionRuc().trim(),
       supplier_name: selectedBranch.name,
       supplier_details: this.supplierDetails().trim() || null,
-      executing_unit: this.executingUnit().trim(),
-      executing_unit_ruc: this.ruc().trim(),
       branch_id: this.branch(),
       items: lines.map((line) => ({
         fuel_type_id: line.fuel_type_id,

@@ -61,6 +61,7 @@ class PurchaseOrderRepository:
                     PurchaseOrder.order_number.ilike(pattern),
                     PurchaseOrder.institution_name.ilike(pattern),
                     PurchaseOrder.executing_unit.ilike(pattern),
+                    PurchaseOrder.executing_unit_ruc.ilike(pattern),
                 )
             )
         if branch_id is not None:

@@ -15,9 +15,8 @@ def test_purchase_order_requires_at_least_one_line() -> None:
             siaf_number="SIAF-001",
             issue_date="2026-01-01",
             institution_name="Institución",
+            institution_ruc="20123456789",
             supplier_name="Proveedor",
-            executing_unit="Unidad",
-            executing_unit_ruc="20123456789",
             branch_id=uuid4(),
             items=[],
         )
@@ -32,9 +31,8 @@ def test_purchase_order_rejects_repeated_fuel_lines() -> None:
             siaf_number="SIAF-001",
             issue_date="2026-01-01",
             institution_name="Institución",
+            institution_ruc="20123456789",
             supplier_name="Proveedor",
-            executing_unit="Unidad",
-            executing_unit_ruc="20123456789",
             branch_id=uuid4(),
             items=[
                 {
@@ -49,5 +47,26 @@ def test_purchase_order_rejects_repeated_fuel_lines() -> None:
                     "unit_price": Decimal("15.2500"),
                     "total_amount": Decimal("76.25"),
                 },
+            ],
+        )
+
+
+def test_purchase_order_rejects_invalid_institution_ruc() -> None:
+    with pytest.raises(ValidationError):
+        PurchaseOrderCreate(
+            order_number="OC-001",
+            siaf_number="SIAF-001",
+            issue_date="2026-01-01",
+            institution_name="Institución",
+            institution_ruc="123",
+            supplier_name="Proveedor",
+            branch_id=uuid4(),
+            items=[
+                {
+                    "fuel_type_id": uuid4(),
+                    "authorized_gallons": "10",
+                    "unit_price": "1",
+                    "total_amount": "10",
+                }
             ],
         )

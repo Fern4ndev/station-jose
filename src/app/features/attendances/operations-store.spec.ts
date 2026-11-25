@@ -9,7 +9,7 @@ import { OperationsStore } from './operations-store';
 
 const pagination = { page: 1, page_size: 100, total: 1, pages: 1 };
 const order = {
-  id: 'order-uuid', order_number: 'OC-01', institution_name: 'Municipalidad',
+  id: 'order-uuid', order_number: 'OC-01', institution_name: 'Municipalidad', executing_unit_ruc: '20123456789',
   issue_date: '2026-11-23', branch: { id: 'branch-uuid', code: 'SAN_JOSE', name: 'San José', is_active: true },
   items: [{ id: 'order-item-uuid', fuel_type: { id: 'fuel-uuid', code: 'DIESEL', name: 'Diésel', is_active: true }, authorized_gallons: '100', attended_gallons: '0', available_gallons: '100' }],
 };
@@ -40,6 +40,7 @@ describe('OperationsStore', () => {
     ] });
     const store = TestBed.inject(OperationsStore);
     await store.load();
+    expect(store.orders()[0].institutionRuc).toBe('20123456789');
     const request = { orderId: 'order-item-uuid', voucherId: 'VM-01', issuer: 'Municipalidad', issuerType: 'INSTITUTION' as const, authorized: 50, gallons: 20, branch: 'San José' };
     await expect(store.register(request)).rejects.toThrow('Red interrumpida');
     await store.register(request);

@@ -1,14 +1,24 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AutoCompleteModule, type AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { SelectModule } from 'primeng/select';
 import { formatGallons, orderBalance } from '../../../orders/orders-data';
 import { voucherBalance, type VoucherIssuerType } from '../../../vouchers/vouchers-data';
 import type { AttendanceRequest } from '../../attendances-data';
 import type { DispatchOrder, DispatchVoucher } from '../../operations-store';
 
+interface InstitutionOption {
+  readonly value: string;
+  readonly label: string;
+}
+
+function normalizeSearch(value: string): string {
+  return value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('es-PE').trim();
+}
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, SelectModule],
+  imports: [AutoCompleteModule, FormsModule, SelectModule],
   selector: 'app-attendance-form',
   templateUrl: './attendance-form.html',
 })
@@ -22,6 +32,9 @@ export class AttendanceForm {
   readonly register = output<AttendanceRequest>();
 
   protected readonly orderId = signal('');
+  protected readonly institutionRuc = signal('');
+  protected readonly institutionSuggestions = signal<InstitutionOption[]>([]);
+  protected readonly purchaseOrderId = signal('');
   protected readonly voucherId = signal('');
   protected readonly issuer = signal('');
   protected readonly issuerType = signal<VoucherIssuerType>('INSTITUTION');
@@ -36,25 +49,69 @@ export class AttendanceForm {
   private wasLocked = false;
 
   protected readonly selectedOrder = computed(
-    () => this.orders().find((order) => order.id === this.orderId()) ?? null,
+    () => this.filteredOrders().find((order) => order.id === this.orderId()) ?? null,
+  );
+  protected readonly institutionOptions = computed(() => {
+    const byId = new Map<string, { value: string; label: string; orderIds: Set<string> }>();
+    for (const order of this.orders()) {
+      const current = byId.get(order.institutionRuc);
+      byId.set(order.institutionRuc, {
+        value: order.institutionRuc,
+        label: current?.label ?? `${order.entity} · ${order.institutionRuc}`,
+        orderIds: new Set([...(current?.orderIds ?? []), order.apiId]),
+      });
+    }
+    return [...byId.values()]
+      .sort((a, b) => a.label.localeCompare(b.label, 'es-PE'))
+      .map((item) => ({
+        value: item.value,
+        label: `${item.label} · ${item.orderIds.size} ${item.orderIds.size === 1 ? 'orden disponible' : 'órdenes disponibles'}`,
+      }));
+  });
+  protected readonly filteredOrders = computed(() =>
+    this.orders().filter((order) => order.institutionRuc === this.institutionRuc()),
   );
   protected readonly orderBalanceLabel = computed(() => {
     const order = this.selectedOrder();
     return order ? `${formatGallons(orderBalance(order))} gal` : '— gal';
   });
-  protected readonly orderOptions = computed(() => this.orders().map((order) => ({
+  protected readonly purchaseOrderOptions = computed(() => {
+    const byId = new Map<string, DispatchOrder>();
+    for (const order of this.filteredOrders()) byId.set(order.apiId, order);
+    return [...byId.values()].map((order) => ({
+      value: order.apiId,
+      label: `${order.orderNumber} · ${order.date} · ${order.branch}`,
+    }));
+  });
+  protected readonly fuelLineOptions = computed(() => this.filteredOrders()
+    .filter((order) => order.apiId === this.purchaseOrderId())
+    .map((order) => ({
     value: order.id,
-    label: `${order.orderNumber} · ${order.fuel} · ${order.entity} (${this.balance(order)} disponibles)`,
+    label: `${order.fuel} · ${this.balance(order)} disponibles`,
   })));
   protected readonly issuerTypes = [{ value: 'INSTITUTION', label: 'Institución' }, { value: 'STATION', label: 'Estación' }];
   protected readonly branches = [{ value: 'San José', label: 'San José' }, { value: 'Santa Marta', label: 'Santa Marta' }];
 
   constructor() {
     effect(() => {
-      const available = this.orders();
+      const available = this.purchaseOrderOptions();
+      if (!available.some((order) => order.value === this.purchaseOrderId())) {
+        this.purchaseOrderId.set(available[0]?.value ?? '');
+      }
+    });
+
+    effect(() => {
+      const available = this.filteredOrders().filter(
+        (order) => order.apiId === this.purchaseOrderId(),
+      );
       if (!available.some((order) => order.id === this.orderId())) {
         this.orderId.set(available[0]?.id ?? '');
       }
+    });
+
+    effect(() => {
+      const order = this.selectedOrder();
+      if (order && !this.locked()) this.issuer.set(order.entity);
     });
 
     effect(() => {
@@ -96,6 +153,8 @@ export class AttendanceForm {
       }
       this.previousToken = token;
       this.voucherId.set('');
+      this.institutionRuc.set('');
+      this.purchaseOrderId.set('');
       this.issuer.set('');
       this.issuerType.set('INSTITUTION');
       this.authorized.set('');
@@ -106,6 +165,13 @@ export class AttendanceForm {
 
   protected balance(order: DispatchOrder): string {
     return `${formatGallons(orderBalance(order))} gal`;
+  }
+
+  protected searchInstitutions(event: AutoCompleteCompleteEvent): void {
+    const query = normalizeSearch(event.query);
+    this.institutionSuggestions.set(
+      this.institutionOptions().filter((option) => normalizeSearch(option.label).includes(query)),
+    );
   }
 
   protected setVoucher(event: Event): void {

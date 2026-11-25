@@ -26,10 +26,9 @@ export interface PurchaseOrderCreate {
   readonly siaf_number: string;
   readonly issue_date: string;
   readonly institution_name: string;
+  readonly institution_ruc: string;
   readonly supplier_name: string;
   readonly supplier_details?: string | null;
-  readonly executing_unit: string;
-  readonly executing_unit_ruc: string;
   readonly branch_id: string;
   readonly items: readonly PurchaseOrderItemCreate[];
 }
@@ -38,10 +37,9 @@ export interface PurchaseOrderUpdate {
   readonly siaf_number?: string | null;
   readonly issue_date?: string | null;
   readonly institution_name?: string | null;
+  readonly institution_ruc?: string | null;
   readonly supplier_name?: string | null;
   readonly supplier_details?: string | null;
-  readonly executing_unit?: string | null;
-  readonly executing_unit_ruc?: string | null;
   readonly branch_id?: string | null;
   readonly items?: readonly PurchaseOrderItemCreate[] | null;
 }

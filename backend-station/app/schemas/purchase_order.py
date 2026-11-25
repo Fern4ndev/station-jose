@@ -21,10 +21,9 @@ class PurchaseOrderCreate(BaseModel):
     siaf_number: str = Field(min_length=1, max_length=60)
     issue_date: date
     institution_name: str = Field(min_length=1, max_length=200)
+    institution_ruc: str = Field(pattern=r"^\d{11}$")
     supplier_name: str = Field(min_length=1, max_length=200)
     supplier_details: str | None = None
-    executing_unit: str = Field(min_length=1, max_length=200)
-    executing_unit_ruc: str = Field(min_length=1, max_length=20)
     branch_id: UUID
     items: list[PurchaseOrderItemCreate] = Field(min_length=1)
 
@@ -40,10 +39,9 @@ class PurchaseOrderUpdate(BaseModel):
     siaf_number: str | None = Field(default=None, min_length=1, max_length=60)
     issue_date: date | None = None
     institution_name: str | None = Field(default=None, min_length=1, max_length=200)
+    institution_ruc: str | None = Field(default=None, pattern=r"^\d{11}$")
     supplier_name: str | None = Field(default=None, min_length=1, max_length=200)
     supplier_details: str | None = None
-    executing_unit: str | None = Field(default=None, min_length=1, max_length=200)
-    executing_unit_ruc: str | None = Field(default=None, min_length=1, max_length=20)
     branch_id: UUID | None = None
     items: list[PurchaseOrderItemCreate] | None = Field(default=None, min_length=1)
 

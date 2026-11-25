@@ -17,6 +17,11 @@ pytestmark = pytest.mark.skipif(
     os.getenv("SANJOSE_RUN_DB_TESTS") != "1", reason="Database integration requires explicit opt-in"
 )
 
+INSTITUTION_FIELDS = {
+    "institution_name": "Institución de prueba",
+    "institution_ruc": "20123456789",
+}
+
 
 @pytest.fixture
 def order_context() -> Generator[tuple[TestClient, str, list[str], Session], None, None]:
@@ -28,7 +33,8 @@ def order_context() -> Generator[tuple[TestClient, str, list[str], Session], Non
     fuels = [FuelType(id=uuid4(), code=f"T{suffix}{i}", name=f"Fuel {suffix} {i}") for i in (1, 2)]
     setup.add_all([branch, *fuels])
     setup.flush()
-    branch_id, fuel_ids = str(branch.id), [str(item.id) for item in fuels]
+    branch_id = str(branch.id)
+    fuel_ids = [str(item.id) for item in fuels]
     setup.commit()
 
     def override_db() -> Generator[Session, None, None]:
@@ -56,10 +62,8 @@ def test_order_lifecycle_and_filters(
         "order_number": number,
         "siaf_number": "SIAF-TEST",
         "issue_date": "2026-11-01",
-        "institution_name": "Entidad de prueba",
+        **INSTITUTION_FIELDS,
         "supplier_name": "Proveedor",
-        "executing_unit": "Unidad",
-        "executing_unit_ruc": "12345678901",
         "branch_id": branch_id,
         "items": [
             {
@@ -79,14 +83,24 @@ def test_order_lifecycle_and_filters(
     assert len(created.json()["items"]) == 2
     found = client.get(
         "/api/v1/purchase-orders",
-        params={"search": number, "branch_id": branch_id, "issue_date_from": "2026-11-01"},
+        params={
+            "search": number,
+            "branch_id": branch_id,
+            "issue_date_from": "2026-11-01",
+        },
     )
     assert found.status_code == 200 and found.json()["items"][0]["id"] == order_id
+    found_by_ruc = client.get(
+        "/api/v1/purchase-orders",
+        params={"search": INSTITUTION_FIELDS["institution_ruc"]},
+    )
+    assert found_by_ruc.status_code == 200
+    assert any(item["id"] == order_id for item in found_by_ruc.json()["items"])
     updated = client.patch(
-        f"/api/v1/purchase-orders/{order_id}", json={"institution_name": "Entidad actualizada"}
+        f"/api/v1/purchase-orders/{order_id}", json={"supplier_name": "Proveedor actualizado"}
     )
     assert (
-        updated.status_code == 200 and updated.json()["institution_name"] == "Entidad actualizada"
+        updated.status_code == 200 and updated.json()["supplier_name"] == "Proveedor actualizado"
     )
     assert client.delete(f"/api/v1/purchase-orders/{order_id}").status_code == 204
     assert client.get(f"/api/v1/purchase-orders/{order_id}").status_code == 404
@@ -100,10 +114,8 @@ def test_order_with_voucher_cannot_be_deleted(
         "order_number": f"F3-{uuid4().hex[:10]}",
         "siaf_number": "SIAF",
         "issue_date": "2026-11-01",
-        "institution_name": "Entidad",
+        **INSTITUTION_FIELDS,
         "supplier_name": "Proveedor",
-        "executing_unit": "Unidad",
-        "executing_unit_ruc": "12345678901",
         "branch_id": branch_id,
         "items": [
             {
@@ -158,10 +170,8 @@ def test_partial_dispatch_preserves_voucher_balance_and_idempotency(
         "order_number": f"F4-{suffix}",
         "siaf_number": "SIAF",
         "issue_date": "2026-11-01",
-        "institution_name": "Entidad",
+        **INSTITUTION_FIELDS,
         "supplier_name": "Proveedor",
-        "executing_unit": "Unidad",
-        "executing_unit_ruc": "12345678901",
         "branch_id": branch_id,
         "items": [
             {
@@ -273,10 +283,8 @@ def test_review_and_correction_preserve_balances(
         "order_number": f"F5-{suffix}",
         "siaf_number": "SIAF",
         "issue_date": "2026-11-01",
-        "institution_name": "Entidad",
+        **INSTITUTION_FIELDS,
         "supplier_name": "Proveedor",
-        "executing_unit": "Unidad",
-        "executing_unit_ruc": "12345678901",
         "branch_id": branch_id,
         "items": [
             {
@@ -343,10 +351,8 @@ def test_reports_filter_export_and_role_access(
         "order_number": f"F6-{uuid4().hex[:10]}",
         "siaf_number": "SIAF",
         "issue_date": "2026-11-01",
-        "institution_name": "Entidad",
+        **INSTITUTION_FIELDS,
         "supplier_name": "Proveedor",
-        "executing_unit": "Unidad",
-        "executing_unit_ruc": "12345678901",
         "branch_id": branch_id,
         "items": [
             {

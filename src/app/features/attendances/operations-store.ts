@@ -14,6 +14,7 @@ import type { AttendanceRequest, DemoAttendance } from './attendances-data';
 export interface DispatchOrder extends DemoOrder {
   readonly apiId: string;
   readonly orderNumber: string;
+  readonly institutionRuc: string;
 }
 
 export interface DispatchVoucher extends DemoVoucher {
@@ -49,6 +50,7 @@ export class OperationsStore {
         id: item.id,
         apiId: order.id,
         orderNumber: order.order_number,
+        institutionRuc: order.executing_unit_ruc.trim(),
         entity: order.institution_name,
         date: order.issue_date,
         branch: order.branch.name,

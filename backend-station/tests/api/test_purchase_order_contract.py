@@ -18,4 +18,6 @@ def test_purchase_order_create_contract_has_items(client: TestClient) -> None:
     schema = openapi["components"]["schemas"]["PurchaseOrderCreate"]
 
     assert "items" in schema["required"]
+    assert "institution_name" in schema["required"]
+    assert "institution_ruc" in schema["required"]
     assert schema["properties"]["items"]["minItems"] == 1

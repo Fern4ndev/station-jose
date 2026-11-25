@@ -19,6 +19,8 @@ Para una base que ya contiene datos, agrega además un ALTER numerado por cada c
 
 `006_drop_attendance_verifications.sql` elimina la tabla `attendance_verifications` y sus índices, retirada del alcance el 20/11/2026. Destruye los datos que contenga, así que solo debe aplicarse cuando ya no queden lecturas ni escrituras de esa tabla en el código. Después, los cambios deben aplicarse en este orden: `003`, `004`, `005` y `006`.
 
+`007_direct_institution_fields.sql` retira el catálogo independiente de instituciones, cuando exista, y conserva nombre y RUC directamente en cada orden de compra. También asegura el índice utilizado para agrupar órdenes por RUC en Atenciones.
+
 Cuando todo el equipo haya aplicado el ALTER:
 
 1. Consolida sus cambios en `001_schema.sql` y, si aplica, `002_seed.sql`.
