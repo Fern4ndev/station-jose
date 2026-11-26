@@ -1,0 +1,83 @@
+/* Selectores acotados al formulario, incluidos los controles de PrimeNG. */
+app-attendance-form { display: block; }
+
+.attendance-entry-form {
+  --entry-ink: #243b42;
+  --entry-muted: #5e7278;
+  --entry-border: #dce6e4;
+  --entry-accent: #206e5e;
+  --entry-tint: #f1f8f5;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  margin: 0;
+  color: var(--entry-ink);
+  font-size: 13px;
+}
+
+.attendance-entry-form .attendance-entry-section { min-width: 0; }
+.attendance-entry-form .attendance-entry-wide { grid-column: 1 / -1; }
+.attendance-entry-form .attendance-entry-voucher { border-left: 1px solid var(--entry-border); padding-left: 24px; }
+.attendance-entry-form .attendance-entry-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 32px; margin-bottom: 16px; }
+.attendance-entry-form .attendance-entry-heading h3 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; font-weight: 650; letter-spacing: -.02em; }
+.attendance-entry-form .attendance-entry-step { display: grid; flex: none; width: 24px; height: 24px; place-items: center; border: 1px solid #cfe3da; border-radius: 8px; background: var(--entry-tint); color: var(--entry-accent); font-size: 11px; }
+.attendance-entry-form .attendance-entry-balance { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; column-gap: 6px; row-gap: 2px; color: var(--entry-muted); font-size: 11px; text-align: right; }
+.attendance-entry-form .attendance-entry-balance strong { color: var(--entry-accent); font-size: 13px; font-weight: 650; }
+.attendance-entry-form .attendance-entry-tag { padding: 4px 8px; border-radius: 6px; background: #e8f4ee; color: var(--entry-accent); font-size: 11px; font-weight: 600; }
+.attendance-entry-form .attendance-entry-fields { display: grid; gap: 14px; }
+.attendance-entry-form .attendance-entry-voucher-fields { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 14px 12px; }
+.attendance-entry-form .attendance-entry-field { display: grid; align-content: start; gap: 7px; min-width: 0; }
+.attendance-entry-form .attendance-entry-field > label { color: var(--entry-ink); font-size: 12px; font-weight: 550; }
+.attendance-entry-form .attendance-entry-input { box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid var(--entry-border); border-radius: 10px; background: #fff; color: var(--entry-ink); font: inherit; line-height: 1.5; transition: border-color 150ms, box-shadow 150ms; }
+.attendance-entry-form .attendance-entry-input::placeholder { color: #839395; }
+.attendance-entry-form .attendance-entry-input:hover:not(:disabled):not(:read-only) { border-color: #a9c8bd; }
+.attendance-entry-form .attendance-entry-input:focus-visible { outline: 2px solid #35a98e; outline-offset: 2px; border-color: #35a98e; }
+.attendance-entry-form .attendance-entry-input:read-only { background: #f4f7f6; color: #617574; }
+.attendance-entry-form .attendance-entry-input:disabled { background: #f2f5f4; color: #788987; cursor: not-allowed; }
+.attendance-entry-form .attendance-entry-select.p-select { min-height: 44px; border-color: var(--entry-border); border-radius: 10px; align-items: center; }
+.attendance-entry-form .attendance-entry-select.p-select,
+.attendance-entry-form .attendance-entry-select .p-select-label { font-size: 13px !important; }
+.attendance-entry-select-overlay .p-select-option,
+.attendance-entry-suggestions .p-autocomplete-option { font-size: 13px !important; }
+.attendance-entry-form .attendance-entry-hint { margin: 0; color: var(--entry-accent); font-size: 11px; line-height: 1.5; }
+.attendance-entry-form .attendance-entry-fuels { padding-top: 22px; border-top: 1px solid var(--entry-border); }
+.attendance-entry-form .attendance-entry-fuel-list { overflow: hidden; border: 1px solid var(--entry-border); border-radius: 12px; }
+.attendance-entry-form .attendance-entry-fuel-columns,
+.attendance-entry-form .attendance-entry-fuel-row { display: grid; grid-template-columns: minmax(0, 1fr) 140px 140px; align-items: center; gap: 16px; padding: 14px 16px; }
+.attendance-entry-form .attendance-entry-fuel-columns { padding-top: 10px; padding-bottom: 10px; background: #f5f8f7; color: var(--entry-muted); font-size: 11px; font-weight: 550; }
+.attendance-entry-form .attendance-entry-fuel-columns span:not(:first-child) { text-align: right; }
+.attendance-entry-form .attendance-entry-fuel-row { border-top: 1px solid #e8efec; }
+.attendance-entry-form .attendance-entry-fuel-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.attendance-entry-form .attendance-entry-fuel-icon { display: grid; place-items: center; flex: none; width: 34px; height: 38px; border-radius: 9px; background: var(--entry-tint); color: var(--entry-accent); }
+.attendance-entry-form .attendance-entry-fuel-name { margin: 0 0 4px; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.attendance-entry-form .attendance-entry-fuel-balance { color: var(--entry-muted); font-size: 11px; }
+.attendance-entry-form .attendance-entry-quantity { display: grid; gap: 7px; min-width: 0; }
+.attendance-entry-form .attendance-entry-number { text-align: right; font-size: 15px; font-variant-numeric: tabular-nums; }
+.attendance-entry-form .attendance-entry-delivery { border-color: #adcfc0; background: #f6fbf8; color: #1b5b4f; font-weight: 600; }
+.attendance-entry-form .attendance-entry-mobile-label { display: none; }
+.attendance-entry-form .attendance-entry-empty { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 100px; padding: 20px; border: 1px dashed #cbded5; border-radius: 12px; background: #f8fbf9; color: var(--entry-muted); font-size: 12px; text-align: center; }
+.attendance-entry-form .attendance-entry-branch { max-width: 260px; }
+.attendance-entry-form .attendance-entry-error { margin: 0; padding: 12px 14px; border: 1px solid #edcdbd; border-radius: 10px; background: #fff6f0; color: #944b2a; font-size: 12px; line-height: 1.6; }
+
+.sanjose-dialog:has(.attendance-entry-form) .sanjose-dialog-close.p-button { width: 44px; height: 44px; }
+
+@media (max-width: 680px) {
+  .attendance-entry-form { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .attendance-entry-form .attendance-entry-voucher { padding-top: 18px; padding-left: 0; border-top: 1px solid var(--entry-border); border-left: 0; }
+  .attendance-entry-form .attendance-entry-heading { margin-bottom: 12px; }
+  .attendance-entry-form .attendance-entry-fuels { padding-top: 18px; }
+  .attendance-entry-form .attendance-entry-fuel-columns { display: none; }
+  .attendance-entry-form .attendance-entry-fuel-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 12px; padding: 16px; }
+  .attendance-entry-form .attendance-entry-fuel-row:first-of-type { border-top: 0; }
+  .attendance-entry-form .attendance-entry-fuel-info { grid-column: 1 / -1; }
+  .attendance-entry-form .attendance-entry-mobile-label { display: block; color: var(--entry-muted); font-size: 11px; }
+  .attendance-entry-form .attendance-entry-empty { min-height: 84px; }
+}
+
+@media (max-width: 380px) {
+  .attendance-entry-form .attendance-entry-voucher-fields { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-entry-form .attendance-entry-input { transition: none; }
+}

@@ -59,7 +59,7 @@
     </button>
   </div>
 
-  @if (!collapsed()) {
+  @if (!collapsed() && !branchLocked()) {
     <label
       class="mb-[16px] flex min-h-[42px] items-center justify-between rounded-[13px] border border-(--color-primary-300) bg-(--color-primary-100) p-[0_10px] text-(--color-primary-800)"
     >

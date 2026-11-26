@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, effect, input, model, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, model, output, viewChild } from '@angular/core';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
 import type { AttendanceRequest } from '../../attendances-data';
 import type { DispatchOrder, DispatchVoucher } from '../../operations-store';
 import { AttendanceForm } from '../attendance-form/attendance-form';
+import { formatGallons } from '../../../orders/orders-data';
 
 /** Formulario de despacho dentro de un modal, disparado desde la vista de atenciones. */
 @Component({
@@ -22,12 +23,6 @@ export class AttendanceFormDialog {
   readonly register = output<AttendanceRequest>();
 
   private readonly form = viewChild(AttendanceForm);
-  private readonly formDirty = signal(false);
-
-  /** El formulario avisa si hay cambios; el pie se refresca con este signal local. */
-  protected readonly dirty = this.formDirty.asReadonly();
-
-  constructor() {
-    effect(() => this.formDirty.set(this.form()?.dirty() ?? false));
-  }
+  protected readonly dirty = computed(() => this.form()?.dirty() ?? false);
+  protected readonly totalLabel = computed(() => formatGallons(this.form()?.totalGallons() ?? 0));
 }

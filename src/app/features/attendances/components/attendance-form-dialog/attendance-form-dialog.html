@@ -1,7 +1,7 @@
 <app-ui-dialog
   [(visible)]="visible"
   title="Registrar atención"
-  description="Valida el saldo de la orden y del vale antes de confirmar el despacho."
+  width="min(820px, calc(100vw - 24px))"
 >
   <app-attendance-form
     [orders]="orders()"
@@ -12,21 +12,27 @@
     (register)="register.emit($event)"
   />
 
-  <div dialogFooter class="flex w-full items-center justify-end gap-[8px] max-[760px]:flex-col-reverse">
-    <button
-      type="button"
-      class="inline-flex min-h-[39px] w-full items-center justify-center rounded-[11px] border border-[#dce5e6] bg-white px-[13px] text-[11px] font-[600] text-[#4a5f66] transition-[background] hover:bg-[#f6f9f9] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] sm:w-auto"
-      (click)="visible.set(false)"
-    >
-      Cancelar
-    </button>
-    <button
-      type="submit"
-      form="attendanceForm"
-      [disabled]="!dirty()"
-      class="inline-flex min-h-[39px] w-full items-center justify-center gap-[8px] rounded-[11px] border border-transparent bg-(--sanjose-primary-action) px-[13px] text-[11px] font-[620] whitespace-nowrap text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] transition-[background,box-shadow] hover:bg-(--sanjose-primary-action-hover) disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] sm:w-auto"
-    >
-      Confirmar despacho
-    </button>
+  <div dialogFooter class="flex w-full items-center justify-between gap-[20px] max-[580px]:flex-col max-[580px]:items-stretch max-[580px]:gap-[12px]">
+    <div class="flex flex-col gap-[3px] max-[580px]:flex-row max-[580px]:items-center max-[580px]:justify-between" aria-live="polite" aria-atomic="true">
+      <span class="text-[11px] font-medium text-[#607678]">Total a despachar</span>
+      <strong class="text-[22px] font-semibold leading-none tracking-tight text-[#205f53]">{{ totalLabel() }} <span class="text-[12px] font-medium">gal</span></strong>
+    </div>
+    <div class="flex items-center gap-[10px] max-[580px]:grid max-[580px]:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+      <button
+        type="button"
+        class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-[#dce5e6] bg-white px-[20px] text-[13px] font-medium text-[#4a5f66] transition-colors hover:bg-[#f6f9f9] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#39c6ae] max-[580px]:px-[10px] max-[580px]:text-[12px]"
+        (click)="visible.set(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        form="attendanceForm"
+        [disabled]="!dirty()"
+        class="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-transparent bg-(--sanjose-primary-action) px-[22px] text-[13px] font-semibold whitespace-nowrap text-white transition-colors hover:bg-(--sanjose-primary-action-hover) disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#39c6ae] max-[580px]:px-[10px] max-[580px]:text-[12px]"
+      >
+        Confirmar despacho
+      </button>
+    </div>
   </div>
 </app-ui-dialog>

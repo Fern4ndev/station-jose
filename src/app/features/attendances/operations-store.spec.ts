@@ -21,6 +21,37 @@ const voucher = {
 };
 
 describe('OperationsStore', () => {
+  it('muestra una fila por atención con todos sus combustibles y mantiene separados los despachos del mismo vale', async () => {
+    const secondOrderItem = { ...order.items[0], id: 'order-item-2', fuel_type: { ...order.items[0].fuel_type, name: 'Gasolina' } };
+    const multiOrder = { ...order, items: [...order.items, secondOrderItem] };
+    const multiVoucher = { ...voucher, items: [...voucher.items, { ...voucher.items[0], id: 'voucher-item-2', purchase_order_item_id: 'order-item-2' }] };
+    const first = { ...voucher.attendances[0], items: [
+      { ...voucher.attendances[0].items[0], attended_gallons: '10.125' },
+      { id: 'attendance-item-2', voucher_item_id: 'voucher-item-2', attended_gallons: '4.875' },
+    ] };
+    const second = { ...first, id: 'next-attendance', attended_at: '2026-11-24T10:00:00Z', items: [
+      { ...first.items[0], id: 'next-item-1', attended_gallons: '0.100' },
+      { ...first.items[1], id: 'next-item-2', attended_gallons: '0.200' },
+    ] };
+    TestBed.configureTestingModule({ providers: [
+      OperationsStore,
+      { provide: PurchaseOrdersApi, useValue: { list: () => of({ items: [multiOrder], pagination }) } },
+      { provide: VouchersApi, useValue: { list: () => of({ items: [multiVoucher], pagination }) } },
+      { provide: AttendancesApi, useValue: { list: () => of({ items: [first, second], pagination }) } },
+      { provide: AuthService, useValue: { currentUser: () => ({ id: 'user-uuid' }), fullName: () => 'Grifero Uno' } },
+    ] });
+    const store = TestBed.inject(OperationsStore);
+    await store.load();
+    expect(store.attendances()).toHaveLength(2);
+    expect(store.attendances()[0]).toEqual(expect.objectContaining({
+      id: 'next-attendance', gallons: 0.3,
+      lines: [expect.objectContaining({ fuel: 'Diésel', gallons: 0.1 }), expect.objectContaining({ fuel: 'Gasolina', gallons: 0.2 })],
+    }));
+    expect(store.attendances()[1]).toEqual(expect.objectContaining({ id: 'attendance-uuid', gallons: 15 }));
+    await store.load();
+    expect(store.attendances()).toHaveLength(2);
+  });
+
   it('reutiliza la clave de idempotencia al reintentar el mismo despacho', async () => {
     const ordersApi = { list: vi.fn().mockReturnValue(of({ items: [order], pagination })) };
     const vouchersApi = { list: vi.fn().mockReturnValue(of({ items: [], pagination: { ...pagination, total: 0, pages: 0 } })) };

@@ -10,6 +10,8 @@ export interface NavChild {
   readonly icon: UiIconName;
   readonly path: string;
   readonly roles: readonly UserRole[];
+  /** Solo visibilidad en el sidebar; no cambia el acceso a la ruta. */
+  readonly hiddenFor?: readonly UserRole[];
 }
 
 export interface NavGroup {
@@ -110,6 +112,7 @@ export const NAV: readonly NavEntry[] = [
         icon: 'attendances',
         path: `${ADMIN_PREFIX}/atenciones`,
         roles: ALL_ROLES,
+        hiddenFor: ['ADMIN'],
       },
     ],
   },
@@ -158,12 +161,13 @@ export const navForRole = (role: UserRole | undefined): NavEntry[] => {
   if (!role) {
     return [];
   }
+  const visible = (child: NavChild): boolean => child.roles.includes(role) && !child.hiddenFor?.includes(role);
   return NAV.filter(
     (entry): entry is NavGroup =>
-      isGroup(entry) && entry.children.some((child) => child.roles.includes(role)),
+      isGroup(entry) && entry.children.some(visible),
   ).map((group) => ({
     ...group,
-    children: group.children.filter((child) => child.roles.includes(role)),
+    children: group.children.filter(visible),
   }));
 };
 

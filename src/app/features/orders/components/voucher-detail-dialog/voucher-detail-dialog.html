@@ -1,6 +1,6 @@
 <app-ui-dialog
   [(visible)]="visible"
-  [title]="voucher()?.number ?? 'Vale'"
+  [title]="voucher() ? 'Vale ' + voucher()!.number : 'Vale'"
   [description]="voucher() ? voucher()!.issuer + ' · ' + voucher()!.issuerType : ''"
   width="min(520px, calc(100vw - 28px))"
 >
@@ -11,7 +11,7 @@
       >
         <div class="grid gap-[6px]">
           <app-ui-status-badge [label]="detail.status" [tone]="statusTone(detail.status)" />
-          <span class="text-[9px] leading-[1.4] text-[#7d8f93]">Registrado el {{ detail.createdLabel }}</span>
+          <span class="text-[9px] leading-[1.4] text-[#7d8f93]">Registro: {{ detail.createdLabel }}</span>
         </div>
         <span class="grid justify-items-end gap-[1px]">
           <span class="text-[8.5px] font-[650] uppercase tracking-[0.08em] text-[#7d8f93]">Saldo</span>
@@ -29,22 +29,14 @@
           <span>
             Despachado
             <strong class="font-[650] text-[#3a5057]">{{ gallons(detail.used) }}</strong>
-            de {{ gallons(detail.total) }}
           </span>
-          <span class="font-[650] text-[#4a7f70]">{{ percent(detail.used, detail.total) }}%</span>
-        </div>
-        <div class="h-[6px] w-full overflow-hidden rounded-full bg-[#eaf0ee]">
-          <div
-            class="h-full rounded-full bg-[linear-gradient(90deg,#5cc1a3,#2f8f78)] transition-[width] duration-500"
-            [style.width.%]="percent(detail.used, detail.total)"
-          ></div>
+          <span>Autorizado <strong class="font-[650] text-[#3a5057]">{{ gallons(detail.total) }}</strong></span>
         </div>
       </div>
 
       <section class="grid gap-[8px]">
         <div class="flex items-center justify-between gap-[8px]">
-          <h4 class="m-0 text-[9px] font-[680] uppercase tracking-[0.07em] text-[#6c8085]">Líneas del vale</h4>
-          <span class="text-[9px] text-[#98a2a5]">{{ detail.lines.length }} combustible(s)</span>
+          <h4 class="m-0 text-[9px] font-[680] uppercase tracking-[0.07em] text-[#6c8085]">Combustibles</h4>
         </div>
         <div class="grid gap-[7px]">
           @for (line of detail.lines; track line.id) {
@@ -52,17 +44,14 @@
               <div class="flex items-baseline justify-between gap-[10px]">
                 <strong class="text-[11px] font-[640] text-[#243941]">{{ line.fuel }}</strong>
                 <span class="text-[9px] text-[#8b989c]">
-                  Disponible
+                  Saldo
                   <strong class="ml-[2px] font-[650]" [class]="line.available > 0 ? 'text-[#2f7d68]' : 'text-[#a2543c]'">
                     {{ gallons(line.available) }}
                   </strong>
                 </span>
               </div>
-              <div class="h-[4px] w-full overflow-hidden rounded-full bg-[#eef2f1]">
-                <div class="h-full rounded-full bg-[#5cc1a3]" [style.width.%]="percent(line.attended, line.authorized)"></div>
-              </div>
               <div class="flex items-center justify-between gap-[10px] text-[8.5px] text-[#98a2a5]">
-                <span>Atendido <strong class="font-[640] text-[#4a6167]">{{ gallons(line.attended) }}</strong></span>
+                <span>Despachado <strong class="font-[640] text-[#4a6167]">{{ gallons(line.attended) }}</strong></span>
                 <span>Autorizado <strong class="font-[640] text-[#4a6167]">{{ gallons(line.authorized) }}</strong></span>
               </div>
             </div>
@@ -72,13 +61,12 @@
 
       <section class="grid gap-[8px]">
         <div class="flex items-center justify-between gap-[8px]">
-          <h4 class="m-0 text-[9px] font-[680] uppercase tracking-[0.07em] text-[#6c8085]">Atenciones</h4>
-          <span class="text-[9px] text-[#98a2a5]">{{ detail.attendances.length }} registrada(s)</span>
+          <h4 class="m-0 text-[9px] font-[680] uppercase tracking-[0.07em] text-[#6c8085]">Atenciones ({{ detail.attendances.length }})</h4>
         </div>
 
         @if (detail.attendances.length === 0) {
           <div class="rounded-[11px] border border-dashed border-[#dfe7e6] bg-[#fbfdfc] p-[16px] text-center text-[10px] text-[#98a2a5]">
-            Este vale aún no registra atenciones.
+            Sin atenciones.
           </div>
         } @else {
           <ul class="m-0 grid max-h-[232px] gap-[7px] overflow-y-auto p-0 pr-[2px]">

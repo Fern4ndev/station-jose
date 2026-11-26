@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AutoCompleteModule, type AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { SelectModule } from 'primeng/select';
+import { UiIcon } from '../../../../shared/components/ui-icon/ui-icon';
 import { formatGallons } from '../../../orders/orders-data';
 import {
   gallonsBalanceMilli,
@@ -42,9 +43,12 @@ function draftAmount(value: number): string {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AutoCompleteModule, FormsModule, SelectModule],
+  imports: [AutoCompleteModule, FormsModule, SelectModule, UiIcon],
+  // Los estilos de controles PrimeNG se acotan a .attendance-entry-form.
+  encapsulation: ViewEncapsulation.None,
   selector: 'app-attendance-form',
   templateUrl: './attendance-form.html',
+  styleUrl: './attendance-form.css',
 })
 export class AttendanceForm {
   readonly orders = input.required<readonly DispatchOrder[]>();
@@ -62,10 +66,13 @@ export class AttendanceForm {
   protected readonly issuer = signal('');
   protected readonly issuerType = signal<VoucherIssuerType>('INSTITUTION');
   protected readonly branchValue = signal('San José');
-  protected readonly hint = signal('Vale nuevo: indica los galones autorizados por cada combustible.');
+  protected readonly hint = signal('');
   protected readonly locked = signal(false);
   protected readonly error = signal('');
   protected readonly lines = signal<readonly FuelDraft[]>([]);
+  readonly totalGallons = computed(() => this.lines().reduce(
+    (sum, line) => sum + (parseGallonsInput(line.gallons.trim())?.milli ?? 0), 0,
+  ) / 1000);
 
   private readonly issuerBaseline = computed(() =>
     this.locked() ? this.matchingVouchers()[0]?.issuer ?? '' : this.selectedOrder()?.entity ?? '',
@@ -181,10 +188,7 @@ export class AttendanceForm {
       if (existing) {
         this.issuer.set(existing.issuer);
         this.issuerType.set(existing.issuerType);
-        const count = existing.lines?.length ?? 0;
-        this.hint.set(
-          `Vale existente: ${this.voucherAvailableLabel(existing)} disponibles en ${count} combustible${count === 1 ? '' : 's'}. Se conserva su historial.`,
-        );
+        this.hint.set(`Disponible: ${this.voucherAvailableLabel(existing)}`);
         this.locked.set(true);
       } else {
         this.locked.set(false);
@@ -193,8 +197,8 @@ export class AttendanceForm {
           this.issuerType.set('INSTITUTION');
         }
         this.hint.set(candidates.length > 1
-          ? 'Hay vales con ese número de distintos emisores. Indica el emisor exacto.'
-          : 'Vale nuevo: indica los galones autorizados por cada combustible.');
+          ? 'Indica el emisor exacto del vale.'
+          : '');
       }
       this.wasLocked = existing !== undefined;
     });
@@ -367,7 +371,7 @@ export class AttendanceForm {
       voucherId,
       issuer: this.issuer().trim(),
       issuerType: this.issuerType(),
-      branch: this.branchValue(),
+      branch: this.branchLocked() ? this.branch() : this.branchValue(),
       lines: requestLines,
     });
   }

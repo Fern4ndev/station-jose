@@ -6,10 +6,13 @@ import { ReportsApi, type DashboardResponse } from '../../core/services/reports-
 import { CatalogApi } from '../../core/services/catalog-api';
 import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
 import { UiPageHeading } from '../../shared/components/ui-page-heading/ui-page-heading';
+import { UiPanel } from '../../shared/components/ui-panel/ui-panel';
+import { TableRefresh } from '../../shared/components/table-refresh/table-refresh';
 import { extractApiError } from '../../shared/utils/api-error';
 import type { StatCardModel } from '../../shared/components/ui-stat-card/ui-stat-card';
 import { AdminUiState } from '../../layouts/admin/admin-ui-state';
 import { OperationsStore } from '../attendances/operations-store';
+import { AttendanceHistory } from '../attendances/components/attendance-history/attendance-history';
 import { formatGallons, orderBalance } from '../orders/orders-data';
 import { voucherBalance } from '../vouchers/vouchers-data';
 import { DashboardActivity } from './components/dashboard-activity/dashboard-activity';
@@ -17,7 +20,7 @@ import { DashboardMetrics } from './components/dashboard-metrics/dashboard-metri
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DashboardActivity, DashboardMetrics, UiIcon, UiPageHeading],
+  imports: [AttendanceHistory, DashboardActivity, DashboardMetrics, TableRefresh, UiIcon, UiPageHeading, UiPanel],
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
 })

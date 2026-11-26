@@ -126,6 +126,7 @@ describe('auth guards', () => {
 
     TestBed.resetTestingModule();
     setup('ADMIN');
+    expect(run(navGuard('/atenciones'))).toBe(true);
     expect(run(navGuard('/usuarios'))).toBe(true);
     expect(run(navGuard('/reportes'))).toBe(true);
   });
@@ -141,7 +142,6 @@ describe('auth guards', () => {
       '/',
       '/ordenes',
       '/vales',
-      '/atenciones',
       '/reportes',
       '/combustibles',
       '/usuarios',

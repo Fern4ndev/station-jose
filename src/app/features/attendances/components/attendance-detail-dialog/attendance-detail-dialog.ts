@@ -4,7 +4,7 @@ import { UiStatusBadge } from '../../../../shared/components/ui-status-badge/ui-
 import { formatGallons } from '../../../orders/orders-data';
 import type { DemoAttendance } from '../../attendances-data';
 
-/** Detalle de una línea de despacho registrada en atenciones. */
+/** Detalle de una atención con uno o varios combustibles. */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UiDialog, UiStatusBadge],

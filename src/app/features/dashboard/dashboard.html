@@ -11,5 +11,12 @@
 
   <app-dashboard-metrics [metrics]="metrics()" />
 
-  <app-dashboard-activity [rows]="recent()" [scope]="scope()" [refreshing]="refreshing()" (refresh)="refresh()" (viewAll)="goAttendances()" />
+  @if (role() === 'ADMIN') {
+    <app-ui-panel title="Historial de atenciones" [subtitle]="'Despachos registrados en ' + scope()">
+      <app-table-refresh panelAction [loading]="refreshing()" (refresh)="refresh()" />
+      <app-attendance-history [rows]="recent()" />
+    </app-ui-panel>
+  } @else {
+    <app-dashboard-activity [rows]="recent()" [scope]="scope()" [refreshing]="refreshing()" (refresh)="refresh()" (viewAll)="goAttendances()" />
+  }
 </div>

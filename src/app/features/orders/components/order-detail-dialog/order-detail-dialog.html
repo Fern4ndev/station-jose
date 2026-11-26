@@ -1,7 +1,6 @@
 <app-ui-dialog
   [(visible)]="visible"
   [title]="order()?.id ?? 'Orden'"
-  [description]="order()?.entity ?? ''"
   width="min(920px, calc(100vw - 28px))"
 >
   <div class="mb-[16px] flex flex-wrap items-center justify-between gap-[10px] border-b border-[#edf0f0] pb-[10px]">
@@ -41,10 +40,12 @@
       </button>
     </div>
 
-    <span class="inline-flex items-center gap-[6px] rounded-full border border-[#e3ebe9] bg-[#fbfdfc] px-[10px] py-[4px] text-[9.5px] text-[#7d8f93]">
-      Saldo de la orden
-      <strong class="font-[660] text-[#2f7d68]">{{ balance() }}</strong>
-    </span>
+    @if (tab() === 'vouchers') {
+      <span class="inline-flex items-center gap-[6px] rounded-full border border-[#e3ebe9] bg-[#fbfdfc] px-[10px] py-[4px] text-[9.5px] text-[#7d8f93]">
+        Saldo de la orden
+        <strong class="font-[660] text-[#2f7d68]">{{ balance() }}</strong>
+      </span>
+    }
   </div>
 
   @if (order(); as detail) {
@@ -107,14 +108,10 @@
                 <dd class="m-0 text-[10.5px] font-[600] text-[#3f555c]">{{ detail.source?.siaf_number || '—' }}</dd>
               </div>
               <div class="grid gap-[1px]">
-                <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Orden</dt>
-                <dd class="m-0 text-[10.5px] font-[600] text-[#3f555c]">{{ detail.id }}</dd>
-              </div>
-              <div class="grid gap-[1px]">
                 <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Emisión</dt>
                 <dd class="m-0 text-[10.5px] font-[600] text-[#3f555c]">{{ detail.date }}</dd>
               </div>
-              <div class="col-span-2 grid gap-[1px]">
+              <div class="grid gap-[1px]">
                 <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Sede proveedora</dt>
                 <dd class="m-0 text-[10.5px] font-[600] text-[#3f555c]">{{ detail.branch }}</dd>
               </div>
@@ -139,7 +136,6 @@
         <section class="grid gap-[8px]">
           <div class="flex items-baseline justify-between gap-[10px]">
             <h3 class="m-0 text-[8.5px] font-[680] uppercase tracking-[0.08em] text-[#6c8085]">Combustibles</h3>
-            <span class="text-[9px] text-[#98a2a5]">{{ detail.source?.items?.length ?? 0 }} línea(s)</span>
           </div>
 
           @if (detail.source?.items?.length) {
@@ -149,7 +145,7 @@
                   <div class="flex items-start justify-between gap-[10px]">
                     <span class="grid gap-[1px]">
                       <strong class="text-[11px] font-[650] text-[#243941]">{{ line.fuel_type.name }}</strong>
-                      <span class="text-[8.5px] uppercase tracking-[0.06em] text-[#98a2a5]">Saldo disponible</span>
+                      <span class="text-[8.5px] uppercase tracking-[0.06em] text-[#98a2a5]">Saldo</span>
                     </span>
                     <strong
                       class="text-[15px] leading-[1.1] font-[670] tracking-[-0.03em]"
@@ -181,20 +177,14 @@
             </div>
           } @else {
             <p class="m-0 rounded-[11px] border border-dashed border-[#dfe7e6] bg-[#fbfdfc] px-[12px] py-[10px] text-[10px] text-[#8b989c]">
-              La orden no tiene líneas de combustible registradas.
+              Sin combustibles.
             </p>
           }
         </section>
 
-        <p class="m-0 text-[9px] leading-[1.5] text-[#919da0]">
-          El saldo es compartido entre San José y Santa Marta y se calcula con las atenciones confirmadas.
-        </p>
       </div>
     } @else {
-      <div class="mb-[12px] flex flex-wrap items-center justify-between gap-[8px]">
-        <p class="m-0 text-[10px] leading-[1.5] text-[#839095]">
-          Vales atendidos asociados a esta orden. El más reciente aparece primero.
-        </p>
+      <div class="mb-[12px] flex justify-end">
         <app-table-refresh [loading]="loading()" (refresh)="reloadVouchers()" />
       </div>
 
@@ -215,7 +205,7 @@
         </div>
       } @else if (vouchers().length === 0) {
         <div class="rounded-[12px] border border-dashed border-[#dfe7e6] bg-[#fbfdfc] p-[30px_20px] text-center text-[11px] text-[#8b989c]">
-          Esta orden aún no tiene vales atendidos.
+          Sin vales atendidos.
         </div>
       } @else {
         <div class="mb-[12px] grid grid-cols-3 gap-[8px] max-[560px]:grid-cols-1">
@@ -234,12 +224,11 @@
         </div>
 
         <div class="w-full overflow-x-auto rounded-[12px] border border-[#e5eaea]">
-          <table class="w-full min-w-[780px] border-collapse text-left">
+          <table class="w-full min-w-[660px] border-collapse text-left" aria-label="Vales de la orden">
             <thead>
               <tr>
                 <th class="border-b border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[12px] py-[8px] text-[8.5px] font-[650] whitespace-nowrap text-[#839095]">VALE</th>
                 <th class="border-b border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[12px] py-[8px] text-[8.5px] font-[650] whitespace-nowrap text-[#839095]">EMISOR</th>
-                <th class="border-b border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[12px] py-[8px] text-[8.5px] font-[650] whitespace-nowrap text-[#839095]">REGISTRADO</th>
                 <th class="border-b border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[12px] py-[8px] text-[8.5px] font-[650] whitespace-nowrap text-[#839095]">ESTADO</th>
                 <th class="border-b border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[12px] py-[8px] text-[8.5px] font-[650] whitespace-nowrap text-[#839095]">DESPACHADO</th>
                 <th class="border-b border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[12px] py-[8px] text-[8.5px] font-[650] whitespace-nowrap text-[#839095]">ATENCIONES</th>
@@ -259,9 +248,6 @@
                   <td class="border-t border-[#eef2f1] px-[12px] py-[11px] align-middle">
                     <span class="block text-[10.5px] text-[#52636a]">{{ voucher.issuer }}</span>
                     <span class="mt-[2px] block text-[8.5px] text-[#98a2a5]">{{ voucher.issuerType }}</span>
-                  </td>
-                  <td class="border-t border-[#eef2f1] px-[12px] py-[11px] align-middle text-[10px] whitespace-nowrap text-[#52636a]">
-                    {{ voucher.createdLabel }}
                   </td>
                   <td class="border-t border-[#eef2f1] px-[12px] py-[11px] align-middle whitespace-nowrap">
                     <app-ui-status-badge [label]="voucher.status" [tone]="statusTone(voucher.status)" />

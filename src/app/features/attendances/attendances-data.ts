@@ -3,6 +3,13 @@ import type { VoucherIssuerType } from '../vouchers/vouchers-data';
 
 export type AttendanceStatus = 'Confirmada';
 
+export interface AttendanceFuelLine {
+  readonly id: string;
+  readonly fuel: string;
+  readonly gallons: number;
+  readonly authorized?: number;
+}
+
 export interface DemoAttendance {
   readonly id: string;
   readonly voucher: string;
@@ -15,6 +22,8 @@ export interface DemoAttendance {
   readonly institution?: string;
   /** Galones autorizados en la línea del vale, si está disponible. */
   readonly authorized?: number;
+  /** Combustibles entregados en una misma atención. */
+  readonly lines?: readonly AttendanceFuelLine[];
   readonly time: string;
   readonly date: string;
   readonly status: AttendanceStatus;

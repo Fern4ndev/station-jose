@@ -21,11 +21,6 @@ export class VoucherDetailDialog {
     return `${formatGallons(Number(value))} gal`;
   }
 
-  protected percent(value: number, total: number): number {
-    if (total <= 0) return 0;
-    return Math.min(100, Math.max(0, Math.round((value / total) * 100)));
-  }
-
   protected statusTone(status: VoucherStatus): StatusTone {
     if (status === 'Disponible') return 'green';
     if (status === 'Bloqueado') return 'gray';

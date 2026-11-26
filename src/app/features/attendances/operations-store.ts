@@ -103,31 +103,40 @@ export class OperationsStore {
     const voucherById = new Map(voucherDetails.map((voucher) => [voucher.id, voucher]));
     const attendances: DemoAttendance[] = attendanceDetails.flatMap((attendance) => {
       const voucher = voucherById.get(attendance.voucher_id);
-      if (!voucher) return [];
+      if (!voucher || !attendance.items.length) return [];
       const order = orderById.get(voucher.purchase_order_id);
       const voucherItemsById = new Map(voucher.items.map((item) => [item.id, item]));
-      return attendance.items.map((item) => {
+      const lines = attendance.items.map((item) => {
         const voucherItem = voucherItemsById.get(item.voucher_item_id);
         const orderItem = voucherItem ? orderItemById.get(voucherItem.purchase_order_item_id) : undefined;
         return {
-          id: `${attendance.id}:${item.id}`,
-          voucher: voucher.voucher_number,
-          orderId: order?.order_number ?? voucher.purchase_order_id,
-          attendant: attendance.performer_name ?? (attendance.performed_by_user_id === this.auth.currentUser()?.id
-            ? this.auth.fullName()
-            : attendance.performed_by_user_id.slice(0, 8)),
-          branch: attendance.branch_name ?? order?.branch.name ?? '',
-          gallons: Number(item.attended_gallons),
-          fuel: orderItem?.fuel,
-          issuer: voucher.issuer_name,
-          institution: order?.institution_name,
+          id: item.id,
+          gallons: gallonsToMilli(item.attended_gallons) / 1000,
+          fuel: orderItem?.fuel ?? 'Combustible',
           authorized: voucherItem ? Number(voucherItem.authorized_gallons) : undefined,
-          time: new Date(attendance.attended_at).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Lima' }),
-          date: new Date(attendance.attended_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Lima' }).replace(/\./g, ''),
-          attendedAt: attendance.attended_at,
-          status: 'Confirmada' as const,
         };
       });
+      return [{
+        id: attendance.id,
+        voucher: voucher.voucher_number,
+        orderId: order?.order_number ?? voucher.purchase_order_id,
+        attendant: attendance.performer_name ?? (attendance.performed_by_user_id === this.auth.currentUser()?.id
+          ? this.auth.fullName()
+          : attendance.performed_by_user_id.slice(0, 8)),
+        branch: attendance.branch_name ?? order?.branch.name ?? '',
+        gallons: lines.reduce((sum, line) => sum + gallonsToMilli(line.gallons), 0) / 1000,
+        fuel: [...new Set(lines.map((line) => line.fuel))].join(', '),
+        issuer: voucher.issuer_name,
+        institution: order?.institution_name,
+        authorized: lines.every((line) => line.authorized !== undefined)
+          ? lines.reduce((sum, line) => sum + gallonsToMilli(line.authorized), 0) / 1000
+          : undefined,
+        lines,
+        time: new Date(attendance.attended_at).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Lima' }),
+        date: new Date(attendance.attended_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Lima' }).replace(/\./g, ''),
+        attendedAt: attendance.attended_at,
+        status: 'Confirmada' as const,
+      }];
     }).sort((a, b) => (b.attendedAt ?? '').localeCompare(a.attendedAt ?? ''));
     this.ordersState.set(orders);
     this.vouchersState.set(vouchers);

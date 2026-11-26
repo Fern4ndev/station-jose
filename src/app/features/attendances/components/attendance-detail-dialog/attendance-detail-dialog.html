@@ -7,11 +7,25 @@
     <div class="grid gap-[16px]">
       <div class="flex items-center justify-between gap-[12px] rounded-[12px] border border-[#dceee8] bg-[#f2faf6] p-[15px_16px]">
         <span class="grid gap-[3px] text-[9px] leading-[1.4] text-[#386e61]">
-          Combustible despachado
+          Total despachado
           <strong class="text-[11px] font-[650] text-[#225d50]">{{ detail.fuel ?? '—' }}</strong>
         </span>
         <strong class="text-[18px] tracking-[-0.03em] text-[#225d50]">{{ gallons(detail.gallons) }}</strong>
       </div>
+
+      @if (detail.lines && detail.lines.length > 1) {
+        <div class="overflow-x-auto rounded-[10px] border border-[#e5eded]">
+          <table class="w-full text-left text-[11px] text-[#52636a]">
+            <caption class="sr-only">Combustibles de la atención</caption>
+            <thead class="bg-[#f5f9f8] text-[10px] text-[#52646a]"><tr><th class="px-[12px] py-[9px] font-semibold">Combustible</th><th class="px-[12px] py-[9px] text-right font-semibold">Autorizado</th><th class="px-[12px] py-[9px] text-right font-semibold">Despachado</th></tr></thead>
+            <tbody>
+              @for (line of detail.lines; track line.id) {
+                <tr class="border-t border-[#edf0f0]"><td class="px-[12px] py-[10px]">{{ line.fuel }}</td><td class="whitespace-nowrap px-[12px] py-[10px] text-right">{{ gallons(line.authorized) }}</td><td class="whitespace-nowrap px-[12px] py-[10px] text-right font-semibold text-[#225d50]">{{ gallons(line.gallons) }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
 
       <dl class="m-0 grid grid-cols-2 gap-x-[16px] gap-y-[12px] max-[520px]:grid-cols-1">
         <div class="grid gap-[3px] border-b border-[#f0f3f3] pb-[9px]">
