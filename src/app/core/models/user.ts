@@ -57,6 +57,8 @@ export interface UserCreate {
 export interface UserUpdate {
   readonly first_name?: string | null;
   readonly last_name?: string | null;
+  readonly dni?: string | null;
+  readonly email?: string | null;
 }
 
 export interface UserRoleUpdate {

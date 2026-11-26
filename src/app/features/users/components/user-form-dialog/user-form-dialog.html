@@ -1,17 +1,30 @@
 <app-ui-dialog
   [(visible)]="visible"
   [title]="editing() ? 'Editar usuario' : 'Agregar usuario'"
-  [description]="editing() ? 'Actualiza el nombre, el rol y la sede. El DNI y el correo son de solo lectura.' : 'Asigna uno de los roles predefinidos. La oficina administra ambas sedes.'"
+  [description]="editing() ? 'Actualiza el nombre, los apellidos, el DNI, el correo, el rol y la sede.' : 'Asigna uno de los roles predefinidos. La oficina administra ambas sedes.'"
 >
   <form id="userForm" class="grid grid-cols-2 gap-[13px] max-[760px]:grid-cols-1" (submit)="onSubmit($event)" novalidate>
     <div class="grid gap-[6px]">
-      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserName">Nombre completo</label>
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserFirstName">Nombre</label>
       <input
-        id="newUserName"
+        id="newUserFirstName"
         class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-        placeholder="Nombre y apellidos"
-        [value]="name()"
-        (input)="setName($event)"
+        placeholder="Nombres"
+        autocomplete="given-name"
+        [value]="firstName()"
+        (input)="setFirstName($event)"
+      />
+    </div>
+
+    <div class="grid gap-[6px]">
+      <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserLastName">Apellidos</label>
+      <input
+        id="newUserLastName"
+        class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+        placeholder="Apellidos"
+        autocomplete="family-name"
+        [value]="lastName()"
+        (input)="setLastName($event)"
       />
     </div>
 
@@ -23,26 +36,21 @@
         inputmode="numeric"
         maxlength="8"
         placeholder="Número de documento"
-        [readonly]="editing()"
         [value]="dni()"
         (input)="setDni($event)"
       />
     </div>
 
-    <div class="grid gap-[6px] col-span-full max-[760px]:col-span-1">
+    <div class="grid gap-[6px]">
       <label class="mb-0 block text-[10px] font-[620] text-[#52646a]" for="newUserEmail">Correo electrónico</label>
       <input
         id="newUserEmail"
         class="min-h-[39px] w-full rounded-[10px] border border-[#dce5e5] bg-white px-[11px] text-[11px] text-[#30464d] placeholder:text-[#a5b1b4] read-only:bg-[#f7fafa] read-only:text-[#5f6f73] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
         type="email"
         placeholder="nombre@estacion.pe"
-        [readonly]="editing()"
         [value]="email()"
         (input)="setEmail($event)"
       />
-      @if (editing()) {
-        <span class="text-[9px] leading-[1.5] text-[#919da0]">El DNI y el correo no se pueden modificar desde este panel.</span>
-      }
     </div>
 
     <div class="grid gap-[6px]">

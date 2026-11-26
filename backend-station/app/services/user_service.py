@@ -70,7 +70,27 @@ class UserService:
             user.first_name = data.first_name.strip()
         if data.last_name is not None:
             user.last_name = data.last_name.strip()
-        db.flush()
+        if data.dni is not None:
+            dni = data.dni.strip()
+            owner = self.users.get_by_dni(db, dni)
+            if owner is not None and owner.id != user.id:
+                raise DuplicateUserError("El correo o DNI ya está registrado.")
+            user.dni = dni
+        email_changed = False
+        if data.email is not None:
+            email = data.email.lower()
+            owner = self.users.get_by_email(db, email)
+            if owner is not None and owner.id != user.id:
+                raise DuplicateUserError("El correo o DNI ya está registrado.")
+            email_changed = email != user.email
+            user.email = email
+        try:
+            db.flush()
+        except IntegrityError as exc:
+            raise DuplicateUserError("El correo o DNI ya está registrado.") from exc
+        if email_changed:
+            # El correo identifica la cuenta al iniciar sesión: se cierran sus sesiones.
+            self.sessions.revoke_all_for_user(db, user_id=user.id, now=datetime.now(UTC))
         return user
 
     def set_status(self, db: Session, user_id: UUID, data: UserStatusUpdate) -> User:

@@ -12,6 +12,8 @@ export type UserRole = (typeof ROLE_DETAILS)[UserRoleValue]['label'];
 export interface DemoUserRow {
   readonly id: string;
   readonly name: string;
+  readonly firstName: string;
+  readonly lastName: string;
   readonly email: string;
   readonly dni: string;
   readonly role: UserRole;
@@ -22,7 +24,8 @@ export interface DemoUserRow {
 }
 
 export interface UserDraft {
-  readonly name: string;
+  readonly firstName: string;
+  readonly lastName: string;
   readonly email: string;
   readonly dni: string;
   readonly role: UserRoleValue;

@@ -73,6 +73,8 @@ export class Users {
     return {
       id: user.id,
       name: `${user.first_name} ${user.last_name}`,
+      firstName: user.first_name,
+      lastName: user.last_name,
       email: user.email,
       dni: user.dni,
       role: user.role === 'ADMIN' ? 'Administrador' : user.role === 'OFFICE' ? 'Oficina' : 'Grifero',
@@ -112,23 +114,33 @@ export class Users {
   protected async save(draft: UserDraft): Promise<void> {
     if (this.saving()) return;
     this.saving.set(true);
-    const [first_name, ...last] = draft.name.trim().split(/\s+/);
-    const last_name = last.join(' ');
+    const first_name = draft.firstName.trim();
+    const last_name = draft.lastName.trim();
+    const dni = draft.dni.trim();
+    const email = draft.email.trim();
+    const fullName = `${first_name} ${last_name}`;
     const branchId = draft.role === 'ATTENDANT' ? draft.branch || null : null;
     try {
       const user = this.editing();
       if (user) {
-        await firstValueFrom(this.api.update(user.id, { first_name, last_name }));
+        const changes: { first_name?: string; last_name?: string; dni?: string; email?: string } = {};
+        if (first_name !== user.firstName) changes.first_name = first_name;
+        if (last_name !== user.lastName) changes.last_name = last_name;
+        if (dni !== user.dni) changes.dni = dni;
+        if (email !== user.email) changes.email = email;
+        if (Object.keys(changes).length > 0) {
+          await firstValueFrom(this.api.update(user.id, changes));
+        }
         if (draft.role !== user.roleValue || branchId !== (user.branchId ?? null)) {
           await firstValueFrom(this.api.updateRole(user.id, { role: draft.role, branch_id: branchId }));
         }
-        this.messages.add({ severity: 'success', summary: `${draft.name}: usuario actualizado.`, life: 2800 });
+        this.messages.add({ severity: 'success', summary: `${fullName}: usuario actualizado.`, life: 2800 });
       } else {
         await firstValueFrom(this.api.create({
           first_name,
           last_name,
-          dni: draft.dni,
-          email: draft.email,
+          dni,
+          email,
           password: draft.password,
           role: draft.role,
           branch_id: branchId,

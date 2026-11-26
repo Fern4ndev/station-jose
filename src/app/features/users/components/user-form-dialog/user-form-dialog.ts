@@ -37,7 +37,8 @@ export class UserFormDialog {
   protected readonly editing = computed(() => this.user() !== null);
   protected readonly branchOptions = computed(() => this.branches().map((item) => ({ value: item.id, label: item.name })));
 
-  protected readonly name = signal('');
+  protected readonly firstName = signal('');
+  protected readonly lastName = signal('');
   protected readonly dni = signal('');
   protected readonly email = signal('');
   protected readonly role = signal<UserRoleValue>('OFFICE');
@@ -53,7 +54,8 @@ export class UserFormDialog {
         return;
       }
       const user = this.user();
-      this.name.set(user?.name ?? '');
+      this.firstName.set(user?.firstName ?? '');
+      this.lastName.set(user?.lastName ?? '');
       this.dni.set(user?.dni ?? '');
       this.email.set(user?.email ?? '');
       this.role.set(user?.roleValue ?? 'OFFICE');
@@ -63,8 +65,12 @@ export class UserFormDialog {
     });
   }
 
-  protected setName(event: Event): void {
-    this.name.set((event.target as HTMLInputElement).value);
+  protected setFirstName(event: Event): void {
+    this.firstName.set((event.target as HTMLInputElement).value);
+  }
+
+  protected setLastName(event: Event): void {
+    this.lastName.set((event.target as HTMLInputElement).value);
   }
 
   protected setDni(event: Event): void {
@@ -81,25 +87,25 @@ export class UserFormDialog {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
-    const name = this.name().trim();
+    const firstName = this.firstName().trim();
+    const lastName = this.lastName().trim();
     const dni = this.dni().trim();
     const email = this.email().trim();
 
-    if (!name) {
-      this.error.set('Indica el nombre completo del usuario.');
+    if (!firstName) {
+      this.error.set('Indica el nombre del usuario.');
       return;
     }
-    // DNI y correo no se envían al editar: se validan solo en el alta.
-    if (!this.editing() && !/^\d{8}$/.test(dni)) {
+    if (!lastName) {
+      this.error.set('Indica los apellidos del usuario.');
+      return;
+    }
+    if (!/^\d{8}$/.test(dni)) {
       this.error.set('El DNI debe tener 8 dígitos.');
       return;
     }
-    if (!this.editing() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       this.error.set('Indica un correo electrónico válido.');
-      return;
-    }
-    if (name.split(/\s+/).length < 2) {
-      this.error.set('Indica nombre y apellidos.');
       return;
     }
     if (!this.editing() && this.password().length < 8) {
@@ -111,6 +117,14 @@ export class UserFormDialog {
       return;
     }
 
-    this.saved.emit({ name, dni, email, role: this.role(), branch: this.branch(), password: this.password() });
+    this.saved.emit({
+      firstName,
+      lastName,
+      dni,
+      email,
+      role: this.role(),
+      branch: this.branch(),
+      password: this.password(),
+    });
   }
 }
