@@ -1,19 +1,18 @@
-<div class="relative flex min-h-screen items-center justify-center overflow-hidden p-[24px] max-[760px]:p-[16px]">
-  <svg
-    class="pointer-events-none absolute inset-0 z-[2] h-full w-full opacity-[0.16] mix-blend-overlay"
-    aria-hidden="true"
-  >
-    <filter id="auth-grain">
-      <feTurbulence type="fractalNoise" baseFrequency="0.99" numOctaves="1" stitchTiles="stitch" />
-      <feColorMatrix
-        type="matrix"
-        values="0.181 0.608 0.061 0 0.075 0.181 0.608 0.061 0 0.075 0.181 0.608 0.061 0 0.075 0 0 0 1 0"
-      />
-    </filter>
-    <rect width="100%" height="100%" filter="url(#auth-grain)" />
-  </svg>
-
-  <div class="relative z-[3] w-full">
-    <router-outlet />
-  </div>
-</div>
+<main class="auth-layout">
+  <figure class="auth-photo">
+    <img
+      src="assets/img/auth/fuel-station.png"
+      alt=""
+      width="896"
+      height="1200"
+      fetchpriority="high"
+    />
+    <figcaption>
+      <span class="auth-caption-rule" aria-hidden="true"></span>
+      <p>Sistema de gestión</p>
+    </figcaption>
+  </figure>
+  <section class="auth-content" aria-label="Acceso al sistema">
+    <div class="auth-form-container"><router-outlet /></div>
+  </section>
+</main>

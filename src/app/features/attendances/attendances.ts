@@ -88,7 +88,7 @@ export class Attendances {
       await this.operations.register(request);
       this.resetToken.update((token) => token + 1);
       this.registerOpen.set(false);
-      this.messages.add({ severity: 'success', summary: `${formatGallons(request.gallons)} gal registrados en la base de datos.`, life: 2800 });
+      this.messages.add({ severity: 'success', summary: `${formatGallons(Number(request.gallons))} gal registrados en la base de datos.`, life: 2800 });
     } catch (error) {
       this.messages.add({ severity: 'error', summary: extractApiError(error, error instanceof Error ? error.message : 'No se pudo registrar el despacho.'), life: 4000 });
     } finally {

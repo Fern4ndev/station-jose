@@ -1,146 +1,85 @@
-<div class="mx-auto w-full max-w-[430px] animate-[fadeIn_230ms_ease_both]">
-  <section
-    class="relative overflow-hidden rounded-[26px] border border-[rgba(255,255,255,0.92)] bg-[#fdfefe] shadow-[0_28px_90px_rgba(9,32,38,0.18)]"
-  >
-    <div
-      class="pointer-events-none absolute -right-[80px] -top-[100px] h-[240px] w-[240px] rounded-full bg-[radial-gradient(circle,rgba(57,198,174,0.18),transparent_70%)]"
-      aria-hidden="true"
-    ></div>
-
-    <div class="relative p-[32px_30px_26px] max-[480px]:p-[26px_20px_22px]">
-      <div class="flex items-center justify-center gap-[11px]">
-        <div
-          class="grid h-[42px] w-[42px] flex-none place-items-center rounded-[14px] bg-[linear-gradient(145deg,#2f7d70,#173c42)] text-[#e9fbf6] shadow-[0_8px_20px_rgba(23,60,66,0.22)]"
-          aria-hidden="true"
-        >
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-            <path
-              d="M5 19V6.8C5 5.25 6.25 4 7.8 4h5.4C14.75 4 16 5.25 16 6.8V19M3.5 19h14M8 8h5M8 11h5"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-            />
-            <path
-              d="M16 8.5h2.1a1.4 1.4 0 0 1 1.4 1.4v5.6a1.5 1.5 0 0 0 3 0v-4.1l-2.2-2.2"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path d="M8.2 19v-3.1a2.3 2.3 0 0 1 4.6 0V19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <div class="text-[14px] font-[680] tracking-[-0.035em] text-[#13262e]">San José</div>
-          <div class="mt-[2px] text-[10px] text-[#87979b]">Control de combustible</div>
-        </div>
-      </div>
-
-      <h1 class="mt-[26px] mb-0 text-center text-[23px] font-[650] tracking-[-0.045em] text-[#13262e]">
-        Iniciar sesión
-      </h1>
-      <p class="mt-[6px] mb-[24px] text-center text-[11.5px] leading-[1.55] text-[#77868b]">
-        Usa tu cuenta asignada por la administración de la estación.
-      </p>
-
-      <form class="grid gap-[15px]" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <div>
-          <label class="mb-[7px] block text-[11px] font-[620] text-[#52646a]" for="loginEmail">Correo electrónico</label>
-          <input
-            id="loginEmail"
-            class="min-h-[46px] w-full rounded-[12px] border border-[#dde6e4] bg-[#f8fbfa] px-[13px] text-[13px] text-[#22373e] transition-[background,border-color,box-shadow] placeholder:text-[#a8b4b6] focus:border-[#65b8a6] focus:bg-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[rgba(57,198,174,0.72)]"
-            type="email"
-            formControlName="email"
-            autocomplete="username"
-            placeholder="Ingrese su email"
-            [attr.aria-invalid]="emailError() !== ''"
-            [attr.aria-describedby]="emailError() !== '' ? 'loginEmailError' : null"
-            (input)="clearError()"
-            (blur)="emailTouched.set(true)"
-          />
-          @if (emailError()) {
-            <p id="loginEmailError" class="mt-[6px] mb-0 text-[10.5px] leading-[1.5] text-[#b0522b]" role="alert">
-              {{ emailError() }}
-            </p>
-          }
-        </div>
-
-        <div>
-          <label class="mb-[7px] block text-[11px] font-[620] text-[#52646a]" for="loginPassword">Contraseña</label>
-          <div class="relative">
-            <input
-              id="loginPassword"
-              class="min-h-[46px] w-full rounded-[12px] border border-[#dde6e4] bg-[#f8fbfa] px-[13px] pr-[48px] text-[13px] text-[#22373e] transition-[background,border-color,box-shadow] placeholder:text-[#a8b4b6] focus:border-[#65b8a6] focus:bg-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[rgba(57,198,174,0.72)]"
-              [type]="showPassword() ? 'text' : 'password'"
-              formControlName="password"
-              autocomplete="current-password"
-              placeholder="Tu contraseña"
-              [attr.aria-invalid]="passwordError() !== ''"
-              [attr.aria-describedby]="passwordError() !== '' ? 'loginPasswordError' : null"
-              (input)="clearError()"
-              (blur)="passwordTouched.set(true)"
-            />
-            <button
-              type="button"
-              class="absolute right-[5px] top-1/2 grid h-[36px] w-[36px] -translate-y-1/2 cursor-pointer place-items-center rounded-[9px] text-[#7b8c90] transition-colors hover:bg-[#eef6f3] hover:text-[#2f6f65] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[rgba(57,198,174,0.72)]"
-              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-              [attr.aria-pressed]="showPassword()"
-              [attr.title]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-              (click)="togglePassword()"
-            >
-              <iconify-icon
-                [attr.icon]="showPassword() ? 'mdi:eye-off-outline' : 'mdi:eye-outline'"
-                height="19"
-                aria-hidden="true"
-              ></iconify-icon>
-            </button>
-          </div>
-          @if (passwordError()) {
-            <p
-              id="loginPasswordError"
-              class="mt-[6px] mb-0 text-[10.5px] leading-[1.5] text-[#b0522b]"
-              role="alert"
-            >
-              {{ passwordError() }}
-            </p>
-          }
-        </div>
-
-        @if (lockedOut()) {
-          <p
-            class="m-0 rounded-[11px] border border-[#f0d4c4] bg-[#fdf3ec] px-[12px] py-[10px] text-[10.5px] leading-[1.5] text-[#9a5a2c]"
-            role="alert"
-            aria-live="polite"
-          >
-            Demasiados intentos fallidos. Espera {{ lockSeconds() }} s antes de volver a intentarlo.
-          </p>
-        } @else if (error()) {
-          <p
-            class="m-0 rounded-[11px] border border-[#f0d4c4] bg-[#fdf3ec] px-[12px] py-[10px] text-[10.5px] leading-[1.5] text-[#9a5a2c]"
-            role="alert"
-            aria-live="polite"
-          >
-            {{ error() }}
-          </p>
-        }
-
-        <button
-          type="submit"
-          class="mt-[3px] inline-flex min-h-[46px] w-full cursor-pointer items-center justify-center gap-[8px] rounded-[12px] border border-transparent bg-(--sanjose-primary-action) text-[12.5px] font-[620] text-white shadow-[0_8px_18px_rgba(23,60,66,0.2)] transition-[background,box-shadow] hover:bg-(--sanjose-primary-action-hover) disabled:cursor-progress disabled:bg-[#9db5b8] disabled:shadow-none focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-          [disabled]="loading() || lockedOut() || !formValid()"
-        >
-          @if (lockedOut()) {
-            Bloqueado · espera {{ lockSeconds() }} s
-          } @else {
-            {{ loading() ? 'Validando credenciales…' : 'Iniciar sesión' }}
-          }
-        </button>
-      </form>
-
-      <p class="mt-[20px] mb-0 border-t border-[#edf2f1] pt-[16px] text-center text-[9.5px] leading-[1.6] text-[#8f9b9e]">
-        Acceso restringido al personal autorizado de la estación. Si no puedes ingresar, contacta al administrador del
-        sistema.
-      </p>
+<div class="login">
+  <img
+    class="login-logo"
+    src="assets/img/auth/san-jose-logo.png"
+    alt="Servicentro San Jose E.I.R.Ltda."
+    width="150"
+    height="111"
+  />
+  <h1>Iniciar sesión</h1>
+  <p class="login-intro">Ingresa tus credenciales para acceder al sistema.</p>
+  <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="loading()" novalidate>
+    <div class="login-field">
+      <label for="loginEmail">Correo electrónico</label>
+      <input
+        id="loginEmail"
+        type="email"
+        formControlName="email"
+        autocomplete="username"
+        placeholder="Ej. operador@correo.com"
+        autocapitalize="none"
+        spellcheck="false"
+        required
+        [attr.aria-invalid]="emailError() !== ''"
+        [attr.aria-describedby]="emailError() ? 'loginEmailError' : null"
+        (input)="clearError()"
+        (blur)="emailTouched.set(true)"
+      />
+      @if (emailError()) {
+        <p id="loginEmailError" class="login-field-error" role="alert">{{ emailError() }}</p>
+      }
     </div>
-  </section>
+    <div class="login-field">
+      <label for="loginPassword">Contraseña</label>
+      <div class="login-password">
+        <input
+          id="loginPassword"
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+          required
+          [attr.aria-invalid]="passwordError() !== ''"
+          [attr.aria-describedby]="passwordError() ? 'loginPasswordError' : null"
+          (input)="clearError()"
+          (blur)="passwordTouched.set(true)"
+        />
+        <button
+          class="login-password-toggle"
+          type="button"
+          [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          [attr.aria-pressed]="showPassword()"
+          aria-controls="loginPassword"
+          (click)="togglePassword()"
+        >
+          <img src="assets/img/auth/eye.svg" alt="" width="21" height="21" />
+        </button>
+      </div>
+      @if (passwordError()) {
+        <p id="loginPasswordError" class="login-field-error" role="alert">{{ passwordError() }}</p>
+      }
+    </div>
+    @if (lockedOut()) {
+      <p class="login-alert" role="alert" aria-live="polite">
+        Demasiados intentos fallidos. Espera {{ lockSeconds() }} s antes de volver a intentarlo.
+      </p>
+    } @else if (error() && !emailError() && !passwordError()) {
+      <p class="login-alert" role="alert">{{ error() }}</p>
+    }
+    <button class="login-submit" type="submit" [disabled]="loading() || lockedOut()">
+      @if (lockedOut()) {
+        Bloqueado · espera {{ lockSeconds() }} s
+      } @else if (loading()) {
+        <span class="login-spinner" aria-hidden="true"></span>
+        Validando credenciales…
+      } @else {
+        Ingresar
+        <img src="assets/img/auth/arrow-right.svg" alt="" width="17" height="17" />
+      }
+    </button>
+  </form>
+  <div class="login-help">
+    <p><strong>¿Problemas para ingresar?</strong></p>
+    <p>Contacta al administrador del sistema.</p>
+  </div>
+  <p class="login-status">Acceso restringido al personal autorizado.</p>
 </div>

@@ -1,3 +1,4 @@
+import type { DecimalInput } from '../../core/models/purchase-order';
 import type { VoucherIssuerType } from '../vouchers/vouchers-data';
 
 export type AttendanceStatus = 'Confirmada';
@@ -20,8 +21,9 @@ export interface AttendanceRequest {
   readonly voucherId: string;
   readonly issuer: string;
   readonly issuerType: VoucherIssuerType;
-  readonly authorized: number;
-  readonly gallons: number;
+  readonly authorized: DecimalInput;
+  /** Se envía como string decimal normalizado (3 decimales). */
+  readonly gallons: DecimalInput;
   readonly branch: string;
 }
 

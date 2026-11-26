@@ -10,5 +10,6 @@
     [branchLocked]="branchLocked()"
     [resetToken]="resetToken()"
     (register)="register.emit($event)"
+    (cancel)="visible.set(false)"
   />
 </app-ui-dialog>

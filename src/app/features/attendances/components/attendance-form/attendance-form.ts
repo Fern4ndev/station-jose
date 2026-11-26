@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { AutoCompleteModule, type AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { SelectModule } from 'primeng/select';
 import { formatGallons, orderBalance } from '../../../orders/orders-data';
+import { gallonsBalanceMilli, parseGallonsInput } from '../../../../shared/utils/gallons';
 import { voucherBalance, type VoucherIssuerType } from '../../../vouchers/vouchers-data';
 import type { AttendanceRequest } from '../../attendances-data';
 import type { DispatchOrder, DispatchVoucher } from '../../operations-store';
@@ -30,6 +31,7 @@ export class AttendanceForm {
   readonly resetToken = input(0);
 
   readonly register = output<AttendanceRequest>();
+  readonly cancel = output<void>();
 
   protected readonly orderId = signal('');
   protected readonly institutionRuc = signal('');
@@ -52,21 +54,17 @@ export class AttendanceForm {
     () => this.filteredOrders().find((order) => order.id === this.orderId()) ?? null,
   );
   protected readonly institutionOptions = computed(() => {
-    const byId = new Map<string, { value: string; label: string; orderIds: Set<string> }>();
+    const byId = new Map<string, InstitutionOption>();
     for (const order of this.orders()) {
-      const current = byId.get(order.institutionRuc);
+      if (byId.has(order.institutionRuc)) continue;
       byId.set(order.institutionRuc, {
         value: order.institutionRuc,
-        label: current?.label ?? `${order.entity} · ${order.institutionRuc}`,
-        orderIds: new Set([...(current?.orderIds ?? []), order.apiId]),
+        label: `${order.entity} · ${order.institutionRuc}`,
       });
     }
     return [...byId.values()]
       .sort((a, b) => a.label.localeCompare(b.label, 'es-PE'))
-      .map((item) => ({
-        value: item.value,
-        label: `${item.label} · ${item.orderIds.size} ${item.orderIds.size === 1 ? 'orden disponible' : 'órdenes disponibles'}`,
-      }));
+      .map((item) => ({ value: item.value, label: item.label }));
   });
   protected readonly filteredOrders = computed(() =>
     this.orders().filter((order) => order.institutionRuc === this.institutionRuc()),
@@ -80,7 +78,7 @@ export class AttendanceForm {
     for (const order of this.filteredOrders()) byId.set(order.apiId, order);
     return [...byId.values()].map((order) => ({
       value: order.apiId,
-      label: `${order.orderNumber} · ${order.date} · ${order.branch}`,
+      label: order.orderNumber,
     }));
   });
   protected readonly fuelLineOptions = computed(() => this.filteredOrders()
@@ -194,7 +192,7 @@ export class AttendanceForm {
     event.preventDefault();
     const order = this.selectedOrder();
     const voucherId = this.voucherId().trim();
-    const gallons = Number(this.gallons());
+    const rawGallons = this.gallons().trim();
 
     if (!order) {
       this.error.set('Selecciona una orden con saldo disponible.');
@@ -208,7 +206,16 @@ export class AttendanceForm {
       this.error.set('Indica el nombre del emisor del vale.');
       return;
     }
-    if (!Number.isFinite(gallons) || gallons <= 0) {
+    if (!rawGallons) {
+      this.error.set('Indica los galones realmente entregados.');
+      return;
+    }
+    const gallons = parseGallonsInput(rawGallons);
+    if (!gallons) {
+      this.error.set('Los galones admiten como máximo 3 decimales (ej. 5,250).');
+      return;
+    }
+    if (gallons.milli <= 0) {
       this.error.set('Indica los galones realmente entregados.');
       return;
     }
@@ -218,14 +225,26 @@ export class AttendanceForm {
       && normalize(voucher.id) === normalize(voucherId)
       && normalize(voucher.issuer) === normalize(this.issuer()),
     );
-    if (gallons > orderBalance(order) || (existing && gallons > voucherBalance(existing))) {
-      this.error.set('El despacho supera el saldo disponible de la orden o del vale.');
+    // Comparaciones en milésimas exactas: los saldos con decimales no deben
+    // rechazarse por residuos de punto flotante.
+    if (gallons.milli > gallonsBalanceMilli(order.total, order.used)) {
+      this.error.set('El despacho supera el saldo disponible de la orden.');
       return;
     }
-    const authorized = Number(this.authorized());
-    if (!existing && (!Number.isFinite(authorized) || authorized < gallons)) {
-      this.error.set('Los galones autorizados deben cubrir el despacho.');
+    if (existing && gallons.milli > gallonsBalanceMilli(existing.total, existing.used)) {
+      this.error.set('El despacho supera el saldo disponible del vale.');
       return;
+    }
+    const authorized = parseGallonsInput(this.authorized());
+    if (!existing) {
+      if (!authorized || authorized.milli <= 0) {
+        this.error.set('Indica los galones autorizados del vale (máximo 3 decimales).');
+        return;
+      }
+      if (authorized.milli < gallons.milli) {
+        this.error.set('Los galones autorizados deben cubrir el despacho.');
+        return;
+      }
     }
 
     this.error.set('');
@@ -234,8 +253,8 @@ export class AttendanceForm {
       voucherId,
       issuer: this.issuer().trim(),
       issuerType: this.issuerType(),
-      authorized,
-      gallons,
+      authorized: authorized?.normalized ?? '0.000',
+      gallons: gallons.normalized,
       branch: this.branchValue(),
     });
   }

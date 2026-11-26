@@ -1,11 +1,10 @@
-import { CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { APP_ROUTES, SESSION_EXPIRED_REASON } from '../../core/constants/nav';
 import { isApiError } from '../../core/models/error';
 import { AuthService } from '../../core/services/auth/auth';
-import 'iconify-icon';
 
 /** Longitud mínima de contraseña aceptada por el formulario de acceso. */
 const PASSWORD_MIN_LENGTH = 6;
@@ -13,9 +12,9 @@ const PASSWORD_MIN_LENGTH = 6;
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   selector: 'app-login',
   templateUrl: './login.html',
+  styleUrl: './login.css',
 })
 export class Login {
   private readonly route = inject(ActivatedRoute);
@@ -27,16 +26,16 @@ export class Login {
     password: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH)]],
   });
 
-  /** Estado del formulario como señal para que la plantilla (OnPush) se actualice al validar. */
-  private readonly formStatus = toSignal(this.form.statusChanges, { initialValue: this.form.status });
+  /** Recalcula los errores incluso cuando el estado global sigue siendo INVALID. */
+  private readonly formValue = toSignal(this.form.valueChanges, {
+    initialValue: this.form.getRawValue(),
+  });
 
   protected readonly emailTouched = signal(false);
   protected readonly passwordTouched = signal(false);
 
-  protected readonly formValid = computed(() => this.formStatus() === 'VALID');
-
   protected readonly emailError = computed(() => {
-    this.formStatus();
+    this.formValue();
     const control = this.form.controls.email;
     if (!this.emailTouched() || control.valid) {
       return '';
@@ -47,7 +46,7 @@ export class Login {
   });
 
   protected readonly passwordError = computed(() => {
-    this.formStatus();
+    this.formValue();
     const control = this.form.controls.password;
     if (!this.passwordTouched() || control.valid) {
       return '';
