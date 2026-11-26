@@ -14,6 +14,8 @@ export interface ReportFilters {
   readonly branch_id?: string | null;
   readonly status?: string | null;
   readonly group_by?: ReportGrouping;
+  readonly hour_from?: number;
+  readonly hour_to?: number;
 }
 
 export interface FuelDashboardRow {
@@ -105,6 +107,8 @@ export type AttendanceReportQuery = {
   readonly date_to?: string | null;
   readonly user_id?: string | null;
   readonly branch_id?: string | null;
+  readonly hour_from?: number;
+  readonly hour_to?: number;
 };
 
 export type DashboardQuery = AttendanceReportQuery & {

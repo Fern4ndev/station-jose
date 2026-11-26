@@ -34,6 +34,9 @@ export class FuelTypeFormDialog {
   );
   protected readonly shownError = computed(() => this.localError() || this.error());
 
+  /** Solo se puede guardar cuando el nombre difiere del registro original. */
+  protected readonly dirty = computed(() => this.name() !== (this.editing()?.name ?? ''));
+
   constructor() {
     effect(() => {
       if (!this.visible()) {

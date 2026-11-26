@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TablePagination } from '../../shared/components/table-pagination/table-pagination';
@@ -20,15 +21,14 @@ import { ReportChart } from './components/report-chart/report-chart';
 import { ReportMetrics } from './components/report-metrics/report-metrics';
 import { ReportSummaryPanel } from './components/report-summary/report-summary';
 import {
-  REPORT_PERIODS,
-  type ReportBucket,
+  REPORT_VIEWS, REPORT_GROUPING, buildReportBuckets, defaultReportRange, filterReportAttendances,
   type ReportSummary,
-  type ReportPeriod,
+  type ReportSelection, type ReportView,
 } from './reports-data';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, SelectModule, DatePickerModule, TablePagination, ReportChart, ReportMetrics, ReportSummaryPanel, TableRefresh, UiIcon, UiPageHeading],
+  imports: [FormsModule, DatePipe, SelectModule, DatePickerModule, TablePagination, ReportChart, ReportMetrics, ReportSummaryPanel, TableRefresh, UiIcon, UiPageHeading],
   selector: 'app-reports',
   templateUrl: './reports.html',
 })
@@ -39,15 +39,13 @@ export class Reports {
   private readonly api = inject(ReportsApi);
   private readonly catalog = inject(CatalogApi);
 
-  protected readonly periods = [...REPORT_PERIODS];
-  protected readonly period = signal<ReportPeriod>('7d');
   protected readonly kind = signal<'orders' | 'attendances'>('orders');
   protected readonly kinds = [{ value: 'orders', label: 'Órdenes' }, { value: 'attendances', label: 'Atenciones' }];
-  protected readonly groupings = [{ value: 'hour', label: 'Por hora' }, { value: 'day', label: 'Por día' }, { value: 'week', label: 'Por semana' }, { value: 'month', label: 'Por mes' }];
-  protected readonly grouping = signal<'hour' | 'day' | 'week' | 'month'>('day');
+  protected readonly views = [...REPORT_VIEWS];
+  protected readonly view = signal<ReportView>('week');
   protected readonly today = new Date();
-  protected readonly from = signal(this.startOfPeriod('7d'));
-  protected readonly to = signal(new Date());
+  protected readonly from = signal(defaultReportRange('week', this.today).from);
+  protected readonly to = signal(defaultReportRange('week', this.today).to);
   protected readonly hourOptions = Array.from({ length: 24 }, (_, hour) => ({
     value: hour,
     label: `${String(hour).padStart(2, '0')}:00`,
@@ -55,54 +53,47 @@ export class Reports {
   protected readonly hourFrom = signal(0);
   protected readonly hourTo = signal(23);
   protected readonly branch = this.state.branch;
+  protected readonly applied = signal<ReportSelection>(this.selection());
+  protected readonly activeKind = computed(() => this.applied().kind);
+  protected readonly hasPending = computed(() => JSON.stringify(this.selection()) !== JSON.stringify(this.applied()));
 
   protected readonly dashboard = signal<DashboardResponse | null>(null);
   protected readonly orderRows = signal<readonly PurchaseOrderReportRow[]>([]);
   protected readonly attendanceRows = signal<readonly AttendanceReportRow[]>([]);
   protected readonly first = linkedSignal({
-    source: () => [this.kind(), this.from(), this.to(), this.hourFrom(), this.hourTo(), this.branch(), this.orderRows(), this.attendanceRows()] as const,
+    source: () => [this.applied(), this.orderRows(), this.attendanceRows()] as const,
     computation: () => 0,
   });
   protected readonly pageSize = signal(10);
-  protected readonly filteredAttendanceRows = computed(() => {
-    const from = this.hourFrom();
-    const to = this.hourTo();
-    if (from === 0 && to === 23) return this.attendanceRows();
-    return this.attendanceRows().filter((row) => {
-      const hour = this.hourOf(row.attended_at);
-      return hour !== null && hour >= from && hour <= to;
-    });
-  });
+  protected readonly filteredAttendanceRows = computed(() => filterReportAttendances(this.attendanceRows(), this.applied()));
   /** El servidor entrega lo más reciente primero: el último registro es la fila 1. */
   protected readonly orderedOrderRows = computed(() => this.orderRows());
   protected readonly orderedAttendanceRows = computed(() => this.filteredAttendanceRows());
   protected readonly pagedOrderRows = computed(() => this.orderedOrderRows().slice(this.first(), this.first() + this.pageSize()));
   protected readonly pagedAttendanceRows = computed(() => this.orderedAttendanceRows().slice(this.first(), this.first() + this.pageSize()));
-  protected readonly reportRowCount = computed(() => this.kind() === 'orders' ? this.orderRows().length : this.filteredAttendanceRows().length);
+  protected readonly reportRowCount = computed(() => this.activeKind() === 'orders' ? this.orderRows().length : this.filteredAttendanceRows().length);
 
   /** Correlativo estable entre páginas; 1 es el registro más reciente. */
   protected reportRowNumber(index: number): number {
     return this.first() + index + 1;
   }
   protected readonly refreshing = signal(false);
-  protected readonly buckets = signal<readonly ReportBucket[]>([]);
-  protected readonly visibleBuckets = computed(() => {
-    const from = this.hourFrom();
-    const to = this.hourTo();
-    if (this.grouping() !== 'hour' || (from === 0 && to === 23)) return this.buckets();
-    return this.buckets().filter((bucket) => {
-      const hour = this.hourOf(bucket.label);
-      return hour !== null && hour >= from && hour <= to;
-    });
+  protected readonly visibleBuckets = computed(() => buildReportBuckets(this.attendanceRows(), this.applied()));
+  protected readonly badge = computed(() => {
+    const format = (value: string) => new Date(`${value}T12:00:00`).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' });
+    const { from, to } = this.applied();
+    return from === to ? format(from) : `${format(from)} – ${format(to)}`;
   });
-  protected readonly badge = computed(() => this.periods.find((item) => item.value === this.period())?.label ?? '');
+  protected readonly chartDescription = computed(() => ({
+    day: 'Por hora', week: 'Lun–vie', month: 'Por semana', year: 'Por mes',
+  })[this.applied().view]);
   protected readonly metrics = computed<readonly StatCardModel[]>(() => {
     const data = this.dashboard();
     return [
-      { id: 'gallons', label: 'Galones atendidos', value: formatGallons(Number(data?.attended_gallons ?? 0)), suffix: 'gal', note: 'En el período seleccionado', icon: 'attendances', tone: 'mint' },
-      { id: 'attendances', label: 'Atenciones', value: String(data?.attendances ?? 0), note: 'En el período seleccionado', icon: 'reports', tone: 'amber' },
-      { id: 'orders', label: 'Órdenes', value: String(data?.orders ?? 0), note: 'En el período seleccionado', icon: 'orders', tone: 'mint' },
-      { id: 'vouchers', label: 'Vales atendidos', value: String(data?.vouchers ?? 0), note: 'En el período seleccionado', icon: 'vouchers', tone: 'amber' },
+      { id: 'gallons', label: 'Galones atendidos', value: formatGallons(Number(data?.attended_gallons ?? 0)), suffix: 'gal', note: 'En el rango aplicado', icon: 'attendances', tone: 'mint' },
+      { id: 'attendances', label: 'Atenciones', value: String(data?.attendances ?? 0), note: 'En el rango aplicado', icon: 'reports', tone: 'amber' },
+      { id: 'orders', label: 'Órdenes', value: String(data?.orders ?? 0), note: 'En el rango aplicado', icon: 'orders', tone: 'mint' },
+      { id: 'vouchers', label: 'Vales atendidos', value: String(data?.vouchers ?? 0), note: 'En el rango aplicado', icon: 'vouchers', tone: 'amber' },
     ];
   });
   protected readonly summary = computed<ReportSummary>(() => {
@@ -119,57 +110,32 @@ export class Reports {
   });
 
   constructor() {
-    effect(() => {
-      this.branch();
-      this.from();
-      this.to();
-      this.grouping();
-      void this.load();
-    });
+    void this.load(this.applied());
   }
 
-  private startOfPeriod(period: ReportPeriod): Date {
-    const now = new Date();
-    const from = new Date(now);
-    if (period === '7d') from.setDate(now.getDate() - 6);
-    else if (period === 'month') from.setDate(1);
-    else if (period === 'year') from.setMonth(0, 1);
-    return from;
+  private selection(): ReportSelection {
+    return { kind: this.kind(), view: this.view(), from: todayIso(this.from()), to: todayIso(this.to()),
+      hourFrom: this.hourFrom(), hourTo: this.hourTo(), branch: this.branch() };
   }
 
-  private hourOf(value: string): number | null {
-    const match = /[T ](\d{2}):/.exec(value);
-    return match ? Number(match[1]) : null;
-  }
-
-  private filters(): { date_from: string; date_to: string; group_by: 'hour' | 'day' | 'week' | 'month' } {
-    return { date_from: todayIso(this.from()), date_to: todayIso(this.to()), group_by: this.grouping() };
-  }
-
-  private async load(): Promise<void> {
+  private async load(selection: ReportSelection): Promise<void> {
     const version = ++this.loadVersion;
     this.refreshing.set(true);
     try {
-      const filters = this.filters();
       const branches = await firstValueFrom(this.catalog.branches());
-      const selected = branches.find((item) => item.name === this.branch());
-      const visible = selected ? [selected] : branches;
-      const [summary, orderReport, attendanceReport, ...series] = await Promise.all([
-        firstValueFrom(this.api.dashboard({ ...filters, branch_id: selected?.id })),
-        firstValueFrom(this.api.purchaseOrders({ date_from: filters.date_from, date_to: filters.date_to, branch_id: selected?.id })),
-        firstValueFrom(this.api.attendances({ date_from: filters.date_from, date_to: filters.date_to, branch_id: selected?.id })),
-        ...visible.map((branch) => firstValueFrom(this.api.dashboard({ ...filters, branch_id: branch.id }))),
+      const selected = branches.find((item) => item.name === selection.branch);
+      const filters = { date_from: selection.from, date_to: selection.to, branch_id: selected?.id };
+      const attendanceFilters = { ...filters, hour_from: selection.hourFrom, hour_to: selection.hourTo };
+      const [summary, orderReport, attendanceReport] = await Promise.all([
+        firstValueFrom(this.api.dashboard({ ...attendanceFilters, group_by: REPORT_GROUPING[selection.view] })),
+        firstValueFrom(this.api.purchaseOrders(filters)),
+        firstValueFrom(this.api.attendances(attendanceFilters)),
       ]);
       if (version !== this.loadVersion) return;
       this.dashboard.set(summary);
       this.orderRows.set(orderReport.items);
       this.attendanceRows.set(attendanceReport.items);
-      const periods = new Set(series.flatMap((item) => item.by_period.map((row) => row.period)));
-      this.buckets.set([...periods].sort().map((period) => ({
-        label: period,
-        sanJose: Number(series[visible.findIndex((item) => item.name === 'San José')]?.by_period.find((item) => item.period === period)?.attended_gallons ?? 0),
-        santaMarta: Number(series[visible.findIndex((item) => item.name === 'Santa Marta')]?.by_period.find((item) => item.period === period)?.attended_gallons ?? 0),
-      })));
+      this.applied.set(selection);
     } catch (error) {
       if (version === this.loadVersion) this.messages.add({ severity: 'error', summary: extractApiError(error, 'No se pudieron cargar los reportes.'), life: 4000 });
     } finally {
@@ -179,23 +145,7 @@ export class Reports {
 
   protected async refresh(): Promise<void> {
     if (this.refreshing()) return;
-    this.refreshing.set(true);
-    try {
-      const { date_from, date_to } = this.filters();
-      const branches = await firstValueFrom(this.catalog.branches());
-      const branch_id = branches.find((item) => item.name === this.branch())?.id;
-      if (this.kind() === 'orders') {
-        const report = await firstValueFrom(this.api.purchaseOrders({ date_from, date_to, branch_id }));
-        this.orderRows.set(report.items);
-      } else {
-        const report = await firstValueFrom(this.api.attendances({ date_from, date_to, branch_id }));
-        this.attendanceRows.set(report.items);
-      }
-    } catch (error) {
-      this.messages.add({ severity: 'error', summary: extractApiError(error, 'No se pudo actualizar la tabla.'), life: 4000 });
-    } finally {
-      this.refreshing.set(false);
-    }
+    await this.load(this.applied());
   }
 
   protected onPage(event: { first?: number; rows?: number }): void {
@@ -203,24 +153,27 @@ export class Reports {
     this.pageSize.set(event.rows ?? 10);
   }
 
-  protected onPeriod(value: ReportPeriod): void {
-    this.period.set(value);
-    if (value === 'custom') return;
-    this.from.set(this.startOfPeriod(value));
-    this.to.set(new Date());
-    this.grouping.set(value === 'year' ? 'month' : value === 'month' ? 'week' : 'day');
+  protected onView(value: ReportView): void {
+    this.view.set(value);
+    const range = defaultReportRange(value, this.to());
+    this.from.set(range.from);
+    this.to.set(range.to);
+  }
+
+  protected async applyFilters(event?: Event): Promise<void> {
+    event?.preventDefault();
+    if (this.refreshing()) return;
+    await this.load(this.selection());
   }
 
   protected onFrom(value: Date | null): void {
     if (!value) return;
-    this.period.set('custom');
     this.from.set(value);
     if (value > this.to()) this.to.set(value);
   }
 
   protected onTo(value: Date | null): void {
     if (!value) return;
-    this.period.set('custom');
     this.to.set(value);
     if (value < this.from()) this.from.set(value);
   }
@@ -241,15 +194,15 @@ export class Reports {
   }
 
   protected exportReport(format: 'pdf' | 'xlsx'): void {
-    const { date_from, date_to } = this.filters();
-    const branch = this.state.branches().find((item) => item === this.branch());
+    const selection = this.applied();
+    const { from: date_from, to: date_to } = selection;
     void firstValueFrom(this.catalog.branches()).then((branches) => {
-      const branch_id = branches.find((item) => item.name === branch)?.id;
-      return this.kind() === 'orders'
+      const branch_id = branches.find((item) => item.name === selection.branch)?.id;
+      return selection.kind === 'orders'
         ? firstValueFrom(this.api.exportPurchaseOrders(format, { date_from, date_to, branch_id }))
-        : firstValueFrom(this.api.exportAttendances(format, { date_from, date_to, branch_id }));
+        : firstValueFrom(this.api.exportAttendances(format, { date_from, date_to, branch_id, hour_from: selection.hourFrom, hour_to: selection.hourTo }));
     }).then((blob) => {
-      downloadBlob(blob, `reporte-${this.kind() === 'orders' ? 'ordenes' : 'atenciones'}.${format}`);
+      downloadBlob(blob, `reporte-${selection.kind === 'orders' ? 'ordenes' : 'atenciones'}.${format}`);
     }).catch((error: unknown) => {
       this.messages.add({ severity: 'error', summary: extractApiError(error), life: 4000 });
     });

@@ -1,7 +1,7 @@
 <div class="animate-[fadeIn_230ms_ease_both]">
   <app-ui-page-heading
     title="Reportes"
-    subtitle="Consulta actividad y saldos por período y sede."
+    subtitle="Consulta los despachos y saldos del rango aplicado."
   >
     <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] bg-(--sanjose-primary-action) text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] hover:bg-(--sanjose-primary-action-hover)" (click)="exportReport('pdf')">
       <app-ui-icon name="download" [size]="14" />
@@ -12,52 +12,58 @@
 
   <app-report-metrics [metrics]="metrics()" />
 
-  <section class="mb-[16px] rounded-[12px] border border-[#e5eaea] bg-white p-[18px]" aria-label="Filtros de reportes">
-    <div class="mb-[10px] flex flex-wrap items-center justify-between gap-[8px]">
-      <div class="flex flex-wrap items-baseline gap-[8px]">
-        <h2 class="m-0 text-[11px] font-[650] text-[#22373e]">Filtros</h2>
-        <span class="text-[10px] text-[#8c999d]">El rango de horas filtra el gráfico y el detalle de atenciones.</span>
+  <section class="mb-[16px] rounded-[16px] border border-[#dce7e4] bg-white p-[20px] max-[760px]:p-[14px]" aria-label="Filtros de reportes">
+    <form (ngSubmit)="applyFilters()">
+    <div class="mb-[18px] flex flex-wrap items-start justify-between gap-[14px]">
+      <div>
+        <h2 class="m-0 text-[13px] font-[650] text-[#22373e]">Filtros del reporte</h2>
+        <p class="mt-[5px] mb-0 text-[12px] leading-relaxed text-[#607076]">Ajusta los filtros y presiona Aplicar.</p>
       </div>
-      @if (hourFrom() !== 0 || hourTo() !== 23) {
-        <button type="button" class="min-h-[26px] cursor-pointer rounded-[8px] border border-[#e2e8e8] bg-white px-[9px] text-[10px] text-[#607076] hover:bg-[#f7fbfa] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]" (click)="resetHours()">Limpiar horas</button>
-      }
+      <span class="text-[12px] leading-relaxed" [class.text-amber-800]="hasPending()" [class.text-slate-600]="!hasPending()" role="status" aria-live="polite">{{ refreshing() ? 'Actualizando…' : hasPending() ? 'Sin aplicar' : 'Aplicado' }}</span>
     </div>
-    <div class="grid grid-cols-[repeat(7,minmax(0,1fr))] gap-[12px] max-[1150px]:grid-cols-[repeat(4,minmax(0,1fr))] max-[760px]:grid-cols-[repeat(2,minmax(0,1fr))] max-[760px]:gap-[8px]">
-      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Reporte
-        <p-select [options]="kinds" optionLabel="label" optionValue="value" [ngModel]="kind()" (ngModelChange)="kind.set($event)" ariaLabel="Tipo de reporte" size="small" styleClass="w-full" />
+    <div class="grid grid-cols-[1.1fr_1.2fr_1.2fr_0.8fr_0.8fr_0.9fr] gap-[12px] max-[1150px]:grid-cols-3 max-[760px]:grid-cols-6 max-[760px]:gap-x-[8px]">
+      <label class="flex min-w-0 flex-col gap-[6px] text-[12px] text-[#52636a] max-[760px]:col-span-6">Reporte
+        <p-select name="reportKind" [options]="kinds" optionLabel="label" optionValue="value" [ngModel]="kind()" (ngModelChange)="kind.set($event)" ariaLabel="Tipo de reporte" size="small" styleClass="w-full" />
       </label>
-      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Período
-        <p-select [options]="periods" optionLabel="label" optionValue="value" [ngModel]="period()" (ngModelChange)="onPeriod($event)" ariaLabel="Período del reporte" size="small" styleClass="w-full" />
+      <label for="reportFrom" class="flex min-w-0 flex-col gap-[6px] text-[12px] text-[#52636a] max-[760px]:col-span-3">Desde
+        <p-datepicker name="reportFrom" [ngModel]="from()" (ngModelChange)="onFrom($event)" dateFormat="dd/mm/yy" [maxDate]="to()" [showIcon]="true" [readonlyInput]="true" inputId="reportFrom" styleClass="w-full" />
       </label>
-      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Agrupar
-        <p-select [options]="groupings" optionLabel="label" optionValue="value" [ngModel]="grouping()" (ngModelChange)="grouping.set($event)" ariaLabel="Agrupar por" size="small" styleClass="w-full" />
+      <label for="reportTo" class="flex min-w-0 flex-col gap-[6px] text-[12px] text-[#52636a] max-[760px]:col-span-3">Hasta
+        <p-datepicker name="reportTo" [ngModel]="to()" (ngModelChange)="onTo($event)" dateFormat="dd/mm/yy" [minDate]="from()" [maxDate]="today" [showIcon]="true" [readonlyInput]="true" inputId="reportTo" styleClass="w-full" />
       </label>
-      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Desde
-        <p-datepicker [ngModel]="from()" (ngModelChange)="onFrom($event)" dateFormat="dd/mm/yy" [maxDate]="to()" [showIcon]="true" [readonlyInput]="true" inputId="reportFrom" styleClass="w-full" />
+      <label class="flex min-w-0 flex-col gap-[6px] text-[12px] text-[#52636a] max-[760px]:col-span-2">Hora desde
+        <p-select name="hourFrom" [options]="hourOptions" optionLabel="label" optionValue="value" [ngModel]="hourFrom()" (ngModelChange)="onHourFrom($event)" ariaLabel="Hora desde" size="small" styleClass="w-full" />
       </label>
-      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Hasta
-        <p-datepicker [ngModel]="to()" (ngModelChange)="onTo($event)" dateFormat="dd/mm/yy" [minDate]="from()" [maxDate]="today" [showIcon]="true" [readonlyInput]="true" inputId="reportTo" styleClass="w-full" />
+      <label class="flex min-w-0 flex-col gap-[6px] text-[12px] text-[#52636a] max-[760px]:col-span-2">Hora hasta
+        <p-select name="hourTo" [options]="hourOptions" optionLabel="label" optionValue="value" [ngModel]="hourTo()" (ngModelChange)="onHourTo($event)" ariaLabel="Hora hasta" size="small" styleClass="w-full" />
       </label>
-      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Hora desde
-        <p-select [options]="hourOptions" optionLabel="label" optionValue="value" [ngModel]="hourFrom()" (ngModelChange)="onHourFrom($event)" ariaLabel="Hora desde" size="small" styleClass="w-full" />
-      </label>
-      <label class="flex min-w-0 flex-col gap-[5px] text-[11px] text-[#52636a]">Hora hasta
-        <p-select [options]="hourOptions" optionLabel="label" optionValue="value" [ngModel]="hourTo()" (ngModelChange)="onHourTo($event)" ariaLabel="Hora hasta" size="small" styleClass="w-full" />
+      <label class="flex min-w-0 flex-col gap-[6px] text-[12px] text-[#52636a] max-[760px]:col-span-2">Vista
+        <p-select name="reportView" [options]="views" optionLabel="label" optionValue="value" [ngModel]="view()" (ngModelChange)="onView($event)" ariaLabel="Vista del gráfico" size="small" styleClass="w-full" />
       </label>
     </div>
+    <div class="mt-[18px] flex items-center justify-between gap-[14px] border-t border-[#edf0f0] pt-[14px] max-[760px]:flex-col max-[760px]:items-stretch">
+      <div class="flex flex-wrap items-center gap-x-[12px] gap-y-[6px] text-[11px] text-[#607076]">
+        <span>Horario de despachos y atenciones.</span>
+        @if (hourFrom() !== 0 || hourTo() !== 23) { <button type="button" class="min-h-[32px] cursor-pointer font-semibold text-teal-800 underline underline-offset-4 focus-visible:outline-2" (click)="resetHours()">Restablecer horario</button> }
+      </div>
+      <button type="submit" class="inline-flex min-h-[44px] min-w-[118px] cursor-pointer items-center justify-center gap-[8px] rounded-[10px] bg-(--sanjose-primary-action) px-[20px] text-[13px] font-semibold text-white transition-colors hover:bg-(--sanjose-primary-action-hover) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#39c6ae] disabled:cursor-wait disabled:opacity-60" [disabled]="refreshing()">
+        <app-ui-icon [name]="refreshing() ? 'refresh' : 'check'" [size]="16" />{{ refreshing() ? 'Aplicando…' : 'Aplicar' }}
+      </button>
+    </div>
+    </form>
   </section>
 
   <div
     class="grid grid-cols-[minmax(0,1.45fr)_minmax(240px,0.75fr)] gap-[16px] max-[760px]:grid-cols-[1fr] max-[760px]:gap-[10px]"
   >
-    <app-report-chart [buckets]="visibleBuckets()" [badge]="badge()" />
+    <app-report-chart class="min-w-0" [buckets]="visibleBuckets()" [badge]="badge()" [subtitle]="chartDescription()" [loading]="refreshing()" [hourly]="applied().view === 'day'" />
     <app-report-summary [summary]="summary()" />
   </div>
 
   <div class="mt-[16px] rounded-[12px] border border-[#e5eaea] bg-white p-[18px] text-[11px] text-[#52636a]">
     <div class="mb-[12px] flex justify-end"><app-table-refresh [loading]="refreshing()" (refresh)="refresh()" /></div>
     <div class="overflow-x-auto">
-    @if (kind() === 'orders') {
+    @if (activeKind() === 'orders') {
       <table class="w-full min-w-[720px] border-collapse text-left [&_th]:border-y [&_th]:border-[#edf0f0] [&_th]:bg-[rgba(244,247,246,0.65)] [&_th]:px-[10px] [&_th]:py-[8px] [&_th]:text-[10px] [&_th]:font-[620] [&_th]:uppercase [&_th]:whitespace-nowrap [&_th]:text-[#839095] [&_td]:px-[10px] [&_td]:py-[10px] [&_td]:whitespace-nowrap [&_td]:align-middle">
         <thead><tr><th class="w-[56px]">N°</th><th>Orden</th><th>Entidad</th><th>Sede</th><th>Combustible</th><th>Autorizado</th><th>Despachado</th><th>Saldo</th></tr></thead>
         <tbody>
@@ -71,7 +77,7 @@
         <thead><tr><th class="w-[56px]">N°</th><th>Fecha</th><th>Vale</th><th>Orden</th><th>Grifero</th><th>Sede</th><th>Combustible</th><th>Galones</th></tr></thead>
         <tbody>
           @for (row of pagedAttendanceRows(); track row.attendance_id + row.fuel_type_code) {
-            <tr class="border-t border-[#edf0f0]"><td class="text-[#8b989c]">{{ reportRowNumber($index) }}</td><td>{{ row.attended_at }}</td><td>{{ row.voucher_number }}</td><td>{{ row.order_number }}</td><td>{{ row.performer_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.attended_gallons }}</td></tr>
+            <tr class="border-t border-[#edf0f0]"><td class="text-[#8b989c]">{{ reportRowNumber($index) }}</td><td>{{ row.attended_at | date:'dd/MM/yyyy HH:mm':'-0500' }}</td><td>{{ row.voucher_number }}</td><td>{{ row.order_number }}</td><td>{{ row.performer_name }}</td><td>{{ row.branch_name }}</td><td>{{ row.fuel_type_name }}</td><td>{{ row.attended_gallons }}</td></tr>
           } @empty { <tr><td colspan="8">No hay atenciones en el período.</td></tr> }
         </tbody>
       </table>

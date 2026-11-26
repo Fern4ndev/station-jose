@@ -56,6 +56,12 @@ El backend actual no utiliza `asyncpg` ni SQLModel. F8 incorpora `PyMuPDF`, `num
 
 El OCR utiliza `rapidocr==3.10.0` con `onnxruntime==1.32.0` en CPU, compatibles con Python 3.13. Se instalan desde `requirements.txt`; el antiguo paquete `rapidocr_onnxruntime==1.4.4` no admite Python 3.13.
 
+Para documentos SIGA en español se utilizan detección PP-OCRv4 móvil y reconocimiento PP-OCRv5 latino. Los modelos se descargan al primer uso y se reutilizan en el proceso; ONNX Runtime usa dos hilos de cálculo y las lecturas OCR se serializan para evitar competir por CPU. El tiempo configurado es de 60 segundos y el navegador cancela solicitudes sin respuesta tras 75 segundos.
+
+Los escaneos SIGA se leen primero en la cabecera y la sección de facturación de cada página. Si se reconocen los cuatro campos principales, se evita el OCR del resto de la página; `extracted_text` contiene únicamente esas regiones. Si faltan datos o el formato es distinto, se procesa la página completa. Los PDF con texto seleccionable mantienen la extracción directa, sin OCR. La detección limita el lado más largo para evitar ampliar innecesariamente los recortes.
+
+La extracción reconoce el número junto a «ORDEN DE COMPRA - GUÍA DE INTERNAMIENTO N°», el «N° Exp. SIAF» y la unidad ejecutora como nombre de la institución. El RUC se busca en la unidad ejecutora o en la sección de facturación, excluyendo `20485584880`, correspondiente a la estación. Los datos ausentes o ambiguos se completan manualmente.
+
 La regla vigente es mantener el esquema manualmente en SQL, sin herramientas automatizadas de migración. El contrato vigente utiliza `db/001_schema.sql` y `db/002_seed.sql`; los cambios para bases existentes se gestionan mediante ALTER numerados.
 
 ## 4. Arquitectura del proyecto
@@ -264,6 +270,8 @@ Para crear una atención se requiere el encabezado `Idempotency-Key` con un UUID
 El grifero consulta y atiende órdenes y vales de su sede. La primera atención guarda los datos del vale y el despacho en una sola operación; el listado de vales atendidos muestra sus registros y permite consultar el detalle y el historial.
 
 Los reportes y exportaciones están restringidos a `ADMIN` y `OFFICE`; el rol `ATTENDANT` no recibe acceso a reportes ni importes. Para habilitar exportaciones instala las dependencias declaradas en `requirements.txt` (`openpyxl` y `reportlab`).
+
+En Reportes, los cambios de filtros se confirman con **Aplicar**. Las vistas muestran 24 horas (Día), lunes a viernes (Semana), semanas de lunes a domingo (Mes) y meses (Año), incluyendo franjas sin despachos. Las consultas de atenciones, dashboard y exportación de atenciones aceptan `hour_from` y `hour_to` entre 0 y 23, inclusivos, en hora de Lima; el horario inicial cubre el día completo. La tabla, los indicadores y la exportación conservan la última selección aplicada mientras se editan los filtros.
 
 ## 12. Pruebas
 

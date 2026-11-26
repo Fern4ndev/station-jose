@@ -100,3 +100,107 @@ def test_preview_rejects_four_pages_and_cleans_temporary_file(tmp_path) -> None:
         )
 
     assert not list(tmp_path.iterdir())
+
+
+def test_extracts_siga_boxed_numbers_and_institution_ruc() -> None:
+    fields = _extract_fields(
+        """ORDEN DE COMPRA - GUÍA DE INTERNAMIENTO N°
+0000101
+N° Exp. SIAF :
+0000000570
+UNIDAD EJECUTORA : 005 MUNICIPALIDAD DE PRUEBA
+NRO. IDENTIFICACIÓN : 300255
+RUC: 20485584880 Teléfono: 983701058
+Facturar a nombre de:
+MUNICIPALIDAD DE PRUEBA
+RUC:
+20123456789
+"""
+    )
+    assert fields.order_number == "0000101"
+    assert fields.siaf_number == "0000000570"
+    assert fields.institution_name == "MUNICIPALIDAD DE PRUEBA"
+    assert fields.executing_unit_ruc == "20123456789"
+
+
+def test_institution_uses_executing_unit_and_excludes_station_ruc() -> None:
+    fields = _extract_fields(
+        "Entidad: Nombre genérico\nUnidad ejecutora:\n005 MUNICIPALIDAD DE PRUEBA\n"
+        "RUC de la unidad ejecutora: 20485584880\nRUC: 20485584880"
+    )
+    assert fields.institution_name == "MUNICIPALIDAD DE PRUEBA"
+    assert fields.executing_unit_ruc is None
+
+
+def test_ambiguous_unlabeled_institution_rucs_require_manual_review() -> None:
+    fields = _extract_fields("RUC: 20485584880\nRUC: 20123456789\nRUC: 20987654321")
+    assert fields.executing_unit_ruc is None
+
+
+def test_reads_billing_ruc_when_ocr_misreads_its_label() -> None:
+    fields = _extract_fields(
+        "RUC: 20485584880\nFacturar a nombre de:\nMUNICIPALIDAD DE PRUEBA\n"
+        "RUÇ : .\n20123456789\nELABORADO POR\nRUC: 20987654321"
+    )
+    assert fields.executing_unit_ruc == "20123456789"
+
+
+_SIGA_HEADER = (
+    "ORDEN DE COMPRA - GUÍA DE INTERNAMIENTO N°\n0000101\n"
+    "N° Exp. SIAF: 0000000570\nUNIDAD EJECUTORA: 005 MUNICIPALIDAD DE PRUEBA"
+)
+_SIGA_BILLING = "Facturar a nombre de:\nMUNICIPALIDAD DE PRUEBA\nRUC: 20123456789"
+
+
+def test_siga_fast_scan_reads_all_three_pages_without_full_page_ocr(tmp_path, monkeypatch) -> None:
+    responses = iter([_SIGA_HEADER, _SIGA_BILLING] * 3)
+    image_heights = []
+
+    def engine(image):
+        image_heights.append(image.shape[0])
+        return SimpleNamespace(txts=tuple(next(responses).splitlines()))
+
+    service = OcrService(Settings(_env_file=None, OCR_TEMP_DIR=str(tmp_path)))
+    monkeypatch.setattr(service, "_create_ocr_engine", lambda: engine)
+    with fitz.open() as document:
+        for _ in range(3):
+            document.new_page(width=600, height=840)
+        content = document.tobytes()
+
+    preview = service.preview(content, filename="siga.pdf", content_type="application/pdf")
+
+    assert preview.pages_processed == 3
+    assert preview.fields.order_number == "0000101"
+    assert preview.fields.siaf_number == "0000000570"
+    assert preview.fields.institution_name == "MUNICIPALIDAD DE PRUEBA"
+    assert preview.fields.executing_unit_ruc == "20123456789"
+    assert len(image_heights) == 6
+    assert max(image_heights) < 840
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize("header", ["Otro formato de orden", _SIGA_HEADER])
+def test_fast_scan_falls_back_to_full_page_when_fields_are_missing(tmp_path, monkeypatch, header):
+    responses = [header]
+    if header == _SIGA_HEADER:
+        responses.append("Facturar a nombre de:\nRUC: 20485584880")
+    responses.append(f"{_SIGA_HEADER}\n{_SIGA_BILLING}")
+    pending = iter(responses)
+    image_heights = []
+
+    def engine(image):
+        image_heights.append(image.shape[0])
+        return SimpleNamespace(txts=tuple(next(pending).splitlines()))
+
+    service = OcrService(Settings(_env_file=None, OCR_TEMP_DIR=str(tmp_path)))
+    monkeypatch.setattr(service, "_create_ocr_engine", lambda: engine)
+    with fitz.open() as document:
+        document.new_page(width=600, height=840)
+        content = document.tobytes()
+
+    preview = service.preview(content, filename="other-layout.pdf", content_type="application/pdf")
+
+    assert preview.fields.executing_unit_ruc == "20123456789"
+    assert len(image_heights) == len(responses)
+    assert image_heights[-1] == 1680
+    assert not list(tmp_path.iterdir())

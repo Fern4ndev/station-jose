@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, model, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, model, output, signal, viewChild } from '@angular/core';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
 import type { AttendanceRequest } from '../../attendances-data';
 import type { DispatchOrder, DispatchVoucher } from '../../operations-store';
@@ -20,4 +20,14 @@ export class AttendanceFormDialog {
   readonly resetToken = input(0);
 
   readonly register = output<AttendanceRequest>();
+
+  private readonly form = viewChild(AttendanceForm);
+  private readonly formDirty = signal(false);
+
+  /** El formulario avisa si hay cambios; el pie se refresca con este signal local. */
+  protected readonly dirty = this.formDirty.asReadonly();
+
+  constructor() {
+    effect(() => this.formDirty.set(this.form()?.dirty() ?? false));
+  }
 }

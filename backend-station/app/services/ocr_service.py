@@ -4,7 +4,9 @@ import re
 import tempfile
 import time
 from datetime import date, datetime
+from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
 from app.core.config import Settings
@@ -15,6 +17,30 @@ from app.core.exceptions import (
     OcrTimeoutError,
 )
 from app.schemas.ocr import PurchaseOrderOcrFields, PurchaseOrderOcrPreview
+
+_OCR_LOCK = Lock()
+_STATION_RUC = "20485584880"
+
+
+@lru_cache(maxsize=1)
+def _load_ocr_engine() -> Any:
+    try:
+        from rapidocr import LangRec, ModelType, OCRVersion, RapidOCR
+    except ImportError as exc:
+        raise OcrProcessingError("El OCR requiere instalar RapidOCR y ONNX Runtime.") from exc
+    return RapidOCR(
+        params={
+            "EngineConfig.onnxruntime.intra_op_num_threads": 2,
+            "EngineConfig.onnxruntime.inter_op_num_threads": 1,
+            "Det.ocr_version": OCRVersion.PPOCRV4,
+            "Det.model_type": ModelType.MOBILE,
+            "Det.limit_type": "max",
+            "Det.limit_side_len": 1280,
+            "Rec.ocr_version": OCRVersion.PPOCRV5,
+            "Rec.model_type": ModelType.MOBILE,
+            "Rec.lang_type": LangRec.LATIN,
+        }
+    )
 
 
 class OcrService:
@@ -85,7 +111,7 @@ class OcrService:
                 if not page_text:
                     if ocr_engine is None:
                         ocr_engine = self._create_ocr_engine()
-                    page_text = self._ocr_page(page, ocr_engine)
+                    page_text = self._read_scanned_page(page, ocr_engine, started_at=started_at)
                     self._check_timeout(started_at)
                     if page_text:
                         warnings.append(f"La página {page_number} fue procesada mediante OCR.")
@@ -111,23 +137,63 @@ class OcrService:
             document.close()
 
     def _create_ocr_engine(self) -> Any:
-        try:
-            from rapidocr import RapidOCR
-        except ImportError as exc:
-            raise OcrProcessingError("El OCR requiere instalar RapidOCR y ONNX Runtime.") from exc
-        return RapidOCR()
+        return _load_ocr_engine()
 
-    def _ocr_page(self, page: Any, engine: Any) -> str:
+    def _read_scanned_page(self, page: Any, engine: Any, *, started_at: float) -> str:
+        import fitz
+
+        rect = page.rect
+        header = self._ocr_page(
+            page,
+            engine,
+            started_at=started_at,
+            clip=fitz.Rect(rect.x0, rect.y0, rect.x1, rect.y0 + rect.height * 0.245),
+        )
+        self._check_timeout(started_at)
+        header_fields = _extract_fields(header)
+        if (
+            re.search(r"gu[íi]a\s+de\s+internamiento", header, re.IGNORECASE)
+            and header_fields.order_number
+            and header_fields.siaf_number
+            and header_fields.executing_unit
+        ):
+            billing = self._ocr_page(
+                page,
+                engine,
+                started_at=started_at,
+                clip=fitz.Rect(
+                    rect.x0, rect.y0 + rect.height * 0.73, rect.x1, rect.y0 + rect.height * 0.84
+                ),
+            )
+            self._check_timeout(started_at)
+            selected_text = f"{header}\n\n{billing}"
+            if _extract_fields(selected_text).executing_unit_ruc:
+                return selected_text
+        return self._ocr_page(page, engine, started_at=started_at)
+
+    def _ocr_page(
+        self, page: Any, engine: Any, *, started_at: float | None = None, clip: Any = None
+    ) -> str:
         try:
             import fitz
             import numpy as np
 
-            pixmap = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
+            pixmap = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False, clip=clip)
             image = np.frombuffer(pixmap.samples, dtype=np.uint8).reshape(
                 pixmap.height, pixmap.width, pixmap.n
             )
-            result = engine(image)
+            remaining = float(self.settings.OCR_TIMEOUT_SECONDS)
+            if started_at is not None:
+                remaining -= time.monotonic() - started_at
+            if not _OCR_LOCK.acquire(timeout=max(0, remaining)):
+                raise OcrTimeoutError("El procesamiento OCR excedió el tiempo máximo permitido.")
+            try:
+                result = engine(image)
+            finally:
+                _OCR_LOCK.release()
             return "\n".join(text.strip() for text in (result.txts or ()) if text.strip())
+        except OcrTimeoutError:
+            raise
         except Exception as exc:
             raise OcrProcessingError("RapidOCR no pudo procesar una página.") from exc
 
@@ -137,25 +203,72 @@ class OcrService:
 
 
 def _extract_fields(text: str) -> PurchaseOrderOcrFields:
+    executing_unit = _label_value(text, r"unidad\s+ejecutora")
+    if executing_unit:
+        executing_unit = re.sub(r"^\d+\s+", "", executing_unit)
     return PurchaseOrderOcrFields(
-        order_number=_label_value(
-            text, r"(?:n[úu]mero\s+de\s+orden|orden\s+de\s+compra|n[.º°]\s*de\s*orden)"
+        order_number=_labeled_number(
+            text,
+            r"(?:n[úu]mero\s+de\s+orden|orden\s+de\s+compra"
+            r"(?:\s*[-–]\s*gu[íi]a\s+de\s+internamiento)?|n[.º°]\s*de\s*orden)",
         ),
-        siaf_number=_label_value(text, r"(?:siaf|expediente\s+siaf)"),
+        siaf_number=_labeled_number(text, r"siaf"),
         issue_date=_extract_date(text),
-        institution_name=_label_value(text, r"(?:entidad|instituci[oó]n)"),
-        supplier_name=_label_value(text, r"(?:proveedor)"),
-        executing_unit=_label_value(text, r"(?:unidad\s+ejecutora)"),
-        executing_unit_ruc=_label_value(text, r"(?:ruc\s+(?:de\s+la\s+)?unidad\s+ejecutora)"),
+        institution_name=executing_unit or _label_value(text, r"(?:entidad|instituci[oó]n)"),
+        supplier_name=_label_value(text, r"(?:proveedor|se[ñn]or\(es\))"),
+        executing_unit=executing_unit,
+        executing_unit_ruc=_institution_ruc(text),
     )
 
 
+def _labeled_number(text: str, label_pattern: str) -> str | None:
+    match = re.search(
+        rf"\b{label_pattern}\s*(?:n[.º°o]\s*)?[:#-]?\s*([a-z]+-\d[\w./-]*|\d[\d./-]*)",
+        text,
+        re.IGNORECASE,
+    )
+    return match.group(1) if match else None
+
+
+def _institution_ruc(text: str) -> str | None:
+    explicit = _label_value(text, r"ruc\s+(?:de\s+la\s+)?unidad\s+ejecutora")
+    if explicit:
+        match = re.search(r"\b\d{11}\b", explicit)
+        if match and match.group() != _STATION_RUC:
+            return match.group()
+    billing_rucs = {
+        ruc.group()
+        for section in re.finditer(
+            r"facturar?\s+a\s+nombre\s+de.*?(?=elaborado\s+por|nota\s+importante|$)",
+            text,
+            re.IGNORECASE | re.DOTALL,
+        )
+        for ruc in re.finditer(r"\b\d{11}\b", section.group())
+    } - {_STATION_RUC}
+    if billing_rucs:
+        return billing_rucs.pop() if len(billing_rucs) == 1 else None
+    candidates = {
+        re.sub(r"\s", "", match.group(1))
+        for match in re.finditer(
+            r"\br\.?\s*u\.?\s*c\.?\s*[:#-]?\s*(\d(?:[ \t]*\d){10})\b",
+            text,
+            re.IGNORECASE,
+        )
+    } - {_STATION_RUC}
+    return candidates.pop() if len(candidates) == 1 else None
+
+
 def _label_value(text: str, label_pattern: str) -> str | None:
-    pattern = re.compile(rf"{label_pattern}\s*[:#-]?\s*(.+)", re.IGNORECASE)
-    for line in text.splitlines():
-        match = pattern.search(line.strip())
+    pattern = re.compile(
+        rf"^(?:{label_pattern})(?=[ \t:#-]|$)[ \t]*[:#-]?[ \t]*(.*)", re.IGNORECASE
+    )
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    for index, line in enumerate(lines):
+        match = pattern.search(line)
         if match:
             value = re.sub(r"\s+", " ", match.group(1)).strip(" :-")
+            if not value and index + 1 < len(lines):
+                value = lines[index + 1]
             if value:
                 return value
     return None

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, input, model, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, model, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
@@ -20,6 +20,15 @@ export class VoucherEditDialog {
   protected readonly issuerType = signal<VoucherIssuerType>('INSTITUTION');
   protected readonly issuerTypes = [{ value: 'INSTITUTION', label: 'Institución' }, { value: 'STATION', label: 'Estación' }];
   protected readonly error = signal('');
+
+  /** Solo se puede guardar cuando el emisor o su tipo difieren del vale original. */
+  protected readonly dirty = computed(() => {
+    const voucher = this.voucher();
+    return (
+      this.issuer() !== (voucher?.issuer ?? '') ||
+      this.issuerType() !== (voucher?.issuerType ?? 'INSTITUTION')
+    );
+  });
 
   constructor() {
     effect(() => {

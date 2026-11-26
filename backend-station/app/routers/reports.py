@@ -30,9 +30,13 @@ def _filters(
     branch_id: UUID | None,
     status: str | None,
     group_by: ReportGrouping,
+    hour_from: int = 0,
+    hour_to: int = 23,
 ) -> ReportFilters:
     if date_from and date_to and date_from > date_to:
         raise InvalidReportFilterError("date_from no puede ser posterior a date_to.")
+    if hour_from > hour_to:
+        raise InvalidReportFilterError("La hora desde no puede ser posterior a la hora hasta.")
     return ReportFilters(
         date_from=date_from,
         date_to=date_to,
@@ -40,6 +44,8 @@ def _filters(
         branch_id=branch_id,
         status=status,
         group_by=group_by,
+        hour_from=hour_from,
+        hour_to=hour_to,
     )
 
 
@@ -72,10 +78,14 @@ def attendance_report(
     date_to: Annotated[date | None, Query()] = None,
     user_id: Annotated[UUID | None, Query()] = None,
     branch_id: Annotated[UUID | None, Query()] = None,
+    hour_from: Annotated[int, Query(ge=0, le=23)] = 0,
+    hour_to: Annotated[int, Query(ge=0, le=23)] = 23,
 ) -> AttendanceReportResponse:
     return ReportService().attendances(
         db,
-        _filters(date_from, date_to, user_id, branch_id, None, ReportGrouping.DAY),
+        _filters(
+            date_from, date_to, user_id, branch_id, None, ReportGrouping.DAY, hour_from, hour_to
+        ),
     )
 
 
@@ -97,10 +107,12 @@ def dashboard_report(
     branch_id: Annotated[UUID | None, Query()] = None,
     status: Annotated[str | None, Query(max_length=30)] = None,
     group_by: Annotated[ReportGrouping, Query()] = ReportGrouping.DAY,
+    hour_from: Annotated[int, Query(ge=0, le=23)] = 0,
+    hour_to: Annotated[int, Query(ge=0, le=23)] = 23,
 ) -> DashboardResponse:
     return ReportService().dashboard(
         db,
-        _filters(date_from, date_to, user_id, branch_id, status, group_by),
+        _filters(date_from, date_to, user_id, branch_id, status, group_by, hour_from, hour_to),
     )
 
 
@@ -138,10 +150,14 @@ def export_attendance_report(
     date_to: Annotated[date | None, Query()] = None,
     user_id: Annotated[UUID | None, Query()] = None,
     branch_id: Annotated[UUID | None, Query()] = None,
+    hour_from: Annotated[int, Query(ge=0, le=23)] = 0,
+    hour_to: Annotated[int, Query(ge=0, le=23)] = 23,
 ) -> Response:
     content, media_type, filename = ReportService().export_attendances(
         db,
-        _filters(date_from, date_to, user_id, branch_id, None, ReportGrouping.DAY),
+        _filters(
+            date_from, date_to, user_id, branch_id, None, ReportGrouping.DAY, hour_from, hour_to
+        ),
         file_format,
     )
     return Response(

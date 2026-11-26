@@ -49,108 +49,141 @@
 
   @if (order(); as detail) {
     @if (tab() === 'summary') {
-      <div class="grid gap-[16px]">
-        <section
-          class="rounded-[16px] border border-[#d9ece5] bg-[linear-gradient(135deg,#f5fbf8_0%,#eaf6f1_100%)] p-[16px_18px]"
-        >
-          <div class="flex flex-wrap items-start justify-between gap-[14px]">
-            <div class="grid gap-[3px]">
-              <span class="text-[8.5px] font-[680] uppercase tracking-[0.09em] text-[#5f8a7f]">Saldo disponible</span>
-              <strong class="text-[27px] leading-[1.05] font-[680] tracking-[-0.045em] text-[#1d5a4d]">{{ balance() }}</strong>
-              <span class="text-[9.5px] text-[#6f8f86]">
-                de {{ gallons(authorizedTotal()) }} autorizados en la orden
+      <div class="grid gap-[12px]">
+        <div class="grid items-start gap-[12px] md:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)]">
+          <section
+            class="rounded-[14px] border border-[#d9ece5] bg-[linear-gradient(135deg,#f5fbf8_0%,#eaf6f1_100%)] p-[14px_16px]"
+          >
+            <div class="flex items-start justify-between gap-[10px]">
+              <div class="grid gap-[1px]">
+                <span class="text-[8.5px] font-[680] uppercase tracking-[0.09em] text-[#5f8a7f]">Saldo disponible</span>
+                <strong class="text-[26px] leading-[1.05] font-[680] tracking-[-0.045em] text-[#1d5a4d]">{{ balance() }}</strong>
+              </div>
+              <span
+                class="inline-flex items-center gap-[5px] rounded-full border border-[#cbe6dc] bg-[rgba(255,255,255,0.75)] px-[9px] py-[3px] text-[9px] font-[650] whitespace-nowrap text-[#3a7c69]"
+              >
+                <iconify-icon icon="mdi:gas-station-outline" height="11" aria-hidden="true"></iconify-icon>
+                {{ usedPercent() }}% despachado
               </span>
             </div>
-            <span
-              class="inline-flex items-center gap-[6px] rounded-full border border-[#cbe6dc] bg-[rgba(255,255,255,0.75)] px-[10px] py-[4px] text-[9px] font-[650] text-[#3a7c69]"
-            >
-              <iconify-icon icon="mdi:gas-station-outline" height="12" aria-hidden="true"></iconify-icon>
-              {{ usedPercent() }}% despachado
-            </span>
+
+            <div class="mt-[11px] h-[6px] w-full overflow-hidden rounded-full bg-[#dcece6]">
+              <div
+                class="h-full rounded-full bg-[linear-gradient(90deg,#5cc1a3,#2f8f78)] transition-[width] duration-500"
+                [style.width.%]="usedPercent()"
+              ></div>
+            </div>
+
+            <div class="mt-[7px] flex items-center justify-between gap-[10px] text-[9px] text-[#6f8f86]">
+              <span>
+                Despachado
+                <strong class="ml-[2px] font-[640] text-[#2c5f54]">{{ gallons(attendedTotal()) }}</strong>
+              </span>
+              <span>
+                Autorizado
+                <strong class="ml-[2px] font-[640] text-[#2c5f54]">{{ gallons(authorizedTotal()) }}</strong>
+              </span>
+            </div>
+          </section>
+
+          <section class="overflow-hidden rounded-[14px] border border-[#e7eceb] bg-white">
+            <header class="flex items-center gap-[6px] border-b border-[#f0f3f3] px-[14px] py-[8px]">
+              <iconify-icon icon="mdi:information-outline" height="12" class="text-[#8b989c]" aria-hidden="true"></iconify-icon>
+              <h3 class="m-0 text-[8.5px] font-[680] uppercase tracking-[0.08em] text-[#6c8085]">Datos de la orden</h3>
+            </header>
+            <dl class="m-0 grid grid-cols-2 gap-x-[14px] gap-y-[7px] px-[14px] py-[10px]">
+              <div class="col-span-2 grid gap-[1px]">
+                <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Institución</dt>
+                <dd class="m-0 text-[10.5px] font-[640] leading-[1.4] text-[#2c424a]">
+                  {{ detail.source?.institution_name || detail.entity }}
+                </dd>
+              </div>
+              <div class="grid gap-[1px]">
+                <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">RUC</dt>
+                <dd class="m-0 text-[10.5px] font-[600] text-[#3f555c]">{{ detail.source?.executing_unit_ruc || '—' }}</dd>
+              </div>
+              <div class="grid gap-[1px]">
+                <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">SIAF</dt>
+                <dd class="m-0 text-[10.5px] font-[600] text-[#3f555c]">{{ detail.source?.siaf_number || '—' }}</dd>
+              </div>
+              <div class="grid gap-[1px]">
+                <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Orden</dt>
+                <dd class="m-0 text-[10.5px] font-[600] text-[#3f555c]">{{ detail.id }}</dd>
+              </div>
+              <div class="grid gap-[1px]">
+                <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Emisión</dt>
+                <dd class="m-0 text-[10.5px] font-[600] text-[#3f555c]">{{ detail.date }}</dd>
+              </div>
+              <div class="col-span-2 grid gap-[1px]">
+                <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Sede proveedora</dt>
+                <dd class="m-0 text-[10.5px] font-[600] text-[#3f555c]">{{ detail.branch }}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+
+        @if (detail.note) {
+          <div class="flex items-start gap-[7px] rounded-[11px] border border-[#eef1f0] bg-[#fbfdfc] px-[12px] py-[8px]">
+            <iconify-icon
+              icon="mdi:note-text-outline"
+              height="12"
+              class="mt-[1px] shrink-0 text-[#9aa7a9]"
+              aria-hidden="true"
+            ></iconify-icon>
+            <p class="m-0 text-[10px] leading-[1.5] text-[#52636a]">
+              <span class="font-[630] text-[#6c8085]">Nota: </span>{{ detail.note }}
+            </p>
           </div>
+        }
 
-          <div class="mt-[14px] h-[7px] w-full overflow-hidden rounded-full bg-[#dcece6]">
-            <div
-              class="h-full rounded-full bg-[linear-gradient(90deg,#5cc1a3,#2f8f78)] transition-[width] duration-500"
-              [style.width.%]="usedPercent()"
-            ></div>
-          </div>
-
-          <div class="mt-[13px] grid grid-cols-2 gap-[8px] max-[520px]:grid-cols-1">
-            <div class="rounded-[11px] border border-[#dcece6] bg-[rgba(255,255,255,0.66)] px-[11px] py-[8px]">
-              <span class="block text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#7d9a92]">Autorizado</span>
-              <strong class="text-[13px] font-[660] tracking-[-0.02em] text-[#2c5f54]">{{ gallons(authorizedTotal()) }}</strong>
-            </div>
-            <div class="rounded-[11px] border border-[#dcece6] bg-[rgba(255,255,255,0.66)] px-[11px] py-[8px]">
-              <span class="block text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#7d9a92]">Despachado</span>
-              <strong class="text-[13px] font-[660] tracking-[-0.02em] text-[#2c5f54]">{{ gallons(attendedTotal()) }}</strong>
-            </div>
-          </div>
-        </section>
-
-        <section class="overflow-hidden rounded-[14px] border border-[#e7eceb] bg-white">
-          <header class="flex items-center gap-[7px] border-b border-[#f0f3f3] px-[15px] py-[9px]">
-            <iconify-icon icon="mdi:information-outline" height="13" class="text-[#8b989c]" aria-hidden="true"></iconify-icon>
-            <h3 class="m-0 text-[8.5px] font-[680] uppercase tracking-[0.08em] text-[#6c8085]">Datos de la orden</h3>
-          </header>
-          <dl class="m-0 grid grid-cols-2 gap-x-[18px] gap-y-[12px] p-[14px_15px] max-[520px]:grid-cols-1">
-            <div class="grid gap-[3px]">
-              <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Sede proveedora</dt>
-              <dd class="m-0 text-[11px] font-[640] text-[#2c424a]">{{ detail.branch }}</dd>
-            </div>
-            <div class="grid gap-[3px]">
-              <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Fecha de emisión</dt>
-              <dd class="m-0 text-[11px] font-[640] text-[#2c424a]">{{ detail.date }}</dd>
-            </div>
-            <div class="col-span-2 grid gap-[3px] max-[520px]:col-span-1">
-              <dt class="text-[8.5px] font-[650] uppercase tracking-[0.07em] text-[#98a4a7]">Nota</dt>
-              <dd class="m-0 text-[10.5px] leading-[1.5] text-[#52636a]">{{ detail.note || 'Sin nota registrada' }}</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section class="grid gap-[9px]">
-          <div class="flex items-center justify-between gap-[10px]">
+        <section class="grid gap-[8px]">
+          <div class="flex items-baseline justify-between gap-[10px]">
             <h3 class="m-0 text-[8.5px] font-[680] uppercase tracking-[0.08em] text-[#6c8085]">Combustibles</h3>
             <span class="text-[9px] text-[#98a2a5]">{{ detail.source?.items?.length ?? 0 }} línea(s)</span>
           </div>
 
-          <div class="grid gap-[10px] md:grid-cols-2">
-            @for (line of detail.source?.items ?? []; track line.id) {
-              <article class="grid gap-[9px] rounded-[13px] border border-[#e7eceb] bg-white p-[12px_14px]">
-                <div class="flex items-start justify-between gap-[10px]">
-                  <span class="grid gap-[2px]">
-                    <strong class="text-[11.5px] font-[650] text-[#243941]">{{ line.fuel_type.name }}</strong>
-                    <span class="text-[8.5px] uppercase tracking-[0.06em] text-[#98a2a5]">Saldo disponible</span>
-                  </span>
-                  <strong
-                    class="text-[16px] leading-[1.1] font-[670] tracking-[-0.03em]"
-                    [class]="num(line.available_gallons) > 0 ? 'text-[#1f6f5f]' : 'text-[#a2543c]'"
-                  >
-                    {{ gallons(line.available_gallons) }}
-                  </strong>
-                </div>
+          @if (detail.source?.items?.length) {
+            <div class="grid gap-[8px] sm:grid-cols-2">
+              @for (line of detail.source?.items ?? []; track line.id) {
+                <article class="grid gap-[7px] rounded-[12px] border border-[#e7eceb] bg-white p-[10px_12px]">
+                  <div class="flex items-start justify-between gap-[10px]">
+                    <span class="grid gap-[1px]">
+                      <strong class="text-[11px] font-[650] text-[#243941]">{{ line.fuel_type.name }}</strong>
+                      <span class="text-[8.5px] uppercase tracking-[0.06em] text-[#98a2a5]">Saldo disponible</span>
+                    </span>
+                    <strong
+                      class="text-[15px] leading-[1.1] font-[670] tracking-[-0.03em]"
+                      [class]="num(line.available_gallons) > 0 ? 'text-[#1f6f5f]' : 'text-[#a2543c]'"
+                    >
+                      {{ gallons(line.available_gallons) }}
+                    </strong>
+                  </div>
 
-                <div class="h-[5px] w-full overflow-hidden rounded-full bg-[#eef2f1]">
-                  <div
-                    class="h-full rounded-full bg-[#5cc1a3]"
-                    [style.width.%]="percent(num(line.attended_gallons), num(line.authorized_gallons))"
-                  ></div>
-                </div>
+                  <div class="h-[4px] w-full overflow-hidden rounded-full bg-[#eef2f1]">
+                    <div
+                      class="h-full rounded-full bg-[#5cc1a3]"
+                      [style.width.%]="percent(num(line.attended_gallons), num(line.authorized_gallons))"
+                    ></div>
+                  </div>
 
-                <div class="flex items-center justify-between gap-[10px] text-[9px] text-[#8b989c]">
-                  <span>
-                    Despachado
-                    <strong class="ml-[2px] font-[640] text-[#4a6167]">{{ gallons(line.attended_gallons) }}</strong>
-                  </span>
-                  <span>
-                    Autorizado
-                    <strong class="ml-[2px] font-[640] text-[#4a6167]">{{ gallons(line.authorized_gallons) }}</strong>
-                  </span>
-                </div>
-              </article>
-            }
-          </div>
+                  <div class="flex items-center justify-between gap-[10px] text-[9px] text-[#8b989c]">
+                    <span>
+                      Despachado
+                      <strong class="ml-[1px] font-[640] text-[#4a6167]">{{ gallons(line.attended_gallons) }}</strong>
+                    </span>
+                    <span>
+                      Autorizado
+                      <strong class="ml-[1px] font-[640] text-[#4a6167]">{{ gallons(line.authorized_gallons) }}</strong>
+                    </span>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="m-0 rounded-[11px] border border-dashed border-[#dfe7e6] bg-[#fbfdfc] px-[12px] py-[10px] text-[10px] text-[#8b989c]">
+              La orden no tiene líneas de combustible registradas.
+            </p>
+          }
         </section>
 
         <p class="m-0 text-[9px] leading-[1.5] text-[#919da0]">
@@ -283,4 +316,3 @@
 </app-ui-dialog>
 
 <app-voucher-detail-dialog [(visible)]="voucherOpen" [voucher]="selectedVoucher()" />
-er()" />

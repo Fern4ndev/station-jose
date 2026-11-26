@@ -48,6 +48,32 @@ export class UserFormDialog {
 
   protected readonly showBranch = computed(() => this.role() === 'ATTENDANT');
 
+  private readonly baseline = computed(() => {
+    const user = this.user();
+    return {
+      firstName: user?.firstName ?? '',
+      lastName: user?.lastName ?? '',
+      dni: user?.dni ?? '',
+      email: user?.email ?? '',
+      role: user?.roleValue ?? ('OFFICE' as UserRoleValue),
+      branch: user?.branchId ?? '',
+    };
+  });
+
+  /** Solo se puede guardar cuando el formulario difiere de los datos originales. */
+  protected readonly dirty = computed(() => {
+    const base = this.baseline();
+    return (
+      this.firstName() !== base.firstName ||
+      this.lastName() !== base.lastName ||
+      this.dni() !== base.dni ||
+      this.email() !== base.email ||
+      this.role() !== base.role ||
+      this.branch() !== base.branch ||
+      (!this.editing() && this.password().length > 0)
+    );
+  });
+
   constructor() {
     effect(() => {
       if (!this.visible()) {

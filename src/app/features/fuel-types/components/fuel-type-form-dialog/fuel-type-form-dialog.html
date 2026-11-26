@@ -32,8 +32,8 @@
     <button
       type="submit"
       form="fuelTypeForm"
-      class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent bg-(--sanjose-primary-action) px-[16px] text-[11px] font-[620] whitespace-nowrap text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] transition-[background,box-shadow] hover:bg-(--sanjose-primary-action-hover) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
-      [disabled]="saving()"
+      class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent bg-(--sanjose-primary-action) px-[16px] text-[11px] font-[620] whitespace-nowrap text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] transition-[background,box-shadow] hover:bg-(--sanjose-primary-action-hover) disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+      [disabled]="saving() || !dirty()"
     >
       {{ saving() ? 'Guardando…' : isEditing() ? 'Guardar cambios' : 'Registrar combustible' }}
     </button>

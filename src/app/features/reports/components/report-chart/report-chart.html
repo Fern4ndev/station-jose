@@ -1,17 +1,28 @@
-<app-ui-panel title="Galones despachados" subtitle="Actividad por sede">
-  <app-ui-status-badge panelAction [label]="badge()" tone="green" />
-  <div class="p-[8px_20px_18px]">
+<app-ui-panel title="Galones despachados" [subtitle]="subtitle() + ' · ' + badge()">
+  <div panelAction class="w-[148px] max-w-full">
+    <p-select [options]="branchOptions" optionLabel="label" optionValue="value" [ngModel]="selectedBranch()" (ngModelChange)="selectedBranch.set($event)" ariaLabel="Sede del gráfico" size="small" styleClass="w-full" appendTo="body" />
+  </div>
+  <div class="relative min-w-0 p-[8px_20px_18px]" [attr.aria-busy]="loading()">
     @if (buckets().length) {
-      <div class="h-[250px] w-full" role="img" [attr.aria-label]="'Gráfico de galones despachados por sede, ' + badge()">
-        <p-chart type="bar" [data]="chartData()" [options]="chartOptions" height="250px" />
+      <div class="w-full overflow-x-auto overscroll-x-contain" tabindex="0" role="region" aria-label="Gráfico de despachos; desplázate horizontalmente para ver todas las franjas">
+      <div class="h-[250px] w-full" [style.min-width.px]="minimumWidth()" role="img" [attr.aria-label]="'Gráfico de galones despachados por sede, ' + badge()">
+        <p-chart type="bar" [data]="chartData()" [options]="chartOptions()" height="250px" />
       </div>
+      </div>
+      <ul class="mt-[8px] mb-0 flex list-none flex-wrap justify-center gap-x-[16px] gap-y-[6px] p-0 text-[11px] text-[#52636a]" aria-label="Sedes del gráfico">
+        @for (dataset of chartData().datasets; track dataset.label) {
+          <li class="inline-flex items-center gap-[6px]"><span class="size-[9px] rounded-full" [style.background-color]="dataset.backgroundColor" aria-hidden="true"></span>{{ dataset.label }}</li>
+        }
+      </ul>
+      @if (!hasActivity() && !loading()) { <p class="mt-[8px] mb-0 text-[11px] text-[#52636a]">Sin despachos.</p> }
       <table class="sr-only">
         <caption>Galones despachados por sede y período</caption>
-        <thead><tr><th>Período</th><th>San José</th><th>Santa Marta</th></tr></thead>
-        <tbody>@for (bucket of buckets(); track bucket.label) { <tr><td>{{ bucket.label }}</td><td>{{ bucket.sanJose }}</td><td>{{ bucket.santaMarta }}</td></tr> }</tbody>
+        <thead><tr><th>Franja</th>@if (selectedBranch() !== 'santaMarta') { <th>San José</th> }@if (selectedBranch() !== 'sanJose') { <th>Santa Marta</th> }</tr></thead>
+        <tbody>@for (bucket of buckets(); track bucket.key ?? $index) { <tr><td>{{ bucket.detail ?? bucket.label }}</td>@if (selectedBranch() !== 'santaMarta') { <td>{{ bucket.sanJose }}</td> }@if (selectedBranch() !== 'sanJose') { <td>{{ bucket.santaMarta }}</td> }</tr> }</tbody>
       </table>
     } @else {
-      <p class="flex h-[250px] items-center justify-center text-[11px] text-[#65777b]">No hay datos para el rango seleccionado.</p>
+      <p class="flex h-[250px] items-center justify-center text-[11px] text-[#65777b]">Sin datos.</p>
     }
+    @if (loading()) { <div class="absolute inset-0 flex items-center justify-center rounded-[12px] bg-white/80 text-[12px] font-medium text-[#315d66]" role="status">Actualizando…</div> }
   </div>
 </app-ui-panel>

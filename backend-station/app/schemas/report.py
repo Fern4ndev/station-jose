@@ -5,7 +5,7 @@ from decimal import Decimal
 from enum import StrEnum
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ReportGrouping(StrEnum):
@@ -22,6 +22,8 @@ class ReportFilters(BaseModel):
     branch_id: UUID | None = None
     status: str | None = None
     group_by: ReportGrouping = ReportGrouping.DAY
+    hour_from: int = Field(default=0, ge=0, le=23)
+    hour_to: int = Field(default=23, ge=0, le=23)
 
 
 class PurchaseOrderReportRow(BaseModel):

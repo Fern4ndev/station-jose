@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, model, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize, type Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -32,6 +34,8 @@ function lineAmount(gallons: string, price: string): string {
 })
 export class OrderFormDialog {
   private readonly ocr = inject(OcrApi);
+  private readonly destroyRef = inject(DestroyRef);
+  private ocrRequest: Subscription | null = null;
   readonly visible = model(false);
   readonly order = input<DemoOrder | null>(null);
   readonly takenIds = input<readonly string[]>([]);
@@ -46,6 +50,8 @@ export class OrderFormDialog {
   protected readonly number = signal('');
   protected readonly siaf = signal('');
   protected readonly date = signal(todayIso());
+  /** Fecha de referencia, refrescada cada vez que se abre el diálogo. */
+  private readonly today = signal(todayIso());
   protected readonly dateValue = computed(() => {
     const value = new Date(`${this.date()}T00:00:00`);
     return Number.isNaN(value.getTime()) ? null : value;
@@ -59,13 +65,62 @@ export class OrderFormDialog {
   protected readonly pdfLabel = signal('Selecciona un PDF para prellenar los campos');
   protected readonly loadingOcr = signal(false);
 
+  private readonly baseline = computed(() => {
+    const source = this.order()?.source;
+    const lines: readonly DraftLine[] = source
+      ? source.items.map((item) => ({
+          fuel_type_id: item.fuel_type.id,
+          gallons: item.authorized_gallons,
+          unit_price: 'unit_price' in item ? item.unit_price : '',
+        }))
+      : [{ fuel_type_id: '', gallons: '', unit_price: '' }];
+    return {
+      number: source?.order_number ?? '',
+      siaf: source?.siaf_number ?? '',
+      date: source?.issue_date ?? this.today(),
+      supplierDetails: source?.supplier_details ?? '',
+      institutionName: source?.institution_name ?? source?.executing_unit ?? '',
+      institutionRuc: source?.executing_unit_ruc ?? '',
+      branch: source?.branch.id ?? '',
+      lines,
+    };
+  });
+
+  /** Solo se puede guardar cuando el formulario difiere de la orden original. */
+  protected readonly dirty = computed(() => {
+    const base = this.baseline();
+    const lines = this.lines();
+    return (
+      this.number() !== base.number ||
+      this.siaf() !== base.siaf ||
+      this.date() !== base.date ||
+      this.supplierDetails() !== base.supplierDetails ||
+      this.institutionName() !== base.institutionName ||
+      this.institutionRuc() !== base.institutionRuc ||
+      this.branch() !== base.branch ||
+      lines.length !== base.lines.length ||
+      lines.some((line, index) => {
+        const initial = base.lines[index];
+        return (
+          line.fuel_type_id !== initial.fuel_type_id ||
+          line.gallons !== initial.gallons ||
+          line.unit_price !== initial.unit_price
+        );
+      })
+    );
+  });
+
   constructor() {
     effect(() => {
-      if (!this.visible()) return;
+      if (!this.visible()) {
+        this.ocrRequest?.unsubscribe();
+        return;
+      }
       const source = this.order()?.source;
+      this.today.set(todayIso());
       this.number.set(source?.order_number ?? '');
       this.siaf.set(source?.siaf_number ?? '');
-      this.date.set(source?.issue_date ?? todayIso());
+      this.date.set(source?.issue_date ?? this.today());
       this.supplierDetails.set(source?.supplier_details ?? '');
       this.institutionName.set(source?.institution_name ?? source?.executing_unit ?? '');
       this.institutionRuc.set(source?.executing_unit_ruc ?? '');
@@ -108,17 +163,30 @@ export class OrderFormDialog {
   }
 
   protected onPdf(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
     if (!file) return;
+    input.value = '';
+    this.ocrRequest?.unsubscribe();
+    this.error.set('');
     this.loadingOcr.set(true);
-    this.pdfLabel.set(`Procesando ${file.name}…`);
-    this.ocr.analyze(file).subscribe({
+    const processingLabel = `Procesando ${file.name}…`;
+    this.pdfLabel.set(processingLabel);
+    this.ocrRequest = this.ocr.analyze(file).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => {
+        this.loadingOcr.set(false);
+        if (this.pdfLabel() === processingLabel) {
+          this.pdfLabel.set('Selecciona un PDF para prellenar los campos');
+        }
+      }),
+    ).subscribe({
       next: (preview) => {
         const fields = preview.fields;
         if (fields.order_number) this.number.set(fields.order_number);
         if (fields.siaf_number) this.siaf.set(fields.siaf_number);
         if (fields.issue_date) this.date.set(fields.issue_date.slice(0, 10));
-        const extractedName = fields.institution_name ?? fields.executing_unit;
+        const extractedName = fields.executing_unit ?? fields.institution_name;
         if (extractedName) this.institutionName.set(extractedName);
         if (fields.executing_unit_ruc) this.institutionRuc.set(fields.executing_unit_ruc);
         if (fields.supplier_name) {
@@ -136,12 +204,10 @@ export class OrderFormDialog {
           })));
         }
         this.pdfLabel.set(`${file.name} · datos sugeridos, revisa todos los campos`);
-        this.loadingOcr.set(false);
       },
       error: (error: unknown) => {
         this.error.set(extractApiError(error, 'No se pudo procesar el PDF. Puedes completar la orden manualmente.'));
         this.pdfLabel.set('Selecciona un PDF para prellenar los campos');
-        this.loadingOcr.set(false);
       },
     });
   }

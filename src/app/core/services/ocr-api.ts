@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs';
+import { type Observable, throwError, timeout } from 'rxjs';
 import { API_ENDPOINTS, BaseApi } from '../api/api-url';
 
 /* Contratos exclusivos de este router. Todos los campos son opcionales. */
@@ -42,6 +42,13 @@ export class OcrApi extends BaseApi {
     return this.postForm<PurchaseOrderOcrPreview>(
       API_ENDPOINTS.ocr.purchaseOrderPreviews,
       body,
+    ).pipe(
+      timeout({
+        first: 75_000,
+        with: () => throwError(() => new Error(
+          'Se agotó el tiempo para procesar el PDF. Inténtalo de nuevo o completa los campos manualmente.',
+        )),
+      }),
     );
   }
 }

@@ -67,6 +67,30 @@ export class AttendanceForm {
   protected readonly error = signal('');
   protected readonly lines = signal<readonly FuelDraft[]>([]);
 
+  private readonly issuerBaseline = computed(() =>
+    this.locked() ? this.matchingVouchers()[0]?.issuer ?? '' : this.selectedOrder()?.entity ?? '',
+  );
+
+  private readonly issuerTypeBaseline = computed<VoucherIssuerType>(() =>
+    this.locked() ? this.matchingVouchers()[0]?.issuerType ?? 'INSTITUTION' : 'INSTITUTION',
+  );
+
+  private readonly branchBaseline = computed(() =>
+    this.branch() === 'Todas las sedes' ? 'San José' : this.branch(),
+  );
+
+  /** Hay datos escritos por el usuario respecto al estado inicial del formulario. */
+  readonly dirty = computed(() =>
+    this.voucherId().trim() !== '' ||
+    this.institutionRuc().trim() !== '' ||
+    this.issuer() !== this.issuerBaseline() ||
+    this.issuerType() !== this.issuerTypeBaseline() ||
+    this.branchValue() !== this.branchBaseline() ||
+    this.lines().some((line) =>
+      line.gallons.trim() !== '' || (!this.locked() && line.authorized.trim() !== ''),
+    ),
+  );
+
   private previousToken = 0;
   private wasLocked = false;
   private linesKey = '';

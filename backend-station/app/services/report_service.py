@@ -91,6 +91,9 @@ class ReportService:
         )
         rows: list[AttendanceReportRow] = []
         for attendance in attendances:
+            hour = attendance.attended_at.astimezone(ZoneInfo(self.settings.TIMEZONE)).hour
+            if not filters.hour_from <= hour <= filters.hour_to:
+                continue
             for item in attendance.items:
                 order_item = item.voucher_item.purchase_order_item
                 if order_item is None:
