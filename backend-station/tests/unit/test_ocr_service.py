@@ -1,5 +1,7 @@
 """OCR service safety and field extraction tests."""
 
+from types import SimpleNamespace
+
 import fitz
 import pytest
 from app.core.config import Settings
@@ -57,3 +59,44 @@ def test_rejects_pdf_exceeding_configured_size(tmp_path) -> None:
         service.preview(
             b"%PDF-more-than-eight-bytes", filename="orden.pdf", content_type="application/pdf"
         )
+
+
+@pytest.mark.parametrize("texts", [("Numero de orden: OC-123", "SIAF: 5678"), None])
+def test_reads_current_rapidocr_output(texts) -> None:
+    service = OcrService(Settings())
+    with fitz.open() as document:
+        page = document.new_page()
+        text = service._ocr_page(page, lambda image: SimpleNamespace(txts=texts))
+
+    assert text == "\n".join(texts or ())
+
+
+def test_preview_reads_all_three_pages(tmp_path) -> None:
+    with fitz.open() as document:
+        for number in range(1, 4):
+            page = document.new_page()
+            page.insert_text((72, 72), f"Pagina {number}")
+        content = document.tobytes()
+
+    preview = OcrService(Settings(_env_file=None, OCR_TEMP_DIR=str(tmp_path))).preview(
+        content, filename="three-pages.pdf", content_type="application/pdf"
+    )
+
+    assert preview.pages_processed == 3
+    assert all(f"Pagina {number}" in preview.extracted_text for number in range(1, 4))
+    assert not list(tmp_path.iterdir())
+
+
+def test_preview_rejects_four_pages_and_cleans_temporary_file(tmp_path) -> None:
+    with fitz.open() as document:
+        for _ in range(4):
+            page = document.new_page()
+            page.insert_text((72, 72), "Documento de cuatro paginas")
+        content = document.tobytes()
+
+    with pytest.raises(InvalidPdfError, match="3 páginas"):
+        OcrService(Settings(_env_file=None, OCR_TEMP_DIR=str(tmp_path))).preview(
+            content, filename="four-pages.pdf", content_type="application/pdf"
+        )
+
+    assert not list(tmp_path.iterdir())

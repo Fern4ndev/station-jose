@@ -10,21 +10,37 @@ export interface DemoAttendance {
   readonly attendant: string;
   readonly branch: string;
   readonly gallons: number;
+  readonly fuel?: string;
+  readonly issuer?: string;
+  readonly institution?: string;
+  /** Galones autorizados en la línea del vale, si está disponible. */
+  readonly authorized?: number;
   readonly time: string;
   readonly date: string;
   readonly status: AttendanceStatus;
   readonly attendedAt?: string;
 }
 
+/** Una línea de combustible dentro de la atención. */
+export interface AttendanceLineRequest {
+  /** Línea de la orden (`purchase_order_items.id`). */
+  readonly orderItemId: string;
+  /** Línea del vale cuando la atención es posterior; ausente en un vale nuevo. */
+  readonly voucherItemId?: string;
+  /** Galones autorizados; solo se envían al crear el vale. */
+  readonly authorized: DecimalInput;
+  /** Galones realmente entregados, normalizados a 3 decimales. */
+  readonly gallons: DecimalInput;
+}
+
 export interface AttendanceRequest {
-  readonly orderId: string;
+  /** Orden de compra (`purchase_orders.id`). */
+  readonly purchaseOrderId: string;
   readonly voucherId: string;
   readonly issuer: string;
   readonly issuerType: VoucherIssuerType;
-  readonly authorized: DecimalInput;
-  /** Se envía como string decimal normalizado (3 decimales). */
-  readonly gallons: DecimalInput;
   readonly branch: string;
+  readonly lines: readonly AttendanceLineRequest[];
 }
 
 export function visibleAttendances(

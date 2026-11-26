@@ -24,13 +24,13 @@ export class VouchersTable {
   readonly lockedVoucherIds = input<readonly string[]>([]);
   protected readonly first = linkedSignal({ source: this.rows, computation: () => 0 });
   protected readonly pageSize = signal(10);
-  /** El servidor entrega lo más reciente primero; la tabla se lista en forma ascendente. */
-  protected readonly orderedRows = computed(() => [...this.rows()].reverse());
+  /** El servidor entrega lo más reciente primero: el último vale es la fila 1. */
+  protected readonly orderedRows = computed(() => [...this.rows()]);
   protected readonly pageRows = computed(() =>
     this.orderedRows().slice(this.first(), this.first() + this.pageSize()),
   );
 
-  /** Correlativo ascendente, estable entre páginas. */
+  /** Correlativo estable entre páginas; 1 es el registro más reciente. */
   protected rowNumber(index: number): number {
     return this.first() + index + 1;
   }

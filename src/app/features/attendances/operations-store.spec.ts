@@ -41,7 +41,14 @@ describe('OperationsStore', () => {
     const store = TestBed.inject(OperationsStore);
     await store.load();
     expect(store.orders()[0].institutionRuc).toBe('20123456789');
-    const request = { orderId: 'order-item-uuid', voucherId: 'VM-01', issuer: 'Municipalidad', issuerType: 'INSTITUTION' as const, authorized: 50, gallons: 20, branch: 'San José' };
+    const request = {
+      purchaseOrderId: 'order-uuid',
+      voucherId: 'VM-01',
+      issuer: 'Municipalidad',
+      issuerType: 'INSTITUTION' as const,
+      branch: 'San José',
+      lines: [{ orderItemId: 'order-item-uuid', authorized: '50.000', gallons: '20.000' }],
+    };
     await expect(store.register(request)).rejects.toThrow('Red interrumpida');
     await store.register(request);
     expect(attendancesApi.createFirst.mock.calls[0][2]).toBe(attendancesApi.createFirst.mock.calls[1][2]);
@@ -69,11 +76,19 @@ describe('OperationsStore', () => {
     await store.load();
     expect(store.attendances()).toHaveLength(0);
 
-    await store.register({ orderId: 'order-item-uuid', voucherId: 'VM-01', issuer: 'Municipalidad', issuerType: 'INSTITUTION', authorized: 50, gallons: 20, branch: 'San José' });
+    await store.register({
+      purchaseOrderId: 'order-uuid',
+      voucherId: 'VM-01',
+      issuer: 'Municipalidad',
+      issuerType: 'INSTITUTION',
+      branch: 'San José',
+      lines: [{ orderItemId: 'order-item-uuid', authorized: '50.000', gallons: '20.000' }],
+    });
 
     expect(attendancesApi.createFirst).toHaveBeenCalledWith('order-uuid', expect.objectContaining({
       voucher_number: 'VM-01',
-      items: [{ purchase_order_item_id: 'order-item-uuid', attended_gallons: 20 }],
+      voucher_items: [{ purchase_order_item_id: 'order-item-uuid', authorized_gallons: '50.000' }],
+      items: [{ purchase_order_item_id: 'order-item-uuid', attended_gallons: '20.000' }],
     }), expect.any(String));
     expect(store.vouchers()[0].id).toBe('VM-01');
     expect(store.attendances()[0].gallons).toBe(20);
@@ -93,11 +108,69 @@ describe('OperationsStore', () => {
     const store = TestBed.inject(OperationsStore);
     await store.load();
 
-    await store.register({ orderId: 'order-item-uuid', voucherId: 'VM-01', issuer: 'Municipalidad', issuerType: 'INSTITUTION', authorized: 50, gallons: 10, branch: 'San José' });
+    await store.register({
+      purchaseOrderId: 'order-uuid',
+      voucherId: 'VM-01',
+      issuer: 'Municipalidad',
+      issuerType: 'INSTITUTION',
+      branch: 'San José',
+      lines: [{
+        orderItemId: 'order-item-uuid',
+        voucherItemId: 'voucher-item-uuid',
+        authorized: '50.000',
+        gallons: '10.000',
+      }],
+    });
 
     expect(attendancesApi.createFollowUp).toHaveBeenCalledWith('voucher-uuid', {
-      items: [{ voucher_item_id: 'voucher-item-uuid', attended_gallons: 10 }],
+      items: [{ voucher_item_id: 'voucher-item-uuid', attended_gallons: '10.000' }],
     }, expect.any(String));
     expect(attendancesApi.createFirst).not.toHaveBeenCalled();
+  });
+
+  it('crea un vale con varios combustibles en una sola atención', async () => {
+    const multiOrder = {
+      ...order,
+      items: [
+        order.items[0],
+        { id: 'order-item-2', fuel_type: { id: 'fuel-2', code: 'GASOLINE', name: 'Gasolina', is_active: true }, authorized_gallons: '80', attended_gallons: '0', available_gallons: '80' },
+      ],
+    };
+    const ordersApi = { list: vi.fn().mockReturnValue(of({ items: [multiOrder], pagination })) };
+    const vouchersApi = { list: vi.fn().mockReturnValue(of({ items: [], pagination: { ...pagination, total: 0, pages: 0 } })) };
+    const attendancesApi = {
+      list: vi.fn().mockReturnValue(of({ items: [], pagination: { ...pagination, total: 0, pages: 0 } })),
+      createFirst: vi.fn().mockReturnValue(of({ id: 'attendance-uuid' })),
+      createFollowUp: vi.fn(),
+    };
+    TestBed.configureTestingModule({ providers: [
+      OperationsStore,
+      { provide: PurchaseOrdersApi, useValue: ordersApi },
+      { provide: VouchersApi, useValue: vouchersApi },
+      { provide: AttendancesApi, useValue: attendancesApi },
+      { provide: AuthService, useValue: { currentUser: () => ({ id: 'user-uuid' }), fullName: () => 'Grifero Uno' } },
+    ] });
+    const store = TestBed.inject(OperationsStore);
+    await store.load();
+
+    await store.register({
+      purchaseOrderId: 'order-uuid',
+      voucherId: 'VM-02',
+      issuer: 'Municipalidad',
+      issuerType: 'INSTITUTION',
+      branch: 'San José',
+      lines: [
+        { orderItemId: 'order-item-uuid', authorized: '50.000', gallons: '10.500' },
+        { orderItemId: 'order-item-2', authorized: '80.000', gallons: '0.000' },
+      ],
+    });
+
+    expect(attendancesApi.createFirst).toHaveBeenCalledWith('order-uuid', expect.objectContaining({
+      voucher_items: [
+        { purchase_order_item_id: 'order-item-uuid', authorized_gallons: '50.000' },
+        { purchase_order_item_id: 'order-item-2', authorized_gallons: '80.000' },
+      ],
+      items: [{ purchase_order_item_id: 'order-item-uuid', attended_gallons: '10.500' }],
+    }), expect.any(String));
   });
 });

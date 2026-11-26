@@ -24,4 +24,6 @@ export class UiDialog {
   readonly visible = model(false);
   readonly title = input.required<string>();
   readonly description = input('');
+  /** Ancho del diálogo; por defecto el del mockup. */
+  readonly width = input('min(570px, calc(100vw - 28px))');
 }

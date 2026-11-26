@@ -38,3 +38,12 @@ def test_cors_origins_from_env_file_accept_comma_separated_values(tmp_path: Path
     settings = Settings(_env_file=env_file)
 
     assert settings.cors_origins == ["http://localhost:4200", "http://127.0.0.1:4200"]
+
+
+def test_ocr_defaults_to_three_pages() -> None:
+    assert Settings(_env_file=None).OCR_MAX_PDF_PAGES == 3
+
+
+def test_ocr_rejects_configuration_above_three_pages() -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, OCR_MAX_PDF_PAGES=4)

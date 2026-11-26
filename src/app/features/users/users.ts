@@ -35,6 +35,7 @@ export class Users {
   protected readonly branches = signal<readonly BranchResponse[]>([]);
   protected readonly query = signal('');
   protected readonly createOpen = signal(false);
+  protected readonly editing = signal<DemoUserRow | null>(null);
   protected readonly saving = signal(false);
   protected readonly refreshing = signal(false);
   protected readonly roles = ROLE_SUMMARY;
@@ -77,6 +78,7 @@ export class Users {
       role: user.role === 'ADMIN' ? 'Administrador' : user.role === 'OFFICE' ? 'Oficina' : 'Grifero',
       roleValue: user.role,
       branch: user.branch?.name ?? (user.role === 'OFFICE' ? 'Ambas sedes' : '—'),
+      branchId: user.branch?.id,
       active: user.is_active,
     };
   }
@@ -96,27 +98,51 @@ export class Users {
     });
   }
 
-  protected create(draft: UserDraft): void {
+  protected openCreate(): void {
+    this.editing.set(null);
+    this.createOpen.set(true);
+  }
+
+  protected openEdit(user: DemoUserRow): void {
+    if (user.roleValue === 'ADMIN') return;
+    this.editing.set(user);
+    this.createOpen.set(true);
+  }
+
+  protected async save(draft: UserDraft): Promise<void> {
     if (this.saving()) return;
     this.saving.set(true);
     const [first_name, ...last] = draft.name.trim().split(/\s+/);
-    this.api.create({
-      first_name,
-      last_name: last.join(' '),
-      dni: draft.dni,
-      email: draft.email,
-      password: draft.password,
-      role: draft.role,
-      branch_id: draft.role === 'ATTENDANT' ? draft.branch : null,
-    }).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.createOpen.set(false);
-        void this.load();
-        this.query.set('');
+    const last_name = last.join(' ');
+    const branchId = draft.role === 'ATTENDANT' ? draft.branch || null : null;
+    try {
+      const user = this.editing();
+      if (user) {
+        await firstValueFrom(this.api.update(user.id, { first_name, last_name }));
+        if (draft.role !== user.roleValue || branchId !== (user.branchId ?? null)) {
+          await firstValueFrom(this.api.updateRole(user.id, { role: draft.role, branch_id: branchId }));
+        }
+        this.messages.add({ severity: 'success', summary: `${draft.name}: usuario actualizado.`, life: 2800 });
+      } else {
+        await firstValueFrom(this.api.create({
+          first_name,
+          last_name,
+          dni: draft.dni,
+          email: draft.email,
+          password: draft.password,
+          role: draft.role,
+          branch_id: branchId,
+        }));
         this.messages.add({ severity: 'success', summary: 'Usuario creado.', life: 2800 });
-      },
-      error: (error: unknown) => { this.saving.set(false); this.showError(error); },
-    });
+      }
+      this.createOpen.set(false);
+      this.editing.set(null);
+      this.query.set('');
+      await this.load();
+    } catch (error) {
+      this.showError(error);
+    } finally {
+      this.saving.set(false);
+    }
   }
 }

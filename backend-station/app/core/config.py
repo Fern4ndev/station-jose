@@ -36,7 +36,7 @@ class Settings(BaseSettings):
 
     OCR_ENABLED: bool = True
     OCR_MAX_UPLOAD_BYTES: Annotated[int, Field(gt=0)] = 10_485_760
-    OCR_MAX_PDF_PAGES: Annotated[int, Field(gt=0)] = 20
+    OCR_MAX_PDF_PAGES: Annotated[int, Field(gt=0, le=3)] = 3
     OCR_TIMEOUT_SECONDS: Annotated[int, Field(gt=0)] = 60
     OCR_TEMP_DIR: str = "/tmp/san-jose-ocr"
     REPORT_MAX_EXPORT_ROWS: Annotated[int, Field(gt=0)] = 10_000

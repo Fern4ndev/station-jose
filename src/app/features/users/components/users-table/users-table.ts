@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output, signal } from '@angular/core';
 import { TablePagination } from '../../../../shared/components/table-pagination/table-pagination';
+import { UiIcon } from '../../../../shared/components/ui-icon/ui-icon';
 import { UiStatusBadge } from '../../../../shared/components/ui-status-badge/ui-status-badge';
 import { userInitials, type DemoUserRow } from '../../users-data';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TablePagination, UiStatusBadge],
+  imports: [TablePagination, UiIcon, UiStatusBadge],
   selector: 'app-users-table',
   templateUrl: './users-table.html',
 })
@@ -26,6 +27,7 @@ export class UsersTable {
   }
 
   readonly toggle = output<DemoUserRow>();
+  readonly edit = output<DemoUserRow>();
 
   protected initials = userInitials;
 }

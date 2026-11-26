@@ -7,7 +7,7 @@
         <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ROL</th>
         <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">SEDE</th>
         <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
-        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ACCESO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ACCIONES</th>
       </tr>
     </thead>
     <tbody>
@@ -40,15 +40,39 @@
             }
           </td>
           <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]">
-            <button
-              type="button"
-              class="relative h-[20px] w-[34px] cursor-pointer rounded-full border-0 bg-[#cbd4d4] p-0 transition-colors after:absolute after:top-[3px] after:left-[3px] after:h-[14px] after:w-[14px] after:rounded-full after:bg-white after:shadow-[0_1px_3px_rgba(0,0,0,0.15)] after:transition-transform after:content-[''] data-[on]:bg-[#51b89e] data-[on]:after:translate-x-[14px] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] motion-reduce:transition-none motion-reduce:after:transition-none"
-              [attr.data-on]="user.active || null"
-              [attr.aria-pressed]="user.active"
-              [attr.aria-label]="(user.active ? 'Deshabilitar a ' : 'Habilitar a ') + user.name"
-              [disabled]="user.roleValue === 'ADMIN'"
-              (click)="toggle.emit(user)"
-            ></button>
+            <div class="flex items-center gap-[6px]">
+              @if (user.roleValue === 'ADMIN') {
+                <button
+                  type="button"
+                  class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] disabled:cursor-not-allowed disabled:opacity-45"
+                  disabled
+                  title="La cuenta administradora no se puede modificar"
+                  [attr.aria-label]="'La cuenta administradora ' + user.name + ' no se puede modificar'"
+                >
+                  <app-ui-icon name="edit" [size]="14" />
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors hover:border-[#a9d8cd] hover:bg-[#fbfdfc] hover:text-[#287e6e] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+                  title="Editar usuario"
+                  [attr.aria-label]="'Editar usuario ' + user.name"
+                  (click)="edit.emit(user)"
+                >
+                  <app-ui-icon name="edit" [size]="14" />
+                </button>
+              }
+
+              <button
+                type="button"
+                class="relative h-[20px] w-[34px] cursor-pointer rounded-full border-0 bg-[#cbd4d4] p-0 transition-colors after:absolute after:top-[3px] after:left-[3px] after:h-[14px] after:w-[14px] after:rounded-full after:bg-white after:shadow-[0_1px_3px_rgba(0,0,0,0.15)] after:transition-transform after:content-[''] data-[on]:bg-[#51b89e] data-[on]:after:translate-x-[14px] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] motion-reduce:transition-none motion-reduce:after:transition-none disabled:cursor-not-allowed disabled:opacity-45"
+                [attr.data-on]="user.active || null"
+                [attr.aria-pressed]="user.active"
+                [attr.aria-label]="(user.active ? 'Deshabilitar a ' : 'Habilitar a ') + user.name"
+                [disabled]="user.roleValue === 'ADMIN'"
+                (click)="toggle.emit(user)"
+              ></button>
+            </div>
           </td>
         </tr>
       } @empty {

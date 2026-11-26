@@ -16,6 +16,7 @@ export interface DemoUserRow {
   readonly dni: string;
   readonly role: UserRole;
   readonly branch: string;
+  readonly branchId?: string;
   readonly active: boolean;
   readonly roleValue?: UserRoleValue;
 }

@@ -21,7 +21,7 @@ export class OrdersTable {
     this.rows().slice(this.first(), this.first() + this.pageSize()),
   );
 
-  /** Correlativo ascendente, estable entre páginas. */
+  /** Correlativo estable entre páginas; 1 es la orden más reciente. */
   protected rowNumber(index: number): number {
     return this.first() + index + 1;
   }

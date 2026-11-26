@@ -73,14 +73,14 @@ export class Reports {
       return hour !== null && hour >= from && hour <= to;
     });
   });
-  /** El servidor entrega lo más reciente primero; las tablas se listan en forma ascendente. */
-  protected readonly orderedOrderRows = computed(() => [...this.orderRows()].reverse());
-  protected readonly orderedAttendanceRows = computed(() => [...this.filteredAttendanceRows()].reverse());
+  /** El servidor entrega lo más reciente primero: el último registro es la fila 1. */
+  protected readonly orderedOrderRows = computed(() => this.orderRows());
+  protected readonly orderedAttendanceRows = computed(() => this.filteredAttendanceRows());
   protected readonly pagedOrderRows = computed(() => this.orderedOrderRows().slice(this.first(), this.first() + this.pageSize()));
   protected readonly pagedAttendanceRows = computed(() => this.orderedAttendanceRows().slice(this.first(), this.first() + this.pageSize()));
   protected readonly reportRowCount = computed(() => this.kind() === 'orders' ? this.orderRows().length : this.filteredAttendanceRows().length);
 
-  /** Correlativo ascendente, estable entre páginas. */
+  /** Correlativo estable entre páginas; 1 es el registro más reciente. */
   protected reportRowNumber(index: number): number {
     return this.first() + index + 1;
   }

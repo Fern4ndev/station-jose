@@ -1,0 +1,66 @@
+<app-ui-dialog
+  [(visible)]="visible"
+  title="Detalle de la atención"
+  [description]="attendance() ? 'Vale ' + attendance()!.voucher + ' · Orden ' + attendance()!.orderId : ''"
+>
+  @if (attendance(); as detail) {
+    <div class="grid gap-[16px]">
+      <div class="flex items-center justify-between gap-[12px] rounded-[12px] border border-[#dceee8] bg-[#f2faf6] p-[15px_16px]">
+        <span class="grid gap-[3px] text-[9px] leading-[1.4] text-[#386e61]">
+          Combustible despachado
+          <strong class="text-[11px] font-[650] text-[#225d50]">{{ detail.fuel ?? '—' }}</strong>
+        </span>
+        <strong class="text-[18px] tracking-[-0.03em] text-[#225d50]">{{ gallons(detail.gallons) }}</strong>
+      </div>
+
+      <dl class="m-0 grid grid-cols-2 gap-x-[16px] gap-y-[12px] max-[520px]:grid-cols-1">
+        <div class="grid gap-[3px] border-b border-[#f0f3f3] pb-[9px]">
+          <dt class="text-[9px] font-[620] tracking-[0.04em] text-[#98a4a7] uppercase">Vale</dt>
+          <dd class="m-0 text-[11px] font-[630] text-[#2c424a]">{{ detail.voucher }}</dd>
+        </div>
+        <div class="grid gap-[3px] border-b border-[#f0f3f3] pb-[9px]">
+          <dt class="text-[9px] font-[620] tracking-[0.04em] text-[#98a4a7] uppercase">Orden de compra</dt>
+          <dd class="m-0 text-[11px] font-[630] text-[#2c424a]">{{ detail.orderId }}</dd>
+        </div>
+        <div class="grid gap-[3px] border-b border-[#f0f3f3] pb-[9px]">
+          <dt class="text-[9px] font-[620] tracking-[0.04em] text-[#98a4a7] uppercase">Institución</dt>
+          <dd class="m-0 text-[11px] font-[630] text-[#2c424a]">{{ detail.institution || '—' }}</dd>
+        </div>
+        <div class="grid gap-[3px] border-b border-[#f0f3f3] pb-[9px]">
+          <dt class="text-[9px] font-[620] tracking-[0.04em] text-[#98a4a7] uppercase">Emisor del vale</dt>
+          <dd class="m-0 text-[11px] font-[630] text-[#2c424a]">{{ detail.issuer || '—' }}</dd>
+        </div>
+        <div class="grid gap-[3px] border-b border-[#f0f3f3] pb-[9px]">
+          <dt class="text-[9px] font-[620] tracking-[0.04em] text-[#98a4a7] uppercase">Sede</dt>
+          <dd class="m-0 text-[11px] font-[630] text-[#2c424a]">{{ detail.branch || '—' }}</dd>
+        </div>
+        <div class="grid gap-[3px] border-b border-[#f0f3f3] pb-[9px]">
+          <dt class="text-[9px] font-[620] tracking-[0.04em] text-[#98a4a7] uppercase">Grifero</dt>
+          <dd class="m-0 text-[11px] font-[630] text-[#2c424a]">{{ detail.attendant }}</dd>
+        </div>
+        <div class="grid gap-[3px] border-b border-[#f0f3f3] pb-[9px]">
+          <dt class="text-[9px] font-[620] tracking-[0.04em] text-[#98a4a7] uppercase">Fecha y hora</dt>
+          <dd class="m-0 text-[11px] font-[630] text-[#2c424a]">{{ detail.date }} · {{ detail.time }}</dd>
+        </div>
+        <div class="grid gap-[3px] border-b border-[#f0f3f3] pb-[9px]">
+          <dt class="text-[9px] font-[620] tracking-[0.04em] text-[#98a4a7] uppercase">Autorizado en el vale</dt>
+          <dd class="m-0 text-[11px] font-[630] text-[#2c424a]">{{ gallons(detail.authorized) }}</dd>
+        </div>
+        <div class="flex items-center justify-between gap-[10px] border-b border-[#f0f3f3] pb-[9px]">
+          <dt class="text-[9px] font-[620] tracking-[0.04em] text-[#98a4a7] uppercase">Estado</dt>
+          <dd class="m-0"><app-ui-status-badge [label]="detail.status" tone="green" /></dd>
+        </div>
+      </dl>
+    </div>
+  }
+
+  <div dialogFooter class="flex justify-end gap-[8px]">
+    <button
+      type="button"
+      class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent bg-(--sanjose-primary-action) px-[13px] text-[11px] font-[620] whitespace-nowrap text-white shadow-[0_5px_12px_rgba(23,60,66,0.13)] transition-[background,box-shadow] hover:bg-(--sanjose-primary-action-hover) focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+      (click)="visible.set(false)"
+    >
+      Cerrar
+    </button>
+  </div>
+</app-ui-dialog>

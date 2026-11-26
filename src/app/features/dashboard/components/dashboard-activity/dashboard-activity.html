@@ -16,7 +16,6 @@
           <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">GRIFERO</th>
           <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">SEDE</th>
           <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">DESPACHADO</th>
-          <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
         </tr>
       </thead>
       <tbody>
@@ -32,13 +31,10 @@
             <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]">{{ row.attendant.split(' ')[0] }}</td>
             <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]">{{ row.branch }}</td>
             <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]">{{ gallons(row.gallons) }}</td>
-            <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]">
-              <app-ui-status-badge [label]="row.status" tone="green" />
-            </td>
           </tr>
         } @empty {
           <tr>
-            <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="6">
+            <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]" colspan="5">
               <div class="p-[36px_20px] text-center text-[11px] text-[#8b989c]">Sin despachos registrados hoy.</div>
             </td>
           </tr>

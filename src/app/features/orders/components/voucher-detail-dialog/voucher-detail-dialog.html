@@ -1,0 +1,118 @@
+<app-ui-dialog
+  [(visible)]="visible"
+  [title]="voucher()?.number ?? 'Vale'"
+  [description]="voucher() ? voucher()!.issuer + ' · ' + voucher()!.issuerType : ''"
+  width="min(520px, calc(100vw - 28px))"
+>
+  @if (voucher(); as detail) {
+    <div class="grid gap-[14px]">
+      <div
+        class="flex items-start justify-between gap-[12px] rounded-[13px] border border-[#dfecea] bg-[linear-gradient(135deg,#f6fbf9_0%,#eef8f3_100%)] p-[13px_14px]"
+      >
+        <div class="grid gap-[6px]">
+          <app-ui-status-badge [label]="detail.status" [tone]="statusTone(detail.status)" />
+          <span class="text-[9px] leading-[1.4] text-[#7d8f93]">Registrado el {{ detail.createdLabel }}</span>
+        </div>
+        <span class="grid justify-items-end gap-[1px]">
+          <span class="text-[8.5px] font-[650] uppercase tracking-[0.08em] text-[#7d8f93]">Saldo</span>
+          <strong
+            class="text-[20px] leading-[1.1] font-[680] tracking-[-0.045em]"
+            [class]="hasBalance(detail) ? 'text-[#1f6f5f]' : 'text-[#a2543c]'"
+          >
+            {{ gallons(detail.balance) }}
+          </strong>
+        </span>
+      </div>
+
+      <div class="grid gap-[6px]">
+        <div class="flex items-center justify-between gap-[10px] text-[9.5px] text-[#7d8f93]">
+          <span>
+            Despachado
+            <strong class="font-[650] text-[#3a5057]">{{ gallons(detail.used) }}</strong>
+            de {{ gallons(detail.total) }}
+          </span>
+          <span class="font-[650] text-[#4a7f70]">{{ percent(detail.used, detail.total) }}%</span>
+        </div>
+        <div class="h-[6px] w-full overflow-hidden rounded-full bg-[#eaf0ee]">
+          <div
+            class="h-full rounded-full bg-[linear-gradient(90deg,#5cc1a3,#2f8f78)] transition-[width] duration-500"
+            [style.width.%]="percent(detail.used, detail.total)"
+          ></div>
+        </div>
+      </div>
+
+      <section class="grid gap-[8px]">
+        <div class="flex items-center justify-between gap-[8px]">
+          <h4 class="m-0 text-[9px] font-[680] uppercase tracking-[0.07em] text-[#6c8085]">Líneas del vale</h4>
+          <span class="text-[9px] text-[#98a2a5]">{{ detail.lines.length }} combustible(s)</span>
+        </div>
+        <div class="grid gap-[7px]">
+          @for (line of detail.lines; track line.id) {
+            <div class="grid gap-[7px] rounded-[11px] border border-[#e8eeec] bg-white p-[10px_11px]">
+              <div class="flex items-baseline justify-between gap-[10px]">
+                <strong class="text-[11px] font-[640] text-[#243941]">{{ line.fuel }}</strong>
+                <span class="text-[9px] text-[#8b989c]">
+                  Disponible
+                  <strong class="ml-[2px] font-[650]" [class]="line.available > 0 ? 'text-[#2f7d68]' : 'text-[#a2543c]'">
+                    {{ gallons(line.available) }}
+                  </strong>
+                </span>
+              </div>
+              <div class="h-[4px] w-full overflow-hidden rounded-full bg-[#eef2f1]">
+                <div class="h-full rounded-full bg-[#5cc1a3]" [style.width.%]="percent(line.attended, line.authorized)"></div>
+              </div>
+              <div class="flex items-center justify-between gap-[10px] text-[8.5px] text-[#98a2a5]">
+                <span>Atendido <strong class="font-[640] text-[#4a6167]">{{ gallons(line.attended) }}</strong></span>
+                <span>Autorizado <strong class="font-[640] text-[#4a6167]">{{ gallons(line.authorized) }}</strong></span>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="grid gap-[8px]">
+        <div class="flex items-center justify-between gap-[8px]">
+          <h4 class="m-0 text-[9px] font-[680] uppercase tracking-[0.07em] text-[#6c8085]">Atenciones</h4>
+          <span class="text-[9px] text-[#98a2a5]">{{ detail.attendances.length }} registrada(s)</span>
+        </div>
+
+        @if (detail.attendances.length === 0) {
+          <div class="rounded-[11px] border border-dashed border-[#dfe7e6] bg-[#fbfdfc] p-[16px] text-center text-[10px] text-[#98a2a5]">
+            Este vale aún no registra atenciones.
+          </div>
+        } @else {
+          <ul class="m-0 grid max-h-[232px] gap-[7px] overflow-y-auto p-0 pr-[2px]">
+            @for (attendance of detail.attendances; track attendance.id) {
+              <li class="grid gap-[6px] rounded-[11px] border border-[#eef2f1] bg-[#fbfdfc] p-[9px_11px]">
+                <div class="flex items-start justify-between gap-[10px]">
+                  <div class="grid gap-[2px]">
+                    <strong class="text-[10.5px] font-[640] text-[#2f464d]">{{ attendance.date }} · {{ attendance.time }}</strong>
+                    <span class="text-[9px] leading-[1.4] text-[#8b989c]">{{ attendance.performer }} · {{ attendance.branch }}</span>
+                  </div>
+                  <strong class="text-[11px] font-[660] whitespace-nowrap text-[#2f464d]">{{ gallons(attendance.gallons) }}</strong>
+                </div>
+                <div class="flex flex-wrap gap-[4px]">
+                  @for (fuel of attendance.fuels; track fuel.id) {
+                    <span class="rounded-full bg-[#eef7f3] px-[7px] py-[2px] text-[8.5px] font-[600] text-[#3f7d6c]">
+                      {{ fuel.fuel }} · {{ gallons(fuel.gallons) }}
+                    </span>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+  }
+
+  <div dialogFooter class="flex justify-end gap-[8px]">
+    <button
+      type="button"
+      class="inline-flex min-h-[37px] cursor-pointer items-center justify-center gap-[8px] rounded-[10px] border border-[#dce5e6] bg-[rgba(255,255,255,0.72)] px-[13px] text-[11px] font-[620] whitespace-nowrap text-[#53656a] transition-colors hover:bg-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+      (click)="visible.set(false)"
+    >
+      Cerrar
+    </button>
+  </div>
+</app-ui-dialog>

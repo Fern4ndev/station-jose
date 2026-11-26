@@ -14,6 +14,7 @@ import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
 import type { BranchResponse } from '../../../../core/models/catalog';
 import {
   USER_ROLES,
+  type DemoUserRow,
   type UserDraft,
   type UserRoleValue,
 } from '../../users-data';
@@ -26,13 +27,14 @@ import {
 })
 export class UserFormDialog {
   readonly visible = model(false);
+  readonly user = input<DemoUserRow | null>(null);
   readonly branches = input<readonly BranchResponse[]>([]);
   readonly saving = input(false);
 
   readonly saved = output<UserDraft>();
 
-  protected readonly roles = USER_ROLES;
   protected readonly roleOptions = [...USER_ROLES];
+  protected readonly editing = computed(() => this.user() !== null);
   protected readonly branchOptions = computed(() => this.branches().map((item) => ({ value: item.id, label: item.name })));
 
   protected readonly name = signal('');
@@ -50,11 +52,12 @@ export class UserFormDialog {
       if (!this.visible()) {
         return;
       }
-      this.name.set('');
-      this.dni.set('');
-      this.email.set('');
-      this.role.set('OFFICE');
-      this.branch.set('');
+      const user = this.user();
+      this.name.set(user?.name ?? '');
+      this.dni.set(user?.dni ?? '');
+      this.email.set(user?.email ?? '');
+      this.role.set(user?.roleValue ?? 'OFFICE');
+      this.branch.set(user?.branchId ?? '');
       this.password.set('');
       this.error.set('');
     });
@@ -86,11 +89,12 @@ export class UserFormDialog {
       this.error.set('Indica el nombre completo del usuario.');
       return;
     }
-    if (!/^\d{8}$/.test(dni)) {
+    // DNI y correo no se envían al editar: se validan solo en el alta.
+    if (!this.editing() && !/^\d{8}$/.test(dni)) {
       this.error.set('El DNI debe tener 8 dígitos.');
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!this.editing() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       this.error.set('Indica un correo electrónico válido.');
       return;
     }
@@ -98,7 +102,7 @@ export class UserFormDialog {
       this.error.set('Indica nombre y apellidos.');
       return;
     }
-    if (this.password().length < 8) {
+    if (!this.editing() && this.password().length < 8) {
       this.error.set('La contraseña debe tener al menos 8 caracteres.');
       return;
     }

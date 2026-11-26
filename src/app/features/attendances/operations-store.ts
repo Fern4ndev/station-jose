@@ -4,6 +4,7 @@ import type { PurchaseOrderDetail } from '../../core/models/purchase-order';
 import type { AttendanceResult } from '../../core/models/attendance';
 import type { VoucherDetail } from '../../core/models/voucher';
 import { AttendancesApi } from '../../core/services/attendances-api';
+import { gallonsToMilli } from '../../shared/utils/gallons';
 import { AuthService } from '../../core/services/auth/auth';
 import { PurchaseOrdersApi } from '../../core/services/purchase-orders-api';
 import { VouchersApi } from '../../core/services/vouchers-api';
@@ -17,11 +18,22 @@ export interface DispatchOrder extends DemoOrder {
   readonly institutionRuc: string;
 }
 
+export interface DispatchVoucherLine {
+  readonly id: string;
+  readonly orderItemId: string;
+  readonly fuel: string;
+  readonly authorized: number;
+  readonly attended: number;
+  readonly available: number;
+  readonly status: string;
+}
+
 export interface DispatchVoucher extends DemoVoucher {
   readonly apiId: string;
   readonly itemId: string;
   readonly orderItemId: string;
   readonly branch: string;
+  readonly lines?: readonly DispatchVoucherLine[];
 }
 
 /** Datos operativos leídos del servidor; sobreviven al cambio de ruta. */
@@ -77,6 +89,7 @@ export class OperationsStore {
         backendStatus: voucher.status,
         lines: voucher.items.map((line) => ({
           id: line.id,
+          orderItemId: line.purchase_order_item_id,
           fuel: orderItemById.get(line.purchase_order_item_id)?.fuel ?? 'Combustible',
           authorized: Number(line.authorized_gallons),
           attended: Number(line.attended_gallons),
@@ -92,7 +105,11 @@ export class OperationsStore {
       const voucher = voucherById.get(attendance.voucher_id);
       if (!voucher) return [];
       const order = orderById.get(voucher.purchase_order_id);
-      return attendance.items.map((item) => ({
+      const voucherItemsById = new Map(voucher.items.map((item) => [item.id, item]));
+      return attendance.items.map((item) => {
+        const voucherItem = voucherItemsById.get(item.voucher_item_id);
+        const orderItem = voucherItem ? orderItemById.get(voucherItem.purchase_order_item_id) : undefined;
+        return {
           id: `${attendance.id}:${item.id}`,
           voucher: voucher.voucher_number,
           orderId: order?.order_number ?? voucher.purchase_order_id,
@@ -101,11 +118,16 @@ export class OperationsStore {
             : attendance.performed_by_user_id.slice(0, 8)),
           branch: attendance.branch_name ?? order?.branch.name ?? '',
           gallons: Number(item.attended_gallons),
+          fuel: orderItem?.fuel,
+          issuer: voucher.issuer_name,
+          institution: order?.institution_name,
+          authorized: voucherItem ? Number(voucherItem.authorized_gallons) : undefined,
           time: new Date(attendance.attended_at).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Lima' }),
           date: new Date(attendance.attended_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Lima' }).replace(/\./g, ''),
           attendedAt: attendance.attended_at,
           status: 'Confirmada' as const,
-        }));
+        };
+      });
     }).sort((a, b) => (b.attendedAt ?? '').localeCompare(a.attendedAt ?? ''));
     this.ordersState.set(orders);
     this.vouchersState.set(vouchers);
@@ -119,25 +141,45 @@ export class OperationsStore {
     }
     const idempotencyKey = this.pendingDispatches.get(serialized)!;
     this.writePendingKey(serialized, idempotencyKey);
-    const order = this.ordersState().find((item) => item.id === request.orderId);
-    if (!order) throw new Error('Selecciona una orden disponible del servidor.');
+    const orderItems = new Set(
+      this.ordersState()
+        .filter((item) => item.apiId === request.purchaseOrderId)
+        .map((item) => item.id),
+    );
+    if (orderItems.size === 0) throw new Error('Selecciona una orden disponible del servidor.');
+    if (request.lines.length === 0) throw new Error('Selecciona al menos un combustible para despachar.');
+
     const normalize = (value: string) => value.normalize('NFKC').trim().toLocaleLowerCase().replace(/\s+/g, ' ');
+    // El vale puede tener varias líneas de combustible: se busca por número,
+    // emisor y pertenencia a la orden de compra seleccionada.
     const voucher = this.vouchersState().find((item) =>
-      item.orderItemId === order.id
-      && normalize(item.id) === normalize(request.voucherId)
-      && normalize(item.issuer) === normalize(request.issuer),
+      normalize(item.id) === normalize(request.voucherId)
+      && normalize(item.issuer) === normalize(request.issuer)
+      && (item.lines ?? []).some((line) => orderItems.has(line.orderItemId)),
     );
     if (voucher) {
-      await firstValueFrom(this.attendancesApi.createFollowUp(voucher.apiId, {
-        items: [{ voucher_item_id: voucher.itemId, attended_gallons: request.gallons }],
-      }, idempotencyKey));
+      const items = request.lines.map((line) => {
+        const voucherItemId = line.voucherItemId
+          ?? voucher.lines?.find((item) => item.orderItemId === line.orderItemId)?.id;
+        if (!voucherItemId) throw new Error('El vale no tiene una línea para el combustible seleccionado.');
+        return { voucher_item_id: voucherItemId, attended_gallons: line.gallons };
+      });
+      await firstValueFrom(this.attendancesApi.createFollowUp(voucher.apiId, { items }, idempotencyKey));
     } else {
-      await firstValueFrom(this.attendancesApi.createFirst(order.apiId, {
+      const authorized = request.lines.filter((line) => gallonsToMilli(line.authorized) > 0);
+      const delivered = request.lines.filter((line) => gallonsToMilli(line.gallons) > 0);
+      await firstValueFrom(this.attendancesApi.createFirst(request.purchaseOrderId, {
         issuer_type: request.issuerType,
         issuer_name: request.issuer,
         voucher_number: request.voucherId,
-        voucher_items: [{ purchase_order_item_id: order.id, authorized_gallons: request.authorized }],
-        items: [{ purchase_order_item_id: order.id, attended_gallons: request.gallons }],
+        voucher_items: authorized.map((line) => ({
+          purchase_order_item_id: line.orderItemId,
+          authorized_gallons: line.authorized,
+        })),
+        items: delivered.map((line) => ({
+          purchase_order_item_id: line.orderItemId,
+          attended_gallons: line.gallons,
+        })),
       }, idempotencyKey));
     }
     await this.load();

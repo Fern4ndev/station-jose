@@ -8,7 +8,7 @@
         <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">GRIFERO</th>
         <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">SEDE</th>
         <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">GALONES</th>
-        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ESTADO</th>
+        <th class="border-y border-[#edf0f0] bg-[rgba(244,247,246,0.65)] px-[10px] py-[8px] text-[10px] font-[620] whitespace-nowrap text-[#839095]">ACCIONES</th>
       </tr>
     </thead>
     <tbody>
@@ -28,7 +28,15 @@
           <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]">{{ row.branch }}</td>
           <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]">{{ gallons(row) }}</td>
           <td class="border-b border-[#eff2f2] px-[10px] py-[10px] text-[11px] whitespace-nowrap text-[#52636a]">
-            <app-ui-status-badge [label]="row.status" tone="green" />
+            <button
+              type="button"
+              class="grid h-[31px] w-[31px] place-items-center rounded-[9px] border border-[#e5eaea] bg-white text-[#5d7477] transition-colors hover:border-[#a9d8cd] hover:bg-[#fbfdfc] hover:text-[#287e6e] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)]"
+              title="Ver detalle de la atención"
+              [attr.aria-label]="'Ver detalle de la atención del vale ' + row.voucher"
+              (click)="openDetail(row)"
+            >
+              <iconify-icon icon="mdi:eye-outline" height="16" aria-hidden="true"></iconify-icon>
+            </button>
           </td>
         </tr>
       } @empty {
@@ -44,3 +52,5 @@
   </table>
 </div>
 <app-table-pagination [first]="first()" [rows]="pageSize()" [totalRecords]="rows().length" (pageChange)="onPage($event)" />
+
+<app-attendance-detail-dialog [(visible)]="detailOpen" [attendance]="selected()" />

@@ -64,7 +64,7 @@ class OcrService:
         started_at: float,
     ) -> PurchaseOrderOcrPreview:
         try:
-            import fitz  # type: ignore[import-not-found]
+            import fitz  # type: ignore[import-untyped]
         except ImportError as exc:
             raise OcrProcessingError("El procesamiento PDF requiere instalar PyMuPDF.") from exc
         try:
@@ -73,7 +73,9 @@ class OcrService:
             raise InvalidPdfError("No se pudo abrir el PDF recibido.") from exc
         try:
             if document.page_count > self.settings.OCR_MAX_PDF_PAGES:
-                raise InvalidPdfError("El PDF supera el máximo de páginas permitido.")
+                raise InvalidPdfError(
+                    f"El PDF debe tener como máximo {self.settings.OCR_MAX_PDF_PAGES} páginas."
+                )
             text_pages: list[str] = []
             warnings: list[str] = []
             ocr_engine: Any = None
@@ -110,34 +112,24 @@ class OcrService:
 
     def _create_ocr_engine(self) -> Any:
         try:
-            from rapidocr_onnxruntime import RapidOCR  # type: ignore[import-not-found]
-        except ImportError:
-            try:
-                from rapidocr import RapidOCR  # type: ignore[import-not-found]
-            except ImportError as exc:
-                raise OcrProcessingError("El OCR requiere instalar RapidOCR.") from exc
+            from rapidocr import RapidOCR
+        except ImportError as exc:
+            raise OcrProcessingError("El OCR requiere instalar RapidOCR y ONNX Runtime.") from exc
         return RapidOCR()
 
     def _ocr_page(self, page: Any, engine: Any) -> str:
         try:
             import fitz
-            import numpy as np  # type: ignore[import-not-found]
+            import numpy as np
 
             pixmap = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
             image = np.frombuffer(pixmap.samples, dtype=np.uint8).reshape(
                 pixmap.height, pixmap.width, pixmap.n
             )
             result = engine(image)
+            return "\n".join(text.strip() for text in (result.txts or ()) if text.strip())
         except Exception as exc:
             raise OcrProcessingError("RapidOCR no pudo procesar una página.") from exc
-        entries = result[0] if isinstance(result, tuple) else result
-        if not entries:
-            return ""
-        return "\n".join(
-            str(entry[1]).strip()
-            for entry in entries
-            if isinstance(entry, list | tuple) and len(entry) >= 2 and str(entry[1]).strip()
-        )
 
     def _check_timeout(self, started_at: float) -> None:
         if time.monotonic() - started_at > self.settings.OCR_TIMEOUT_SECONDS:
