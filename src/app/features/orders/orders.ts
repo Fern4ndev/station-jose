@@ -5,6 +5,7 @@ import type { BranchResponse, FuelTypeResponse } from '../../core/models/catalog
 import { CatalogApi } from '../../core/services/catalog-api';
 import { PurchaseOrdersApi } from '../../core/services/purchase-orders-api';
 import { VouchersApi } from '../../core/services/vouchers-api';
+import type { PurchaseOrderOcrPreview } from '../../core/services/ocr-api';
 import { AdminUiState } from '../../layouts/admin/admin-ui-state';
 import { UiConfirmDialog } from '../../shared/components/ui-confirm-dialog/ui-confirm-dialog';
 import { UiIcon } from '../../shared/components/ui-icon/ui-icon';
@@ -14,13 +15,14 @@ import { TableRefresh } from '../../shared/components/table-refresh/table-refres
 import { extractApiError } from '../../shared/utils/api-error';
 import { OrderDetailDialog } from './components/order-detail-dialog/order-detail-dialog';
 import { OrderFormDialog } from './components/order-form-dialog/order-form-dialog';
+import { OrderImportDialog } from './components/order-import-dialog/order-import-dialog';
 import { OrdersTable } from './components/orders-table/orders-table';
 import { OrdersToolbar } from './components/orders-toolbar/orders-toolbar';
 import { filterOrders, toOrderRows, type DemoOrder, type OrderDraft, type OrderFilter } from './orders-data';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [OrderDetailDialog, OrderFormDialog, OrdersTable, OrdersToolbar, TableRefresh, UiConfirmDialog, UiIcon, UiPageHeading, UiPanel],
+  imports: [OrderDetailDialog, OrderFormDialog, OrderImportDialog, OrdersTable, OrdersToolbar, TableRefresh, UiConfirmDialog, UiIcon, UiPageHeading, UiPanel],
   selector: 'app-orders',
   templateUrl: './orders.html',
 })
@@ -38,6 +40,8 @@ export class Orders {
   protected readonly filter = signal<OrderFilter>('Todas');
   protected readonly query = signal('');
   protected readonly formOpen = signal(false);
+  protected readonly importOpen = signal(false);
+  protected readonly importedPreview = signal<PurchaseOrderOcrPreview | null>(null);
   protected readonly editing = signal<DemoOrder | null>(null);
   protected readonly detailOpen = signal(false);
   protected readonly selected = signal<DemoOrder | null>(null);
@@ -88,8 +92,13 @@ export class Orders {
     this.messages.add({ severity: 'error', summary: extractApiError(error), life: 4000 });
   }
 
-  protected openNew(): void { this.editing.set(null); this.formOpen.set(true); }
-  protected openEdit(order: DemoOrder): void { this.editing.set(order); this.formOpen.set(true); }
+  protected openNew(): void { this.editing.set(null); this.importedPreview.set(null); this.formOpen.set(true); }
+  protected openEdit(order: DemoOrder): void { this.editing.set(order); this.importedPreview.set(null); this.formOpen.set(true); }
+  protected onImported(preview: PurchaseOrderOcrPreview): void {
+    this.editing.set(null);
+    this.importedPreview.set(preview);
+    this.formOpen.set(true);
+  }
   protected openDetail(order: DemoOrder): void { this.selected.set(order); this.detailOpen.set(true); }
 
   protected askDelete(order: DemoOrder): void {

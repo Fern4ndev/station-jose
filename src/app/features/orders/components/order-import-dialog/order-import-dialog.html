@@ -1,0 +1,32 @@
+<app-ui-dialog [(visible)]="visible" title="Importar orden de compra" width="min(520px, calc(100vw - 24px))">
+  <div class="order-import" [attr.aria-busy]="loading()">
+    @if (loading()) {
+      <div class="order-import__processing">
+        <app-scan-loader [inline]="true" label="Leyendo documento…" />
+        <p class="order-import__filename">{{ file()?.name }}</p>
+      </div>
+    } @else {
+      <label class="order-import__dropzone" [class.order-import__dropzone--dragging]="dragging()"
+        (dragover)="onDragOver($event)" (dragleave)="dragging.set(false)" (drop)="onDrop($event)">
+        <input class="order-import__input" type="file" accept="application/pdf,.pdf"
+          aria-label="Seleccionar PDF de la orden" aria-describedby="orderImportLimits" (change)="onFile($event)" />
+        <span class="order-import__document" aria-hidden="true"></span>
+        @if (file(); as selected) {
+          <strong class="order-import__filename">{{ selected.name }}</strong>
+          <span class="order-import__choose">Cambiar PDF</span>
+        } @else {
+          <strong class="order-import__prompt">Arrastra tu PDF aquí</strong>
+          <span class="order-import__choose">Seleccionar archivo</span>
+        }
+        <span class="order-import__limits" id="orderImportLimits">Hasta 3 páginas · 10 MB</span>
+      </label>
+      <p class="order-import__hint">Se completarán los datos de la orden para que los revises.</p>
+    }
+    @if (error()) { <p class="order-import__error" role="alert">{{ error() }}</p> }
+  </div>
+  <div dialogFooter class="order-import__actions">
+    <button type="button" class="order-import__button order-import__button--secondary" (click)="cancel()">Cancelar</button>
+    <button type="button" class="order-import__button order-import__button--primary"
+      [disabled]="!file() || loading()" (click)="process()">{{ loading() ? 'Procesando…' : 'Procesar PDF' }}</button>
+  </div>
+</app-ui-dialog>

@@ -1,4 +1,4 @@
-<app-ui-dialog [(visible)]="visible" [title]="title()" description="Revisa todos los campos antes de guardar la orden.">
+<app-ui-dialog [(visible)]="visible" [title]="title()" [description]="preview() ? 'Datos importados. Revisa antes de guardar.' : 'Revisa todos los campos antes de guardar la orden.'">
   <form id="orderForm" class="grid grid-cols-2 gap-[13px] max-[760px]:grid-cols-1" (submit)="onSubmit($event)" novalidate>
     <label class="grid gap-[6px] text-[11px] text-[#52646a]">Número de orden
       <input class="min-h-[39px] rounded-[10px] border border-[#dce5e5] px-[11px]" [readonly]="!!order()" [value]="number()" (input)="set('number', $event)" />
@@ -39,16 +39,10 @@
       }
       <button type="button" class="justify-self-start rounded-[10px] border border-[#dce5e5] px-[12px] py-[8px] text-[11px]" (click)="addLine()">Agregar combustible</button>
     </div>
-    @if (!order()) {
-      <label class="col-span-full grid gap-[6px] rounded-[12px] border border-dashed border-[#bbd5d0] bg-[#f7fbfa] p-[12px] text-[11px] text-[#53746f]">PDF de orden (opcional)
-        <input type="file" accept="application/pdf,.pdf" (change)="onPdf($event)" [disabled]="loadingOcr()" />
-        <span>{{ pdfLabel() }}</span>
-      </label>
-    }
     @if (error()) { <p class="col-span-full m-0 text-[11px] text-[#a55a2c]" role="alert">{{ error() }}</p> }
   </form>
   <div dialogFooter class="flex justify-end gap-[8px]">
     <button type="button" class="min-h-[39px] rounded-[11px] border border-[#dce5e6] bg-white px-[13px] text-[11px]" (click)="visible.set(false)">Cancelar</button>
-    <button type="submit" form="orderForm" class="min-h-[39px] rounded-[11px] bg-(--sanjose-primary-action) px-[13px] text-[11px] text-white disabled:cursor-not-allowed disabled:opacity-45" [disabled]="loadingOcr() || saving() || !dirty()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
+    <button type="submit" form="orderForm" class="min-h-[39px] rounded-[11px] bg-(--sanjose-primary-action) px-[13px] text-[11px] text-white disabled:cursor-not-allowed disabled:opacity-45" [disabled]="saving() || !dirty()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
   </div>
 </app-ui-dialog>

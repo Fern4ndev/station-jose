@@ -5,7 +5,7 @@
   >
     <app-table-refresh [loading]="refreshing()" (refresh)="loadMore()" />
     @if (canManage()) {
-      <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] border-[#dce5e6] bg-[rgba(255,255,255,0.72)] text-[#53656a] hover:bg-white" (click)="openNew()">
+      <button type="button" class="inline-flex min-h-[39px] items-center justify-center gap-[8px] rounded-[11px] border border-transparent px-[13px] text-[11px] font-[620] whitespace-nowrap transition-[background,box-shadow] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[rgba(57,198,174,0.72)] border-[#dce5e6] bg-[rgba(255,255,255,0.72)] text-[#53656a] hover:bg-white" (click)="importOpen.set(true)">
         <app-ui-icon name="orders" [size]="14" />
         Importar PDF
       </button>
@@ -39,12 +39,15 @@
   <app-order-form-dialog
     [(visible)]="formOpen"
     [order]="editing()"
+    [preview]="importedPreview()"
     [takenIds]="takenIds()"
     [branches]="branches()"
     [fuels]="fuels()"
     [saving]="saving()"
     (saved)="save($event)"
   />
+
+  <app-order-import-dialog [(visible)]="importOpen" (imported)="onImported($event)" />
 
   <app-order-detail-dialog [(visible)]="detailOpen" [order]="selected()" />
 

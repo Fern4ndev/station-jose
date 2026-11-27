@@ -1,11 +1,26 @@
 :host {
+  --scan-color: var(--sanjose-accent, #3a8176);
+  --scan-light: var(--sanjose-primary-action, #173c42);
   position: fixed;
   z-index: 2000;
   inset: 0;
   display: block;
 }
 
+:host(.scan-loader-inline) {
+  position: relative;
+  z-index: auto;
+  inset: auto;
+}
+
+:host(.scan-loader-inline) .scan-loader {
+  min-height: 240px;
+  background: transparent;
+  backdrop-filter: none;
+}
+
 .scan-loader {
+  box-sizing: border-box;
   display: flex;
   width: 100%;
   min-height: 100%;
@@ -16,7 +31,7 @@
   padding: 1rem;
   background: rgb(246 249 255 / 82%);
   backdrop-filter: blur(2px);
-  color: var(--fareas-primary);
+  color: var(--scan-color);
   text-align: center;
 }
 
@@ -42,7 +57,7 @@
 }
 
 .scan-loader__document--active {
-  color: var(--fareas-primary-light);
+  color: var(--scan-light);
   clip-path: inset(0 0 100%);
   animation: scan-document-reveal 2.4s ease-in-out infinite;
 }
@@ -55,8 +70,8 @@
   left: 0;
   height: 2px;
   border-radius: 999px;
-  background: var(--fareas-primary);
-  box-shadow: 0 0 10px rgb(21 93 252 / 45%);
+  background: var(--scan-color);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--scan-color) 45%, transparent);
   animation: scan-document-beam 2.4s ease-in-out infinite;
 }
 

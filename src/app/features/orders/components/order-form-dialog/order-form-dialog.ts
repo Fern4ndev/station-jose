@@ -1,13 +1,10 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, model, output, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize, type Subscription } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, effect, input, model, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import type { BranchResponse, FuelTypeResponse } from '../../../../core/models/catalog';
-import { OcrApi } from '../../../../core/services/ocr-api';
+import type { PurchaseOrderOcrPreview } from '../../../../core/services/ocr-api';
 import { UiDialog } from '../../../../shared/components/ui-dialog/ui-dialog';
-import { extractApiError } from '../../../../shared/utils/api-error';
 import { todayIso } from '../../../../shared/utils/date-range';
 import type { DemoOrder, OrderDraft } from '../../orders-data';
 
@@ -33,11 +30,9 @@ function lineAmount(gallons: string, price: string): string {
   templateUrl: './order-form-dialog.html',
 })
 export class OrderFormDialog {
-  private readonly ocr = inject(OcrApi);
-  private readonly destroyRef = inject(DestroyRef);
-  private ocrRequest: Subscription | null = null;
   readonly visible = model(false);
   readonly order = input<DemoOrder | null>(null);
+  readonly preview = input<PurchaseOrderOcrPreview | null>(null);
   readonly takenIds = input<readonly string[]>([]);
   readonly branches = input<readonly BranchResponse[]>([]);
   readonly fuels = input<readonly FuelTypeResponse[]>([]);
@@ -62,8 +57,6 @@ export class OrderFormDialog {
   protected readonly branch = signal('');
   protected readonly lines = signal<readonly DraftLine[]>([{ fuel_type_id: '', gallons: '', unit_price: '' }]);
   protected readonly error = signal('');
-  protected readonly pdfLabel = signal('Selecciona un PDF para prellenar los campos');
-  protected readonly loadingOcr = signal(false);
 
   private readonly baseline = computed(() => {
     const source = this.order()?.source;
@@ -112,10 +105,7 @@ export class OrderFormDialog {
 
   constructor() {
     effect(() => {
-      if (!this.visible()) {
-        this.ocrRequest?.unsubscribe();
-        return;
-      }
+      if (!this.visible()) return;
       const source = this.order()?.source;
       this.today.set(todayIso());
       this.number.set(source?.order_number ?? '');
@@ -131,7 +121,8 @@ export class OrderFormDialog {
         unit_price: 'unit_price' in item ? item.unit_price : '',
       })) ?? [{ fuel_type_id: '', gallons: '', unit_price: '' }]);
       this.error.set('');
-      this.pdfLabel.set('Selecciona un PDF para prellenar los campos');
+      const preview = this.preview();
+      if (preview && !source) this.applyPreview(preview);
     });
   }
 
@@ -162,54 +153,28 @@ export class OrderFormDialog {
     if (this.lines().length > 1) this.lines.update((lines) => lines.filter((_, at) => at !== index));
   }
 
-  protected onPdf(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    input.value = '';
-    this.ocrRequest?.unsubscribe();
-    this.error.set('');
-    this.loadingOcr.set(true);
-    const processingLabel = `Procesando ${file.name}…`;
-    this.pdfLabel.set(processingLabel);
-    this.ocrRequest = this.ocr.analyze(file).pipe(
-      takeUntilDestroyed(this.destroyRef),
-      finalize(() => {
-        this.loadingOcr.set(false);
-        if (this.pdfLabel() === processingLabel) {
-          this.pdfLabel.set('Selecciona un PDF para prellenar los campos');
-        }
-      }),
-    ).subscribe({
-      next: (preview) => {
-        const fields = preview.fields;
-        if (fields.order_number) this.number.set(fields.order_number);
-        if (fields.siaf_number) this.siaf.set(fields.siaf_number);
-        if (fields.issue_date) this.date.set(fields.issue_date.slice(0, 10));
-        const extractedName = fields.executing_unit ?? fields.institution_name;
-        if (extractedName) this.institutionName.set(extractedName);
-        if (fields.executing_unit_ruc) this.institutionRuc.set(fields.executing_unit_ruc);
-        if (fields.supplier_name) {
-          const supplier = fields.supplier_name.toLocaleLowerCase('es-PE');
-          const matchedBranch = this.branches().find((item) =>
-            supplier.includes(item.name.toLocaleLowerCase('es-PE')),
-          );
-          if (matchedBranch) this.branch.set(matchedBranch.id);
-        }
-        if (fields.lines?.length) {
-          this.lines.set(fields.lines.map((line) => ({
-            fuel_type_id: this.fuels().find((fuel) => line.fuel_description?.toLowerCase().includes(fuel.name.toLowerCase()))?.id ?? '',
-            gallons: line.authorized_gallons ?? '',
-            unit_price: line.unit_price ?? '',
-          })));
-        }
-        this.pdfLabel.set(`${file.name} · datos sugeridos, revisa todos los campos`);
-      },
-      error: (error: unknown) => {
-        this.error.set(extractApiError(error, 'No se pudo procesar el PDF. Puedes completar la orden manualmente.'));
-        this.pdfLabel.set('Selecciona un PDF para prellenar los campos');
-      },
-    });
+  private applyPreview(preview: PurchaseOrderOcrPreview): void {
+    const fields = preview.fields;
+    if (fields.order_number) this.number.set(fields.order_number);
+    if (fields.siaf_number) this.siaf.set(fields.siaf_number);
+    if (fields.issue_date) this.date.set(fields.issue_date.slice(0, 10));
+    const extractedName = fields.executing_unit ?? fields.institution_name;
+    if (extractedName) this.institutionName.set(extractedName);
+    if (fields.executing_unit_ruc) this.institutionRuc.set(fields.executing_unit_ruc);
+    if (fields.supplier_name) {
+      const supplier = fields.supplier_name.toLocaleLowerCase('es-PE');
+      const matchedBranch = this.branches().find((item) =>
+        supplier.includes(item.name.toLocaleLowerCase('es-PE')),
+      );
+      if (matchedBranch) this.branch.set(matchedBranch.id);
+    }
+    if (fields.lines?.length) {
+      this.lines.set(fields.lines.map((line) => ({
+        fuel_type_id: this.fuels().find((fuel) => line.fuel_description?.toLowerCase().includes(fuel.name.toLowerCase()))?.id ?? '',
+        gallons: line.authorized_gallons ?? '',
+        unit_price: line.unit_price ?? '',
+      })));
+    }
   }
 
   protected onSubmit(event: Event): void {
